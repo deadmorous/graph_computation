@@ -6,6 +6,7 @@ enable_testing()
 
 add_executable(
     gc-lib-test
+    main.cpp
     test_gc.cpp)
 
 target_link_libraries(
