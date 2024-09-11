@@ -1,27 +1,149 @@
 #include "gc/graph_computation.hpp"
 
+#include "common/log.hpp"
+#include "common/throw.hpp"
+
 #include <algorithm>
 #include <cassert>
+#include <iostream>
 #include <ranges>
 #include <stdexcept>
 #include <unordered_map>
-#include <unordered_set>
+#include <set>
 
+#include <quill/std/Set.h>
+
+
+using namespace std::string_view_literals;
 
 namespace gc {
 
 namespace {
 
+struct IndexEdgeEnd
+{
+    uint32_t inode;
+    uint32_t port;
 
+    auto operator<=>(const IndexEdgeEnd&) const noexcept
+        -> std::strong_ordering = default;
+};
+
+using IndexEdge = std::array<IndexEdgeEnd, 2>;
+
+auto operator<<(std::ostream& s, const IndexEdgeEnd& ee)
+    -> std::ostream&
+{ return s << '(' << ee.inode << ',' << ee.port << ')'; }
+
+auto operator<<(std::ostream& s, const IndexEdge& e)
+    -> std::ostream&
+{ return s << '[' << e[0] << "->" << e[1] << ']'; }
+
+// -----------
+
+template <typename T>
+struct Grouped
+{
+    std::vector<T>          values;
+    std::vector<uint32_t>   groups{0};
+};
+
+template <typename T, typename V>
+requires std::convertible_to<V, T>
+auto add_to_last_group(Grouped<T>& grouped, V&& value)
+    -> void
+{ grouped.values.emplace_back(std::forward<V>(value)); }
+
+template <typename T>
+auto next_group(Grouped<T>& grouped)
+    -> void
+{ grouped.groups.push_back(grouped.values.size()); }
+
+template <typename T>
+auto group_count(const Grouped<T>& grouped)
+    -> uint32_t
+{
+    assert(!grouped.groups.empty());
+    return grouped.groups.size() - 1;
+}
+
+template <typename T>
+auto group(const Grouped<T>& grouped, uint32_t igroup)
+    -> std::span<const T>
+{
+    assert(igroup + 1 < grouped.groups.size());
+    const auto* indices = grouped.groups.data() + igroup;
+    const auto* data = grouped.values.data();
+    return { data+indices[0], data+indices[1] };
+}
+
+template <typename T>
+auto group(Grouped<T>& grouped, uint32_t igroup)
+    -> std::span<T>
+{
+    assert(igroup + 1 < grouped.groups.size());
+    auto* indices = grouped.groups.data() + igroup;
+    auto* data = grouped.values.data();
+    return { data+indices[0], data+indices[1] };
+}
+
+
+template <typename T>
+auto operator<<(std::ostream& s, const Grouped<T>& grouped)
+    -> std::ostream&
+{
+    std::string_view delim = "";
+    s << '[';
+    for (uint32_t ig=0, ng=group_count(grouped); ig<ng; ++ig)
+    {
+        auto g = group(grouped, ig);
+        s << delim << '(' << format_seq(g) << ')';
+        delim = ", "sv;
+    }
+    s << ']';
+    return s;
+}
+
+// -----------
 
 } // anonymous namespace
 
 struct ComputationInstructions
-{};
+{
+    Grouped<uint32_t>       nodes;
+    Grouped<IndexEdge>      edges;
+};
+
+auto operator<<(std::ostream& s, const ComputationInstructions& instr)
+    -> std::ostream&
+{
+    auto print_group = [&](const auto& grouped, uint32_t ig)
+        { s << '(' << common::format_seq(group(grouped, ig)) << ')'; };
+
+    auto n = group_count(instr.nodes);
+    assert(group_count(instr.edges) + 1 == n);
+    s << '{';
+    print_group(instr.nodes, 0);
+    for (uint32_t i=1; i<n; ++i)
+    {
+        s << " => ";
+        print_group(instr.edges, i-1);
+        s << " | ";
+        print_group(instr.nodes, i);
+    }
+    return s;
+}
+
+
+// -----------
 
 auto compile(const Graph& g)
     -> ComputationInstructionsPtr
 {
+    GC_LOG_INFO(
+        "gc::compile: begin, nodes: {}, edges: {}",
+        g.nodes.size(), g.edges.size());
+
     // View graph nodes as raw pointers
     auto nodes = std::ranges::transform_view(
         g.nodes,
@@ -54,40 +176,110 @@ auto compile(const Graph& g)
             return d.inputs_avail == d.input_count;
         };
 
-    using IndexSet = std::unordered_set<uint32_t>;
+    using IndexSet = std::set<uint32_t>;
 
-    auto known = IndexSet{};
+    const auto node_ind_range =
+        std::ranges::iota_view{uint32_t{}, static_cast<uint32_t>(nodes.size())};
 
     // Add all sources to the initial level of the graph
     auto level = IndexSet{};
     std::ranges::copy_if(
-        std::ranges::iota_view{uint32_t{}, static_cast<uint32_t>(nodes.size())},
+        node_ind_range,
         std::inserter(level, level.end()), has_all_inputs );
     if (level.empty())
         throw std::invalid_argument("Graph has no sources");
 
+    auto known = level;
+
     // Map node-pointer-based edges to node-index-based ones
-    struct EE
-    {
-        uint32_t inode;
-        uint32_t port;
-    };
-    using E = std::array<EE, 2>;
-    auto edges = std::vector<E>{};
+    auto edges = std::vector<IndexEdge>{};
     edges.reserve(g.edges.size());
     std::ranges::transform(
         g.edges,
         std::back_inserter(edges),
-        [&](const Edge e) -> E
+        [&](const Edge e) -> IndexEdge
         {
-            auto transform_end = [&](const EdgeEnd& ee) -> EE
+            auto transform_end = [&](const EdgeEnd& ee) -> IndexEdgeEnd
                 { return { node_ind[ee.node], ee.port }; };
             return { transform_end(e[0]), transform_end(e[1]) };
         } );
 
+    // We will further track connections of all inputs & outputs by edges
+    using BitVec = std::vector<bool>;
+    using BitVecs = std::vector<BitVec>;
+    auto all_inputs = BitVecs{};
+    all_inputs.reserve(nodes.size());
+    for (size_t i=0, n=nodes.size(); i<n; ++i)
+    {
+        const auto* node = nodes[i];
+        all_inputs.emplace_back(BitVec(node->input_count(), false));
+    }
+
+    // Check edges
+    auto check_edge_end = [&](const IndexEdgeEnd& ee, bool input)
+    {
+        if (ee.inode >= nodes.size())
+            common::throw_<std::invalid_argument>(
+                "Edge end ", ee, " refers to a non-existent node");
+        const auto* node = nodes[ee.inode];
+        if (input)
+        {
+            if (ee.port >= node->input_count())
+                common::throw_<std::invalid_argument>(
+                    "Edge end ", ee, " refers to a non-existent input port");
+        }
+        else
+        {
+            if (ee.port >= node->output_count())
+                common::throw_<std::invalid_argument>(
+                    "Edge end ", ee, " refers to a non-existent output port");
+        }
+    };
+
+    auto check_edge = [&](const IndexEdge& e)
+    {
+        check_edge_end(e[0], false);
+        check_edge_end(e[1], true);
+    };
+
+    std::ranges::for_each(edges, check_edge);
+
+    auto result = std::make_shared<ComputationInstructions>();
+
+    auto process_edge = [&](const IndexEdge& e)
+    {
+        const auto& e1 = e[1];
+        assert (e1.inode < all_inputs.size());
+        auto& ports = all_inputs[e1.inode];
+        if (ports.at(e1.port))
+            common::throw_<std::invalid_argument>(
+                "Edge end ", e1,
+                " is not the only one coming to the input port");
+        ports[e1.port] = true;
+
+        add_to_last_group(result->edges, e);
+    };
+
+    auto process_level = [&]
+    {
+        for (auto inode : level)
+            add_to_last_group(result->nodes, inode);
+        next_group(result->nodes);
+    };
+
+    auto process_level_edges = [&]
+    {
+        auto& edges = result->edges;
+        next_group(edges);
+        std::ranges::sort(group(edges, group_count(edges)-1));
+    };
+
+    process_level();
+
     // Process graph level by level
     while (known.size() < nodes.size())
     {
+        GC_LOG_DEBUG("gc::compile: level: {}", level);
         auto next_level = IndexSet{};
 
         for (const auto& e : edges)
@@ -100,21 +292,44 @@ auto compile(const Graph& g)
             if (known.contains(e1.inode))
                 continue;
 
+            process_edge(e);
+
+            GC_LOG_DEBUG("gc::compile: {}", common::format(e));
+
             ++node_data[e1.inode].inputs_avail;
             if (has_all_inputs(e1.inode))
             {
+                GC_LOG_DEBUG(
+                    "gc::compile: node {} has all inputs ready", e1.inode);
                 assert(!next_level.contains(e1.inode));
                 next_level.insert(e1.inode);
             }
         }
+
+        process_level_edges();
+
         if (next_level.empty())
-            throw std::invalid_argument("Graph is not connected");
+        {
+            auto unreachable = IndexSet{};
+            std::ranges::copy_if(
+                node_ind_range,
+                std::inserter(unreachable, unreachable.end()),
+                [&](uint32_t inode)
+                    { return !known.contains(inode); } );
+
+            common::throw_<std::invalid_argument>(
+                "Graph is not connected. Unreachable nodes are ",
+                common::format_seq(unreachable));
+        }
 
         std::ranges::copy(next_level, std::inserter(known, known.end()));
         std::swap(level, next_level);
+        process_level();
     }
 
-    return std::make_shared<ComputationInstructions>(); // TODO
+    assert(result->nodes.values.size() == g.nodes.size());
+    assert(result->edges.values.size() == g.edges.size());
+    return result;
 }
 
 } // namespace gc

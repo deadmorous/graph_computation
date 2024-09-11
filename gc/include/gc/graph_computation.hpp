@@ -132,6 +132,10 @@ struct Graph final
 
 struct ComputationInstructions;
 using ComputationInstructionsPtr = std::shared_ptr<ComputationInstructions>;
+auto operator<<(std::ostream& s, const ComputationInstructions& instructions)
+    -> std::ostream&;
+
+// -----------
 
 auto compile(const Graph& g)
     -> ComputationInstructionsPtr;
