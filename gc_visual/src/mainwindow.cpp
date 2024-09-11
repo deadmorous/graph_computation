@@ -1,6 +1,6 @@
-#include "mainwindow.hpp"
+#include "gc_visual/mainwindow.hpp"
 
-#include "bitmap_view.hpp"
+#include "gc_visual/bitmap_view.hpp"
 
 
 #if 0 // TODO

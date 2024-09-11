@@ -1,4 +1,4 @@
-#include "simple_presentation.hpp"
+#include "gc_visual/simple_presentation.hpp"
 
 #if 0 // TODO
 auto SimplePresentation::represent(QImage& img, SequenceGeneratorInterface& gen)

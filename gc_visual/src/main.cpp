@@ -1,9 +1,10 @@
-#include "mainwindow.hpp"
+#include "gc_visual/mainwindow.hpp"
 
-#include "eratosthenes_sieve.hpp"
-#include "simple_presentation.hpp"
-#include "spiral_presentation.hpp"
-#include "test_sequence.hpp"
+#include "gc_visual/simple_presentation.hpp"
+#include "gc_visual/spiral_presentation.hpp"
+
+#include "gc_app/eratosthenes_sieve.hpp"
+#include "gc_app/test_sequence.hpp"
 
 #include <QApplication>
 

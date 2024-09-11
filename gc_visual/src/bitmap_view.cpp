@@ -1,4 +1,4 @@
-#include "bitmap_view.hpp"
+#include "gc_visual/bitmap_view.hpp"
 
 #include <QPainter>
 

@@ -1,4 +1,4 @@
-#include "eratosthenes_sieve.hpp"
+#include "gc_app/eratosthenes_sieve.hpp"
 
 namespace {
 

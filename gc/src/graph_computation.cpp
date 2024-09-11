@@ -1,4 +1,4 @@
-#include "graph_computation.hpp"
+#include "gc/graph_computation.hpp"
 
 #include <algorithm>
 #include <cassert>

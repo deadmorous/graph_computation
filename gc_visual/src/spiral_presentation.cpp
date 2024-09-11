@@ -1,4 +1,4 @@
-#include "spiral_presentation.hpp"
+#include "gc_visual/spiral_presentation.hpp"
 
 #if 0 // TODO
 #include <cmath>
