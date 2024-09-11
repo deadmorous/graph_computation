@@ -3,6 +3,7 @@
 #include <QPainter>
 
 
+#if 0 // TODO
 BitmapView::BitmapView(SequenceGeneratorInterface& gen,
                        PresentationInterface& presentation,
                        QWidget* parent)
@@ -24,3 +25,5 @@ auto BitmapView::paintEvent(QPaintEvent*)
     auto p = QPainter{ this };
     p.drawImage(QPoint{0, 0}, img_);
 }
+
+#endif // 0

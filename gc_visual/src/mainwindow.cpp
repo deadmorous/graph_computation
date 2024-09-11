@@ -3,6 +3,7 @@
 #include "bitmap_view.hpp"
 
 
+#if 0 // TODO
 MainWindow::MainWindow(SequenceGeneratorInterface& gen,
                        PresentationInterface& presentation,
                        QWidget *parent)
@@ -12,3 +13,4 @@ MainWindow::MainWindow(SequenceGeneratorInterface& gen,
 }
 
 MainWindow::~MainWindow() {}
+#endif // 0

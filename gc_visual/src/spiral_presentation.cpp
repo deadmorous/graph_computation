@@ -1,5 +1,6 @@
 #include "spiral_presentation.hpp"
 
+#if 0 // TODO
 #include <cmath>
 #include <numbers>
 
@@ -81,3 +82,4 @@ auto SpiralPresentation::represent(QImage& img, SequenceGeneratorInterface& gen)
 
     img = result;
 }
+#endif // 0

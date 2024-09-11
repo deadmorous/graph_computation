@@ -11,6 +11,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
+#if 0 // TODO
     // TestSequence generator;
     EratosthenesSieve generator;
 
@@ -19,5 +20,6 @@ int main(int argc, char *argv[])
 
     MainWindow w(generator, presentation);
     w.show();
+#endif // 0
     return a.exec();
 }

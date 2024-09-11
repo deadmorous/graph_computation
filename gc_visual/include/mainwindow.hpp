@@ -1,5 +1,6 @@
 #pragma once
 
+#if 0 // TODO
 #include "sequence_generator.hpp"
 #include "presentation.hpp"
 
@@ -15,3 +16,4 @@ public:
                QWidget *parent = nullptr);
     ~MainWindow();
 };
+#endif // 0

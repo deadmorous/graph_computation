@@ -1,5 +1,6 @@
 #pragma once
 
+#if 0 // TODO
 #include "sequence_generator.hpp"
 #include "presentation.hpp"
 
@@ -27,3 +28,6 @@ private:
     PresentationInterface& presentation_;
     QImage img_;
 };
+
+#endif // 0
+

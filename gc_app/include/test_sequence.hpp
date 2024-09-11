@@ -1,14 +1,18 @@
 #pragma once
 
-#include "sequence_generator.hpp"
+#include <cstdint>
+#include <span>
+#include <vector>
 
+using Uint = uint32_t;
+using UintVec = std::vector<Uint>;
+using ConstUintSpan = std::span<const Uint>;
 
-class TestSequence
-    : public SequenceGeneratorInterface
+class TestSequence final
 {
 public:
-    virtual auto generate(Uint size)
-        -> ConstUintSpan override;
+    auto generate(Uint size)
+        -> ConstUintSpan;
 
 private:
     UintVec state_;

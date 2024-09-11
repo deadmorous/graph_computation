@@ -13,9 +13,9 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 set(PROJECT_SOURCES
-        bitmap_view.hpp bitmap_view.cpp
+        bitmap_view.cpp ../include/bitmap_view.hpp
         main.cpp
-        mainwindow.cpp mainwindow.hpp
+        mainwindow.cpp ../include/mainwindow.hpp
         simple_presentation.cpp
         spiral_presentation.cpp
 )
