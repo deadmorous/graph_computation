@@ -1,6 +1,5 @@
 #include "gc/graph_computation.hpp"
 
-#include "common/grouped.hpp"
 #include "common/log.hpp"
 #include "common/throw.hpp"
 
@@ -55,9 +54,11 @@ auto operator<<(std::ostream& s, const ComputationInstructions& instr)
         { s << '(' << common::format_seq(group(grouped, ig)) << ')'; };
 
     auto n = group_count(instr.nodes);
-    assert(group_count(instr.edges) + 1 == n);
+    assert(group_count(instr.edges) + 1 == n ||
+           (n == 0 && group_count(instr.edges) == 0));
     s << '{';
-    print_group(instr.nodes, 0);
+    if (n > 0)
+        print_group(instr.nodes, 0);
     for (uint32_t i=1; i<n; ++i)
     {
         s << " => ";
@@ -65,6 +66,7 @@ auto operator<<(std::ostream& s, const ComputationInstructions& instr)
         s << " | ";
         print_group(instr.nodes, i);
     }
+    s << '}';
     return s;
 }
 
@@ -74,9 +76,14 @@ auto operator<<(std::ostream& s, const ComputationInstructions& instr)
 auto compile(const Graph& g)
     -> ComputationInstructionsPtr
 {
-    GC_LOG_INFO(
-        "gc::compile: begin, nodes: {}, edges: {}",
-        g.nodes.size(), g.edges.size());
+    // GC_LOG_DEBUG(
+    //     "gc::compile: begin, nodes: {}, edges: {}",
+    //     g.nodes.size(), g.edges.size());
+
+    auto result = std::make_shared<ComputationInstructions>();
+
+    if (g.edges.empty() && g.nodes.empty())
+        return result;
 
     // View graph nodes as raw pointers
     auto nodes = std::ranges::transform_view(
@@ -176,8 +183,6 @@ auto compile(const Graph& g)
 
     std::ranges::for_each(edges, check_edge);
 
-    auto result = std::make_shared<ComputationInstructions>();
-
     auto process_edge = [&](const IndexEdge& e)
     {
         const auto& e1 = e[1];
@@ -211,7 +216,7 @@ auto compile(const Graph& g)
     // Process graph level by level
     while (known.size() < nodes.size())
     {
-        GC_LOG_DEBUG("gc::compile: level: {}", level);
+        // GC_LOG_DEBUG("gc::compile: level: {}", level);
         auto next_level = IndexSet{};
 
         for (const auto& e : edges)
@@ -226,13 +231,13 @@ auto compile(const Graph& g)
 
             process_edge(e);
 
-            GC_LOG_DEBUG("gc::compile: {}", common::format(e));
+            // GC_LOG_DEBUG("gc::compile: {}", common::format(e));
 
             ++node_data[e1.inode].inputs_avail;
             if (has_all_inputs(e1.inode))
             {
-                GC_LOG_DEBUG(
-                    "gc::compile: node {} has all inputs ready", e1.inode);
+                // GC_LOG_DEBUG(
+                //     "gc::compile: node {} has all inputs ready", e1.inode);
                 assert(!next_level.contains(e1.inode));
                 next_level.insert(e1.inode);
             }
@@ -283,6 +288,69 @@ auto compile(const Graph& g)
     }
 
     return result;
+}
+
+auto compute(ComputationResult& result,
+             const Graph& g,
+             const ComputationInstructions* instructions)
+    -> void
+{
+    auto input_count = [](const gc::Node& node){ return node.input_count(); };
+    auto output_count = [](const gc::Node& node){ return node.output_count(); };
+
+    if (result.outputs.values.empty())
+    {
+        // Allocate result grouped data
+        auto fill = [&](common::Grouped<Value>& grouped, auto count)
+        {
+            grouped = {};
+            for (const auto& node : g.nodes)
+            {
+                for (uint32_t i=0, n=count(*node); i<n; ++i)
+                    common::add_to_last_group(grouped, Value{});
+                common::next_group(grouped);
+            }
+        };
+
+        fill(result.inputs, input_count);
+        fill(result.outputs, output_count);
+    }
+
+    else
+    {
+        // Validate result grouped data
+        auto check = [&](const common::Grouped<Value>& grouped, auto count)
+        {
+            assert (group_count(grouped) == g.nodes.size());
+            for (uint32_t inode=0, n=g.nodes.size(); inode<n; ++inode)
+                assert(group(grouped, inode).size() ==
+                       count(*g.nodes[inode]));
+        };
+
+        check(result.inputs, input_count);
+        check(result.outputs, output_count);
+    }
+
+    auto nlevels = group_count(instructions->nodes);
+    for (auto level=0; level<nlevels; ++level)
+    {
+        for (auto inode : group(instructions->nodes, level))
+        {
+            if (inode > 0)
+            {
+                for (const auto& e : group(instructions->edges, inode-1))
+                {
+                    const auto& [e0, e1] = e;
+                    group(result.outputs, e1.inode)[e1.port] =
+                        group(result.inputs, e0.inode)[e0.port];
+                }
+            }
+
+            g.nodes[inode]->compute_outputs(
+                group(result.outputs, inode),
+                group(result.inputs, inode));
+        }
+    }
 }
 
 } // namespace gc

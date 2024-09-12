@@ -94,6 +94,12 @@ auto check_comple_graph(const gc::Graph& g,
 
 TEST(Gc, compile)
 {
+    check_comple_graph(
+        test_graph(
+            {},
+            {}),
+        "{}");
+
     // 0 -> 1 -> 2 -> 3
     check_comple_graph(
         test_graph(
@@ -104,7 +110,7 @@ TEST(Gc, compile)
         "{(0) => ([(0,0)->(1,0)]) |"
         " (1) => ([(1,0)->(2,0)]) |"
         " (2) => ([(2,0)->(3,0)]) |"
-        " (3)");
+        " (3)}");
 
     // 1 -> 2 -> 3 -> 0
     check_comple_graph(
@@ -116,7 +122,7 @@ TEST(Gc, compile)
         "{(1) => ([(1,0)->(2,0)]) |"
         " (2) => ([(2,0)->(3,0)]) |"
         " (3) => ([(3,0)->(0,0)]) |"
-        " (0)");
+        " (0)}");
 
     // 8 -> 7 -> 5
     //
@@ -148,7 +154,7 @@ TEST(Gc, compile)
         " (6,7) => ([(6,0)->(3,0)],[(6,1)->(4,0)],[(7,0)->(4,1)],[(7,1)->(5,0)]) |"
         " (3,4,5) => ([(3,0)->(1,0)],[(4,0)->(1,1)],[(4,1)->(2,0)],[(5,0)->(2,1)]) |"
         " (1,2) => ([(1,0)->(0,0)],[(2,0)->(0,1)]) |"
-        " (0)");
+        " (0)}");
 
     // Graph is not connected. Unreachable nodes are 1
     EXPECT_THROW(
@@ -201,4 +207,16 @@ TEST(Gc, compile)
                  {{1,0}, {2,0}}}),
             ""),
         std::invalid_argument);
+}
+
+TEST(Gc, compute)
+{
+    auto g = test_graph(
+        {{0, 1}, {1, 1}},
+        {{{0,0}, {1,0}}});
+
+    auto instr = compile(g);
+
+    auto result = gc::ComputationResult{};
+    compute(result, g, instr.get());
 }

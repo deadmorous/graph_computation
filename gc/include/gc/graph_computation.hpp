@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common/grouped.hpp"
+
 #include <any>
 #include <array>
 #include <cstdint>
@@ -142,10 +144,8 @@ auto compile(const Graph& g)
 
 struct ComputationResult
 {
-    using NodeOutputs = std::vector<ConstValueSpan>;
-
-    ValueVec                all_outputs;
-    NodeOutputs             node_outputs;
+    common::Grouped<Value> inputs;
+    common::Grouped<Value> outputs;
 };
 
 auto compute(ComputationResult& result,
