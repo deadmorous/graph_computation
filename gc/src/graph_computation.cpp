@@ -1,5 +1,6 @@
 #include "gc/graph_computation.hpp"
 
+#include "common/grouped.hpp"
 #include "common/log.hpp"
 #include "common/throw.hpp"
 
@@ -39,79 +40,12 @@ auto operator<<(std::ostream& s, const IndexEdge& e)
     -> std::ostream&
 { return s << '[' << e[0] << "->" << e[1] << ']'; }
 
-// -----------
-
-template <typename T>
-struct Grouped
-{
-    std::vector<T>          values;
-    std::vector<uint32_t>   groups{0};
-};
-
-template <typename T, typename V>
-requires std::convertible_to<V, T>
-auto add_to_last_group(Grouped<T>& grouped, V&& value)
-    -> void
-{ grouped.values.emplace_back(std::forward<V>(value)); }
-
-template <typename T>
-auto next_group(Grouped<T>& grouped)
-    -> void
-{ grouped.groups.push_back(grouped.values.size()); }
-
-template <typename T>
-auto group_count(const Grouped<T>& grouped)
-    -> uint32_t
-{
-    assert(!grouped.groups.empty());
-    return grouped.groups.size() - 1;
-}
-
-template <typename T>
-auto group(const Grouped<T>& grouped, uint32_t igroup)
-    -> std::span<const T>
-{
-    assert(igroup + 1 < grouped.groups.size());
-    const auto* indices = grouped.groups.data() + igroup;
-    const auto* data = grouped.values.data();
-    return { data+indices[0], data+indices[1] };
-}
-
-template <typename T>
-auto group(Grouped<T>& grouped, uint32_t igroup)
-    -> std::span<T>
-{
-    assert(igroup + 1 < grouped.groups.size());
-    auto* indices = grouped.groups.data() + igroup;
-    auto* data = grouped.values.data();
-    return { data+indices[0], data+indices[1] };
-}
-
-
-template <typename T>
-auto operator<<(std::ostream& s, const Grouped<T>& grouped)
-    -> std::ostream&
-{
-    std::string_view delim = "";
-    s << '[';
-    for (uint32_t ig=0, ng=group_count(grouped); ig<ng; ++ig)
-    {
-        auto g = group(grouped, ig);
-        s << delim << '(' << format_seq(g) << ')';
-        delim = ", "sv;
-    }
-    s << ']';
-    return s;
-}
-
-// -----------
-
 } // anonymous namespace
 
 struct ComputationInstructions
 {
-    Grouped<uint32_t>       nodes;
-    Grouped<IndexEdge>      edges;
+    common::Grouped<uint32_t>       nodes;
+    common::Grouped<IndexEdge>      edges;
 };
 
 auto operator<<(std::ostream& s, const ComputationInstructions& instr)
