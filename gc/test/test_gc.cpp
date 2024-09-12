@@ -150,19 +150,55 @@ TEST(Gc, compile)
         " (1,2) => ([(1,0)->(0,0)],[(2,0)->(0,1)]) |"
         " (0)");
 
-    // TODO: Check exception
-    // check_comple_graph(
-    //     test_graph(
-    //         {{1,0}, {0,1}, {1,1}, {1,1}},
-    //         {{{1,0}, {2,0}},
-    //          {{2,0}, {3,0}},
-    //          {{2,0}, {0,0}},
-    //          {{3,0}, {2,0}}}),
-    //     "{(1) => ([(1,0)->(2,0)]) |"
-    //     " (2) => ([(2,0)->(3,0)]) |"
-    //     " (3) => ([(3,0)->(2,0)]) |"
-    //     " (0)");
+    // Graph is not connected. Unreachable nodes are 1
+    EXPECT_THROW(
+        check_comple_graph(
+            test_graph(
+                {{0,1}, {2,1}},
+                {{{0,0}, {1,0}},
+                 {{1,0}, {1,1}}}),
+            ""),
+        std::invalid_argument);
 
-    // auto result = gc::ComputationResult{};
-    // compute(result, g, instructions.get());
+    // Edge end (1,1) refers to a non-existent input port
+    EXPECT_THROW(
+        check_comple_graph(
+            test_graph(
+                {{0,1}, {1,1}},
+                {{{0,0}, {1,0}},
+                 {{1,0}, {1,1}}}),
+            ""),
+        std::invalid_argument);
+
+    // Edge end (0,2) refers to a non-existent output port
+    EXPECT_THROW(
+        check_comple_graph(
+            test_graph(
+                {{0,1}, {1,1}},
+                {{{0,2}, {1,0}},
+                 {{1,0}, {1,1}}}),
+            ""),
+        std::invalid_argument);
+
+    // The following edges are not processed because the graph has a cycle: [(3,0)->(2,0)]
+    EXPECT_THROW(
+        check_comple_graph(
+            test_graph(
+                {{1,0}, {0,1}, {1,1}, {1,1}},
+                {{{1,0}, {2,0}},
+                 {{2,0}, {3,0}},
+                 {{2,0}, {0,0}},
+                 {{3,0}, {2,0}}}),
+            ""),
+        std::invalid_argument);
+
+    // Edge end (2,0) is not the only one coming to the input port
+    EXPECT_THROW(
+        check_comple_graph(
+            test_graph(
+                {{0,1}, {0,1}, {1,0}},
+                {{{0,0}, {2,0}},
+                 {{1,0}, {2,0}}}),
+            ""),
+        std::invalid_argument);
 }

@@ -218,9 +218,7 @@ auto compile(const Graph& g)
     // Check edges
     auto check_edge_end = [&](const IndexEdgeEnd& ee, bool input)
     {
-        if (ee.inode >= nodes.size())
-            common::throw_<std::invalid_argument>(
-                "Edge end ", ee, " refers to a non-existent node");
+        assert(ee.inode < nodes.size());
         const auto* node = nodes[ee.inode];
         if (input)
         {
