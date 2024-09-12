@@ -328,7 +328,28 @@ auto compile(const Graph& g)
     }
 
     assert(result->nodes.values.size() == g.nodes.size());
-    assert(result->edges.values.size() == g.edges.size());
+
+    if(result->edges.values.size() != g.edges.size())
+    {
+        auto& sorted_edges = result->edges.values;
+        auto is_edge_unprocessed = [&](const IndexEdge& e)
+        {
+            auto it = std::ranges::lower_bound(sorted_edges, e);
+            return it == sorted_edges.end() || *it != e;
+        };
+        std::ranges::sort(sorted_edges);
+        auto unprocessed_edges = std::set<IndexEdge>{};
+        std::ranges::copy_if(
+            edges,
+            std::inserter(unprocessed_edges, unprocessed_edges.end()),
+            is_edge_unprocessed);
+
+        common::throw_<std::invalid_argument>(
+            "The following edges are not processed because"
+            " the graph has a cycle: ",
+            common::format_seq(unprocessed_edges));
+    }
+
     return result;
 }
 
