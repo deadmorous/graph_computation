@@ -1,120 +1,13 @@
 #pragma once
 
-#include "common/grouped.hpp"
-#include "common/type.hpp"
+#include "gc/value.hpp"
 
-#include <any>
+#include "common/grouped.hpp"
+
 #include <array>
-#include <cstdint>
-#include <memory>
-#include <span>
-#include <string_view>
-#include <vector>
+
 
 namespace gc {
-
-enum class ScalarType : uint8_t
-{
-    Byte,
-    F32,
-    F64,
-    I8,
-    I16,
-    I32,
-    I64,
-    U8,
-    U16,
-    U32,
-    U64
-};
-
-enum class AggregateType : uint8_t
-{
-    Array,
-    Scalar,
-    Struct
-};
-
-
-// -----------
-
-template <typename T>
-struct TypedField final
-{
-    std::string_view        name;
-    T                       value;
-};
-
-template <typename T>
-using TypedFieldVec = std::vector< TypedField<T> >;
-
-using Shape = TypedFieldVec<uint32_t>;
-
-// -----------
-
-
-
-struct Value final
-{
-    AggregateType           aggregate_type;
-    std::any                value;
-};
-
-using ValueSpan = std::span<Value>;
-using ConstValueSpan = std::span<const Value>;
-using ValueVec = std::vector<Value>;
-
-struct Array final
-{
-    Shape                   shape;
-    std::shared_ptr<void>   data;
-};
-
-struct Scalar final
-{
-    ScalarType type;
-    union {
-        std::byte           byte;
-        float               f32;
-        double              f64;
-        int8_t              i8;
-        int16_t             i16;
-        int32_t             i32;
-        int64_t             i64;
-        uint8_t             u8;
-        uint16_t            u16;
-        uint32_t            u32;
-        uint64_t            u64;
-    } value;
-};
-
-struct Field final
-{
-    std::string_view        name;
-    Value                   value;
-};
-
-struct Struct final
-{
-    std::vector<Field>      fields;
-};
-
-inline auto as(Scalar& v, common::Type_Tag<int32_t> tag)
-    -> int32_t&
-{
-    assert(v.type == ScalarType::I32);
-    return v.value.i32;
-}
-
-template <std::integral T>
-auto as(Value& v, common::Type_Tag<T> tag = {})
-    -> T&
-{
-    assert(v.aggregate_type == AggregateType::Scalar);
-    return as(std::any_cast<Scalar&>(v.value), tag);
-}
-
-// -----------
 
 struct Node
 {

@@ -3,7 +3,8 @@ cmake_minimum_required(VERSION 3.5)
 project(gc-lib LANGUAGES CXX)
 
 add_library(gc-lib STATIC
-    graph_computation.cpp)
+    graph_computation.cpp
+    type.cpp)
 
 add_library(gc::lib ALIAS gc-lib)
 

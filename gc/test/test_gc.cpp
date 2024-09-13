@@ -186,7 +186,8 @@ TEST(Gc, compile)
             ""),
         std::invalid_argument);
 
-    // The following edges are not processed because the graph has a cycle: [(3,0)->(2,0)]
+    // The following edges are not processed because
+    // the graph has a cycle: [(3,0)->(2,0)]
     EXPECT_THROW(
         check_comple_graph(
             test_graph(
@@ -209,6 +210,71 @@ TEST(Gc, compile)
         std::invalid_argument);
 }
 
+struct MyStruct
+{
+    int foo;
+    double bar;
+    std::vector<bool> flags;
+};
+
+constexpr inline auto fields_of(MyStruct& x)
+    -> std::tuple<int&, double&, std::vector<bool>&>
+{ return { x.foo, x.bar, x.flags }; }
+
+constexpr inline auto fields_of(const MyStruct& x)
+    -> std::tuple<const int&, const double&, const std::vector<bool>&>
+{ return { x.foo, x.bar, x.flags }; }
+
+inline auto fields_of(MyStruct&& x) = delete;
+
+constexpr inline auto tuple_tag_of(common::Type_Tag<MyStruct>)
+    -> common::Type_Tag<std::tuple<int, double, std::vector<bool>>>
+{ return {}; }
+
+constexpr inline auto field_names_of(common::Type_Tag<MyStruct>)
+    -> std::array<std::string_view, 3>
+{ return { "foo", "bar", "flags" }; }
+
+
+
+TEST(Gc, Type)
+{
+    const auto* t_int = gc::Type::of<int>();
+    const auto* t_int_vec = gc::Type::of<std::vector<int>>();
+    const auto* t_bool = gc::Type::of<bool>();
+    const auto* t_bool_bool_vec = gc::Type::of<std::vector<std::vector<bool>>>();
+    const auto* t_tuple = gc::Type::of<std::tuple<int, bool, std::vector<float>>>();
+    const auto* t_struct = gc::Type::of<MyStruct>();
+
+    EXPECT_EQ(gc::Type::of<std::vector<int>>(), t_int_vec);
+    EXPECT_EQ(gc::Type::of<MyStruct>(), t_struct);
+
+    using common::format;
+    EXPECT_EQ(format(t_int),
+              "Type{I32}");
+    EXPECT_EQ(format(t_int_vec),
+              "Type{Vector[I32]}");
+    EXPECT_EQ(format(t_bool),
+              "Type{Bool}");
+    EXPECT_EQ(format(t_bool_bool_vec),
+              "Type{Vector[Vector[Bool]]}");
+    EXPECT_EQ(format(t_tuple),
+              "Type{Tuple{I32, Bool, Vector[F32]}}");
+    EXPECT_EQ(format(t_struct),
+              "Type{Struct{foo: I32, bar: F64, flags: Vector[Bool]}}");
+}
+
+class MyBlob final
+{};
+
+GC_REGISTER_CUSTOM_TYPE(MyBlob, 1);
+
+TEST(Gc, CustomType)
+{
+    const auto* t_my_blob = gc::Type::of<MyBlob>();
+    EXPECT_EQ(common::format(t_my_blob), "Type{Custom<MyBlob: 1>}");
+}
+
 TEST(Gc, compute)
 {
     auto g = test_graph(
@@ -218,7 +284,7 @@ TEST(Gc, compute)
     auto val = gc::Value {
         .aggregate_type = gc::AggregateType::Scalar,
         .value = gc::Scalar{
-            .type = gc::ScalarType::I32,
+            .type = gc::ScalarTypeId::I32,
             .value = { .i32 = 123 } } };
 
     auto& ival = as<int32_t>(val);
