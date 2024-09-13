@@ -215,6 +215,15 @@ TEST(Gc, compute)
         {{0, 1}, {1, 1}},
         {{{0,0}, {1,0}}});
 
+    auto val = gc::Value {
+        .aggregate_type = gc::AggregateType::Scalar,
+        .value = gc::Scalar{
+            .type = gc::ScalarType::I32,
+            .value = { .i32 = 123 } } };
+
+    auto& ival = as<int32_t>(val);
+    EXPECT_EQ(ival, 123);
+
     auto instr = compile(g);
 
     auto result = gc::ComputationResult{};

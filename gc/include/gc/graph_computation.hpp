@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/grouped.hpp"
+#include "common/type.hpp"
 
 #include <any>
 #include <array>
@@ -97,6 +98,21 @@ struct Struct final
 {
     std::vector<Field>      fields;
 };
+
+inline auto as(Scalar& v, common::Type_Tag<int32_t> tag)
+    -> int32_t&
+{
+    assert(v.type == ScalarType::I32);
+    return v.value.i32;
+}
+
+template <std::integral T>
+auto as(Value& v, common::Type_Tag<T> tag = {})
+    -> T&
+{
+    assert(v.aggregate_type == AggregateType::Scalar);
+    return as(std::any_cast<Scalar&>(v.value), tag);
+}
 
 // -----------
 
