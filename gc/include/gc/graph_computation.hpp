@@ -5,6 +5,7 @@
 #include "common/grouped.hpp"
 
 #include <array>
+#include <memory>
 
 
 namespace gc {

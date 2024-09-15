@@ -6,6 +6,9 @@
 
 #include <initializer_list>
 
+
+// using namespace std::string_view_literals;
+
 namespace {
 
 class TestNode final
@@ -275,19 +278,40 @@ TEST(Gc, CustomType)
     EXPECT_EQ(common::format(t_my_blob), "Type{Custom<MyBlob: 1>}");
 }
 
+// ---
+
+TEST(Gc, DynamicValueAccess)
+{
+    auto path = gc::ValuePath{} / 0ul / "asd";
+    auto value = gc::Value(123);
+    auto action = gc::ActionOnValue{ .action = gc::ActionOnValue::Get };
+    value.act(path, action);
+    value.act(gc::ValuePath{} / 0ul / "asd", action);
+}
+
+// ---
+
 TEST(Gc, compute)
 {
     auto g = test_graph(
         {{0, 1}, {1, 1}},
         {{{0,0}, {1,0}}});
 
-    auto val = gc::Value {
-        .aggregate_type = gc::AggregateType::Scalar,
-        .value = gc::Scalar{
-            .type = gc::ScalarTypeId::I32,
-            .value = { .i32 = 123 } } };
+    auto val = gc::Value(common::Type<int32_t>, 123);
 
-    auto& ival = as<int32_t>(val);
+    size_t visit_count{};
+    gc::ScalarT{ val.type() }.visit(
+        [&]<typename T>(common::Type_Tag<T>)
+        {
+            constexpr auto is_int32_t = std::is_same_v<T, int32_t>;
+            EXPECT_TRUE(is_int32_t);
+            ++visit_count;
+            if constexpr (std::is_integral_v<T>)
+                EXPECT_EQ(val.as<T>(), 123);
+        });
+    EXPECT_EQ(visit_count, 1);
+
+    auto& ival = val.as<int32_t>();
     EXPECT_EQ(ival, 123);
 
     auto instr = compile(g);

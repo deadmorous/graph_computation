@@ -1,5 +1,7 @@
 #pragma once
 
+#include "gc/type_fwd.hpp"
+
 #include "common/type.hpp"
 
 #include <array>
@@ -32,60 +34,13 @@
     }                                                                       \
     static_assert(true)
 
+
 namespace common {
 constexpr inline struct Impl_Tag final {} Impl;
 } // namespace common
 
+
 namespace gc {
-
-enum class ScalarTypeId : uint8_t
-{
-    Bool,
-    Byte,
-    F32,
-    F64,
-    I8,
-    I16,
-    I32,
-    I64,
-    U8,
-    U16,
-    U32,
-    U64
-};
-
-#define GRAPH_COMPUTATION_DECL_SCALAR_TYPE_ID(T, id)                        \
-    constexpr inline auto scalar_type_id_of(common::Type_Tag<T>) noexcept   \
-        -> ScalarTypeId                                                     \
-    { return ScalarTypeId::id; }                                            \
-    static_assert(true)
-
-GRAPH_COMPUTATION_DECL_SCALAR_TYPE_ID(bool     , Bool);
-GRAPH_COMPUTATION_DECL_SCALAR_TYPE_ID(std::byte, Byte);
-GRAPH_COMPUTATION_DECL_SCALAR_TYPE_ID(float    , F32 );
-GRAPH_COMPUTATION_DECL_SCALAR_TYPE_ID(double   , F64 );
-GRAPH_COMPUTATION_DECL_SCALAR_TYPE_ID(int8_t   , I8  );
-GRAPH_COMPUTATION_DECL_SCALAR_TYPE_ID(int16_t  , I16 );
-GRAPH_COMPUTATION_DECL_SCALAR_TYPE_ID(int32_t  , I32 );
-GRAPH_COMPUTATION_DECL_SCALAR_TYPE_ID(int64_t  , I64 );
-GRAPH_COMPUTATION_DECL_SCALAR_TYPE_ID(uint8_t  , U8  );
-GRAPH_COMPUTATION_DECL_SCALAR_TYPE_ID(uint16_t , U16 );
-GRAPH_COMPUTATION_DECL_SCALAR_TYPE_ID(uint32_t , U32 );
-GRAPH_COMPUTATION_DECL_SCALAR_TYPE_ID(uint64_t , U64 );
-
-template <typename T>
-concept ScalarType =
-    requires{ scalar_type_id_of(common::Type<T>); };
-
-template <typename T>
-concept StructType =
-    requires(T t, const T ct)
-{
-    fields_of(t);
-    fields_of(ct);
-    tuple_tag_of(common::Type<T>);
-    field_names_of(common::Type<T>);
-};
 
 enum class AggregateType : uint8_t
 {
@@ -97,20 +52,6 @@ enum class AggregateType : uint8_t
     Vector
 };
 
-
-
-template <typename> struct CustomTypeToId;
-template <uint8_t> struct IdToCustomType;
-
-
-template <typename T>
-concept RegisteredCustomType =
-    requires
-{
-    CustomTypeToId<T>::id;
-    CustomTypeToId<T>::name;
-    requires IdToCustomType<CustomTypeToId<T>::id>::id == CustomTypeToId<T>::id;
-};
 
 
 class Type final
@@ -252,6 +193,51 @@ class ScalarT final
 public:
     ScalarT(const Type*) noexcept;
     auto id() const noexcept -> ScalarTypeId;
+
+    template <typename F, typename... Args>
+    auto visit(F&& f, Args... args) const
+    {
+        switch(id())
+        {
+        case ScalarTypeId::Bool:
+            return std::invoke(std::forward<F>(f), common::Type<bool>,
+                               std::forward<Args>(args)...);
+        case ScalarTypeId::Byte:
+            return std::invoke(std::forward<F>(f), common::Type<std::byte>,
+                               std::forward<Args>(args)...);
+        case ScalarTypeId::F32:
+            return std::invoke(std::forward<F>(f), common::Type<float>,
+                               std::forward<Args>(args)...);
+        case ScalarTypeId::F64:
+            return std::invoke(std::forward<F>(f), common::Type<double>,
+                               std::forward<Args>(args)...);
+        case ScalarTypeId::I8:
+            return std::invoke(std::forward<F>(f), common::Type<int8_t>,
+                               std::forward<Args>(args)...);
+        case ScalarTypeId::I16:
+            return std::invoke(std::forward<F>(f), common::Type<int16_t>,
+                               std::forward<Args>(args)...);
+        case ScalarTypeId::I32:
+            return std::invoke(std::forward<F>(f), common::Type<int32_t>,
+                               std::forward<Args>(args)...);
+        case ScalarTypeId::I64:
+            return std::invoke(std::forward<F>(f), common::Type<int64_t>,
+                               std::forward<Args>(args)...);
+        case ScalarTypeId::U8:
+            return std::invoke(std::forward<F>(f), common::Type<uint8_t>,
+                               std::forward<Args>(args)...);
+        case ScalarTypeId::U16:
+            return std::invoke(std::forward<F>(f), common::Type<uint16_t>,
+                               std::forward<Args>(args)...);
+        case ScalarTypeId::U32:
+            return std::invoke(std::forward<F>(f), common::Type<uint32_t>,
+                               std::forward<Args>(args)...);
+        case ScalarTypeId::U64:
+            return std::invoke(std::forward<F>(f), common::Type<uint64_t>,
+                               std::forward<Args>(args)...);
+        }
+        __builtin_unreachable();
+    }
 
 private:
     const Type* type_;
