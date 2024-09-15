@@ -209,16 +209,9 @@ auto StructT::tuple_type() const noexcept
 auto StructT::field_names() const noexcept
     -> std::span<const std::string_view>
 {
-    auto tt = TupleT(tuple_type());
-
-    // deBUG
-    const auto* ddd = type_->storage().data();
-    auto ddd_offset = ptr_align_index(2) + sizeof(void*);
-    const auto* ddd_names = ddd + ddd_offset;
-
     auto* names = get_pointer<const std::string_view>(
         type_->storage().data() + ptr_align_index(2) + sizeof(void*));
-    return { names, tt.element_count() };
+    return { names, tuple().element_count() };
 }
 
 auto StructT::tuple() const noexcept
