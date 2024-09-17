@@ -245,7 +245,7 @@ TEST(Gc, Type)
     const auto* t_int = gc::Type::of<int>();
     const auto* t_int_vec = gc::Type::of<std::vector<int>>();
     const auto* t_bool = gc::Type::of<bool>();
-    // TODO const auto* t_bool_bool_vec = gc::Type::of<std::vector<std::vector<bool>>>();
+    const auto* t_int_vec_vec = gc::Type::of<std::vector<std::vector<int>>>();
     const auto* t_tuple = gc::Type::of<std::tuple<int, bool, std::vector<float>>>();
     const auto* t_struct = gc::Type::of<MyStruct>();
 
@@ -259,8 +259,8 @@ TEST(Gc, Type)
               "Type{Vector[I32]}");
     EXPECT_EQ(format(t_bool),
               "Type{Bool}");
-    // EXPECT_EQ(format(t_bool_bool_vec),
-    //           "Type{Vector[Vector[Bool]]}");
+    EXPECT_EQ(format(t_int_vec_vec),
+              "Type{Vector[Vector[I32]]}");
     EXPECT_EQ(format(t_tuple),
               "Type{Tuple{I32, Bool, Vector[F32]}}");
     EXPECT_EQ(format(t_struct),

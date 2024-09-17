@@ -228,10 +228,34 @@ struct ValueComponents<Type, T>
     }
 };
 
+template <typename Type, RegisteredCustomType T>
+struct ValueComponents<Type, T>
+{
+    template <MaybeConst<T> U, typename F>
+    static auto dispatch(ValuePathView path, U& data, F&& f)
+    {
+        assert(path.empty());
+        return std::invoke(std::forward<F>(f), data, common::Type<T>);
+    }
+};
+
+
+
+template <typename T>
+using ValueComponentsAccessFactoryFunc =
+    std::unique_ptr<ValueComponentAccess<Type>>(*)();
+
 template <typename Type, typename T>
-auto make_value_components_access(common::Type_Tag<Type> = {},
-                                  common::Type_Tag<T> = {})
-    -> std::unique_ptr<ValueComponentAccess<Type>>
-{ return std::make_unique< ValueComponentAccessImpl<Type, T> >(); }
+auto value_components_access_factory(common::Type_Tag<Type> = {},
+                                     common::Type_Tag<T> = {})
+    -> ValueComponentsAccessFactoryFunc<Type>
+{
+    constexpr auto result = +[]()
+        -> std::unique_ptr<ValueComponentAccess<Type>>
+    {
+        return std::make_unique< ValueComponentAccessImpl<Type, T> >();
+    };
+    return result;
+}
 
 } // namespace gc::detail

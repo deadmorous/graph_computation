@@ -62,7 +62,11 @@ public:
 
     using Storage = std::array<std::byte, max_size>;
 
-    using ValueComponentAccess = detail::ValueComponentAccess<Type>;
+    using ValueComponentAccess =
+        detail::ValueComponentAccess<Type>;
+
+    using ValueComponentsAccessFactoryFunc =
+        detail::ValueComponentsAccessFactoryFunc<Type>;
 
     static constexpr auto this_tag = common::Type<Type>;
 
@@ -94,11 +98,10 @@ public:
     };
 
     Type(common::Impl_Tag,
-         std::unique_ptr<ValueComponentAccess> value_component_access,
          std::initializer_list<ByteInitializer> init,
          std::initializer_list<const Type*> bases,
          const std::string_view* names)
-        : Type{ std::move(value_component_access), init, bases, names }
+        : Type{ init, bases, names }
     {}
 
 
@@ -113,7 +116,7 @@ public:
         -> const Type*
     {
         return intern(
-            detail::make_value_components_access(this_tag, tag),
+            detail::value_components_access_factory(this_tag, tag),
             { AggregateType::Scalar, scalar_type_id_of(tag) });
     }
 
@@ -122,7 +125,7 @@ public:
         -> const Type*
     {
         return intern(
-            detail::make_value_components_access(this_tag, tag),
+            detail::value_components_access_factory(this_tag, tag),
             {AggregateType::Vector},
             {of<T>()});
     }
@@ -132,7 +135,7 @@ public:
         -> const Type*
     {
         return intern(
-            detail::make_value_components_access(this_tag, tag),
+            detail::value_components_access_factory(this_tag, tag),
             {AggregateType::Tuple, sizeof...(Ts)},
             {of<Ts>()...});
     }
@@ -145,7 +148,7 @@ public:
         constexpr uint8_t field_count = field_names.size();
         constexpr auto tuple_tag = tuple_tag_of(tag);
         return intern(
-            detail::make_value_components_access(this_tag, tag),
+            detail::value_components_access_factory(this_tag, tag),
             {AggregateType::Struct, field_count},
             {of(tuple_tag)},
             field_names.data());
@@ -156,7 +159,7 @@ public:
         -> const Type*
     {
         return intern(
-            {}, // TODO
+            detail::value_components_access_factory(this_tag, tag),
             {AggregateType::Custom, CustomTypeToId<T>::id},
             {},
             {&CustomTypeToId<T>::name});
@@ -185,15 +188,14 @@ public:
 private:
 
     alignas(size_t) Storage storage_;
-    std::unique_ptr<ValueComponentAccess> value_component_access_;
+    mutable std::unique_ptr<ValueComponentAccess> value_component_access_;
 
-    Type(std::unique_ptr<ValueComponentAccess> value_component_access,
-         std::initializer_list<ByteInitializer> init,
+    Type(std::initializer_list<ByteInitializer> init,
          std::initializer_list<const Type*> bases,
          const std::string_view* names);
 
     static auto intern(
-        std::unique_ptr<ValueComponentAccess> value_component_access,
+        ValueComponentsAccessFactoryFunc value_component_access_factory,
         std::initializer_list<ByteInitializer> init,
         std::initializer_list<const Type*> bases = {},
         const std::string_view* names = nullptr)
