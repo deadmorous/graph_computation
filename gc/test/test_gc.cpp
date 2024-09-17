@@ -5,6 +5,8 @@
 #include <gtest/gtest.h>
 
 #include <initializer_list>
+#include <numeric>
+#include <ranges>
 
 
 // using namespace std::string_view_literals;
@@ -30,12 +32,24 @@ public:
 
     auto default_inputs(gc::ValueSpan result) const
         -> void override
-    {}
+    { std::fill(result.begin(), result.end(), 0); }
 
     auto compute_outputs(gc::ValueSpan result,
                          gc::ConstValueSpan inputs) const
         -> void override
-    {}
+    {
+        std::iota(result.begin(), result.end(), 1);
+
+        if (output_count_ == 0)
+            return;
+
+        auto output_index = 0;
+        for (const auto& input : inputs)
+        {
+            result[output_index].as<int>() += input.as<int>();
+            output_index = (output_index + 1) % output_count_;
+        }
+    }
 
 private:
     uint32_t input_count_;
@@ -280,6 +294,26 @@ TEST(Gc, CustomType)
 
 // ---
 
+TEST(Gc, Scalar)
+{
+    auto val = gc::Value(common::Type<int32_t>, 123);
+
+    size_t visit_count{};
+    gc::ScalarT{ val.type() }.visit(
+        [&]<typename T>(common::Type_Tag<T>)
+        {
+            constexpr auto is_int32_t = std::is_same_v<T, int32_t>;
+            EXPECT_TRUE(is_int32_t);
+            ++visit_count;
+            if constexpr (std::is_integral_v<T>)
+                EXPECT_EQ(val.as<T>(), 123);
+        });
+    EXPECT_EQ(visit_count, 1);
+
+    auto& ival = val.as<int32_t>();
+    EXPECT_EQ(ival, 123);
+}
+
 TEST(Gc, DynamicValueAccess)
 {
     auto v_int = gc::Value(123);
@@ -320,31 +354,81 @@ TEST(Gc, DynamicValueAccess)
 
 // ---
 
-TEST(Gc, compute)
+TEST(Gc, compute_1)
 {
     auto g = test_graph(
         {{0, 1}, {1, 1}},
         {{{0,0}, {1,0}}});
 
-    auto val = gc::Value(common::Type<int32_t>, 123);
-
-    size_t visit_count{};
-    gc::ScalarT{ val.type() }.visit(
-        [&]<typename T>(common::Type_Tag<T>)
-        {
-            constexpr auto is_int32_t = std::is_same_v<T, int32_t>;
-            EXPECT_TRUE(is_int32_t);
-            ++visit_count;
-            if constexpr (std::is_integral_v<T>)
-                EXPECT_EQ(val.as<T>(), 123);
-        });
-    EXPECT_EQ(visit_count, 1);
-
-    auto& ival = val.as<int32_t>();
-    EXPECT_EQ(ival, 123);
-
     auto instr = compile(g);
 
     auto result = gc::ComputationResult{};
     compute(result, g, instr.get());
+
+    EXPECT_EQ(group(result.outputs, 0).size(), 1);
+    EXPECT_EQ(group(result.outputs, 0)[0].as<int>(), 1);
+
+    EXPECT_EQ(group(result.outputs, 1).size(), 1);
+    EXPECT_EQ(group(result.outputs, 1)[0].as<int>(), 2);
+}
+
+TEST(Gc, compute_2)
+{
+    // 8 -> 7 -> 5
+    //
+    // |    |    |
+    // v    v    v
+    //
+    // 6 -> 4 -> 2
+    //
+    // |    |    |
+    // v    v    v
+    //
+    // 3 -> 1 -> 0
+    auto g = test_graph(
+        {{2,0}, {2,1}, {2,1}, {1,1}, {2,2}, {1,1}, {1,2}, {1,2}, {0,2}},
+        {{{1,0}, {0,0}},
+         {{2,0}, {0,1}},
+         {{3,0}, {1,0}},
+         {{4,0}, {1,1}},
+         {{4,1}, {2,0}},
+         {{5,0}, {2,1}},
+         {{6,0}, {3,0}},
+         {{6,1}, {4,0}},
+         {{7,0}, {4,1}},
+         {{7,1}, {5,0}},
+         {{8,0}, {6,0}},
+         {{8,1}, {7,0}}});
+
+    auto instr = gc::compile(g);
+
+    auto format_result = [](const gc::ComputationResult& res)
+        -> std::string
+    {
+        std::ostringstream s;
+        for (size_t inode=0; inode<9; ++inode)
+        {
+            auto gr = group(res.outputs, inode);
+            auto seq = std::ranges::transform_view(
+                gr,
+                [](const gc::Value& v)
+                { return v.as<int>(); });
+            s << inode << ": (" << common::format_seq(seq) << ')' << std::endl;
+        }
+        return s.str();
+    };
+
+    auto result = gc::ComputationResult{};
+    compute(result, g, instr.get());
+
+    EXPECT_EQ(format_result(result), R"(0: ()
+1: (7)
+2: (9)
+3: (3)
+4: (3,5)
+5: (3)
+6: (2,2)
+7: (3,2)
+8: (1,2)
+)");
 }

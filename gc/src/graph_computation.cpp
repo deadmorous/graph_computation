@@ -336,13 +336,13 @@ auto compute(ComputationResult& result,
     {
         for (auto inode : group(instructions->nodes, level))
         {
-            if (inode > 0)
+            if (level > 0)
             {
-                for (const auto& e : group(instructions->edges, inode-1))
+                for (const auto& e : group(instructions->edges, level-1))
                 {
                     const auto& [e0, e1] = e;
-                    group(result.outputs, e1.inode)[e1.port] =
-                        group(result.inputs, e0.inode)[e0.port];
+                    group(result.inputs, e1.inode)[e1.port] =
+                        group(result.outputs, e0.inode)[e0.port];
                 }
             }
 

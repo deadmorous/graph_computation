@@ -25,6 +25,8 @@ public:
         Value{ common::Type<T>, value }
     {}
 
+    auto operator=(const Value&) -> Value& = default;
+
 
     // Field access
 
