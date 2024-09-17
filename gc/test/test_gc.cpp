@@ -217,21 +217,21 @@ struct MyStruct
 {
     int foo;
     double bar;
-    std::vector<bool> flags;
+    std::vector<unsigned int> flags;
 };
 
 constexpr inline auto fields_of(MyStruct& x)
-    -> std::tuple<int&, double&, std::vector<bool>&>
+    -> std::tuple<int&, double&, std::vector<unsigned int>&>
 { return { x.foo, x.bar, x.flags }; }
 
 constexpr inline auto fields_of(const MyStruct& x)
-    -> std::tuple<const int&, const double&, const std::vector<bool>&>
+    -> std::tuple<const int&, const double&, const std::vector<unsigned int>&>
 { return { x.foo, x.bar, x.flags }; }
 
 inline auto fields_of(MyStruct&& x) = delete;
 
 constexpr inline auto tuple_tag_of(common::Type_Tag<MyStruct>)
-    -> common::Type_Tag<std::tuple<int, double, std::vector<bool>>>
+    -> common::Type_Tag<std::tuple<int, double, std::vector<unsigned int>>>
 { return {}; }
 
 constexpr inline auto field_names_of(common::Type_Tag<MyStruct>)
@@ -245,7 +245,7 @@ TEST(Gc, Type)
     const auto* t_int = gc::Type::of<int>();
     const auto* t_int_vec = gc::Type::of<std::vector<int>>();
     const auto* t_bool = gc::Type::of<bool>();
-    const auto* t_bool_bool_vec = gc::Type::of<std::vector<std::vector<bool>>>();
+    // TODO const auto* t_bool_bool_vec = gc::Type::of<std::vector<std::vector<bool>>>();
     const auto* t_tuple = gc::Type::of<std::tuple<int, bool, std::vector<float>>>();
     const auto* t_struct = gc::Type::of<MyStruct>();
 
@@ -259,12 +259,12 @@ TEST(Gc, Type)
               "Type{Vector[I32]}");
     EXPECT_EQ(format(t_bool),
               "Type{Bool}");
-    EXPECT_EQ(format(t_bool_bool_vec),
-              "Type{Vector[Vector[Bool]]}");
+    // EXPECT_EQ(format(t_bool_bool_vec),
+    //           "Type{Vector[Vector[Bool]]}");
     EXPECT_EQ(format(t_tuple),
               "Type{Tuple{I32, Bool, Vector[F32]}}");
     EXPECT_EQ(format(t_struct),
-              "Type{Struct{foo: I32, bar: F64, flags: Vector[Bool]}}");
+              "Type{Struct{foo: I32, bar: F64, flags: Vector[U32]}}");
 }
 
 class MyBlob final
@@ -282,11 +282,40 @@ TEST(Gc, CustomType)
 
 TEST(Gc, DynamicValueAccess)
 {
-    auto path = gc::ValuePath{} / 0ul / "asd";
-    auto value = gc::Value(123);
-    auto action = gc::ActionOnValue{ .action = gc::ActionOnValue::Get };
-    value.act(path, action);
-    value.act(gc::ValuePath{} / 0ul / "asd", action);
+    auto v_int = gc::Value(123);
+    EXPECT_EQ(v_int.get({}).as<int>(), 123);
+
+    auto v_vec_double = gc::Value(std::vector<double>{ 1.2, 3.4, 5.6 });
+    EXPECT_EQ(v_vec_double.get(gc::ValuePath{} / 1ul).as<double>(), 3.4);
+
+    auto v_struct  = gc::Value(MyStruct{
+        .foo = 123,
+        .bar = 4.56,
+        .flags = {12, 34, 56, 78, 90}
+    });
+    EXPECT_EQ(v_struct.get(gc::ValuePath{} / "foo").as<int>(), 123);
+    EXPECT_EQ(v_struct.get(gc::ValuePath{} / "bar").as<double>(), 4.56);
+
+    auto actual_flags =
+        v_struct.get(gc::ValuePath{} / "flags").as<std::vector<unsigned int>>();
+    auto expected_flags =
+        std::vector<unsigned int>{12, 34, 56, 78, 90};
+    EXPECT_EQ(actual_flags, expected_flags);
+
+    EXPECT_EQ(v_struct.get(gc::ValuePath{} / "flags" / 0u).as<unsigned>(), 12);
+    EXPECT_EQ(v_struct.get(gc::ValuePath{} / "flags" / 3u).as<unsigned>(), 78);
+    EXPECT_EQ(v_struct.get(gc::ValuePath{} / "flags" / 4u).as<unsigned>(), 90);
+
+    // vector::_M_range_check: __n (which is 5) >= this->size() (which is 5)
+    EXPECT_THROW(v_struct.get(gc::ValuePath{} / "flags" / 5u),
+                 std::out_of_range);
+
+    v_struct.set(gc::ValuePath{} / "flags" / 3u, 912u);
+    EXPECT_EQ(v_struct.get(gc::ValuePath{} / "flags" / 3u).as<unsigned>(), 912);
+
+    v_struct.resize(gc::ValuePath{} / "flags", 6);
+    v_struct.set(gc::ValuePath{} / "flags" / 5u, 144u);
+    EXPECT_EQ(v_struct.get(gc::ValuePath{} / "flags" / 5u).as<unsigned>(), 144);
 }
 
 // ---

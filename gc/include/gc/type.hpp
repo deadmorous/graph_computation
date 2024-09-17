@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gc/detail/value_component_access.hpp"
 #include "gc/type_fwd.hpp"
 
 #include "common/type.hpp"
@@ -61,6 +62,10 @@ public:
 
     using Storage = std::array<std::byte, max_size>;
 
+    using ValueComponentAccess = detail::ValueComponentAccess<Type>;
+
+    static constexpr auto this_tag = common::Type<Type>;
+
 
     // TODO: Hide it, only need in the source
 
@@ -89,10 +94,11 @@ public:
     };
 
     Type(common::Impl_Tag,
+         std::unique_ptr<ValueComponentAccess> value_component_access,
          std::initializer_list<ByteInitializer> init,
          std::initializer_list<const Type*> bases,
          const std::string_view* names)
-        : Type{ init, bases, names }
+        : Type{ std::move(value_component_access), init, bases, names }
     {}
 
 
@@ -106,20 +112,30 @@ public:
     static auto of(common::Type_Tag<T> tag)
         -> const Type*
     {
-        return intern({
-            AggregateType::Scalar,
-            scalar_type_id_of(tag) });
+        return intern(
+            detail::make_value_components_access(this_tag, tag),
+            { AggregateType::Scalar, scalar_type_id_of(tag) });
     }
 
     template <typename T>
-    static auto of(common::Type_Tag<std::vector<T>>)
+    static auto of(common::Type_Tag<std::vector<T>> tag)
         -> const Type*
-    { return intern({AggregateType::Vector}, {of<T>()}); }
+    {
+        return intern(
+            detail::make_value_components_access(this_tag, tag),
+            {AggregateType::Vector},
+            {of<T>()});
+    }
 
     template <typename... Ts>
-    static auto of(common::Type_Tag<std::tuple<Ts...>>)
+    static auto of(common::Type_Tag<std::tuple<Ts...>> tag)
         -> const Type*
-    { return intern({AggregateType::Tuple, sizeof...(Ts)}, {of<Ts>()...}); }
+    {
+        return intern(
+            detail::make_value_components_access(this_tag, tag),
+            {AggregateType::Tuple, sizeof...(Ts)},
+            {of<Ts>()...});
+    }
 
     template <StructType T>
     static auto of(common::Type_Tag<T> tag)
@@ -128,23 +144,28 @@ public:
         static constexpr auto field_names = field_names_of(tag);
         constexpr uint8_t field_count = field_names.size();
         constexpr auto tuple_tag = tuple_tag_of(tag);
-        return intern({AggregateType::Struct, field_count},
-                      {of(tuple_tag)},
-                      field_names.data());
+        return intern(
+            detail::make_value_components_access(this_tag, tag),
+            {AggregateType::Struct, field_count},
+            {of(tuple_tag)},
+            field_names.data());
     }
 
     template <RegisteredCustomType T>
     static auto of(common::Type_Tag<T> tag)
         -> const Type*
     {
-        return intern({AggregateType::Custom, CustomTypeToId<T>::id},
-                      {},
-                      {&CustomTypeToId<T>::name});
+        return intern(
+            {}, // TODO
+            {AggregateType::Custom, CustomTypeToId<T>::id},
+            {},
+            {&CustomTypeToId<T>::name});
     }
 
 
-    auto operator<=>(const Type&) const
-        -> std::strong_ordering = default;
+    auto operator<=>(const Type& that) const
+        -> std::strong_ordering
+    { return storage_ <=> that.storage_; }
 
     auto storage() const
         -> const Storage&
@@ -154,21 +175,29 @@ public:
         -> AggregateType
     { return static_cast<AggregateType>(storage_[1]); }
 
+    auto value_component_access() const noexcept
+        -> const ValueComponentAccess*
+    { return value_component_access_.get(); }
+
     friend auto operator<<(std::ostream& s, const Type* t)
         -> std::ostream&;
 
 private:
 
     alignas(size_t) Storage storage_;
+    std::unique_ptr<ValueComponentAccess> value_component_access_;
 
-    Type(std::initializer_list<ByteInitializer> init,
+    Type(std::unique_ptr<ValueComponentAccess> value_component_access,
+         std::initializer_list<ByteInitializer> init,
          std::initializer_list<const Type*> bases,
          const std::string_view* names);
 
-    static auto intern(std::initializer_list<ByteInitializer> init,
-                       std::initializer_list<const Type*> bases = {},
-                       const std::string_view* names = nullptr)
-        -> const Type*;
+    static auto intern(
+        std::unique_ptr<ValueComponentAccess> value_component_access,
+        std::initializer_list<ByteInitializer> init,
+        std::initializer_list<const Type*> bases = {},
+        const std::string_view* names = nullptr)
+            -> const Type*;
 };
 
 template <typename T>

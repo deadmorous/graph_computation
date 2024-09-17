@@ -7,8 +7,6 @@
 
 namespace gc {
 
-struct ActionOnValue;
-
 class Value final
 {
 public:
@@ -23,7 +21,7 @@ public:
     {}
 
     template <typename T>
-    Value(const T& value) :
+    /* implicit */ Value(const T& value) :
         Value{ common::Type<T>, value }
     {}
 
@@ -45,9 +43,24 @@ public:
 
     // Interface for C++ type-unaware users
 
-    // TODO
-    // auto act(const Path& path, Action action) -> void;
-    auto act(ValuePathView path, ActionOnValue&) -> void {} // TODO
+    auto get(ValuePathView path) const
+        -> Value
+    {
+        auto [t, d] = type_->value_component_access()->get(path, data_);
+        return { t, std::move(d) };
+    }
+
+    auto set(ValuePathView path, const Value& v)
+        -> void
+    { type_->value_component_access()->set(path, data_, v.data_); }
+
+    auto size(ValuePathView path) const
+        -> size_t
+    { return type_->value_component_access()->size(path, data_); }
+
+    auto resize(ValuePathView path, size_t size)
+        -> void
+    { return type_->value_component_access()->resize(path, data_, size); }
 
 
     // Interface for C++ type-aware users
@@ -63,6 +76,11 @@ public:
     { return std::any_cast<const T&>(data_); }
 
 private:
+    Value(const Type* type, std::any data) :
+        type_{ type },
+        data_{ std::move(data) }
+    {}
+
     const Type* type_{};
     std::any data_;
 };
@@ -72,14 +90,5 @@ private:
 using ValueSpan = std::span<Value>;
 using ConstValueSpan = std::span<const Value>;
 using ValueVec = std::vector<Value>;
-
-
-
-struct ActionOnValue
-{
-    enum {Get, Set, Size, Resize} action;
-    Value value;
-    size_t size{};
-};
 
 } // namespace gc

@@ -121,9 +121,11 @@ constexpr auto ptr_align_index(size_t index)
 } // anonymous namespace
 
 
-Type::Type(std::initializer_list<ByteInitializer> init,
+Type::Type(std::unique_ptr<ValueComponentAccess> value_component_access,
+           std::initializer_list<ByteInitializer> init,
            std::initializer_list<const Type*> bases,
            const std::string_view* names)
+    : value_component_access_{ std::move(value_component_access) }
 {
     auto total_bases_size =
         bases.size() * sizeof(const Type*);
@@ -160,13 +162,16 @@ Type::Type(std::initializer_list<ByteInitializer> init,
     std::fill(d, storage_.data() + storage_.size(), std::byte{});
 }
 
-auto Type::intern(std::initializer_list<ByteInitializer> init,
-                  std::initializer_list<const Type*> bases,
-                  const std::string_view* names)
-    -> const Type*
+auto Type::intern(
+    std::unique_ptr<ValueComponentAccess> value_component_access,
+    std::initializer_list<ByteInitializer> init,
+    std::initializer_list<const Type*> bases,
+    const std::string_view* names)
+        -> const Type*
 {
     auto& types = interned_types();
-    auto [it, inserted] = types.emplace(common::Impl, init, bases, names);
+    auto [it, inserted] = types.emplace(
+        common::Impl, std::move(value_component_access), init, bases, names);
     return &*it;
 }
 
