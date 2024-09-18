@@ -1,8 +1,9 @@
 #include "gc_app/test_sequence.hpp"
 
-#include <cassert>
+#include "gc_app/types.hpp"
 
 
+namespace gc_app {
 namespace {
 
 auto test_seq(Uint limit)
@@ -16,13 +17,33 @@ auto test_seq(Uint limit)
     return result;
 }
 
-}
+} // anonymous namespace
 
-auto TestSequence::generate(Uint limit)
-    -> ConstUintSpan
+
+auto TestSequence::input_count() const
+    -> uint32_t
+{ return 1; }
+
+auto TestSequence::output_count() const
+    -> uint32_t
+{ return 1; }
+
+auto TestSequence::default_inputs(gc::ValueSpan result) const
+    -> void
 {
-    if (state_.size() < limit)
-        state_ = test_seq(limit);
-
-    return {state_.data(), limit};
+    assert(result.size() == 1);
+    result[0] = uint_val(1000);
 }
+
+auto TestSequence::compute_outputs(
+        gc::ValueSpan result,
+        gc::ConstValueSpan inputs) const
+    -> void
+{
+    assert(inputs.size() == 1);
+    assert(result.size() == 1);
+    auto count = uint_val(inputs[0]);
+    result[0] = uint_vec_val(test_seq(count));
+}
+
+} // namespace gc_app

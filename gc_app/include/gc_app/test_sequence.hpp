@@ -1,19 +1,21 @@
 #pragma once
 
-#include <cstdint>
-#include <span>
-#include <vector>
+#include "gc/graph_computation.hpp"
 
-using Uint = uint32_t;
-using UintVec = std::vector<Uint>;
-using ConstUintSpan = std::span<const Uint>;
+namespace gc_app {
 
-class TestSequence final
+class TestSequence final :
+    gc::Node
 {
 public:
-    auto generate(Uint size)
-        -> ConstUintSpan;
+    auto input_count() const -> uint32_t override;
 
-private:
-    UintVec state_;
+    auto output_count() const -> uint32_t override;
+
+    auto default_inputs(gc::ValueSpan result) const -> void override;
+
+    auto compute_outputs(gc::ValueSpan result,
+                         gc::ConstValueSpan inputs) const -> void override;
 };
+
+} // namespace gc_app

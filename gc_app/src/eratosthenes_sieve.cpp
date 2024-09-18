@@ -1,5 +1,11 @@
 #include "gc_app/eratosthenes_sieve.hpp"
 
+#include "gc_app/types.hpp"
+
+// #include <chrono>
+
+
+namespace gc_app {
 namespace {
 
 auto sieve(Uint limit)
@@ -18,26 +24,43 @@ auto sieve(Uint limit)
     return result;
 }
 
-}
+} // anonymous namespace
 
-auto EratosthenesSieve::generate(Uint limit)
-    -> ConstUintSpan
+
+auto EratosthenesSieve::input_count() const
+    -> uint32_t
+{ return 1; }
+
+auto EratosthenesSieve::output_count() const
+    -> uint32_t
+{ return 1; }
+
+auto EratosthenesSieve::default_inputs(gc::ValueSpan result) const
+    -> void
 {
-    if (state_.size() < limit)
-        state_ = sieve(limit);
-
-    return {state_.data(), limit};
+    assert(result.size() == 1);
+    result[0] = uint_val(1000);
 }
 
+auto EratosthenesSieve::compute_outputs(
+        gc::ValueSpan result,
+        gc::ConstValueSpan inputs) const
+    -> void
+{
+    assert(inputs.size() == 1);
+    assert(result.size() == 1);
+    auto count = uint_val(inputs[0]);
+    result[0] = uint_vec_val(sieve(count));
+}
 
 #if 0
 struct _{_(){
-    PrimeInt Ns[] = {
+    Uint Ns[] = {
         1'000, 10'000, 100'000, 1'000'000, 10'000'000, 100'000'000, 1'000'000'000 };
     for (auto N : Ns)
     {
         auto t1 = std::chrono::high_resolution_clock::now();
-        auto s = EratosthenesSieve::sieve(N);
+        auto s = sieve(N);
         auto t2 = std::chrono::high_resolution_clock::now();
         auto dt = std::chrono::nanoseconds{ t2 - t1 };
         // std::cout
@@ -54,3 +77,4 @@ struct _{_(){
     //         << std::endl;
 }}__;
 #endif // 0
+} // namespace gc_app
