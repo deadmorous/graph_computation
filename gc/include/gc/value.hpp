@@ -15,17 +15,21 @@ public:
     Value() noexcept = default;
 
     template <typename T, std::convertible_to<T> V>
-    Value(common::Type_Tag<T> tag, const V& value) :
+    Value(common::Type_Tag<T> tag, V&& value) :
         type_{ Type::of(tag) },
-        data_{ T(value) }
+        data_{ T(std::forward<V>(value)) }
     {}
 
+    /* implicit */ Value(const Value&) = default;
+    /* implicit */ Value(Value&&) = default;
+
     template <typename T>
-    /* implicit */ Value(const T& value) :
-        Value{ common::Type<T>, value }
+    /* implicit */ Value(T&& value) :
+        Value{ common::Type<std::remove_cvref_t<T>>, std::forward<T>(value) }
     {}
 
     auto operator=(const Value&) -> Value& = default;
+    auto operator=(Value&&) -> Value& = default;
 
 
     // Field access
