@@ -204,7 +204,7 @@ private:
 
 template <typename T>
 auto type_of(common::Type_Tag<T> tag = {})
-    -> Type
+    -> const Type*
 { return Type::of(tag); }
 
 
