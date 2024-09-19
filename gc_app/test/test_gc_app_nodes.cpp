@@ -1,4 +1,6 @@
 #include "gc_app/eratosthenes_sieve.hpp"
+#include "gc_app/multiply.hpp"
+#include "gc_app/source_param.hpp"
 #include "gc_app/test_sequence.hpp"
 #include "gc_app/types.hpp"
 
@@ -61,4 +63,53 @@ TEST(GcApp, TestSequence)
         //       0  1  2  3  4  5  6  7  8  9
         UintVec{ 0, 0, 1, 0, 1, 1, 0, 1, 1, 1 };
     ASSERT_EQ(actual_output, expected_output);
+}
+
+TEST(GcApp, SourceParam)
+{
+    SourceParam node;
+
+    ASSERT_EQ(node.input_count(), 0);
+    ASSERT_EQ(node.output_count(), 0);
+
+    gc::ValueVec inputs = { 12, 3.4 };
+
+    auto check = [&](gc::ConstValueSpan s)
+    {
+        ASSERT_EQ(s.size(), inputs.size());
+        ASSERT_EQ(s[0].as<int>(), 12);
+        ASSERT_EQ(s[1].as<double>(), 3.4);
+    };
+
+    node.set_inputs(inputs);
+    ASSERT_EQ(node.output_count(), 2);
+
+    gc::ValueVec outputs(2);
+    node.compute_outputs(outputs, {});
+    check(outputs);
+
+    gc::ValueVec inputs_copy(2);
+    node.get_inputs(inputs_copy);
+    check(inputs_copy);
+}
+
+TEST(GcApp, Multiply)
+{
+    Multiply node;
+
+    ASSERT_EQ(node.input_count(), 2);
+    ASSERT_EQ(node.output_count(), 1);
+
+    auto check =
+        [&]<typename T>(T a, T b)
+    {
+        gc::ValueVec inputs{ a, b };
+        gc::ValueVec outputs(1);
+
+        node.compute_outputs(outputs, inputs);
+        ASSERT_EQ(outputs[0].as<T>(), a*b);
+    };
+
+    check(2, 3);
+    check(1.2, 3.4);
 }

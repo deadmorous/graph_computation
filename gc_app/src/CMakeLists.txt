@@ -4,6 +4,8 @@ project(gc-lib LANGUAGES CXX)
 
 add_library(gc_app-lib STATIC
     eratosthenes_sieve.cpp
+    multiply.cpp
+    source_param.cpp
     test_sequence.cpp)
 
 add_library(gc_app::lib ALIAS gc_app-lib)
