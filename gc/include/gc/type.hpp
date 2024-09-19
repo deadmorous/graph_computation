@@ -270,6 +270,21 @@ public:
         __builtin_unreachable();
     }
 
+    template <typename F, typename... Args>
+    auto visit_numeric(F&& f, Args... args) const
+    {
+        visit(
+            [&]<typename T>(common::Type_Tag<T> tag)
+            {
+                if constexpr (   std::is_integral_v<T>
+                              || std::is_floating_point_v<T>)
+                    return std::invoke(std::forward<F>(f), tag,
+                                       std::forward<Args>(args)...);
+                else
+                    throw std::invalid_argument("Value is not numeric");
+            });
+    }
+
 private:
     const Type* type_;
 };
