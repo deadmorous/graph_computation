@@ -141,7 +141,7 @@ auto compile(const Graph& g)
         [&](const Edge e) -> IndexEdge
         {
             auto transform_end = [&](const EdgeEnd& ee) -> IndexEdgeEnd
-                { return { node_ind[ee.node], ee.port }; };
+                { return { node_ind.at(ee.node), ee.port }; };
             return { transform_end(e[0]), transform_end(e[1]) };
         } );
 

@@ -236,6 +236,25 @@ TEST(Gc, compile)
         std::invalid_argument);
 }
 
+TEST(Gc, compile2)
+{
+    auto n0 = std::make_shared<TestNode>( 0, 1 );
+    auto n1 = std::make_shared<TestNode>( 0, 1 );
+    auto n2 = std::make_shared<TestNode>( 2, 0 );
+
+    using EE = gc::EdgeEnd;
+
+    auto g = gc::Graph{
+        .nodes = { n1, n2 },
+        .edges = {{EE{n0.get(), 0}, EE{n2.get(), 0}},
+                  {EE{n1.get(), 0}, EE{n2.get(), 1}}}
+    };
+
+    // Throws because n0 is missing among graph nodes but is present
+    // among graph edges.
+    EXPECT_THROW(compile(g), std::out_of_range);
+}
+
 struct MyStruct
 {
     int foo;
