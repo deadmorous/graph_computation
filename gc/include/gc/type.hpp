@@ -1,7 +1,9 @@
 #pragma once
 
-#include "gc/detail/value_component_access.hpp"
 #include "gc/type_fwd.hpp"
+
+#include "gc/detail/value_component_access.hpp"
+#include "gc/value_path.hpp"
 
 #include "common/type.hpp"
 
@@ -47,6 +49,7 @@ enum class AggregateType : uint8_t
 {
     Array,
     Custom,
+    Path,
     Scalar,
     Struct,
     Tuple,
@@ -165,6 +168,14 @@ public:
             {&CustomTypeToId<T>::name});
     }
 
+    static auto of(common::Type_Tag<ValuePath> tag)
+        -> const Type*
+    {
+        return intern(
+            detail::value_components_access_factory(this_tag, tag),
+            {AggregateType::Path});
+    }
+
 
     auto operator<=>(const Type& that) const
         -> std::strong_ordering
@@ -214,6 +225,15 @@ public:
     CustomT(const Type*) noexcept;
     auto name() const noexcept -> std::string_view;
     auto id() const noexcept -> uint8_t;
+
+private:
+    const Type* type_;
+};
+
+class PathT final
+{
+public:
+    PathT(const Type*) noexcept;
 
 private:
     const Type* type_;
@@ -341,6 +361,9 @@ auto visit(const Type* type, F&& f, Args&&... args)
         case AggregateType::Custom:
             return std::invoke(
                 std::forward<F>(f), CustomT(type), std::forward<Args>(args)...);
+        case AggregateType::Path:
+            return std::invoke(
+                std::forward<F>(f), PathT(type), std::forward<Args>(args)...);
         case AggregateType::Scalar:
             return std::invoke(
                 std::forward<F>(f), ScalarT(type), std::forward<Args>(args)...);

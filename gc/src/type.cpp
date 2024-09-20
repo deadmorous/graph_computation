@@ -56,6 +56,10 @@ struct AggregatePrinter final
           << ": " << static_cast<uint32_t>(t.id()) << '>';
     }
 
+    auto operator()(const PathT& t)
+        -> void
+    { s << "Path"; }
+
     auto operator()(const ScalarT& t)
         -> void
     { s << magic_enum::enum_name(t.id()); }
@@ -195,6 +199,10 @@ auto CustomT::name() const noexcept
 auto CustomT::id() const noexcept
     -> uint8_t
 { return static_cast<uint8_t>(type_->storage()[2]); }
+
+PathT::PathT(const Type* type) noexcept :
+    type_{ type }
+{ assert(agg_type(type_) == AggregateType::Path); }
 
 ScalarT::ScalarT(const Type* type) noexcept :
     type_{ type }

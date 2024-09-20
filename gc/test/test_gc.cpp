@@ -141,6 +141,15 @@ TEST(Gc, compile)
         " (3) => ([(3,0)->(0,0)]) |"
         " (0)}");
 
+    // 0 -> 2 <- 1
+    check_comple_graph(
+        test_graph(
+            {{0,1}, {0,1}, {2,0}},
+            {{{0,0}, {2,0}},
+             {{1,0}, {2,1}}}),
+        "{(0,1) => ([(0,0)->(2,0)],[(1,0)->(2,1)]) |"
+        " (2)}");
+
     // 8 -> 7 -> 5
     //
     // |    |    |
@@ -262,6 +271,7 @@ TEST(Gc, Type)
     const auto* t_int_vec_vec = gc::Type::of<std::vector<std::vector<int>>>();
     const auto* t_tuple = gc::Type::of<std::tuple<int, bool, std::vector<float>>>();
     const auto* t_struct = gc::Type::of<MyStruct>();
+    const auto* t_path = gc::Type::of<gc::ValuePath>();
 
     EXPECT_EQ(gc::Type::of<std::vector<int>>(), t_int_vec);
     EXPECT_EQ(gc::Type::of<MyStruct>(), t_struct);
@@ -279,6 +289,7 @@ TEST(Gc, Type)
               "Type{Tuple{I32, Bool, Vector[F32]}}");
     EXPECT_EQ(format(t_struct),
               "Type{Struct{foo: I32, bar: F64, flags: Vector[U32]}}");
+    EXPECT_EQ(format(t_path), "Type{Path}");
 }
 
 class MyBlob final
