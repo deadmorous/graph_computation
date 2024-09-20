@@ -14,8 +14,8 @@ struct InputParameters
 };
 
 class SourceParam final :
-    gc::Node,
-    InputParameters
+    public gc::Node,
+    public InputParameters
 {
 public:
     auto input_count() const -> uint32_t override;

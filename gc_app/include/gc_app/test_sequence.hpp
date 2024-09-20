@@ -5,7 +5,7 @@
 namespace gc_app {
 
 class TestSequence final :
-    gc::Node
+    public gc::Node
 {
 public:
     auto input_count() const -> uint32_t override;
