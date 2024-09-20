@@ -1,5 +1,6 @@
 #include "gc_app/eratosthenes_sieve.hpp"
 #include "gc_app/multiply.hpp"
+#include "gc_app/project.hpp"
 #include "gc_app/source_param.hpp"
 #include "gc_app/test_sequence.hpp"
 #include "gc_app/types.hpp"
@@ -112,4 +113,25 @@ TEST(GcApp, Multiply)
 
     check(2, 3);
     check(1.2, 3.4);
+}
+
+TEST(GcApp, Project)
+{
+    Project node;
+
+    ASSERT_EQ(node.input_count(), 2);
+    ASSERT_EQ(node.output_count(), 1);
+
+    auto check =
+        [&]<typename T, typename P>(T value, gc::ValuePath path, P projection)
+    {
+        gc::ValueVec inputs{ value, path };
+        gc::ValueVec outputs(1);
+
+        node.compute_outputs(outputs, inputs);
+        ASSERT_EQ(outputs[0].as<P>(), projection);
+    };
+
+    check(std::vector<int>{123, 45}, gc::ValuePath{}/0u, 123);
+    check(std::vector<int>{123, 45}, gc::ValuePath{}/1u, 45);
 }
