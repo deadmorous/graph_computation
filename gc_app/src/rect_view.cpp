@@ -39,7 +39,7 @@ auto RectView::compute_outputs(
     auto N = *std::max_element(seq.begin(), seq.end());
     auto d = 0xff / N;
 
-    auto n = std::max(image.data.size(), seq.size());
+    auto n = std::min(image.data.size(), seq.size());
     for(size_t index=0; index<n; ++index)
     {
         auto value = seq[index];
