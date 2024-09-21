@@ -1,8 +1,5 @@
 #include "gc_visual/mainwindow.hpp"
 
-#include "gc_visual/simple_presentation.hpp"
-#include "gc_visual/spiral_presentation.hpp"
-
 #include "gc_app/eratosthenes_sieve.hpp"
 #include "gc_app/image.hpp"
 #include "gc_app/multiply.hpp"
@@ -61,17 +58,9 @@ int main(int argc, char *argv[])
     auto result = gc::ComputationResult{};
     compute(result, g, instr.get());
     const auto& image = group(result.outputs,7)[0].as<gc_app::Image>();
-    // TODO: copy to QImage
 
-#if 0 // TODO
-    // TestSequence generator;
-    EratosthenesSieve generator;
-
-    SimplePresentation presentation;
-    //SpiralPresentation presentation;
-
-    MainWindow w(generator, presentation);
+    MainWindow w(image);
     w.show();
-#endif // 0
+
     return a.exec();
 }

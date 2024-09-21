@@ -1,8 +1,6 @@
 #pragma once
 
-#if 0 // TODO
-#include "sequence_generator.hpp"
-#include "presentation.hpp"
+#include "gc_app/image.hpp"
 
 #include <QImage>
 #include <QWidget>
@@ -12,8 +10,7 @@ class BitmapView
 {
 Q_OBJECT
 public:
-    explicit BitmapView(SequenceGeneratorInterface& gen,
-                        PresentationInterface& presentation,
+    explicit BitmapView(const gc_app::Image& image,
                         QWidget* parent = nullptr);
 
     auto image()
@@ -24,10 +21,5 @@ protected:
         -> void override;
 
 private:
-    SequenceGeneratorInterface& gen_;
-    PresentationInterface& presentation_;
     QImage img_;
 };
-
-#endif // 0
-

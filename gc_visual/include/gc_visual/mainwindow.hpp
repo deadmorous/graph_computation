@@ -1,8 +1,6 @@
 #pragma once
 
-#if 0 // TODO
-#include "sequence_generator.hpp"
-#include "presentation.hpp"
+#include "gc_app/image.hpp"
 
 #include <QMainWindow>
 
@@ -11,9 +9,6 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(SequenceGeneratorInterface& gen,
-               PresentationInterface& presentation,
+    MainWindow(const gc_app::Image& image,
                QWidget *parent = nullptr);
-    ~MainWindow();
 };
-#endif // 0

@@ -3,14 +3,9 @@
 #include "gc_visual/bitmap_view.hpp"
 
 
-#if 0 // TODO
-MainWindow::MainWindow(SequenceGeneratorInterface& gen,
-                       PresentationInterface& presentation,
+MainWindow::MainWindow(const gc_app::Image& image,
                        QWidget *parent)
     : QMainWindow(parent)
 {
-    setCentralWidget(new BitmapView{gen, presentation});
+    setCentralWidget(new BitmapView{image});
 }
-
-MainWindow::~MainWindow() {}
-#endif // 0
