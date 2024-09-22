@@ -9,7 +9,7 @@ namespace gc_app {
 namespace {
 
 auto sieve(Uint limit)
--> UintVec
+    -> UintVec
 {
     auto result = UintVec(limit, 0);
     auto prime = Uint{2};
@@ -27,31 +27,36 @@ auto sieve(Uint limit)
 } // anonymous namespace
 
 
-auto EratosthenesSieve::input_count() const
-    -> uint32_t
-{ return 1; }
-
-auto EratosthenesSieve::output_count() const
-    -> uint32_t
-{ return 1; }
-
-auto EratosthenesSieve::default_inputs(gc::ValueSpan result) const
-    -> void
+class EratosthenesSieve final :
+    public gc::Node
 {
-    assert(result.size() == 1);
-    result[0] = uint_val(1000);
-}
+public:
+    auto input_count() const
+        -> uint32_t
+    { return 1; }
 
-auto EratosthenesSieve::compute_outputs(
-        gc::ValueSpan result,
-        gc::ConstValueSpan inputs) const
-    -> void
-{
-    assert(inputs.size() == 1);
-    assert(result.size() == 1);
-    auto count = uint_val(inputs[0]);
-    result[0] = uint_vec_val(sieve(count));
-}
+    auto output_count() const
+        -> uint32_t
+    { return 1; }
+
+    auto default_inputs(gc::ValueSpan result) const
+        -> void
+    {
+        assert(result.size() == 1);
+        result[0] = uint_val(1000);
+    }
+
+    auto compute_outputs(
+            gc::ValueSpan result,
+            gc::ConstValueSpan inputs) const
+        -> void
+    {
+        assert(inputs.size() == 1);
+        assert(result.size() == 1);
+        auto count = uint_val(inputs[0]);
+        result[0] = uint_vec_val(sieve(count));
+    }
+};
 
 #if 0
 struct _{_(){
@@ -77,4 +82,9 @@ struct _{_(){
     //         << std::endl;
 }}__;
 #endif // 0
+
+auto make_eratosthenes_sieve()
+    -> std::shared_ptr<gc::Node>
+{ return std::make_shared<EratosthenesSieve>(); }
+
 } // namespace gc_app

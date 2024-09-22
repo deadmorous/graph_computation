@@ -2,6 +2,9 @@
 
 #include "gc/graph_computation.hpp"
 
+#include "common/maybe_const.hpp"
+
+
 namespace gc_app {
 
 struct InputParameters
@@ -11,29 +14,14 @@ struct InputParameters
     virtual auto get_inputs(gc::ValueSpan inputs) const -> void = 0;
 
     virtual auto set_inputs(gc::ConstValueSpan inputs) -> void = 0;
+
+    template <common::MaybeConst<gc::Node> Node>
+    static auto get(Node* node)
+        -> InputParameters*
+    { return dynamic_cast<common::AsConstAs<Node, InputParameters*>>(node); }
 };
 
-class SourceParam final :
-    public gc::Node,
-    public InputParameters
-{
-public:
-    auto input_count() const -> uint32_t override;
-
-    auto output_count() const -> uint32_t override;
-
-    auto default_inputs(gc::ValueSpan result) const -> void override;
-
-    auto compute_outputs(gc::ValueSpan result,
-                         gc::ConstValueSpan inputs) const -> void override;
-
-
-    auto get_inputs(gc::ValueSpan inputs) const -> void override;
-
-    auto set_inputs(gc::ConstValueSpan inputs) -> void override;
-
-private:
-    gc::ValueVec param_;
-};
+auto make_source_param()
+    -> std::shared_ptr<gc::Node>;
 
 } // namespace gc_app

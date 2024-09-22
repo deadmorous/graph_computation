@@ -4,18 +4,7 @@
 
 namespace gc_app {
 
-class Project final :
-    public gc::Node
-{
-public:
-    auto input_count() const -> uint32_t override;
-
-    auto output_count() const -> uint32_t override;
-
-    auto default_inputs(gc::ValueSpan result) const -> void override;
-
-    auto compute_outputs(gc::ValueSpan result,
-                         gc::ConstValueSpan inputs) const -> void override;
-};
+auto make_project()
+    -> std::shared_ptr<gc::Node>;
 
 } // namespace gc_app

@@ -7,7 +7,7 @@ namespace gc_app {
 namespace {
 
 auto test_seq(Uint limit)
--> UintVec
+    -> UintVec
 {
     assert(limit > 0);
     auto result = UintVec(limit, 1);
@@ -20,30 +20,39 @@ auto test_seq(Uint limit)
 } // anonymous namespace
 
 
-auto TestSequence::input_count() const
-    -> uint32_t
-{ return 1; }
-
-auto TestSequence::output_count() const
-    -> uint32_t
-{ return 1; }
-
-auto TestSequence::default_inputs(gc::ValueSpan result) const
-    -> void
+class TestSequence final :
+    public gc::Node
 {
-    assert(result.size() == 1);
-    result[0] = uint_val(1000);
-}
+public:
+    auto input_count() const
+        -> uint32_t
+    { return 1; }
 
-auto TestSequence::compute_outputs(
-        gc::ValueSpan result,
-        gc::ConstValueSpan inputs) const
-    -> void
-{
-    assert(inputs.size() == 1);
-    assert(result.size() == 1);
-    auto count = uint_val(inputs[0]);
-    result[0] = uint_vec_val(test_seq(count));
-}
+    auto output_count() const
+        -> uint32_t
+    { return 1; }
+
+    auto default_inputs(gc::ValueSpan result) const
+        -> void
+    {
+        assert(result.size() == 1);
+        result[0] = uint_val(1000);
+    }
+
+    auto compute_outputs(
+            gc::ValueSpan result,
+            gc::ConstValueSpan inputs) const
+        -> void
+    {
+        assert(inputs.size() == 1);
+        assert(result.size() == 1);
+        auto count = uint_val(inputs[0]);
+        result[0] = uint_vec_val(test_seq(count));
+    }
+};
+
+auto make_test_sequence()
+    -> std::shared_ptr<gc::Node>
+{ return std::make_shared<TestSequence>(); }
 
 } // namespace gc_app

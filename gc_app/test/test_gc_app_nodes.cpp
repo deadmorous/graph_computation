@@ -12,15 +12,15 @@ using namespace gc_app;
 
 TEST(GcApp, EratosthenesSieve)
 {
-    EratosthenesSieve node;
+    auto node = make_eratosthenes_sieve();
 
-    ASSERT_EQ(node.input_count(), 1);
-    ASSERT_EQ(node.output_count(), 1);
+    ASSERT_EQ(node->input_count(), 1);
+    ASSERT_EQ(node->output_count(), 1);
 
     gc::ValueVec inputs(1);
     gc::ValueVec outputs(1);
 
-    node.default_inputs(inputs);
+    node->default_inputs(inputs);
     ASSERT_EQ(inputs[0].type(), gc::type_of<Uint>());
 
     auto count = uint_val(inputs[0]);
@@ -28,7 +28,7 @@ TEST(GcApp, EratosthenesSieve)
     ASSERT_LE(count, 10000);
 
     inputs[0] = uint_val(10);
-    node.compute_outputs(outputs, inputs);
+    node->compute_outputs(outputs, inputs);
     ASSERT_EQ(outputs[0].type(), gc::type_of<UintVec>());
 
     const auto& actual_output = uint_vec_val(outputs[0]);
@@ -40,15 +40,15 @@ TEST(GcApp, EratosthenesSieve)
 
 TEST(GcApp, TestSequence)
 {
-    TestSequence node;
+    auto node = gc_app::make_test_sequence();
 
-    ASSERT_EQ(node.input_count(), 1);
-    ASSERT_EQ(node.output_count(), 1);
+    ASSERT_EQ(node->input_count(), 1);
+    ASSERT_EQ(node->output_count(), 1);
 
     gc::ValueVec inputs(1);
     gc::ValueVec outputs(1);
 
-    node.default_inputs(inputs);
+    node->default_inputs(inputs);
     ASSERT_EQ(inputs[0].type(), gc::type_of<Uint>());
 
     auto count = uint_val(inputs[0]);
@@ -56,7 +56,7 @@ TEST(GcApp, TestSequence)
     ASSERT_LE(count, 10000);
 
     inputs[0] = uint_val(10);
-    node.compute_outputs(outputs, inputs);
+    node->compute_outputs(outputs, inputs);
     ASSERT_EQ(outputs[0].type(), gc::type_of<UintVec>());
 
     const auto& actual_output = uint_vec_val(outputs[0]);
@@ -68,10 +68,10 @@ TEST(GcApp, TestSequence)
 
 TEST(GcApp, SourceParam)
 {
-    SourceParam node;
+    auto node = make_source_param();
 
-    ASSERT_EQ(node.input_count(), 0);
-    ASSERT_EQ(node.output_count(), 0);
+    ASSERT_EQ(node->input_count(), 0);
+    ASSERT_EQ(node->output_count(), 0);
 
     gc::ValueVec inputs = { 12, 3.4 };
 
@@ -82,24 +82,25 @@ TEST(GcApp, SourceParam)
         ASSERT_EQ(s[1].as<double>(), 3.4);
     };
 
-    node.set_inputs(inputs);
-    ASSERT_EQ(node.output_count(), 2);
+    auto* param = InputParameters::get(node.get());
+    param->set_inputs(inputs);
+    ASSERT_EQ(node->output_count(), 2);
 
     gc::ValueVec outputs(2);
-    node.compute_outputs(outputs, {});
+    node->compute_outputs(outputs, {});
     check(outputs);
 
     gc::ValueVec inputs_copy(2);
-    node.get_inputs(inputs_copy);
+    param->get_inputs(inputs_copy);
     check(inputs_copy);
 }
 
 TEST(GcApp, Multiply)
 {
-    Multiply node;
+    auto node = gc_app::make_multiply();
 
-    ASSERT_EQ(node.input_count(), 2);
-    ASSERT_EQ(node.output_count(), 1);
+    ASSERT_EQ(node->input_count(), 2);
+    ASSERT_EQ(node->output_count(), 1);
 
     auto check =
         [&]<typename T>(T a, T b)
@@ -107,7 +108,7 @@ TEST(GcApp, Multiply)
         gc::ValueVec inputs{ a, b };
         gc::ValueVec outputs(1);
 
-        node.compute_outputs(outputs, inputs);
+        node->compute_outputs(outputs, inputs);
         ASSERT_EQ(outputs[0].as<T>(), a*b);
     };
 
@@ -117,10 +118,10 @@ TEST(GcApp, Multiply)
 
 TEST(GcApp, Project)
 {
-    Project node;
+    auto node = gc_app::make_project();
 
-    ASSERT_EQ(node.input_count(), 2);
-    ASSERT_EQ(node.output_count(), 1);
+    ASSERT_EQ(node->input_count(), 2);
+    ASSERT_EQ(node->output_count(), 1);
 
     auto check =
         [&]<typename T, typename P>(T value, gc::ValuePath path, P projection)
@@ -128,7 +129,7 @@ TEST(GcApp, Project)
         gc::ValueVec inputs{ value, path };
         gc::ValueVec outputs(1);
 
-        node.compute_outputs(outputs, inputs);
+        node->compute_outputs(outputs, inputs);
         ASSERT_EQ(outputs[0].as<P>(), projection);
     };
 

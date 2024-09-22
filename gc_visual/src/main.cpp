@@ -17,20 +17,25 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    auto img_size = std::make_shared<gc_app::SourceParam>();
-    auto img_size_w = std::make_shared<gc_app::SourceParam>();
-    auto img_size_h = std::make_shared<gc_app::SourceParam>();
+    auto img_size = gc_app::make_source_param();
+    auto img_size_w = gc_app::make_source_param();
+    auto img_size_h = gc_app::make_source_param();
 
-    auto pw = std::make_shared<gc_app::Project>();
-    auto ph = std::make_shared<gc_app::Project>();
+    auto pw = gc_app::make_project();
+    auto ph = gc_app::make_project();
 
-    auto seq_size = std::make_shared<gc_app::Multiply>();
-    auto sieve = std::make_shared<gc_app::EratosthenesSieve>();
-    auto view = std::make_shared<gc_app::RectView>();
+    auto seq_size = gc_app::make_multiply();
+    auto sieve = gc_app::make_eratosthenes_sieve();
+    auto view = gc_app::make_rect_view();
 
-    img_size->set_inputs(gc::ValueVec{ gc_app::UintSize(500, 500) });
-    img_size_w->set_inputs(gc::ValueVec{ gc::ValuePath{} / "width"sv });
-    img_size_h->set_inputs(gc::ValueVec{ gc::ValuePath{} / "height"sv });
+    gc_app::InputParameters::get(img_size.get())
+        ->set_inputs(gc::ValueVec{ gc_app::UintSize(500, 500) });
+
+    gc_app::InputParameters::get(img_size_w.get())
+        ->set_inputs(gc::ValueVec{ gc::ValuePath{} / "width"sv });
+
+    gc_app::InputParameters::get(img_size_h.get())
+        ->set_inputs(gc::ValueVec{ gc::ValuePath{} / "height"sv });
 
     using NodeVec = std::vector<gc::NodePtr>;
 
