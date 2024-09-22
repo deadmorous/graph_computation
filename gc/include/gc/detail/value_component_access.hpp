@@ -3,6 +3,8 @@
 #include "gc/type_fwd.hpp"
 #include "gc/value_path.hpp"
 
+#include "common/maybe_const.hpp"
+
 #include <any>
 #include <cassert>
 #include <functional>
@@ -136,16 +138,10 @@ struct ValueComponentAccessImpl final : ValueComponentAccess<Type>
 
 // ---
 
-template <typename T, typename U>
-concept MaybeConst =
-    std::same_as<T, U> || std::same_as<T, const U>;
-
-// ---
-
 template <typename Type, ScalarType T>
 struct ValueComponents<Type, T> final
 {
-    template <MaybeConst<T> U, typename F>
+    template <common::MaybeConst<T> U, typename F>
     static auto dispatch(ValuePathView path, U& data, F&& f)
     {
         assert(path.empty());
@@ -156,7 +152,7 @@ struct ValueComponents<Type, T> final
 template <typename Type>
 struct ValueComponents<Type, ValuePath>
 {
-    template <MaybeConst<ValuePath> U, typename F>
+    template <common::MaybeConst<ValuePath> U, typename F>
     static auto dispatch(ValuePathView path, U& data, F&& f)
     {
         assert(path.empty());
@@ -169,7 +165,7 @@ struct ValueComponents<Type, std::vector<T>>
 {
     using V = std::vector<T>;
 
-    template <MaybeConst<V> U, typename F>
+    template <common::MaybeConst<V> U, typename F>
     static auto dispatch(ValuePathView path, U& data, F&& f)
     {
         if(path.empty())
@@ -187,7 +183,7 @@ struct ValueComponents<Type, std::tuple<Ts...>>
 {
     using V = std::tuple<Ts...>;
 
-    template <MaybeConst<V> U, typename F>
+    template <common::MaybeConst<V> U, typename F>
     static auto dispatch(ValuePathView path, U& data, F&& f)
     {
         if(path.empty())
@@ -211,7 +207,7 @@ struct ValueComponents<Type, std::tuple<Ts...>>
 template <typename Type, StructType T>
 struct ValueComponents<Type, T>
 {
-    template <MaybeConst<T> U, typename F>
+    template <common::MaybeConst<T> U, typename F>
     static auto dispatch(ValuePathView path, U& data, F&& f)
     {
         if(path.empty())
@@ -241,7 +237,7 @@ struct ValueComponents<Type, T>
 template <typename Type, RegisteredCustomType T>
 struct ValueComponents<Type, T>
 {
-    template <MaybeConst<T> U, typename F>
+    template <common::MaybeConst<T> U, typename F>
     static auto dispatch(ValuePathView path, U& data, F&& f)
     {
         assert(path.empty());
