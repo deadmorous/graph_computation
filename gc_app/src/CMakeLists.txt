@@ -5,6 +5,7 @@ project(gc-lib LANGUAGES CXX)
 add_library(gc_app-lib STATIC
     eratosthenes_sieve.cpp
     multiply.cpp
+    node_registry.cpp
     rect_view.cpp
     project.cpp
     source_param.cpp
