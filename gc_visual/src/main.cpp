@@ -1,32 +1,31 @@
 #include "gc_visual/mainwindow.hpp"
 
-#include "gc_app/eratosthenes_sieve.hpp"
-#include "gc_app/image.hpp"
-#include "gc_app/multiply.hpp"
-#include "gc_app/project.hpp"
-#include "gc_app/rect_view.hpp"
 #include "gc_app/source_param.hpp"
-// #include "gc_app/test_sequence.hpp"
+#include "gc_app/node_registry.hpp"
 
 #include <QApplication>
 
 
 using namespace std::string_view_literals;
 
-int main(int argc, char *argv[])
+auto run(int argc, char *argv[])
+    -> int
 {
     QApplication a(argc, argv);
 
-    auto img_size = gc_app::make_source_param();
-    auto img_size_w = gc_app::make_source_param();
-    auto img_size_h = gc_app::make_source_param();
+    auto obj_reg =
+        gc_app::node_registry();
 
-    auto pw = gc_app::make_project();
-    auto ph = gc_app::make_project();
+    auto img_size = obj_reg.at("source_param")();
+    auto img_size_w = obj_reg.at("source_param")();
+    auto img_size_h = obj_reg.at("source_param")();
 
-    auto seq_size = gc_app::make_multiply();
-    auto sieve = gc_app::make_eratosthenes_sieve();
-    auto view = gc_app::make_rect_view();
+    auto pw = obj_reg.at("project")();
+    auto ph = obj_reg.at("project")();
+
+    auto seq_size = obj_reg.at("multiply")();
+    auto sieve = obj_reg.at("eratosthenes_sieve")();
+    auto view = obj_reg.at("rect_view")();
 
     gc_app::InputParameters::get(img_size.get())
         ->set_inputs(gc::ValueVec{ gc_app::UintSize(500, 500) });
@@ -68,4 +67,17 @@ int main(int argc, char *argv[])
     w.show();
 
     return a.exec();
+}
+
+int main(int argc, char *argv[])
+{
+    try
+    {
+        return run(argc, argv);
+    }
+    catch(std::exception& e)
+    {
+        std::cerr << "ERROR: " << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
 }
