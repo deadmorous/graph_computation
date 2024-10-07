@@ -1,5 +1,8 @@
 #include "gc_app/source_param.hpp"
 
+#include "gc/node_port_names.hpp"
+
+
 namespace gc_app {
 
 class SourceParam final :
@@ -7,13 +10,13 @@ class SourceParam final :
     public InputParameters
 {
 public:
-    auto input_count() const
-        -> uint32_t
-    { return 0; }
+    auto input_names() const
+        -> common::ConstNameSpan
+    { return {}; }
 
-    auto output_count() const
-        -> uint32_t
-    { return param_.size(); }
+    auto output_names() const
+        -> common::ConstNameSpan
+    { return out_names_(); }
 
     auto default_inputs(gc::ValueSpan result) const
         -> void
@@ -40,11 +43,13 @@ public:
     {
         param_.reserve(inputs.size());
         param_.clear();
+        out_names_.resize(inputs.size());
         std::copy(inputs.begin(), inputs.end(), std::back_inserter(param_));
     }
 
 private:
     gc::ValueVec param_;
+    gc::DynamicOutputNames out_names_;
 };
 
 auto make_source_param()

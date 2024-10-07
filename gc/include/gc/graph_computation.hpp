@@ -1,30 +1,13 @@
 #pragma once
 
-#include "gc/value.hpp"
+#include "gc/node.hpp"
 
 #include "common/grouped.hpp"
 
 #include <array>
-#include <memory>
 
 
 namespace gc {
-
-struct Node
-{
-    virtual ~Node() = default;
-
-    virtual auto input_count() const -> uint32_t = 0;
-
-    virtual auto output_count() const -> uint32_t = 0;
-
-    virtual auto default_inputs(ValueSpan result) const -> void = 0;
-
-    virtual auto compute_outputs(ValueSpan result,
-                                 ConstValueSpan inputs) const -> void = 0;
-};
-
-using NodePtr = std::shared_ptr<Node>;
 
 struct EdgeEnd final
 {

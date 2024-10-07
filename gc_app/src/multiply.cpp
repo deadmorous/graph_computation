@@ -2,6 +2,10 @@
 
 #include "gc_app/types.hpp"
 
+#include "gc/node_port_names.hpp"
+
+
+using namespace std::string_view_literals;
 
 namespace gc_app {
 
@@ -9,13 +13,14 @@ class Multiply final :
     public gc::Node
 {
 public:
-    auto input_count() const
-        -> uint32_t
-    { return 2; }
+    auto input_names() const
+        -> common::ConstNameSpan
+    { return gc::node_input_names<Multiply>( "lhs"sv, "rhs"sv ); }
 
-    auto output_count() const
-        -> uint32_t
-    { return 1; }
+    auto output_names() const
+        -> common::ConstNameSpan
+    { return gc::node_output_names<Multiply>( "product"sv ); }
+
 
     auto default_inputs(gc::ValueSpan result) const
         -> void

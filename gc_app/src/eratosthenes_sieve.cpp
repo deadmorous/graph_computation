@@ -2,8 +2,12 @@
 
 #include "gc_app/types.hpp"
 
+#include "gc/node_port_names.hpp"
+
 // #include <chrono>
 
+
+using namespace std::string_view_literals;
 
 namespace gc_app {
 namespace {
@@ -31,13 +35,13 @@ class EratosthenesSieve final :
     public gc::Node
 {
 public:
-    auto input_count() const
-        -> uint32_t
-    { return 1; }
+    auto input_names() const
+        -> common::ConstNameSpan
+    { return gc::node_input_names<EratosthenesSieve>( "count"sv ); }
 
-    auto output_count() const
-        -> uint32_t
-    { return 1; }
+    auto output_names() const
+        -> common::ConstNameSpan
+    { return gc::node_output_names<EratosthenesSieve>( "sequence"sv ); }
 
     auto default_inputs(gc::ValueSpan result) const
         -> void

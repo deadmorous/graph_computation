@@ -1,4 +1,5 @@
 #include "gc/graph_computation.hpp"
+#include "gc/node_port_names.hpp"
 
 #include "common/format.hpp"
 
@@ -17,18 +18,19 @@ class TestNode final
     : public gc::Node
 {
 public:
-    TestNode(uint32_t input_count, uint32_t output_count) :
-        input_count_{ input_count },
-        output_count_{ output_count }
-    {}
+    TestNode(uint32_t input_count, uint32_t output_count)
+    {
+        input_names_.resize(input_count);
+        output_names_.resize(output_count);
+    }
 
-    auto input_count() const
-        -> uint32_t override
-    { return input_count_; }
+    auto input_names() const
+        -> common::ConstNameSpan override
+    { return input_names_(); }
 
-    auto output_count() const
-        -> uint32_t override
-    { return output_count_; }
+    auto output_names() const
+        -> common::ConstNameSpan override
+    { return output_names_(); }
 
     auto default_inputs(gc::ValueSpan result) const
         -> void override
@@ -54,6 +56,8 @@ public:
 private:
     uint32_t input_count_;
     uint32_t output_count_;
+    gc::DynamicInputNames input_names_;
+    gc::DynamicOutputNames output_names_;
 };
 
 struct TestGraphNodeSpec

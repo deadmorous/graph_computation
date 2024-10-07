@@ -2,6 +2,10 @@
 
 #include "gc_app/types.hpp"
 
+#include "gc/node_port_names.hpp"
+
+
+using namespace std::string_view_literals;
 
 namespace gc_app {
 namespace {
@@ -16,7 +20,6 @@ auto test_seq(Uint limit)
         result[index] = 0;
     return result;
 }
-
 } // anonymous namespace
 
 
@@ -24,13 +27,13 @@ class TestSequence final :
     public gc::Node
 {
 public:
-    auto input_count() const
-        -> uint32_t
-    { return 1; }
+    auto input_names() const
+        -> common::ConstNameSpan
+    { return gc::node_input_names<TestSequence>( "count"sv ); }
 
-    auto output_count() const
-        -> uint32_t
-    { return 1; }
+    auto output_names() const
+        -> common::ConstNameSpan
+    { return gc::node_output_names<TestSequence>( "sequence"sv ); }
 
     auto default_inputs(gc::ValueSpan result) const
         -> void
