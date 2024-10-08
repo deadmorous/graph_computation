@@ -29,7 +29,7 @@ template <std::derived_from<Node> NodeImpl,
          std::same_as<std::string_view>... Args>
 auto node_input_names(Args... names)
     -> common::ConstNameSpan
-{ return node_input_names(common::Type<Node>, names...); }
+{ return node_input_names(common::Type<NodeImpl>, names...); }
 
 
 
@@ -47,7 +47,7 @@ template <std::derived_from<Node> NodeImpl,
          std::same_as<std::string_view>... Args>
 auto node_output_names(Args... names)
     -> common::ConstNameSpan
-{ return node_output_names(common::Type<Node>, names...); }
+{ return node_output_names(common::Type<NodeImpl>, names...); }
 
 // ---
 
