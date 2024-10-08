@@ -42,20 +42,18 @@ public:
     {
         std::iota(result.begin(), result.end(), 1);
 
-        if (output_count_ == 0)
+        if (output_count() == 0)
             return;
 
         auto output_index = 0;
         for (const auto& input : inputs)
         {
             result[output_index].as<int>() += input.as<int>();
-            output_index = (output_index + 1) % output_count_;
+            output_index = (output_index + 1) % output_count();
         }
     }
 
 private:
-    uint32_t input_count_;
-    uint32_t output_count_;
     gc::DynamicInputNames input_names_;
     gc::DynamicOutputNames output_names_;
 };
