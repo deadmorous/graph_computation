@@ -7,3 +7,6 @@
 [submodule "3p/quill"]
 	path = 3p/quill
 	url = https://github.com/odygrd/quill.git
+[submodule "3p/yaml-cpp"]
+	path = 3p/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp.git
