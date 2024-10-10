@@ -47,5 +47,6 @@ target_include_directories(gc-lib
 if ("${GRAPH_COMPUTATION_LOG_ENGINE}" STREQUAL "GC_LOG_QUILL")
     target_link_libraries(gc-lib
         PUBLIC
-            quill::quill)
+            quill::quill
+            yaml-cpp::yaml-cpp)
 endif()
