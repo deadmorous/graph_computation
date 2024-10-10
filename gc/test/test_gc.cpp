@@ -1,4 +1,5 @@
 #include "gc/graph_computation.hpp"
+#include "gc/node.hpp"
 #include "gc/node_port_names.hpp"
 
 #include "common/format.hpp"

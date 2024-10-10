@@ -1,29 +1,12 @@
 #pragma once
 
-#include "gc/node.hpp"
+#include "gc/graph.hpp"
+#include "gc/value.hpp"
 
 #include "common/grouped.hpp"
 
-#include <array>
-
 
 namespace gc {
-
-struct EdgeEnd final
-{
-    const Node*             node;
-    uint32_t                port;
-};
-
-using Edge = std::array<EdgeEnd, 2>;
-
-struct Graph final
-{
-    std::vector<NodePtr>    nodes;
-    std::vector<Edge>       edges;
-};
-
-// -----------
 
 struct ComputationInstructions;
 using ComputationInstructionsPtr = std::shared_ptr<ComputationInstructions>;

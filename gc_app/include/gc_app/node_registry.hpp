@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gc/graph_computation.hpp"
+#include "gc/node_fwd.hpp"
 
 #include "common/object_registry.hpp"
 

@@ -1,4 +1,5 @@
 #include "gc/graph_computation.hpp"
+#include "gc/node.hpp"
 
 #include "common/log.hpp"
 #include "common/throw.hpp"

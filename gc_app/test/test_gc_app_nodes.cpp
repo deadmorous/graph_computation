@@ -5,6 +5,8 @@
 #include "gc_app/test_sequence.hpp"
 #include "gc_app/types.hpp"
 
+#include "gc/node.hpp"
+
 #include <gtest/gtest.h>
 
 

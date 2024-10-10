@@ -5,8 +5,6 @@
 
 #include "common/const_name_span.hpp"
 
-#include <memory>
-
 
 namespace gc {
 
@@ -30,7 +28,5 @@ struct Node
     { return output_names().size(); }
 
 };
-
-using NodePtr = std::shared_ptr<Node>;
 
 } // namespace gc

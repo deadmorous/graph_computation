@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gc/graph_computation.hpp"
+#include "gc/node_fwd.hpp"
 
 namespace gc_app {
 

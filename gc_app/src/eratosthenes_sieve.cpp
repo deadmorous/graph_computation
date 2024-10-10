@@ -2,6 +2,7 @@
 
 #include "gc_app/types.hpp"
 
+#include "gc/node.hpp"
 #include "gc/node_port_names.hpp"
 
 // #include <chrono>

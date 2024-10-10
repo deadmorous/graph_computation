@@ -1,5 +1,6 @@
 #include "gc_app/source_param.hpp"
 
+#include "gc/node.hpp"
 #include "gc/node_port_names.hpp"
 
 

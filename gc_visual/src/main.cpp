@@ -3,6 +3,8 @@
 #include "gc_app/source_param.hpp"
 #include "gc_app/node_registry.hpp"
 
+#include "gc/graph_computation.hpp"
+
 #include <QApplication>
 
 
