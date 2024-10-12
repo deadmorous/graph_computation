@@ -293,8 +293,9 @@ public:
     template <typename F, typename... Args>
     auto visit_numeric(F&& f, Args... args) const
     {
-        visit(
+        return visit(
             [&]<typename T>(common::Type_Tag<T> tag)
+                -> std::invoke_result_t< F, common::Type_Tag<int>, Args... >
             {
                 if constexpr (   std::is_integral_v<T>
                               || std::is_floating_point_v<T>)
