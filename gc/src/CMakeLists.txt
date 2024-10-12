@@ -6,7 +6,9 @@ add_library(gc-lib STATIC
     expect_n_node_args.cpp
     graph_computation.cpp
     node_port_names.cpp
-    type.cpp)
+    load_yaml.cpp
+    type.cpp
+    type_registry.cpp)
 
 add_library(gc::lib ALIAS gc-lib)
 
