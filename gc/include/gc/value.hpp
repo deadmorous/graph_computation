@@ -5,6 +5,8 @@
 #include "gc/type.hpp"
 #include "gc/value_path.hpp"
 
+#include "common/throw.hpp"
+
 #include <any>
 
 namespace gc {
@@ -82,6 +84,21 @@ public:
     auto as(common::Type_Tag<T> = {}) const
         -> const T&
     { return std::any_cast<const T&>(data_); }
+
+    template <typename T>
+    requires (std::is_integral_v<T> || std::is_floating_point_v<T>)
+    auto convert_to(common::Type_Tag<T> = {}) const
+        -> T
+    {
+        if(type_->aggregate_type() != gc::AggregateType::Scalar)
+            common::throw_<std::invalid_argument>(
+                "Value::convert_to: Expected a scalar argument, got ", type_);
+
+        return
+            gc::ScalarT(type_).visit_numeric(
+                [&](auto tag) -> T
+                { return static_cast<T>(as(tag)); });
+    }
 
 private:
     Value(const Type* type, std::any data) :
