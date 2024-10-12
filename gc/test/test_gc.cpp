@@ -385,6 +385,43 @@ TEST(Gc, DynamicValueAccess)
     EXPECT_EQ(v_struct.get(gc::ValuePath{} / "flags" / 5u).as<unsigned>(), 144);
 }
 
+TEST(Gc, ValueReflection)
+{
+    auto v_struct  = gc::Value(MyStruct{
+        .foo = 123,
+        .bar = 4.56,
+        .flags = {12, 34, 56, 78, 90}
+    });
+
+    // // TODO: Provide a better solution (a global function) to format path item
+    // // NOTE: Cannot overload `operator<<` (would need to do so in `std`, because
+    // // ValuePathItem is an alias for std::variant).
+    // auto fmt_item =
+    //     [](std::ostream& s, const gc::ValuePathItem& item)
+    // { std::visit([&](auto typed){ s << typed; }, item); };
+
+    auto struct_keys = v_struct.keys();
+    EXPECT_EQ(struct_keys.size(), 3);
+    EXPECT_EQ(struct_keys[0], gc::ValuePathItem("foo"));
+    EXPECT_EQ(struct_keys[1], gc::ValuePathItem("bar"));
+    EXPECT_EQ(struct_keys[2], gc::ValuePathItem("flags"));
+
+    auto v_flags = v_struct.get(gc::ValuePath{} / "flags");
+    auto flags_keys = v_flags.keys();
+    EXPECT_EQ(flags_keys.size(), 5);
+    EXPECT_EQ(flags_keys[0], gc::ValuePathItem(0u));
+    EXPECT_EQ(flags_keys[1], gc::ValuePathItem(1u));
+    EXPECT_EQ(flags_keys[2], gc::ValuePathItem(2u));
+    EXPECT_EQ(flags_keys[3], gc::ValuePathItem(3u));
+    EXPECT_EQ(flags_keys[4], gc::ValuePathItem(4u));
+
+    auto v_tuple = gc::Value(std::make_tuple(1, 2.3));
+    auto tuple_keys = v_tuple.keys();
+    EXPECT_EQ(tuple_keys.size(), 2);
+    EXPECT_EQ(tuple_keys[0], gc::ValuePathItem(0u));
+    EXPECT_EQ(tuple_keys[1], gc::ValuePathItem(1u));
+}
+
 // ---
 
 TEST(Gc, compute_1)

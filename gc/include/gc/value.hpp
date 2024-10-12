@@ -53,6 +53,10 @@ public:
 
     // Interface for C++ type-unaware users
 
+    auto keys() const
+        -> std::vector<ValuePathItem>
+    { return type_->value_component_access()->keys(data_); }
+
     auto get(ValuePathView path) const
         -> Value
     {

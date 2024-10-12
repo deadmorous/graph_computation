@@ -4,12 +4,14 @@
 #include "gc/value_path.hpp"
 
 #include "common/maybe_const.hpp"
+#include "common/tuple_like.hpp"
 
 #include <any>
 #include <cassert>
 #include <functional>
 #include <memory>
 #include <stdexcept>
+#include <tuple>
 
 
 namespace gc::detail {
@@ -18,6 +20,9 @@ template <typename Type>
 struct ValueComponentAccess
 {
     virtual ~ValueComponentAccess() = default;
+
+    virtual auto keys(const std::any& data) const
+        -> std::vector<ValuePathItem> = 0;
 
     virtual auto get(ValuePathView path,
                      const std::any& data) const
@@ -83,6 +88,33 @@ struct ValueComponents;
 template <typename Type, typename T>
 struct ValueComponentAccessImpl final : ValueComponentAccess<Type>
 {
+    auto keys(const std::any& data) const
+        -> std::vector<ValuePathItem> override
+    {
+        constexpr auto make_path_index_items =
+            [](size_t size)
+            {
+                auto result = std::vector<ValuePathItem>{};
+                result.reserve(size);
+                for (size_t index=0; index<size; ++index)
+                    result.emplace_back(index);
+                return result;
+            };
+        constexpr auto tag = common::Type<T>;
+        const auto& v = unpack(data, tag);
+        if constexpr (StructType<T>)
+        {
+            constexpr auto fields = field_names_of(tag);
+            return std::vector<ValuePathItem>( fields.begin(), fields.end() );
+        }
+        else if constexpr (requires { std::size(v); })
+            return make_path_index_items(std::size(v));
+        else if constexpr (common::is_tuple_like_v<T>)
+            return make_path_index_items(std::tuple_size_v<T>);
+        else
+            return {};
+    }
+
     auto get(ValuePathView path, const std::any& data) const
         -> std::pair<const Type*, std::any> override
     {
