@@ -8,6 +8,6 @@
 namespace gc {
 
 using NodeRegistry =
-    common::ObjectRegsstry<Node, ConstValueSpan>;
+    common::ObjectRegstry<Node, ConstValueSpan>;
 
 } // namespace gc
