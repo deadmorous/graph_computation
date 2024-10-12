@@ -9,7 +9,8 @@ add_library(gc_app-lib STATIC
     rect_view.cpp
     project.cpp
     source_param.cpp
-    test_sequence.cpp)
+    test_sequence.cpp
+    type_registry.cpp)
 
 add_library(gc_app::lib ALIAS gc_app-lib)
 
