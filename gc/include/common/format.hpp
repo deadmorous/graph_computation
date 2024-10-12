@@ -16,14 +16,27 @@ auto format(Ts&&... args)
     return s.str();
 }
 
-template <typename Seq>
-auto format_seq(const Seq& seq)
+struct DefaultFormatter
+{
+    template <typename T>
+    auto operator()(std::ostream& s, const T& value) const
+        -> void
+    { s << value; }
+};
+
+template <typename Seq, typename ElementFormatter = DefaultFormatter>
+auto format_seq(const Seq& seq,
+                const ElementFormatter& element_formatter = {})
     -> std::string
 {
     std::ostringstream s;
     std::string_view delim = "";
     for (const auto& item : seq)
-        s << delim << item,   delim = ",";
+    {
+        s << delim;
+        element_formatter(s, item);
+        delim = ",";
+    }
     return s.str();
 }
 
