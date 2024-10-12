@@ -1,5 +1,7 @@
 #pragma once
 
+#include "gc/value_fwd.hpp"
+
 #include "gc/type.hpp"
 #include "gc/value_path.hpp"
 
@@ -92,9 +94,6 @@ private:
 };
 
 
-
-using ValueSpan = std::span<Value>;
-using ConstValueSpan = std::span<const Value>;
 using ValueVec = std::vector<Value>;
 
 } // namespace gc
