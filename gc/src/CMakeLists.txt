@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.5)
 project(gc-lib LANGUAGES CXX)
 
 add_library(gc-lib STATIC
+    expect_n_node_args.cpp
     graph_computation.cpp
     node_port_names.cpp
     type.cpp)

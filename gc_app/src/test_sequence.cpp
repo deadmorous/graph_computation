@@ -2,6 +2,7 @@
 
 #include "gc_app/types.hpp"
 
+#include "gc/expect_n_node_args.hpp"
 #include "gc/node.hpp"
 #include "gc/node_port_names.hpp"
 
@@ -55,8 +56,11 @@ public:
     }
 };
 
-auto make_test_sequence()
+auto make_test_sequence(gc::ConstValueSpan arg)
     -> std::shared_ptr<gc::Node>
-{ return std::make_shared<TestSequence>(); }
+{
+    assert(arg.empty());
+    return std::make_shared<TestSequence>();
+}
 
 } // namespace gc_app

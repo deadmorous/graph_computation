@@ -2,6 +2,7 @@
 
 #include "gc_app/types.hpp"
 
+#include "gc/expect_n_node_args.hpp"
 #include "gc/node.hpp"
 #include "gc/node_port_names.hpp"
 
@@ -88,8 +89,11 @@ struct _{_(){
 }}__;
 #endif // 0
 
-auto make_eratosthenes_sieve()
+auto make_eratosthenes_sieve(gc::ConstValueSpan args)
     -> std::shared_ptr<gc::Node>
-{ return std::make_shared<EratosthenesSieve>(); }
+{
+    gc::expect_no_node_args("EratosthenesSieve", args);
+    return std::make_shared<EratosthenesSieve>();
+}
 
 } // namespace gc_app

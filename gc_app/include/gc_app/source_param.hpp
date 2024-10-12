@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gc/node.hpp"
+#include "gc/value_fwd.hpp"
 
 #include "common/maybe_const.hpp"
 
@@ -21,7 +22,7 @@ struct InputParameters
     { return dynamic_cast<common::AsConstAs<Node, InputParameters*>>(node); }
 };
 
-auto make_source_param()
+auto make_source_param(gc::ConstValueSpan)
     -> std::shared_ptr<gc::Node>;
 
 } // namespace gc_app

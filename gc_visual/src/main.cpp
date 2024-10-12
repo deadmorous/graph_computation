@@ -18,16 +18,16 @@ auto run(int argc, char *argv[])
     auto obj_reg =
         gc_app::node_registry();
 
-    auto img_size = obj_reg.at("source_param")();
-    auto img_size_w = obj_reg.at("source_param")();
-    auto img_size_h = obj_reg.at("source_param")();
+    auto img_size = obj_reg.at("source_param")(gc::ValueVec{1});
+    auto img_size_w = obj_reg.at("source_param")(gc::ValueVec{1});
+    auto img_size_h = obj_reg.at("source_param")(gc::ValueVec{1});
 
-    auto pw = obj_reg.at("project")();
-    auto ph = obj_reg.at("project")();
+    auto pw = obj_reg.at("project")({});
+    auto ph = obj_reg.at("project")({});
 
-    auto seq_size = obj_reg.at("multiply")();
-    auto sieve = obj_reg.at("eratosthenes_sieve")();
-    auto view = obj_reg.at("rect_view")();
+    auto seq_size = obj_reg.at("multiply")({});
+    auto sieve = obj_reg.at("eratosthenes_sieve")({});
+    auto view = obj_reg.at("rect_view")({});
 
     gc_app::InputParameters::get(img_size.get())
         ->set_inputs(gc::ValueVec{ gc_app::UintSize(500, 500) });

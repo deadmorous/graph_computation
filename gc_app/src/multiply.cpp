@@ -2,6 +2,7 @@
 
 #include "gc_app/types.hpp"
 
+#include "gc/expect_n_node_args.hpp"
 #include "gc/node.hpp"
 #include "gc/node_port_names.hpp"
 
@@ -49,8 +50,11 @@ public:
     }
 };
 
-auto make_multiply()
+auto make_multiply(gc::ConstValueSpan args)
     -> std::shared_ptr<gc::Node>
-{ return std::make_shared<Multiply>(); }
+{
+    gc::expect_no_node_args("Multiply", args);
+    return std::make_shared<Multiply>();
+}
 
 } // namespace gc_app

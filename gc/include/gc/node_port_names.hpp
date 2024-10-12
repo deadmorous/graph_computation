@@ -54,7 +54,7 @@ auto node_output_names(Args... names)
 class DynamicNames
 {
 public:
-    explicit DynamicNames(std::string_view prefix);
+    explicit DynamicNames(std::string_view prefix, uint32_t count = 0);
     auto resize(uint32_t count) -> void;
     auto operator()() const
         -> common::ConstNameSpan;
@@ -69,7 +69,8 @@ class DynamicInputNames final :
     public DynamicNames
 {
 public:
-    explicit DynamicInputNames() : DynamicNames{ "in_" }
+    explicit DynamicInputNames(uint32_t count = 0) :
+        DynamicNames{ "in_", count }
     {}
 };
 
@@ -77,7 +78,8 @@ class DynamicOutputNames final :
     public DynamicNames
 {
 public:
-    explicit DynamicOutputNames() : DynamicNames{ "out_" }
+    explicit DynamicOutputNames(uint32_t count = 0) :
+        DynamicNames{ "out_", count }
     {}
 };
 

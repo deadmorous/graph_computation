@@ -5,9 +5,9 @@
 
 namespace gc {
 
-DynamicNames::DynamicNames(std::string_view prefix)
+DynamicNames::DynamicNames(std::string_view prefix, uint32_t count)
     : prefix_{ prefix }
-{}
+{ resize(count); }
 
 auto DynamicNames::resize(uint32_t count)
     -> void

@@ -2,6 +2,7 @@
 
 #include "gc_app/image.hpp"
 
+#include "gc/expect_n_node_args.hpp"
 #include "gc/node.hpp"
 #include "gc/node_port_names.hpp"
 
@@ -64,8 +65,11 @@ public:
     }
 };
 
-auto make_rect_view()
+auto make_rect_view(gc::ConstValueSpan args)
     -> std::shared_ptr<gc::Node>
-{ return std::make_shared<RectView>(); }
+{
+    gc::expect_no_node_args("RectView", args);
+    return std::make_shared<RectView>();
+}
 
 } // namespace gc_app

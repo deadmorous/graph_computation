@@ -14,7 +14,7 @@ using namespace gc_app;
 
 TEST(GcApp, EratosthenesSieve)
 {
-    auto node = make_eratosthenes_sieve();
+    auto node = make_eratosthenes_sieve({});
 
     ASSERT_EQ(node->input_count(), 1);
     ASSERT_EQ(node->output_count(), 1);
@@ -48,7 +48,7 @@ TEST(GcApp, EratosthenesSieve)
 
 TEST(GcApp, TestSequence)
 {
-    auto node = gc_app::make_test_sequence();
+    auto node = gc_app::make_test_sequence({});
 
     ASSERT_EQ(node->input_count(), 1);
     ASSERT_EQ(node->output_count(), 1);
@@ -82,13 +82,16 @@ TEST(GcApp, TestSequence)
 
 TEST(GcApp, SourceParam)
 {
-    auto node = make_source_param();
+    auto node = make_source_param(gc::ValueVec{ 2 });
 
     ASSERT_EQ(node->input_count(), 0);
-    ASSERT_EQ(node->output_count(), 0);
+    ASSERT_EQ(node->output_count(), 2);
 
     ASSERT_EQ(node->input_names().size(), 0);
-    ASSERT_EQ(node->output_names().size(), 0);
+
+    ASSERT_EQ(node->output_names().size(), 2);
+    ASSERT_EQ(node->output_names()[0], "out_0");
+    ASSERT_EQ(node->output_names()[1], "out_1");
 
     // ---
 
@@ -103,14 +106,6 @@ TEST(GcApp, SourceParam)
 
     auto* param = InputParameters::get(node.get());
     param->set_inputs(inputs);
-    ASSERT_EQ(node->input_count(), 0);
-    ASSERT_EQ(node->output_count(), 2);
-
-    ASSERT_EQ(node->input_names().size(), 0);
-
-    ASSERT_EQ(node->output_names().size(), 2);
-    ASSERT_EQ(node->output_names()[0], "out_0");
-    ASSERT_EQ(node->output_names()[1], "out_1");
 
     // ---
 
@@ -121,11 +116,16 @@ TEST(GcApp, SourceParam)
     gc::ValueVec inputs_copy(2);
     param->get_inputs(inputs_copy);
     check(inputs_copy);
+
+    // Number of parameters in specified at construction time.
+    EXPECT_THROW(
+        param->set_inputs(gc::ValueVec{1, 2, 3}),
+        std::invalid_argument);
 }
 
 TEST(GcApp, Multiply)
 {
-    auto node = gc_app::make_multiply();
+    auto node = gc_app::make_multiply({});
 
     ASSERT_EQ(node->input_count(), 2);
     ASSERT_EQ(node->output_count(), 1);
@@ -153,7 +153,7 @@ TEST(GcApp, Multiply)
 
 TEST(GcApp, Project)
 {
-    auto node = gc_app::make_project();
+    auto node = gc_app::make_project({});
 
     ASSERT_EQ(node->input_count(), 2);
     ASSERT_EQ(node->output_count(), 1);

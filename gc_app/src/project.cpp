@@ -2,6 +2,7 @@
 
 #include "gc_app/types.hpp"
 
+#include "gc/expect_n_node_args.hpp"
 #include "gc/node.hpp"
 #include "gc/node_port_names.hpp"
 #include "gc/value.hpp"
@@ -41,8 +42,11 @@ public:
     }
 };
 
-auto make_project()
+auto make_project(gc::ConstValueSpan args)
     -> std::shared_ptr<gc::Node>
-{ return std::make_shared<Project>(); }
+{
+    gc::expect_no_node_args("Project", args);
+    return std::make_shared<Project>();
+}
 
 } // namespace gc_app
