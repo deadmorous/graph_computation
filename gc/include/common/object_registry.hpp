@@ -10,11 +10,11 @@
 
 namespace common {
 
-template <typename Interface>
+template <typename Interface, typename... ConstructionArgs>
 class ObjectRegsstry
 {
 public:
-    using FactoryFunc = std::shared_ptr<Interface>(*)();
+    using FactoryFunc = std::shared_ptr<Interface>(*)(ConstructionArgs...);
 
     using Storage =
         std::map<std::string_view, FactoryFunc>;
