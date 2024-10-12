@@ -9,11 +9,9 @@
 
 namespace gc_app {
 
-auto node_registry()
-    -> NodeRegistry
+auto populate_node_registry(gc::NodeRegistry& result)
+    -> void
 {
-    auto result = NodeRegistry{};
-
 #define GC_APP_REGISTER(name) \
     result.register_factory(#name, gc_app::make_##name)
 
@@ -25,8 +23,6 @@ auto node_registry()
     GC_APP_REGISTER(test_sequence);
 
 #undef GC_APP_REGISTER
-
-    return result;
 }
 
 } // namespace gc_app

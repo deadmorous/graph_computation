@@ -1,15 +1,18 @@
 #pragma once
 
-#include "gc/node_fwd.hpp"
-
-#include "common/object_registry.hpp"
+#include "gc/node_registry.hpp"
 
 namespace gc_app {
 
-using NodeRegistry =
-    common::ObjectRegsstry<gc::Node>;
+auto populate_node_registry(gc::NodeRegistry&)
+    -> void;
 
-auto node_registry()
-    -> NodeRegistry;
+inline auto node_registry()
+    -> gc::NodeRegistry
+{
+    auto result = gc::NodeRegistry{};
+    populate_node_registry(result);
+    return result;
+}
 
 } // namespace gc_app
