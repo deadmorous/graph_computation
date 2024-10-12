@@ -20,11 +20,11 @@ public:
     using StorageConstIterator =
         typename Storage::const_iterator;
 
-    auto register_factory(std::string_view name, T factory)
+    auto register_value(std::string_view name, T value)
         -> void
     {
         assert(!storage_.contains(name));
-        storage_.emplace(name, factory);
+        storage_.emplace(name, value);
     }
 
     auto maybe_at(std::string_view name) const noexcept

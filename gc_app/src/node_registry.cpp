@@ -13,7 +13,7 @@ auto populate_node_registry(gc::NodeRegistry& result)
     -> void
 {
 #define GC_APP_REGISTER(name) \
-    result.register_factory(#name, gc_app::make_##name)
+    result.register_value(#name, gc_app::make_##name)
 
     GC_APP_REGISTER(eratosthenes_sieve);
     GC_APP_REGISTER(multiply);

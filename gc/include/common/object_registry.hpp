@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/value_registry.h"
+#include "common/value_registry.hpp"
 
 
 namespace common {
