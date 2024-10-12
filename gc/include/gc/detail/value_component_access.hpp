@@ -41,6 +41,9 @@ struct ValueComponentAccess
                         std::any& data,
                         size_t size) const
         -> void = 0;
+
+    virtual auto make_data() const
+        -> std::any = 0;
 };
 
 // ---
@@ -166,6 +169,10 @@ struct ValueComponentAccessImpl final : ValueComponentAccess<Type>
                         "Objects of this type cannot be resized");
             });
     }
+
+    auto make_data() const
+        -> std::any override
+    { return T{}; }
 };
 
 // ---

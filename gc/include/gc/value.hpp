@@ -76,6 +76,9 @@ public:
         -> void
     { return type_->value_component_access()->resize(path, data_, size); }
 
+    static auto make(const Type* type)
+        -> Value
+    { return { type, type->value_component_access()->make_data() }; }
 
     // Interface for C++ type-aware users
 

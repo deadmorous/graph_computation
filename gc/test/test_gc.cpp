@@ -260,8 +260,8 @@ TEST(Gc, compile2)
 
 struct MyStruct
 {
-    int foo;
-    double bar;
+    int foo{};
+    double bar{};
     std::vector<unsigned int> flags;
 };
 
@@ -400,6 +400,7 @@ TEST(Gc, ValueReflection)
     //     [](std::ostream& s, const gc::ValuePathItem& item)
     // { std::visit([&](auto typed){ s << typed; }, item); };
 
+    // Key extraction
     auto struct_keys = v_struct.keys();
     EXPECT_EQ(struct_keys.size(), 3);
     EXPECT_EQ(struct_keys[0], gc::ValuePathItem("foo"));
@@ -420,6 +421,20 @@ TEST(Gc, ValueReflection)
     EXPECT_EQ(tuple_keys.size(), 2);
     EXPECT_EQ(tuple_keys[0], gc::ValuePathItem(0u));
     EXPECT_EQ(tuple_keys[1], gc::ValuePathItem(1u));
+
+    // Dynamic construction of default value from type
+    auto v_struct2 = gc::Value::make(v_struct.type());
+    EXPECT_EQ(v_struct2.type(), v_struct.type());
+    auto typed_struct2 = v_struct2.as<MyStruct>();
+    EXPECT_EQ(typed_struct2.foo, 0);
+    EXPECT_EQ(typed_struct2.bar, 0);
+    EXPECT_EQ(typed_struct2.flags.size(), 0);
+
+    auto struct2_keys = v_struct2.keys();
+    EXPECT_EQ(struct2_keys.size(), 3);
+    EXPECT_EQ(struct2_keys[0], gc::ValuePathItem("foo"));
+    EXPECT_EQ(struct2_keys[1], gc::ValuePathItem("bar"));
+    EXPECT_EQ(struct2_keys[2], gc::ValuePathItem("flags"));
 }
 
 // ---
