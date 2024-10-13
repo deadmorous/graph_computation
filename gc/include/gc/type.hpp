@@ -237,6 +237,7 @@ class CustomT final
 {
 public:
     CustomT(const Type*) noexcept;
+    auto type() const noexcept -> const Type*;
     auto name() const noexcept -> std::string_view;
     auto id() const noexcept -> uint8_t;
 
@@ -248,6 +249,7 @@ class PathT final
 {
 public:
     PathT(const Type*) noexcept;
+    auto type() const noexcept -> const Type*;
 
 private:
     const Type* type_;
@@ -257,10 +259,11 @@ class ScalarT final
 {
 public:
     ScalarT(const Type*) noexcept;
+    auto type() const noexcept -> const Type*;
     auto id() const noexcept -> ScalarTypeId;
 
     template <typename F, typename... Args>
-    auto visit(F&& f, Args... args) const
+    auto visit(F&& f, Args&&... args) const
     {
         switch(id())
         {
@@ -305,7 +308,7 @@ public:
     }
 
     template <typename F, typename... Args>
-    auto visit_numeric(F&& f, Args... args) const
+    auto visit_numeric(F&& f, Args&&... args) const
     {
         return visit(
             [&]<typename T>(common::Type_Tag<T> tag)
@@ -328,6 +331,7 @@ class StringT final
 {
 public:
     StringT(const Type*) noexcept;
+    auto type() const noexcept -> const Type*;
 
     auto id() const noexcept -> StringTypeId;
 
@@ -358,6 +362,7 @@ class StructT final
 {
 public:
     StructT(const Type*) noexcept;
+    auto type() const noexcept -> const Type*;
     auto tuple_type() const noexcept
         -> const Type*;
     auto field_names() const noexcept
@@ -373,6 +378,7 @@ class TupleT final
 {
 public:
     TupleT(const Type*) noexcept;
+    auto type() const noexcept -> const Type*;
     auto element_count() const noexcept
         -> uint8_t;
     auto element_types() const noexcept
@@ -386,6 +392,7 @@ class VectorT final
 {
 public:
     VectorT(const Type*) noexcept;
+    auto type() const noexcept -> const Type*;
     auto element_type() const noexcept
         -> const Type*;
 

@@ -193,6 +193,10 @@ CustomT::CustomT(const Type* type) noexcept :
     type_{ type }
 { assert(agg_type(type_) == AggregateType::Custom); }
 
+auto CustomT::type() const noexcept
+    -> const Type*
+{ return type_; }
+
 auto CustomT::name() const noexcept
     -> std::string_view
 {
@@ -204,29 +208,49 @@ auto CustomT::id() const noexcept
     -> uint8_t
 { return static_cast<uint8_t>(type_->storage()[2]); }
 
+
 PathT::PathT(const Type* type) noexcept :
     type_{ type }
 { assert(agg_type(type_) == AggregateType::Path); }
+
+auto PathT::type() const noexcept
+    -> const Type*
+{ return type_; }
+
 
 ScalarT::ScalarT(const Type* type) noexcept :
     type_{ type }
 { assert(agg_type(type_) == AggregateType::Scalar); }
 
+auto ScalarT::type() const noexcept
+    -> const Type*
+{ return type_; }
+
 auto ScalarT::id() const noexcept
     -> ScalarTypeId
 { return static_cast<ScalarTypeId>(type_->storage()[2]); }
+
 
 StringT::StringT(const Type* type) noexcept :
     type_{ type }
 { assert(agg_type(type_) == AggregateType::String); }
 
+auto StringT::type() const noexcept
+    -> const Type*
+{ return type_; }
+
 auto StringT::id() const noexcept
     -> StringTypeId
 { return static_cast<StringTypeId>(type_->storage()[2]); }
 
+
 StructT::StructT(const Type* type) noexcept :
     type_{ type }
 { assert(agg_type(type_) == AggregateType::Struct); }
+
+auto StructT::type() const noexcept
+    -> const Type*
+{ return type_; }
 
 auto StructT::tuple_type() const noexcept
     -> const Type*
@@ -247,9 +271,14 @@ auto StructT::tuple() const noexcept
     -> TupleT
 { return { tuple_type() }; }
 
+
 TupleT::TupleT(const Type* type) noexcept :
     type_{ type }
 { assert(agg_type(type_) == AggregateType::Tuple); }
+
+auto TupleT::type() const noexcept
+    -> const Type*
+{ return type_; }
 
 auto TupleT::element_count() const noexcept
     -> uint8_t
@@ -263,9 +292,14 @@ auto TupleT::element_types() const noexcept
     return { types, element_count() };
 }
 
+
 VectorT::VectorT(const Type* type) noexcept :
     type_{ type }
 { assert(agg_type(type_) == AggregateType::Vector); }
+
+auto VectorT::type() const noexcept
+    -> const Type*
+{ return type_; }
 
 auto VectorT::element_type() const noexcept
     -> const Type*
