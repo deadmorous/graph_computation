@@ -1,6 +1,5 @@
 #include "gc_app/source_param.hpp"
 
-#include "gc/expect_n_node_args.hpp"
 #include "gc/node.hpp"
 #include "gc/node_port_names.hpp"
 #include "gc/value.hpp"
@@ -14,9 +13,9 @@ class SourceParam final :
     public InputParameters
 {
 public:
-    explicit SourceParam(uint32_t param_count) :
-        param_(param_count),
-        out_names_{param_count}
+    explicit SourceParam(gc::ConstValueSpan param) :
+        param_( param.begin(), param.end() ),
+        out_names_(param.size())
     {}
 
     auto input_names() const
@@ -67,10 +66,7 @@ private:
 auto make_source_param(gc::ConstValueSpan args)
     -> std::shared_ptr<gc::Node>
 {
-    gc::expect_n_node_args("SourceParam", args, 1);
-    auto param_count =
-        args[0].convert_to<uint32_t>();
-    return std::make_shared<SourceParam>(param_count);
+    return std::make_shared<SourceParam>(args);
 }
 
 } // namespace gc_app

@@ -82,7 +82,7 @@ TEST(GcApp, TestSequence)
 
 TEST(GcApp, SourceParam)
 {
-    auto node = make_source_param(gc::ValueVec{ 2 });
+    auto node = make_source_param(gc::ValueVec{ 11, 2.2 });
 
     ASSERT_EQ(node->input_count(), 0);
     ASSERT_EQ(node->output_count(), 2);

@@ -1,6 +1,5 @@
 #include "gc_visual/mainwindow.hpp"
 
-#include "gc_app/source_param.hpp"
 #include "gc_app/node_registry.hpp"
 
 #include "gc/graph_computation.hpp"
@@ -18,9 +17,15 @@ auto run(int argc, char *argv[])
     auto obj_reg =
         gc_app::node_registry();
 
-    auto img_size = obj_reg.at("source_param")(gc::ValueVec{1});
-    auto img_size_w = obj_reg.at("source_param")(gc::ValueVec{1});
-    auto img_size_h = obj_reg.at("source_param")(gc::ValueVec{1});
+    auto img_size =
+        obj_reg.at("source_param")
+        (gc::ValueVec{gc_app::UintSize(500, 500)});
+    auto img_size_w =
+        obj_reg.at("source_param")
+        (gc::ValueVec{ gc::ValuePath{} / "width"sv });
+    auto img_size_h =
+        obj_reg.at("source_param")
+        (gc::ValueVec{ gc::ValuePath{} / "height"sv });
 
     auto pw = obj_reg.at("project")({});
     auto ph = obj_reg.at("project")({});
@@ -28,15 +33,6 @@ auto run(int argc, char *argv[])
     auto seq_size = obj_reg.at("multiply")({});
     auto sieve = obj_reg.at("eratosthenes_sieve")({});
     auto view = obj_reg.at("rect_view")({});
-
-    gc_app::InputParameters::get(img_size.get())
-        ->set_inputs(gc::ValueVec{ gc_app::UintSize(500, 500) });
-
-    gc_app::InputParameters::get(img_size_w.get())
-        ->set_inputs(gc::ValueVec{ gc::ValuePath{} / "width"sv });
-
-    gc_app::InputParameters::get(img_size_h.get())
-        ->set_inputs(gc::ValueVec{ gc::ValuePath{} / "height"sv });
 
     using NodeVec = std::vector<gc::NodePtr>;
 
