@@ -399,29 +399,35 @@ TEST(Gc, DynamicValueAccess)
         .bar = 4.56,
         .flags = {12, 34, 56, 78, 90}
     });
-    EXPECT_EQ(v_struct.get(gc::ValuePath{} / "foo").as<int>(), 123);
-    EXPECT_EQ(v_struct.get(gc::ValuePath{} / "bar").as<double>(), 4.56);
+    EXPECT_EQ(v_struct.get(gc::ValuePath{} / "foo"sv).as<int>(), 123);
+    EXPECT_EQ(v_struct.get(gc::ValuePath{} / "bar"sv).as<double>(), 4.56);
 
     auto actual_flags =
-        v_struct.get(gc::ValuePath{} / "flags").as<std::vector<unsigned int>>();
+        v_struct.get(gc::ValuePath{} / "flags"sv)
+                .as<std::vector<unsigned int>>();
     auto expected_flags =
         std::vector<unsigned int>{12, 34, 56, 78, 90};
     EXPECT_EQ(actual_flags, expected_flags);
 
-    EXPECT_EQ(v_struct.get(gc::ValuePath{} / "flags" / 0u).as<unsigned>(), 12);
-    EXPECT_EQ(v_struct.get(gc::ValuePath{} / "flags" / 3u).as<unsigned>(), 78);
-    EXPECT_EQ(v_struct.get(gc::ValuePath{} / "flags" / 4u).as<unsigned>(), 90);
+    EXPECT_EQ(v_struct.get(gc::ValuePath{} / "flags"sv / 0u).as<unsigned>(),
+              12);
+    EXPECT_EQ(v_struct.get(gc::ValuePath{} / "flags"sv / 3u).as<unsigned>(),
+              78);
+    EXPECT_EQ(v_struct.get(gc::ValuePath{} / "flags"sv / 4u).as<unsigned>(),
+              90);
 
     // vector::_M_range_check: __n (which is 5) >= this->size() (which is 5)
-    EXPECT_THROW(v_struct.get(gc::ValuePath{} / "flags" / 5u),
+    EXPECT_THROW(v_struct.get(gc::ValuePath{} / "flags"sv / 5u),
                  std::out_of_range);
 
-    v_struct.set(gc::ValuePath{} / "flags" / 3u, 912u);
-    EXPECT_EQ(v_struct.get(gc::ValuePath{} / "flags" / 3u).as<unsigned>(), 912);
+    v_struct.set(gc::ValuePath{} / "flags"sv / 3u, 912u);
+    EXPECT_EQ(v_struct.get(gc::ValuePath{} / "flags"sv / 3u).as<unsigned>(),
+              912);
 
-    v_struct.resize(gc::ValuePath{} / "flags", 6);
-    v_struct.set(gc::ValuePath{} / "flags" / 5u, 144u);
-    EXPECT_EQ(v_struct.get(gc::ValuePath{} / "flags" / 5u).as<unsigned>(), 144);
+    v_struct.resize(gc::ValuePath{} / "flags"sv, 6);
+    v_struct.set(gc::ValuePath{} / "flags"sv / 5u, 144u);
+    EXPECT_EQ(v_struct.get(gc::ValuePath{} / "flags"sv / 5u).as<unsigned>(),
+              144);
 }
 
 TEST(Gc, ValueReflection)
@@ -442,11 +448,11 @@ TEST(Gc, ValueReflection)
     // Key extraction
     auto struct_keys = v_struct.keys();
     EXPECT_EQ(struct_keys.size(), 3);
-    EXPECT_EQ(struct_keys[0], gc::ValuePathItem("foo"));
-    EXPECT_EQ(struct_keys[1], gc::ValuePathItem("bar"));
-    EXPECT_EQ(struct_keys[2], gc::ValuePathItem("flags"));
+    EXPECT_EQ(struct_keys[0], gc::ValuePathItem("foo"sv));
+    EXPECT_EQ(struct_keys[1], gc::ValuePathItem("bar"sv));
+    EXPECT_EQ(struct_keys[2], gc::ValuePathItem("flags"sv));
 
-    auto v_flags = v_struct.get(gc::ValuePath{} / "flags");
+    auto v_flags = v_struct.get(gc::ValuePath{} / "flags"sv);
     auto flags_keys = v_flags.keys();
     EXPECT_EQ(flags_keys.size(), 5);
     EXPECT_EQ(flags_keys[0], gc::ValuePathItem(0u));
@@ -471,9 +477,9 @@ TEST(Gc, ValueReflection)
 
     auto struct2_keys = v_struct2.keys();
     EXPECT_EQ(struct2_keys.size(), 3);
-    EXPECT_EQ(struct2_keys[0], gc::ValuePathItem("foo"));
-    EXPECT_EQ(struct2_keys[1], gc::ValuePathItem("bar"));
-    EXPECT_EQ(struct2_keys[2], gc::ValuePathItem("flags"));
+    EXPECT_EQ(struct2_keys[0], gc::ValuePathItem("foo"sv));
+    EXPECT_EQ(struct2_keys[1], gc::ValuePathItem("bar"sv));
+    EXPECT_EQ(struct2_keys[2], gc::ValuePathItem("flags"sv));
 }
 
 // ---

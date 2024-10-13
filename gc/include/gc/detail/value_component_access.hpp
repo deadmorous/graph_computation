@@ -210,7 +210,7 @@ struct ValueComponents<Type, std::vector<T>>
         if(path.empty())
             return std::invoke(std::forward<F>(f), data, common::Type<V>);
 
-        auto index = std::get<size_t>(path[0]);
+        auto index = path[0].index();
         auto& element = data.at(index);
         return ValueComponents<Type, T>::dispatch(
             path.subspan(1), element, std::forward<F>(f));
@@ -228,7 +228,7 @@ struct ValueComponents<Type, std::tuple<Ts...>>
         if(path.empty())
             return std::invoke(std::forward<F>(f), data, common::Type<V>);
 
-        auto index = std::get<size_t>(path[0]);
+        auto index = path[0].index();
 
         return visit_index(
             std::integral_constant<size_t, sizeof...(Ts)>{},
@@ -252,7 +252,7 @@ struct ValueComponents<Type, T>
         if(path.empty())
             return std::invoke(std::forward<F>(f), data, common::Type<T>);
 
-        auto field_name = std::get<std::string_view>(path[0]);
+        auto field_name = path[0].name();
         constexpr auto field_names = field_names_of(common::Type<T>);
         auto it = std::find(field_names.begin(), field_names.end(), field_name);
         assert(it != field_names.end());
