@@ -8,7 +8,8 @@ add_library(gc-lib STATIC
     node_port_names.cpp
     load_yaml.cpp
     type.cpp
-    type_registry.cpp)
+    type_registry.cpp
+    value_path.cpp)
 
 add_library(gc::lib ALIAS gc-lib)
 
