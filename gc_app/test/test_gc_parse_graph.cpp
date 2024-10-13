@@ -4,15 +4,16 @@
 #include "gc_app/type_registry.hpp"
 
 #include "gc/graph_computation.hpp"
-#include "gc/load_yaml.hpp"
+#include "gc/yaml/parse_graph.hpp"
 
 #include <yaml-cpp/yaml.h>
 
 #include <gtest/gtest.h>
 
 
-TEST(GcApp, LoadGraph)
+TEST(GcApp, ParseGraph)
 {
+    // Graph definition in the YAML format
     constexpr auto* config_text = R"(
 nodes:
     - name:  img_size
@@ -65,18 +66,28 @@ edges:
     - [sieve.sequence,      view.sequence]
 )";
 
-    auto config = YAML::Load(config_text);
+    // Initialize node registry and type registry
     auto node_registry = gc_app::node_registry();
     auto type_registry = gc::type_registry();
     gc_app::populate_type_registry(type_registry);
-    auto [g, node_map] = gc::load_graph(config, node_registry, type_registry);
+
+    // Parse YAML into a node object; parse graph from that node
+    auto config = YAML::Load(config_text);
+    auto [g, node_map] =
+        gc::yaml::parse_graph(config, node_registry, type_registry);
+
+    // Check number of nodes and edges
     EXPECT_EQ(g.nodes.size(), 8);
     EXPECT_EQ(g.edges.size(), 9);
 
+    // Check that nodes in the graph are in the same order as in
+    // the YAML file; check `node_map` (well, the check is made for just one
+    // node)
     auto img_size =
         g.nodes.at(0).get();
     EXPECT_EQ(img_size, node_map.at("img_size"));
 
+    // Check parameters passed to some node factories
     EXPECT_EQ(img_size->output_count(), 1);
     gc::ValueVec img_size_inputs( 1 );
     gc_app::InputParameters::get(img_size)
@@ -86,9 +97,12 @@ edges:
     EXPECT_EQ(size.width, 600);
     EXPECT_EQ(size.height, 500);
 
+    // Compute graph
     auto instr = compile(g);
     auto result = gc::ComputationResult{};
     compute(result, g, instr.get());
+
+    // Check computation results
     const auto& image = group(result.outputs,7)[0].as<gc_app::Image>();
     EXPECT_EQ(image.size.width, 600);
     EXPECT_EQ(image.size.height, 500);

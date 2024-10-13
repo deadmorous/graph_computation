@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gc/node_fwd.hpp"
+#include "gc/node_port_tags.hpp"
 
 #include "common/const_name_span.hpp"
 
@@ -11,9 +12,6 @@
 
 
 namespace gc {
-
-constexpr inline struct Input_Tag final {} Input;
-constexpr inline struct Output_Tag final {} Output;
 
 template <std::derived_from<Node> NodeImpl,
           std::same_as<std::string_view>... Args>

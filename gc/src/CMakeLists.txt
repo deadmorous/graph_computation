@@ -3,13 +3,15 @@ cmake_minimum_required(VERSION 3.5)
 project(gc-lib LANGUAGES CXX)
 
 add_library(gc-lib STATIC
+    detail/parse_node_port.cpp
     expect_n_node_args.cpp
     graph_computation.cpp
     node_port_names.cpp
-    load_yaml.cpp
     type.cpp
     type_registry.cpp
-    value_path.cpp)
+    value_path.cpp
+    yaml/parse_graph.cpp
+    yaml/parse_value.cpp)
 
 add_library(gc::lib ALIAS gc-lib)
 
