@@ -26,16 +26,17 @@ struct DefaultFormatter
 
 template <typename Seq, typename ElementFormatter = DefaultFormatter>
 auto format_seq(const Seq& seq,
+                std::string_view delim = ",",
                 const ElementFormatter& element_formatter = {})
     -> std::string
 {
     std::ostringstream s;
-    std::string_view delim = "";
+    std::string_view current_delim = "";
     for (const auto& item : seq)
     {
-        s << delim;
+        s << current_delim;
         element_formatter(s, item);
-        delim = ",";
+        current_delim = delim;
     }
     return s.str();
 }
