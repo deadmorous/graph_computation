@@ -2,8 +2,11 @@
 
 #include "common/type.hpp"
 
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
+#include <string>
+#include <string_view>
 
 
 namespace gc {
@@ -48,6 +51,29 @@ GRAPH_COMPUTATION_DECL_SCALAR_TYPE_ID(uint64_t , U64 );
 template <typename T>
 concept ScalarType =
     requires{ scalar_type_id_of(common::Type<T>); };
+
+
+enum class StringTypeId : uint8_t
+{
+    String,
+    StringView
+};
+
+#define GRAPH_COMPUTATION_DECL_STRING_TYPE_ID(T, id)                        \
+constexpr inline auto string_type_id_of(common::Type_Tag<T>) noexcept       \
+    -> StringTypeId                                                         \
+{ return StringTypeId::id; }                                                \
+    static_assert(true)
+
+GRAPH_COMPUTATION_DECL_STRING_TYPE_ID(std::string     , String);
+GRAPH_COMPUTATION_DECL_STRING_TYPE_ID(std::string_view, StringView);
+
+#undef GRAPH_COMPUTATION_DECL_STRING_TYPE_ID
+
+template <typename T>
+concept StringType =
+    std::same_as<T, std::string> || std::same_as<T, std::string_view>;
+
 
 template <typename T>
 concept StructType =

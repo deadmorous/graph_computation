@@ -51,6 +51,7 @@ enum class AggregateType : uint8_t
     Custom,
     Path,
     Scalar,
+    String,
     Struct,
     Tuple,
     Vector
@@ -90,6 +91,10 @@ public:
             : b{ *reinterpret_cast<const std::byte*>(&scalar_type_id) }
         { static_assert(sizeof(scalar_type_id) == sizeof(std::byte)); }
 
+        ByteInitializer(StringTypeId string_type_id)
+            : b{ *reinterpret_cast<const std::byte*>(&string_type_id) }
+        { static_assert(sizeof(string_type_id) == sizeof(std::byte)); }
+
         ByteInitializer(uint8_t size)
             : b{ *reinterpret_cast<const std::byte*>(&size) }
         { static_assert(sizeof(uint8_t) == sizeof(std::byte)); }
@@ -121,6 +126,15 @@ public:
         return intern(
             detail::value_components_access_factory(this_tag, tag),
             { AggregateType::Scalar, scalar_type_id_of(tag) });
+    }
+
+    template <StringType T>
+    static auto of(common::Type_Tag<T> tag)
+        -> const Type*
+    {
+        return intern(
+            detail::value_components_access_factory(this_tag, tag),
+            { AggregateType::String, string_type_id_of(tag) });
     }
 
     template <typename T>
@@ -310,6 +324,34 @@ private:
     const Type* type_;
 };
 
+class StringT final
+{
+public:
+    StringT(const Type*) noexcept;
+
+    auto id() const noexcept -> StringTypeId;
+
+    template <typename F, typename... Args>
+    auto visit(F&& f, Args... args) const
+    {
+        switch(id())
+        {
+        case StringTypeId::String:
+            return std::invoke(std::forward<F>(f),
+                               common::Type<std::string>,
+                               std::forward<Args>(args)...);
+        case StringTypeId::StringView:
+            return std::invoke(std::forward<F>(f),
+                               common::Type<std::string_view>,
+                               std::forward<Args>(args)...);
+        }
+        __builtin_unreachable();
+    }
+
+private:
+    const Type* type_;
+};
+
 class TupleT;
 
 class StructT final
@@ -368,6 +410,9 @@ auto visit(const Type* type, F&& f, Args&&... args)
         case AggregateType::Scalar:
             return std::invoke(
                 std::forward<F>(f), ScalarT(type), std::forward<Args>(args)...);
+        case AggregateType::String:
+            return std::invoke(
+                std::forward<F>(f), StringT(type), std::forward<Args>(args)...);
         case AggregateType::Struct:
             return std::invoke(
                 std::forward<F>(f), StructT(type), std::forward<Args>(args)...);

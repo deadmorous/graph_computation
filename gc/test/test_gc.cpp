@@ -11,7 +11,7 @@
 #include <ranges>
 
 
-// using namespace std::string_view_literals;
+using namespace std::literals;
 
 namespace {
 
@@ -345,6 +345,45 @@ TEST(Gc, Scalar)
 
     auto& ival = val.as<int32_t>();
     EXPECT_EQ(ival, 123);
+}
+
+TEST(Gc, String)
+{
+    auto check = [](const gc::Value& val,
+                    auto tag,
+                    std::string_view expected_val)
+    {
+        EXPECT_EQ(val.type(), gc::type_of(tag));
+        EXPECT_EQ(val.as(tag), expected_val);
+
+        auto as_s = val.convert_to<std::string>();
+        static_assert(std::same_as<decltype(as_s), std::string>);
+        EXPECT_EQ(as_s, expected_val);
+
+        auto as_sv = val.convert_to<std::string_view>();
+        static_assert(std::same_as<decltype(as_sv), std::string_view>);
+        EXPECT_EQ(as_sv, expected_val);
+
+        EXPECT_THROW(val.convert_to<int>(), std::invalid_argument);
+    };
+
+    constexpr auto ts = common::Type<std::string>;
+    constexpr auto tsv = common::Type<std::string_view>;
+    constexpr auto sv1 = "asd"sv;
+    constexpr auto sv2 = "qwe"sv;
+
+    auto v1_s_from_s = gc::Value(ts, std::string(sv1));
+    auto v2_sv_from_sv = gc::Value(tsv, sv2);
+
+    // Should NOT compile
+    // auto v2_sv_from_s = gc::Value(tsv, std::string(sv2));
+
+    // Should compile
+    auto v2_s_from_sv = gc::Value(ts, sv2);
+
+    check(v1_s_from_s, ts, sv1);
+    check(v2_sv_from_sv, tsv, sv2);
+    check(v2_s_from_sv, ts, sv2);
 }
 
 TEST(Gc, DynamicValueAccess)

@@ -284,6 +284,17 @@ struct ValueComponents<Type, T>
     }
 };
 
+template <typename Type, StringType T>
+struct ValueComponents<Type, T>
+{
+    template <common::MaybeConst<T> U, typename F>
+    static auto dispatch(ValuePathView path, U& data, F&& f)
+    {
+        assert(path.empty());
+        return std::invoke(std::forward<F>(f), data, common::Type<T>);
+    }
+};
+
 
 
 template <typename T>

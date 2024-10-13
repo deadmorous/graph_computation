@@ -64,6 +64,10 @@ struct AggregatePrinter final
         -> void
     { s << magic_enum::enum_name(t.id()); }
 
+    auto operator()(const StringT& t)
+        -> void
+    { s << magic_enum::enum_name(t.id()); }
+
     auto operator()(const StructT& t)
         -> void
     {
@@ -211,6 +215,14 @@ ScalarT::ScalarT(const Type* type) noexcept :
 auto ScalarT::id() const noexcept
     -> ScalarTypeId
 { return static_cast<ScalarTypeId>(type_->storage()[2]); }
+
+StringT::StringT(const Type* type) noexcept :
+    type_{ type }
+{ assert(agg_type(type_) == AggregateType::String); }
+
+auto StringT::id() const noexcept
+    -> StringTypeId
+{ return static_cast<StringTypeId>(type_->storage()[2]); }
 
 StructT::StructT(const Type* type) noexcept :
     type_{ type }

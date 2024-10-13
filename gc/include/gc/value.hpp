@@ -22,6 +22,16 @@ public:
     Value(common::Type_Tag<T> tag, V&& value) :
         type_{ Type::of(tag) },
         data_{ T(std::forward<V>(value)) }
+    {
+        static_assert(!(
+            std::same_as<T, std::string_view> &&
+            std::same_as<std::remove_cvref_t<V>, std::string>),
+            "Cannot construct string view from string because of potentially "
+            "dangling string view");
+    }
+
+    Value(common::Type_Tag<std::string> tag, std::string_view value) :
+        Value(tag, std::string(value))
     {}
 
     /* implicit */ Value(const Value&) = default;
@@ -105,6 +115,20 @@ public:
             gc::ScalarT(type_).visit_numeric(
                 [&](auto tag) -> T
                 { return static_cast<T>(as(tag)); });
+    }
+
+    template <StringType T>
+    auto convert_to(common::Type_Tag<T> = {}) const
+        -> T
+    {
+        if(type_->aggregate_type() != gc::AggregateType::String)
+            common::throw_<std::invalid_argument>(
+                "Value::convert_to: Expected a string argument, got ", type_);
+
+        return
+            gc::StringT(type_).visit(
+                [&](auto tag) -> T
+                { return T{ as(tag) }; });
     }
 
 private:
