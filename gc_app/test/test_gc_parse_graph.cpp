@@ -6,7 +6,7 @@
 #include "gc/graph_computation.hpp"
 #include "gc/yaml/parse_graph.hpp"
 
-#include <yaml-cpp/yaml.h>
+#include "yaml-cpp/yaml.h"
 
 #include <gtest/gtest.h>
 
@@ -16,54 +16,51 @@ TEST(GcApp, ParseGraph)
     // Graph definition in the YAML format
     constexpr auto* config_text = R"(
 nodes:
-    - name:  img_size
-      type:  source_param
-      init:
-        - type: UintSize
-          value:
-            width: 600
-            height: 500
+  - name:  img_size
+    type:  source_param
+    init:
+      - type: UintSize
+        value:
+          width: 600
+          height: 500
 
-    - name:  img_size_w
-      type:  source_param
-      init:
-        - type: ValuePath
-          value: /width
+  - name:  img_size_w
+    type:  source_param
+    init:
+      - type: ValuePath
+        value: /width
 
-    - name:  img_size_h
-      type:  source_param
-      init:
-        - type: ValuePath
-          value: /height
+  - name:  img_size_h
+    type:  source_param
+    init:
+      - type: ValuePath
+        value: /height
 
-    - name: pw
-      type: project
+  - name: pw
+    type: project
 
-    - name: ph
-      type: project
+  - name: ph
+    type: project
 
-    - name: seq_size
-      type: multiply
+  - name: seq_size
+    type: multiply
 
-    - name: sieve
-      type: eratosthenes_sieve
+  - name: sieve
+    type: eratosthenes_sieve
 
-    - name: view
-      type: rect_view
-      attr:
-        show:
-            type: bool
-            value: true
+  - name: view
+    type: rect_view
+
 edges:
-    - [img_size.0,          pw.value]
-    - [img_size_w.out_0,    pw.path]
-    - [img_size,            ph.value]
-    - [img_size_h,          ph.path]
-    - [pw.projection,       seq_size.lhs]
-    - [ph.projection,       seq_size.rhs]
-    - [seq_size.product,    sieve.count]
-    - [img_size,            view.size]
-    - [sieve.sequence,      view.sequence]
+  - [img_size.0,          pw.value]
+  - [img_size_w.out_0,    pw.path]
+  - [img_size,            ph.value]
+  - [img_size_h,          ph.path]
+  - [pw.projection,       seq_size.lhs]
+  - [ph.projection,       seq_size.rhs]
+  - [seq_size.product,    sieve.count]
+  - [img_size,            view.size]
+  - [sieve.sequence,      view.sequence]
 )";
 
     // Initialize node registry and type registry
