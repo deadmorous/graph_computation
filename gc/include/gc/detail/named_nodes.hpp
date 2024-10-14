@@ -9,6 +9,6 @@
 namespace gc::detail {
 
 using NamedNodes =
-    std::unordered_map<std::string, const Node*>;
+    std::unordered_map<std::string, Node*>;
 
 } // namespace gc::detail

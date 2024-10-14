@@ -16,7 +16,7 @@ auto parse_graph(const YAML::Node& config,
     -> std::pair< Graph, detail::NamedNodes >
 {
     auto g = Graph{};
-    auto node_map = std::unordered_map<std::string, const Node*>{};
+    auto node_map = detail::NamedNodes{};
     for (auto node : config["nodes"])
     {
         auto name = node["name"].as<std::string>();
