@@ -7,7 +7,8 @@ enable_testing()
 add_executable(
     gc-lib-test
     main.cpp
-    test_gc.cpp)
+    test_gc.cpp
+    test_gc_nodes.cpp)
 
 target_link_libraries(
     gc-lib-test

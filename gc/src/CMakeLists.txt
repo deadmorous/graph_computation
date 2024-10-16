@@ -7,6 +7,8 @@ add_library(gc-lib STATIC
     expect_n_node_args.cpp
     graph_computation.cpp
     node_port_names.cpp
+    node_registry.cpp
+    source_param.cpp
     type.cpp
     type_registry.cpp
     value_path.cpp

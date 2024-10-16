@@ -1,5 +1,5 @@
 #include "gc_app/node_registry.hpp"
-#include "gc_app/source_param.hpp"
+#include "gc/source_param.hpp"
 #include "gc_app/image.hpp"
 #include "gc_app/type_registry.hpp"
 
@@ -64,7 +64,9 @@ edges:
 )";
 
     // Initialize node registry and type registry
-    auto node_registry = gc_app::node_registry();
+    auto node_registry = gc::node_registry();
+    gc_app::populate_node_registry(node_registry);
+
     auto type_registry = gc::type_registry();
     gc_app::populate_type_registry(type_registry);
 
@@ -87,7 +89,7 @@ edges:
     // Check parameters passed to some node factories
     EXPECT_EQ(img_size->output_count(), 1);
     gc::ValueVec img_size_inputs( 1 );
-    gc_app::InputParameters::get(img_size)
+    gc::InputParameters::get(img_size)
         ->get_inputs(img_size_inputs);
     auto size =
         img_size_inputs[0].as<gc_app::UintSize>();

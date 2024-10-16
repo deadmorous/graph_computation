@@ -1,4 +1,4 @@
-#include "gc_app/source_param.hpp"
+#include "gc/source_param.hpp"
 
 #include "gc/node.hpp"
 #include "gc/node_port_names.hpp"
@@ -6,14 +6,14 @@
 
 #include "common/throw.hpp"
 
-namespace gc_app {
+namespace gc {
 
 class SourceParam final :
-    public gc::Node,
+    public Node,
     public InputParameters
 {
 public:
-    explicit SourceParam(gc::ConstValueSpan param) :
+    explicit SourceParam(ConstValueSpan param) :
         param_( param.begin(), param.end() ),
         out_names_(param.size())
     {}
@@ -26,12 +26,12 @@ public:
         -> common::ConstNameSpan
     { return out_names_(); }
 
-    auto default_inputs(gc::ValueSpan result) const
+    auto default_inputs(ValueSpan result) const
         -> void
     {}
 
-    auto compute_outputs(gc::ValueSpan result,
-                         gc::ConstValueSpan inputs) const
+    auto compute_outputs(ValueSpan result,
+                         ConstValueSpan inputs) const
         -> void
     {
         assert(inputs.empty());
@@ -39,14 +39,14 @@ public:
     }
 
 
-    auto get_inputs(gc::ValueSpan inputs) const
+    auto get_inputs(ValueSpan inputs) const
         -> void
     {
         assert(inputs.size() == param_.size());
         std::copy(param_.begin(), param_.end(), inputs.begin());
     }
 
-    auto set_inputs(gc::ConstValueSpan inputs)
+    auto set_inputs(ConstValueSpan inputs)
         -> void
     {
         if (inputs.size() != param_.size())
@@ -59,14 +59,14 @@ public:
     }
 
 private:
-    gc::ValueVec param_;
-    gc::DynamicOutputNames out_names_;
+    ValueVec param_;
+    DynamicOutputNames out_names_;
 };
 
-auto make_source_param(gc::ConstValueSpan args)
-    -> std::shared_ptr<gc::Node>
+auto make_source_param(ConstValueSpan args)
+    -> std::shared_ptr<Node>
 {
     return std::make_shared<SourceParam>(args);
 }
 
-} // namespace gc_app
+} // namespace gc
