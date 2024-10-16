@@ -1,5 +1,7 @@
 #include "gc_visual/bitmap_view.hpp"
 
+#include "gc_app/image.hpp"
+
 #include <QPainter>
 
 namespace {
@@ -24,18 +26,19 @@ auto to_qimage(const gc_app::Image& image)
 } // anonymous namespace
 
 
-BitmapView::BitmapView(const gc_app::Image& image,
-                       QWidget* parent) :
-    QWidget{ parent },
-    img_{ to_qimage(image) }
+BitmapView::BitmapView(QWidget* parent) :
+    QWidget{ parent }
 {
     // TODO
     setMinimumSize(200, 200);
 }
 
-auto BitmapView::image()
-    -> QImage&
-{ return img_; }
+auto BitmapView::set_image(const gc::Value& image)
+    -> void
+{
+    img_ = to_qimage(image.as<gc_app::Image>());
+    update();
+}
 
 auto BitmapView::paintEvent(QPaintEvent*)
     -> void

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gc_app/image.hpp"
+#include "gc/value_fwd.hpp"
 
 #include <QImage>
 #include <QWidget>
@@ -10,11 +10,11 @@ class BitmapView
 {
 Q_OBJECT
 public:
-    explicit BitmapView(const gc_app::Image& image,
-                        QWidget* parent = nullptr);
+    explicit BitmapView(QWidget* parent = nullptr);
 
-    auto image()
-        -> QImage&;
+public slots:
+    auto set_image(const gc::Value& image)
+        -> void;
 
 protected:
     auto paintEvent(QPaintEvent*)

@@ -1,67 +1,83 @@
 #include "gc_visual/mainwindow.hpp"
 
-#include "gc_app/node_registry.hpp"
-
-#include "gc/graph_computation.hpp"
-
 #include <QApplication>
+
+#include <iostream>
 
 
 using namespace std::string_view_literals;
+
+constexpr auto* example_config_text = R"(
+graph:
+  nodes:
+    - name:  img_size
+      type:  source_param
+      init:
+        - type: UintSize
+          value:
+            width: 600
+            height: 500
+
+    - name:  img_size_w
+      type:  source_param
+      init:
+        - type: ValuePath
+          value: /width
+
+    - name:  img_size_h
+      type:  source_param
+      init:
+        - type: ValuePath
+          value: /height
+
+    - name: pw
+      type: project
+
+    - name: ph
+      type: project
+
+    - name: seq_size
+      type: multiply
+
+    - name: sieve
+      type: eratosthenes_sieve
+
+    - name: view
+      type: rect_view
+  edges:
+    - [img_size.0,          pw.value]
+    - [img_size_w.out_0,    pw.path]
+    - [img_size,            ph.value]
+    - [img_size_h,          ph.path]
+    - [pw.projection,       seq_size.lhs]
+    - [ph.projection,       seq_size.rhs]
+    - [seq_size.product,    sieve.count]
+    - [img_size,            view.size]
+    - [sieve.sequence,      view.sequence]
+
+layout:
+  type: horizontal_layout
+  items:
+    - type: vertical_layout
+      items:
+      - type: spin
+        bind:
+          node: img_size
+          index: 0
+          path: /width
+        range: [1, 5000]
+    - type: image
+      bind: view
+)";
 
 auto run(int argc, char *argv[])
     -> int
 {
     QApplication a(argc, argv);
 
-    auto obj_reg =
-        gc_app::node_registry();
-
-    auto img_size =
-        obj_reg.at("source_param")
-        (gc::ValueVec{gc_app::UintSize(500, 500)});
-    auto img_size_w =
-        obj_reg.at("source_param")
-        (gc::ValueVec{ gc::ValuePath{} / "width"sv });
-    auto img_size_h =
-        obj_reg.at("source_param")
-        (gc::ValueVec{ gc::ValuePath{} / "height"sv });
-
-    auto pw = obj_reg.at("project")({});
-    auto ph = obj_reg.at("project")({});
-
-    auto seq_size = obj_reg.at("multiply")({});
-    auto sieve = obj_reg.at("eratosthenes_sieve")({});
-    auto view = obj_reg.at("rect_view")({});
-
-    using NodeVec = std::vector<gc::NodePtr>;
-
-    using EE = gc::EdgeEnd;
-    auto g = gc::Graph{
-        .nodes = { img_size,
-                   img_size_w, img_size_h, pw, ph, seq_size,
-                   sieve, view },
-        .edges = {{EE{img_size.get(), 0}, EE{pw.get(), 0}},
-                  {EE{img_size_w.get(), 0}, EE{pw.get(), 1}},
-
-                  {EE{img_size.get(), 0}, EE{ph.get(), 0}},
-                  {EE{img_size_h.get(), 0}, EE{ph.get(), 1}},
-
-                  {EE{pw.get(), 0}, EE{seq_size.get(), 0}},
-                  {EE{ph.get(), 0}, EE{seq_size.get(), 1}},
-
-                  {EE{seq_size.get(), 0}, EE{sieve.get(), 0}},
-                  {EE{img_size.get(), 0}, EE{view.get(), 0}},
-                  {EE{sieve.get(), 0}, EE{view.get(), 1}}
-        }
-    };
-
-    auto instr = compile(g);
-    auto result = gc::ComputationResult{};
-    compute(result, g, instr.get());
-    const auto& image = group(result.outputs,7)[0].as<gc_app::Image>();
-
-    MainWindow w(image);
+    MainWindow w({
+        .type = gc_visual::ConfigSpecificationType::Content,
+        .spec = example_config_text });
     w.show();
 
     return a.exec();
