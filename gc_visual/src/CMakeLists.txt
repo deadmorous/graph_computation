@@ -14,6 +14,9 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 set(PROJECT_SOURCES
     bitmap_view.cpp             ../include/gc_visual/bitmap_view.hpp
+    graph_broker.cpp            ../include/gc_visual/graph_broker.hpp
+    graph_parameter_editor.cpp  ../include/gc_visual/graph_parameter_editor.hpp
+    graph_output_visualizer.cpp ../include/gc_visual/graph_output_visualizer.hpp
     main.cpp
     mainwindow.cpp              ../include/gc_visual/mainwindow.hpp
     simple_presentation.cpp
@@ -25,7 +28,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(gc_visual
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-    )
+)
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET gc_visual APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
 #                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
