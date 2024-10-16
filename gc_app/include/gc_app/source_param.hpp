@@ -18,8 +18,8 @@ struct InputParameters
 
     template <common::MaybeConst<gc::Node> Node>
     static auto get(Node* node)
-        -> InputParameters*
-    { return dynamic_cast<common::AsConstAs<Node, InputParameters*>>(node); }
+        -> common::AsConstAs<Node, InputParameters>*
+    { return dynamic_cast<common::AsConstAs<Node, InputParameters>*>(node); }
 };
 
 auto make_source_param(gc::ConstValueSpan)
