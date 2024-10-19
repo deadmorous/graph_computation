@@ -73,8 +73,11 @@ GraphParameterEditor::GraphParameterEditor(const std::string& type,
     auto node_name = bind_node["node"].as<std::string>();
 
     node_ = broker->node(node_name);
-    index_ = bind_node["index"].as<uint32_t>();
-    path_ = gc::ValuePath::from_string(bind_node["path"].as<std::string>());
+
+    if (auto index_node = bind_node["index"])
+        index_ = index_node.as<uint32_t>();
+    if (auto path_node = bind_node["path"])
+        path_ = gc::ValuePath::from_string(path_node.as<std::string>());
 
     auto param_spec =
         gc::ParameterSpec{ node_, index_, path_ };
