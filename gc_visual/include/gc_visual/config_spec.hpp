@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include <string>
+#include <QString>
 
 namespace gc_visual {
 
@@ -14,7 +14,7 @@ enum class ConfigSpecificationType : uint8_t
 struct ConfigSpecification
 {
     ConfigSpecificationType type;
-    std::string spec;
+    QString spec;
 };
 
 } // namespace gc_visual
