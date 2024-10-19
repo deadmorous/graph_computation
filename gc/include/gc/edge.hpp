@@ -12,6 +12,7 @@ struct EdgeEnd final
 {
     const Node*             node;
     uint32_t                port;
+    auto operator==(const EdgeEnd& that) const noexcept -> bool = default;
 };
 
 using Edge = std::array<EdgeEnd, 2>;
