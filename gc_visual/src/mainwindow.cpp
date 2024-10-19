@@ -125,6 +125,8 @@ MainWindow::MainWindow(const gc_visual::ConfigSpecification& spec,
                        QWidget *parent)
     : QMainWindow(parent)
 {
+    resize(800, 600);
+
     // Parse YAML config
     auto config = load_config(spec);
 
