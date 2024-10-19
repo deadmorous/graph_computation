@@ -8,6 +8,7 @@ add_library(gc_app-lib STATIC
     node_registry.cpp
     rect_view.cpp
     project.cpp
+    spiral_view.cpp
     test_sequence.cpp
     type_registry.cpp)
 
