@@ -37,9 +37,17 @@ auto BitmapView::set_image(const gc::Value& image)
     update();
 }
 
+auto BitmapView::set_scale(double scale)
+    -> void
+{
+    scale_ = scale;
+    update();
+}
+
 auto BitmapView::paintEvent(QPaintEvent*)
     -> void
 {
     auto p = QPainter{ this };
+    p.scale(scale_, scale_);
     p.drawImage(QPoint{0, 0}, img_);
 }

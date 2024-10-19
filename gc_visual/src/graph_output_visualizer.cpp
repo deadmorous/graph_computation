@@ -5,6 +5,7 @@
 
 #include "gc/detail/parse_node_port.hpp"
 
+#include <QSlider>
 #include <QVBoxLayout>
 
 
@@ -28,8 +29,16 @@ GraphOutputVisualizer::GraphOutputVisualizer(const std::string& type,
                                     broker->named_nodes(),
                                     gc::Output);
 
+    auto slider = new QSlider{ Qt::Horizontal };
+    slider->setMinimum(1);
+    slider->setMaximum(100);
+    layout->addWidget(slider);
+
     view_ = new BitmapView{};
     layout->addWidget(view_);
+
+    connect(slider, &QSlider::valueChanged,
+            [this](int pos) { view_->set_scale(1. + (pos-1)/10.); });
 
     connect(broker, &GraphBroker::output_updated,
             this, &GraphOutputVisualizer::on_output_updated);
