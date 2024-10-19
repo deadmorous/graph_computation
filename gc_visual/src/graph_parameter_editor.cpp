@@ -1,5 +1,7 @@
 #include "gc_visual/graph_parameter_editor.hpp"
 
+#include "gc/node.hpp"
+
 #include "common/throw.hpp"
 
 #include "yaml-cpp/yaml.h"
@@ -108,7 +110,12 @@ GraphParameterEditor::GraphParameterEditor(const std::string& type,
 
     auto layout = new QVBoxLayout{};
     setLayout(layout);
-    auto* label = new QLabel(QString::fromUtf8(node_name.c_str()));
+    auto label_text = node_name;
+    if (node_->output_count() != 1)
+        label_text += common::format('[', index_, ']');
+    if (!path_.empty())
+        label_text += common::format(path_);
+    auto* label = new QLabel(QString::fromUtf8(label_text.c_str()));
     label->setBuddy(res_.get());
     layout->addWidget(label);
     layout->addWidget(res_.get());
