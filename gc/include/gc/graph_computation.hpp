@@ -29,4 +29,25 @@ auto compute(ComputationResult& result,
              const ComputationInstructions* instructions)
     -> void;
 
+struct Computation final
+{
+    Graph graph;
+    ComputationInstructionsPtr instr;
+    ComputationResult result;
+};
+
+inline auto computation(Graph g)
+    -> Computation
+{
+    auto instr = compile(g);
+
+    return {
+        .graph = std::move(g),
+        .instr = instr };
+}
+
+inline auto compute(Computation& computation)
+    -> void
+{ compute(computation.result, computation.graph, computation.instr.get()); }
+
 } // namespace gc
