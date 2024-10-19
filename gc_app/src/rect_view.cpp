@@ -55,9 +55,9 @@ public:
             auto value = seq[index];
             if (value != 0)
             {
-                // *pixel = rgba(0xff, 0xff, 0xff);
                 auto v = value*d;
                 image.data[index] = rgba(0xff, 0xff-v, 0xff-v);
+                // image.data[index] = rgba(0, 0, 0);
             }
         }
 

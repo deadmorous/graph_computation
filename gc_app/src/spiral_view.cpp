@@ -62,7 +62,8 @@ public:
 
         auto c = 0.5 / std::numbers::pi * scale;
         auto c_2 = 0.5 * c;
-        auto R = (size.width + size.height) / 4;
+        auto rx = size.width / 2;
+        auto ry = size.height / 2;
 
         auto arc_length = [&](double phi)
         {
@@ -73,12 +74,12 @@ public:
         auto* pixel = image.data.data();
         for (uint32_t row=0; row<size.height; ++row)
         {
-            auto y = static_cast<double>(row) - R;
+            auto y = static_cast<double>(row) - ry;
             auto y2 = y*y;
 
             for (uint32_t col=0; col<size.width; ++col, ++pixel)
             {
-                auto x = static_cast<double>(col) - R;
+                auto x = static_cast<double>(col) - rx;
                 auto x2 = x*x;
 
                 auto r = sqrt(x2 + y2);
