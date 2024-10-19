@@ -261,6 +261,7 @@ public:
     ScalarT(const Type*) noexcept;
     auto type() const noexcept -> const Type*;
     auto id() const noexcept -> ScalarTypeId;
+    auto name() const noexcept -> std::string_view;
 
     template <typename F, typename... Args>
     auto visit(F&& f, Args&&... args) const
@@ -332,8 +333,8 @@ class StringT final
 public:
     StringT(const Type*) noexcept;
     auto type() const noexcept -> const Type*;
-
     auto id() const noexcept -> StringTypeId;
+    auto name() const noexcept -> std::string_view;
 
     template <typename F, typename... Args>
     auto visit(F&& f, Args... args) const

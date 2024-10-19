@@ -4,8 +4,6 @@
 
 #include <algorithm>
 #include <cstring>
-// #include <numeric>
-// #include <ranges>
 #include <set>
 
 
@@ -62,11 +60,11 @@ struct AggregatePrinter final
 
     auto operator()(const ScalarT& t)
         -> void
-    { s << magic_enum::enum_name(t.id()); }
+    { s << t.name(); }
 
     auto operator()(const StringT& t)
         -> void
-    { s << magic_enum::enum_name(t.id()); }
+    { s << t.name(); }
 
     auto operator()(const StructT& t)
         -> void
@@ -230,6 +228,10 @@ auto ScalarT::id() const noexcept
     -> ScalarTypeId
 { return static_cast<ScalarTypeId>(type_->storage()[2]); }
 
+auto ScalarT::name() const noexcept
+    -> std::string_view
+{ return magic_enum::enum_name(id()); }
+
 
 StringT::StringT(const Type* type) noexcept :
     type_{ type }
@@ -242,6 +244,9 @@ auto StringT::type() const noexcept
 auto StringT::id() const noexcept
     -> StringTypeId
 { return static_cast<StringTypeId>(type_->storage()[2]); }
+
+auto StringT::name() const noexcept -> std::string_view
+{ return magic_enum::enum_name(id()); }
 
 
 StructT::StructT(const Type* type) noexcept :
