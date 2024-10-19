@@ -76,8 +76,7 @@ auto ValuePathItem::from_string(std::string_view s)
 auto operator<<(std::ostream& s, const ValuePath& path)
     -> std::ostream&
 {
-    s << '/';
-    common::format_seq(path, "/");
+    s << '/' << common::format_seq(path, "/");
     return s;
 }
 
