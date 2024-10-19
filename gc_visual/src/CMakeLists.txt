@@ -19,6 +19,7 @@ set(PROJECT_SOURCES
     graph_output_visualizer.cpp ../include/gc_visual/graph_output_visualizer.hpp
     main.cpp
     mainwindow.cpp              ../include/gc_visual/mainwindow.hpp
+    parse_layout.cpp
     simple_presentation.cpp
     spiral_presentation.cpp
 )

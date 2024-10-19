@@ -2,10 +2,6 @@
 
 #include "gc/graph_computation.hpp"
 
-// #include "gc_app/image.hpp"
-
-// #include "yaml-cpp/node/node.h"
-
 #include "config_spec.hpp"
 
 #include <QMainWindow>
@@ -23,6 +19,9 @@ public:
                         QWidget *parent = nullptr);
 
 private:
+    auto load(const gc_visual::ConfigSpecification& spec)
+        -> void;
+
     gc::Computation computation_;
     GraphBroker* graph_broker_;
 };
