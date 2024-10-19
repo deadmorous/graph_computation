@@ -5,6 +5,7 @@
 #include <cassert>
 #include <map>
 #include <memory>
+#include <optional>
 #include <string_view>
 
 
@@ -28,9 +29,11 @@ public:
     }
 
     auto maybe_at(std::string_view name) const noexcept
-        -> T
+        -> std::optional<T>
     {
         auto it = storage_.find(name);
+        if (it == storage_.end())
+            return std::nullopt;
         return it->second;
     }
 
@@ -38,10 +41,10 @@ public:
         -> T
     {
         auto result = maybe_at(name);
-        if (result)
-            return result;
+        if (result.has_value())
+            return *result;
         throw_<std::domain_error>(
-            "No factory is registered for name '", name, "'");
+            "No value is registered for name '", name, "'");
     }
 
     auto size() const noexcept
