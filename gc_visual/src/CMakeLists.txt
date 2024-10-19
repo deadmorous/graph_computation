@@ -20,8 +20,6 @@ set(PROJECT_SOURCES
     main.cpp
     mainwindow.cpp              ../include/gc_visual/mainwindow.hpp
     parse_layout.cpp
-    simple_presentation.cpp
-    spiral_presentation.cpp
 )
 
 
