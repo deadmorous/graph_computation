@@ -68,10 +68,21 @@ auto parse_layout_item(GraphBroker* broker,
     -> void
 {
     auto type = item_node["type"].as<std::string>();
+
     if (type == "horizontal_layout")
         parse_nested_layout(new QHBoxLayout{}, broker, item_node, parent_item);
     else if (type == "vertical_layout")
         parse_nested_layout(new QVBoxLayout{}, broker, item_node, parent_item);
+    else if (type == "stretch")
+    {
+        auto layout = qobject_cast<QBoxLayout*>(parent_item->layout());
+        if (!layout)
+            common::throw_("Cannot insert a stretch into a widget");
+        int value = 0;
+        if (auto value_node = item_node["value"])
+            value = value_node.as<int>();
+        layout->addStretch(value);
+    }
     else
     {
         QWidget* widget = nullptr;

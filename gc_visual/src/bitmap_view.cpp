@@ -28,10 +28,7 @@ auto to_qimage(const gc_app::Image& image)
 
 BitmapView::BitmapView(QWidget* parent) :
     QWidget{ parent }
-{
-    // TODO
-    setMinimumSize(200, 200);
-}
+{}
 
 auto BitmapView::set_image(const gc::Value& image)
     -> void

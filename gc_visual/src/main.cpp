@@ -66,6 +66,7 @@ layout:
           index: 0
           path: /width
         range: [1, 5000]
+      - type: stretch
     - type: image
       bind: view
 )";

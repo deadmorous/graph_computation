@@ -5,6 +5,8 @@
 
 #include "gc/detail/parse_node_port.hpp"
 
+#include <QVBoxLayout>
+
 
 GraphOutputVisualizer::GraphOutputVisualizer(const std::string& type,
                                              GraphBroker* broker,
@@ -13,6 +15,10 @@ GraphOutputVisualizer::GraphOutputVisualizer(const std::string& type,
     QWidget{ parent },
     broker_{ broker }
 {
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    auto* layout = new QVBoxLayout{};
+    setLayout(layout);
+
     assert(type == "image");
 
     // Resolve output port binding
@@ -22,7 +28,8 @@ GraphOutputVisualizer::GraphOutputVisualizer(const std::string& type,
                                     broker->named_nodes(),
                                     gc::Output);
 
-    view_ = new BitmapView(this);
+    view_ = new BitmapView{};
+    layout->addWidget(view_);
 
     connect(broker, &GraphBroker::output_updated,
             this, &GraphOutputVisualizer::on_output_updated);
