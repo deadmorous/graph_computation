@@ -42,7 +42,7 @@ auto operator<<(std::ostream& s, const IndexEdge& e)
 
 } // anonymous namespace
 
-struct ComputationInstructions
+struct ComputationInstructions final
 {
     common::Grouped<uint32_t>       nodes;
     common::Grouped<IndexEdge>      edges;

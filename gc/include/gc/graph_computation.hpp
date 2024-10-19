@@ -18,7 +18,7 @@ auto operator<<(std::ostream& s, const ComputationInstructions& instructions)
 auto compile(const Graph& g)
     -> ComputationInstructionsPtr;
 
-struct ComputationResult
+struct ComputationResult final
 {
     common::Grouped<Value> inputs;
     common::Grouped<Value> outputs;
