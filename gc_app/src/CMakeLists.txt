@@ -3,10 +3,12 @@ cmake_minimum_required(VERSION 3.5)
 project(gc-lib LANGUAGES CXX)
 
 add_library(gc_app-lib STATIC
+    color.cpp
     eratosthenes_sieve.cpp
     multiply.cpp
     node_registry.cpp
     rect_view.cpp
+    palette.cpp
     project.cpp
     spiral_view.cpp
     test_sequence.cpp

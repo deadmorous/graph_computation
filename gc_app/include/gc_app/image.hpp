@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gc_app/color.hpp"
 #include "gc_app/types.hpp"
 
 namespace gc_app {
@@ -36,28 +37,10 @@ constexpr inline auto field_names_of(common::Type_Tag<Size<T>>)
 
 using UintSize = Size<Uint>;
 
-// ---
-
-inline auto rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 0xff)
-    -> uint32_t
-{
-    return
-          (uint32_t{a} << 24)
-        | (uint32_t{r} << 16)
-        | (uint32_t{g} <<  8)
-        | (uint32_t{b});
-}
-
-inline auto rgba(uint32_t rgb, uint8_t a = 0xff)
-    -> uint32_t
-{ return (uint32_t{a} << 24) | (rgb & 0xffffff); }
-
-// ---
-
 struct Image final
 {
     UintSize                size;
-    std::vector<uint32_t>   data;
+    std::vector<Color>      data;
 };
 
 } // namespace gc_app
