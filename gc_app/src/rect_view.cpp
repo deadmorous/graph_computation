@@ -1,6 +1,7 @@
 #include "gc_app/rect_view.hpp"
 
 #include "gc_app/image.hpp"
+#include "gc_app/palette.hpp"
 
 #include "gc/expect_n_node_args.hpp"
 #include "gc/node.hpp"
@@ -17,7 +18,10 @@ class RectView final :
 public:
     auto input_names() const
         -> common::ConstNameSpan
-    { return gc::node_input_names<RectView>( "size"sv, "sequence"sv ); }
+    {
+        return gc::node_input_names<RectView>(
+            "size"sv, "sequence"sv, "palette"sv);
+    }
 
     auto output_names() const
         -> common::ConstNameSpan
@@ -26,9 +30,13 @@ public:
     auto default_inputs(gc::ValueSpan result) const
         -> void
     {
-        assert(result.size() == 2);
+        assert(result.size() == 3);
         result[0] = UintSize(100, 100);
         result[1] = UintVec(10000, 1);
+        result[2] = IndexedPalette{
+            .color_map = { rgba(0xffffff) },
+            .overflow_color = rgba(0)
+        };
     }
 
     auto compute_outputs(
@@ -36,29 +44,22 @@ public:
             gc::ConstValueSpan inputs) const
         -> void
     {
-        assert(inputs.size() == 2);
+        assert(inputs.size() == 3);
         assert(result.size() == 1);
         const auto& size = inputs[0].as<UintSize>();
         const auto& seq = inputs[1].as<UintVec>();
+        const auto& palette = inputs[2].as<IndexedPalette>();
         auto image = Image
         {
             .size = size,
             .data = UintVec(size.width * size.height, rgba(0, 0))
         };
 
-        auto N = *std::max_element(seq.begin(), seq.end());
-        auto d = 0xff / N;
-
         auto n = std::min(image.data.size(), seq.size());
         for(size_t index=0; index<n; ++index)
         {
             auto value = seq[index];
-            if (value != 0)
-            {
-                auto v = value*d;
-                image.data[index] = rgba(0xff, 0xff-v, 0xff-v);
-                // image.data[index] = rgba(0, 0, 0);
-            }
+            image.data[index] = map_color(palette, value);
         }
 
         result[0] = std::move(image);
