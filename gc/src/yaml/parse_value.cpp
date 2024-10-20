@@ -9,37 +9,57 @@
 
 #include <charconv>
 
+using namespace std::string_view_literals;
+
 namespace gc::yaml {
 
 namespace {
 
+template <typename T, typename... Fcargs>
+requires (std::is_integral_v<T> || std::is_floating_point_v<T>)
+auto parse_as_decimal(common::Type_Tag<T>, std::string_view s, Fcargs... fcargs)
+    -> T
+{
+    auto result = T{};
+    auto fcres = std::from_chars(s.begin(), s.end(), result, fcargs...);
+
+    if (fcres.ec == std::errc::invalid_argument)
+        common::throw_(
+            "Failed to parse scalar of type ", type_of<T>(),
+            " from string '", s, "' - not a number");
+
+    else if (fcres.ec == std::errc::result_out_of_range)
+        common::throw_(
+            "Failed to parse scalar of type ", type_of<T>(),
+            " from string '", s, "' - out of range");
+
+    assert (fcres.ec == std::error_code{});
+    if(fcres.ptr != s.end())
+        common::throw_(
+            "Failed to parse scalar of type ", type_of<T>(),
+            " from string '", s, "' - extra characters remain");
+
+    return result;
+}
+
 struct ScalarParser
 {
     template <typename T>
-    requires (std::is_integral_v<T> || std::is_floating_point_v<T>)
-    auto operator()(common::Type_Tag<T>, Value& v, std::string_view s) const
+    requires (std::is_integral_v<T>)
+    auto operator()(common::Type_Tag<T> tag, Value& v, std::string_view s) const
         -> void
     {
-        auto typed = T{};
-        auto fcres = std::from_chars(s.begin(), s.end(), typed);
-
-        if (fcres.ec == std::errc::invalid_argument)
-            common::throw_(
-                "Failed to parse scalar of type ", type_of<T>(),
-                " from string '", s, "' - not a number");
-        else if (fcres.ec == std::errc::result_out_of_range)
-            common::throw_(
-                "Failed to parse scalar of type ", type_of<T>(),
-                " from string '", s, "' - out of range");
-
-        assert (fcres.ec == std::error_code{});
-        if(fcres.ptr != s.end())
-            common::throw_(
-                "Failed to parse scalar of type ", type_of<T>(),
-                " from string '", s, "' - extra characters remain");
-
-        v = typed;
+        if (s.starts_with("0x"sv))
+            v = parse_as_decimal(tag, s.substr(2), 16);
+        else
+            v = parse_as_decimal(tag, s);
     }
+
+    template <typename T>
+    requires (std::is_floating_point_v<T>)
+    auto operator()(common::Type_Tag<T> tag, Value& v, std::string_view s) const
+        -> void
+    { v = parse_as_decimal(tag, s); }
 
     auto operator()(common::Type_Tag<bool>, Value& v, std::string_view s) const
         -> void
