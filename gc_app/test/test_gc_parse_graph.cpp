@@ -36,6 +36,14 @@ nodes:
       - type: ValuePath
         value: /height
 
+  - name: palette
+    type: source_param
+    init:
+      - type: IndexedPalette
+        value:
+          color_map: [0xffffffff]
+          overflow_color: 0xff000000
+
   - name: pw
     type: project
 
@@ -61,6 +69,7 @@ edges:
   - [seq_size.product,    sieve.count]
   - [img_size,            view.size]
   - [sieve.sequence,      view.sequence]
+  - [palette,             view.palette]
 )";
 
     // Initialize node registry and type registry
@@ -76,8 +85,8 @@ edges:
         gc::yaml::parse_graph(config, node_registry, type_registry);
 
     // Check number of nodes and edges
-    EXPECT_EQ(g.nodes.size(), 8);
-    EXPECT_EQ(g.edges.size(), 9);
+    EXPECT_EQ(g.nodes.size(), 9);
+    EXPECT_EQ(g.edges.size(), 10);
 
     // Check that nodes in the graph are in the same order as in
     // the YAML file; check `node_map` (well, the check is made for just one
@@ -102,30 +111,30 @@ edges:
     compute(result, g, instr.get());
 
     // Check computation results
-    const auto& image = group(result.outputs,7)[0].as<gc_app::Image>();
+    const auto& image = group(result.outputs,8)[0].as<gc_app::Image>();
     EXPECT_EQ(image.size.width, 600);
     EXPECT_EQ(image.size.height, 500);
     EXPECT_EQ(image.data.size(), 500 * 600);
 
-    EXPECT_EQ(image.data[0], 0);
-    EXPECT_EQ(image.data[1], 0);
-    EXPECT_EQ(image.data[2], 0);
-    EXPECT_EQ(image.data[3], 0);
-    EXPECT_NE(image.data[4], 0);
-    EXPECT_EQ(image.data[5], 0);
-    EXPECT_NE(image.data[6], 0);
-    EXPECT_EQ(image.data[7], 0);
-    EXPECT_NE(image.data[8], 0);
-    EXPECT_NE(image.data[9], 0);
-    EXPECT_NE(image.data[10], 0);
-    EXPECT_EQ(image.data[11], 0);
-    EXPECT_NE(image.data[12], 0);
-    EXPECT_EQ(image.data[13], 0);
-    EXPECT_NE(image.data[14], 0);
-    EXPECT_NE(image.data[15], 0);
-    EXPECT_NE(image.data[16], 0);
-    EXPECT_EQ(image.data[17], 0);
-    EXPECT_NE(image.data[18], 0);
-    EXPECT_EQ(image.data[19], 0);
-    EXPECT_NE(image.data[20], 0);
+    EXPECT_EQ(image.data[ 0], 0xffffffff);
+    EXPECT_EQ(image.data[ 1], 0xffffffff);
+    EXPECT_EQ(image.data[ 2], 0xffffffff);
+    EXPECT_EQ(image.data[ 3], 0xffffffff);
+    EXPECT_EQ(image.data[ 4], 0xff000000);
+    EXPECT_EQ(image.data[ 5], 0xffffffff);
+    EXPECT_EQ(image.data[ 6], 0xff000000);
+    EXPECT_EQ(image.data[ 7], 0xffffffff);
+    EXPECT_EQ(image.data[ 8], 0xff000000);
+    EXPECT_EQ(image.data[ 9], 0xff000000);
+    EXPECT_EQ(image.data[10], 0xff000000);
+    EXPECT_EQ(image.data[11], 0xffffffff);
+    EXPECT_EQ(image.data[12], 0xff000000);
+    EXPECT_EQ(image.data[13], 0xffffffff);
+    EXPECT_EQ(image.data[14], 0xff000000);
+    EXPECT_EQ(image.data[15], 0xff000000);
+    EXPECT_EQ(image.data[16], 0xff000000);
+    EXPECT_EQ(image.data[17], 0xffffffff);
+    EXPECT_EQ(image.data[18], 0xff000000);
+    EXPECT_EQ(image.data[19], 0xffffffff);
+    EXPECT_EQ(image.data[20], 0xff000000);
 }
