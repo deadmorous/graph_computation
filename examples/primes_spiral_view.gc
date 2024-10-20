@@ -26,6 +26,14 @@ graph:
         - type: F64
           value: 5
 
+    - name: palette
+      type: source_param
+      init:
+        - type: IndexedPalette
+          value:
+            color_map: [0xffffffff]
+            overflow_color: 0xff000000
+
     - name: pw
       type: project
 
@@ -51,6 +59,7 @@ graph:
     - [img_size,            view.size]
     - [sieve.sequence,      view.sequence]
     - [spiral_scale,        view.scale]
+    - [palette,             view.palette]
 
 layout:
   type: horizontal_layout

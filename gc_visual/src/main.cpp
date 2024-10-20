@@ -30,6 +30,14 @@ graph:
         - type: ValuePath
           value: /height
 
+    - name: palette
+      type: source_param
+      init:
+        - type: IndexedPalette
+          value:
+            color_map: [0xffffffff]
+            overflow_color: 0xff000000
+
     - name: pw
       type: project
 
@@ -54,6 +62,7 @@ graph:
     - [seq_size.product,    sieve.count]
     - [img_size,            view.size]
     - [sieve.sequence,      view.sequence]
+    - [palette,             view.palette]
 
 layout:
   type: horizontal_layout
