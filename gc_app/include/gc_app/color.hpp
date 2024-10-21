@@ -1,39 +1,43 @@
 #pragma once
 
+#include "common/strong.hpp"
+
 #include <array>
 #include <cstdint>
 
+
 namespace gc_app {
 
-// TODO: Make these strong types
-using ColorComponent = uint8_t;
-using Color = uint32_t;
+GCLIB_STRONG_TYPE(ColorComponent, uint8_t);
+
+GCLIB_STRONG_TYPE(Color, uint32_t);
 
 inline constexpr auto rgba(ColorComponent r,
                            ColorComponent g,
                            ColorComponent b,
-                           ColorComponent a = 0xff)
+                           ColorComponent a = ColorComponent{0xff})
     noexcept -> Color
 {
-    return
-          (Color{a} << 24)
-        | (Color{r} << 16)
-        | (Color{g} <<  8)
-        | (Color{b});
+    return Color{
+          (Color::Weak{a.v} << 24)
+        | (Color::Weak{r.v} << 16)
+        | (Color::Weak{g.v} <<  8)
+        | (Color::Weak{b.v}) };
 }
 
-inline constexpr auto rgba(Color rgb, ColorComponent a = 0xff) noexcept
+inline constexpr auto rgba(Color rgb,
+                           ColorComponent a = ColorComponent{0xff}) noexcept
     -> Color
-{ return (Color{a} << 24) | (rgb & 0xffffff); }
+{ return Color{(Color{a.v}.v << 24) | (rgb.v & 0xffffff)}; }
 
 inline constexpr auto r_g_b_a(Color rgba) noexcept
     -> std::array<ColorComponent, 4>
 {
     return {
-        static_cast<ColorComponent>((rgba >> 16) & 0xff),
-        static_cast<ColorComponent>((rgba >> 8) & 0xff),
-        static_cast<ColorComponent>(rgba & 0xff ),
-        static_cast<ColorComponent>((rgba >> 24) & 0xff)
+        static_cast<ColorComponent>((rgba.v >> 16) & 0xff),
+        static_cast<ColorComponent>((rgba.v >> 8) & 0xff),
+        static_cast<ColorComponent>(rgba.v & 0xff ),
+        static_cast<ColorComponent>((rgba.v >> 24) & 0xff)
     };
 }
 
@@ -53,12 +57,12 @@ auto threshold_color(Color color0,
     -> Color;
 
 inline auto transparent_color()
-{ return rgba(0, 0); }
+{ return rgba(Color{0}, ColorComponent{0}); }
 
 inline auto black_color()
-{ return rgba(0, 0xff); }
+{ return rgba(Color{0}, ColorComponent{0xff}); }
 
 inline auto white_color()
-{ return rgba(0xffffff, 0xff); }
+{ return rgba(Color{0xffffff}, ColorComponent{0xff}); }
 
 } // namespace gc_app

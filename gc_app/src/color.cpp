@@ -19,7 +19,7 @@ auto interp_color_impl(Color color0, Color color1, double p)
                       ColorComponent component1) -> ColorComponent
     {
         return static_cast<ColorComponent>(
-            std::lround(component0*(1-p) + component1*p));
+            std::lround(component0.v*(1-p) + component1.v*p));
     };
     auto c0 = r_g_b_a(color0);
     auto c1 = r_g_b_a(color1);
@@ -37,9 +37,9 @@ auto contrast_color(Color color)
     auto components = r_g_b_a(color);
     constexpr uint32_t threshold = 3 * 0x7f;
     auto n =
-        static_cast<uint32_t>(components[0]) +
-        static_cast<uint32_t>(components[1]) +
-        static_cast<uint32_t>(components[2]);
+        static_cast<Color::Weak>(components[0].v) +
+        static_cast<Color::Weak>(components[1].v) +
+        static_cast<Color::Weak>(components[2].v);
     return n > threshold ? black_color() : white_color();
 }
 

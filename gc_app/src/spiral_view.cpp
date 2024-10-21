@@ -38,8 +38,8 @@ public:
         result[1] = UintVec(10000, 1);
         result[2] = 5.;
         result[3] = IndexedPalette{
-            .color_map = { rgba(0xffffff) },
-            .overflow_color = rgba(0)
+            .color_map = { rgba(Color{0xffffff}) },
+            .overflow_color = rgba(Color{0})
         };
     }
 
@@ -57,7 +57,8 @@ public:
         auto image = Image
         {
             .size = size,
-            .data = UintVec(size.width * size.height, rgba(0, 0))
+            .data = ColorVec(size.width * size.height,
+                             rgba(Color{0}, ColorComponent{0}))
         };
 
         auto n = std::min(image.data.size(), seq.size());
@@ -102,7 +103,9 @@ public:
 
                 if (index >= n)
                 {
-                    *pixel = rgba(0xcc, 0xff, 0xcc);
+                    *pixel = rgba(ColorComponent{0xcc},
+                                  ColorComponent{0xff},
+                                  ColorComponent{0xcc});
                     continue;
                 }
 

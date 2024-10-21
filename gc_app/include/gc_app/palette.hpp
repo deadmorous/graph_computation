@@ -26,7 +26,7 @@ struct IndexedPalette
 GCLIB_STRUCT_TYPE(IndexedPalette, color_map, overflow_color);
 
 
-auto map_color(const IndexedPalette& palette, Color value)
+auto map_color(const IndexedPalette& palette, uint32_t value)
     -> Color;
 
 auto average_color(const IndexedPalette& palette, bool with_overflow)

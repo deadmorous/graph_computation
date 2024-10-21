@@ -19,10 +19,13 @@ using UintSize = Size<Uint>;
 GCLIB_STRUCT_TYPE(UintSize, width, height);
 
 
+using ColorVec =
+    std::vector<Color>;
+
 struct Image final
 {
-    UintSize                size;
-    std::vector<Color>      data;
+    UintSize size;
+    ColorVec data;
 };
 
 } // namespace gc_app
