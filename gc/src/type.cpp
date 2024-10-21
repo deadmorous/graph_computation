@@ -66,6 +66,14 @@ struct AggregatePrinter final
         -> void
     { s << t.name(); }
 
+    auto operator()(const StrongT& t)
+        -> void
+    {
+        s << "Strong{";
+        print_type(s, t.weak_type());
+        s << '}';
+    }
+
     auto operator()(const StructT& t)
         -> void
     {
@@ -247,6 +255,22 @@ auto StringT::id() const noexcept
 
 auto StringT::name() const noexcept -> std::string_view
 { return magic_enum::enum_name(id()); }
+
+
+StrongT::StrongT(const Type* type) noexcept :
+    type_{ type }
+{ assert(agg_type(type_) == AggregateType::Strong); }
+
+auto StrongT::type() const noexcept
+    -> const Type*
+{ return type_; }
+
+auto StrongT::weak_type() const noexcept
+    -> const Type*
+{
+    return get_pointer<const Type>(
+        type_->storage().data() + ptr_align_index(2));
+}
 
 
 StructT::StructT(const Type* type) noexcept :

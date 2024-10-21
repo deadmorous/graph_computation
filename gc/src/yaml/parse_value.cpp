@@ -106,6 +106,18 @@ struct YamlValueParser
         value = node.as<std::string>();
     }
 
+    auto operator()(const StrongT& t, Value& value, const YAML::Node& node)
+        -> void
+    {
+        auto path = ValuePath{} / "v"sv;
+        auto weak_value = value.get(path);
+        visit(t.weak_type(),
+              YamlValueParser{},
+              weak_value,
+              node);
+        value.set(path, weak_value);
+    }
+
     auto operator()(const StructT& t, Value& value, const YAML::Node& node)
         -> void
     {

@@ -21,6 +21,11 @@ struct MyStruct
 
 GCLIB_STRUCT_TYPE(MyStruct, foo, bar, flags);
 
+GCLIB_STRONG_TYPE(MyIndex, uint32_t);
+
+} // anonymous namespace
+
+
 TEST(Gc, Type)
 {
     const auto* t_int = gc::Type::of<int>();
@@ -49,9 +54,6 @@ TEST(Gc, Type)
               "Type{Struct{foo: I32, bar: F64, flags: Vector[U32]}}");
     EXPECT_EQ(format(t_path), "Type{Path}");
 }
-
-} // anonymous namespace
-
 
 class MyBlob final
 {};
@@ -212,4 +214,26 @@ TEST(Gc, ValueReflection)
     EXPECT_EQ(struct2_keys[0], gc::ValuePathItem("foo"sv));
     EXPECT_EQ(struct2_keys[1], gc::ValuePathItem("bar"sv));
     EXPECT_EQ(struct2_keys[2], gc::ValuePathItem("flags"sv));
+}
+
+TEST(Gc, StrongType)
+{
+    static_assert(std::same_as<MyIndex::Weak, uint32_t>);
+
+    const auto* type = gc::type_of<MyIndex>();
+    EXPECT_EQ(common::format(type), "Type{Strong{U32}}"sv);
+
+    auto my_index = MyIndex{123};
+    auto v = gc::Value{ my_index };
+    EXPECT_EQ(v.as<MyIndex>(), my_index);
+
+    const auto path = gc::ValuePath{} / "v"sv;
+    EXPECT_EQ(v.get(path).as<MyIndex::Weak>(), my_index.v);
+
+    v.set(path, MyIndex::Weak{456});
+    EXPECT_EQ(v.get(path).as<MyIndex::Weak>(), 456);
+    EXPECT_EQ(v.as<MyIndex>(), MyIndex{456});
+
+    auto v1 = gc::Value::make(type);
+    EXPECT_EQ(v1.as<MyIndex>(), MyIndex{0});
 }

@@ -5,6 +5,7 @@
 #include "gc/detail/value_component_access.hpp"
 #include "gc/value_path.hpp"
 
+#include "common/strong.hpp"
 #include "common/type.hpp"
 
 #include <array>
@@ -52,6 +53,7 @@ enum class AggregateType : uint8_t
     Path,
     Scalar,
     String,
+    Strong,
     Struct,
     Tuple,
     Vector
@@ -135,6 +137,16 @@ public:
         return intern(
             detail::value_components_access_factory(this_tag, tag),
             { AggregateType::String, string_type_id_of(tag) });
+    }
+
+    template <common::StrongType T>
+    static auto of(common::Type_Tag<T> tag)
+        -> const Type*
+    {
+        return intern(
+            detail::value_components_access_factory(this_tag, tag),
+            { AggregateType::Strong},
+            {of<typename T::Weak>()});
     }
 
     template <typename T>
@@ -357,6 +369,17 @@ private:
     const Type* type_;
 };
 
+class StrongT final
+{
+public:
+    StrongT(const Type*) noexcept;
+    auto type() const noexcept -> const Type*;
+    auto weak_type() const noexcept -> const Type*;
+
+private:
+    const Type* type_;
+};
+
 class TupleT;
 
 class StructT final
@@ -421,6 +444,9 @@ auto visit(const Type* type, F&& f, Args&&... args)
         case AggregateType::String:
             return std::invoke(
                 std::forward<F>(f), StringT(type), std::forward<Args>(args)...);
+        case AggregateType::Strong:
+            return std::invoke(
+                std::forward<F>(f), StrongT(type), std::forward<Args>(args)...);
         case AggregateType::Struct:
             return std::invoke(
                 std::forward<F>(f), StructT(type), std::forward<Args>(args)...);

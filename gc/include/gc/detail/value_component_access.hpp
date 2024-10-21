@@ -4,6 +4,8 @@
 #include "gc/value_path.hpp"
 
 #include "common/maybe_const.hpp"
+#include "common/strong.hpp"
+#include "common/throw.hpp"
 #include "common/tuple_like.hpp"
 
 #include <any>
@@ -295,7 +297,27 @@ struct ValueComponents<Type, T>
     }
 };
 
+template <typename Type, common::StrongType T>
+struct ValueComponents<Type, T>
+{
+    template <common::MaybeConst<T> U, typename F>
+    static auto dispatch(ValuePathView path, U& data, F&& f)
+    {
+        if(path.empty())
+            return std::invoke(std::forward<F>(f), data, common::Type<T>);
 
+        auto name = path[0].name();
+        if (name != "v")
+            common::throw_(
+                "For a strong type, the only possible path key is 'v'. "
+                "Got '", name, "' for type ", Type::template of<T>());
+
+        using Weak = typename T::Weak;
+        auto& weak = data.v;
+        return ValueComponents<Type, Weak>::dispatch(
+            path.subspan(1), weak, std::forward<F>(f));
+    }
+};
 
 template <typename T>
 using ValueComponentsAccessFactoryFunc =
