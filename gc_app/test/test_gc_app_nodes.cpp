@@ -137,30 +137,3 @@ TEST(GcApp, Project)
     check(std::vector<int>{123, 45}, gc::ValuePath{}/0u, 123);
     check(std::vector<int>{123, 45}, gc::ValuePath{}/1u, 45);
 }
-
-
-#define wow(p, x) GCLIB_IDENTITY(p)x
-
-#define FIELD(Class, field) Class::field
-
-struct Asd
-{
-    int a;
-    std::string s;
-    bool d;
-};
-
-GCLIB_STRUCT_TYPE(Asd, a, s, d);
-
-TEST(GcApp, Macro)
-{
-    auto ttt = gc::type_of<Asd>();
-
-    std::cout << "MACRO TEST\n";
-    std::cout << GCLIB_STRINGIZE(GCLIB_NUM_ARGS()) << std::endl;
-    std::cout << GCLIB_STRINGIZE(GCLIB_NUM_ARGS(a, b, c)) << std::endl;
-    // std::cout << STRINGIZE((MAP(wow, a, b, c))) << std::endl;
-    std::cout << GCLIB_STRINGIZE((GCLIB_MAP_COMMA_SEP_LIST(wow, &, a0, a1, a2, a3, a4, a5, a6, a7, a8, a9))) << std::endl;
-    std::cout << GCLIB_STRINGIZE((GCLIB_MAP_COMMA_SEP_LIST(FIELD, A, b, c))) << std::endl;
-    // std::cout << GCLIB_STRINGIZE(()) << std::endl;
-}
