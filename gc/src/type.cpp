@@ -261,14 +261,14 @@ auto StructT::tuple_type() const noexcept
     -> const Type*
 {
     return get_pointer<const Type>(
-        type_->storage().data() + ptr_align_index(2));
+        type_->storage().data() + ptr_align_index(3));
 }
 
 auto StructT::field_names() const noexcept
     -> std::span<const std::string_view>
 {
     auto* names = get_pointer<const std::string_view>(
-        type_->storage().data() + ptr_align_index(2) + sizeof(void*));
+        type_->storage().data() + ptr_align_index(3) + sizeof(void*));
     return { names, tuple().element_count() };
 }
 
