@@ -177,13 +177,6 @@ TEST(Gc, ValueReflection)
         .flags = {12, 34, 56, 78, 90}
     });
 
-    // // TODO: Provide a better solution (a global function) to format path item
-    // // NOTE: Cannot overload `operator<<` (would need to do so in `std`, because
-    // // ValuePathItem is an alias for std::variant).
-    // auto fmt_item =
-    //     [](std::ostream& s, const gc::ValuePathItem& item)
-    // { std::visit([&](auto typed){ s << typed; }, item); };
-
     // Key extraction
     auto struct_keys = v_struct.keys();
     EXPECT_EQ(struct_keys.size(), 3);
