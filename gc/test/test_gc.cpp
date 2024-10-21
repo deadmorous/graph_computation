@@ -1,6 +1,7 @@
 #include "gc/graph_computation.hpp"
 #include "gc/node.hpp"
 #include "gc/node_port_names.hpp"
+#include "gc/struct_type_macro.hpp"
 
 #include "common/format.hpp"
 
@@ -265,25 +266,7 @@ struct MyStruct
     std::vector<unsigned int> flags;
 };
 
-constexpr inline auto fields_of(MyStruct& x)
-    -> std::tuple<int&, double&, std::vector<unsigned int>&>
-{ return { x.foo, x.bar, x.flags }; }
-
-constexpr inline auto fields_of(const MyStruct& x)
-    -> std::tuple<const int&, const double&, const std::vector<unsigned int>&>
-{ return { x.foo, x.bar, x.flags }; }
-
-inline auto fields_of(MyStruct&& x) = delete;
-
-constexpr inline auto tuple_tag_of(common::Type_Tag<MyStruct>)
-    -> common::Type_Tag<std::tuple<int, double, std::vector<unsigned int>>>
-{ return {}; }
-
-constexpr inline auto field_names_of(common::Type_Tag<MyStruct>)
-    -> std::array<std::string_view, 3>
-{ return { "foo", "bar", "flags" }; }
-
-
+GCLIB_STRUCT_TYPE(MyStruct, foo, bar, flags);
 
 TEST(Gc, Type)
 {
