@@ -21,8 +21,5 @@ public:
         QWidget* parent = nullptr);
 
 private:
-    gc::Node* node_;
-    size_t index_{0};
-    gc::ValuePath path_;
     std::shared_ptr<QWidget> res_;
 };

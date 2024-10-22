@@ -75,6 +75,11 @@ layout:
           index: 0
           path: /width
         range: [1, 5000]
+      - type: color
+        bind:
+          node: palette
+          index: 0
+          path: /overflow_color
       - type: stretch
     - type: image
       bind: view
