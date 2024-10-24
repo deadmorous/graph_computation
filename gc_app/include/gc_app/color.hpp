@@ -30,6 +30,10 @@ inline constexpr auto rgba(Color rgb,
     -> Color
 { return Color{(Color{a.v}.v << 24) | (rgb.v & 0xffffff)}; }
 
+inline constexpr auto rgba(std::array<ColorComponent, 4> c) noexcept
+    -> Color
+{ return rgba(c[0], c[1], c[2], c[3]); }
+
 inline constexpr auto r_g_b_a(Color rgba) noexcept
     -> std::array<ColorComponent, 4>
 {
@@ -56,13 +60,39 @@ auto threshold_color(Color color0,
                      double threshold = 0.5)
     -> Color;
 
-inline auto transparent_color()
+inline constexpr auto transparent_color() noexcept
+    -> Color
 { return rgba(Color{0}, ColorComponent{0}); }
 
-inline auto black_color()
-{ return rgba(Color{0}, ColorComponent{0xff}); }
+inline constexpr auto black_color(ColorComponent a = {0xff}) noexcept
+    -> Color
+{ return rgba(Color{0}, a); }
 
-inline auto white_color()
-{ return rgba(Color{0xffffff}, ColorComponent{0xff}); }
+inline constexpr auto white_color(ColorComponent a = {0xff}) noexcept
+    -> Color
+{ return rgba(Color{0xffffff}, a); }
+
+inline constexpr auto gray_color(ColorComponent lightness,
+                                 ColorComponent a = {0xff}) noexcept
+    -> Color
+{ return rgba(lightness, lightness, lightness, a); }
+
+inline constexpr auto blend_colors(Color back, Color front) noexcept
+    -> Color
+{
+    auto back_components = r_g_b_a(back);
+    auto front_components = r_g_b_a(front);
+    uint32_t ba = back_components[3].v;
+    uint32_t fa = front_components[3].v;
+    auto result_components = std::array<ColorComponent, 4>{};
+    for (uint32_t i=0; i<4; ++i)
+    {
+        uint32_t b = back_components[i].v;
+        uint32_t f = front_components[i].v;
+        uint32_t c = (b*(0xff-fa) + f*fa)/0xff;
+        result_components[i] = ColorComponent(c);
+    }
+    return rgba(result_components);
+}
 
 } // namespace gc_app
