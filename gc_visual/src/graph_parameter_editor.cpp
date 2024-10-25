@@ -1,6 +1,8 @@
 #include "gc_visual/graph_parameter_editor.hpp"
 
 #include "gc_visual/color_editor_widget.hpp"
+#include "gc_visual/qstr.hpp"
+#include "gc_visual/vector_editor_widget.hpp"
 
 #include "gc_app/color.hpp"
 
@@ -87,11 +89,38 @@ private:
     EditorWidgetType* widget_;
 };
 
-// ---
+class VectorEditor final
+{
+public:
+    using EditorWidgetType = VectorEditorWidget;
 
-inline auto qstr(const std::string& s)
-    -> QString
-{ return QString::fromUtf8(s.c_str()); }
+    VectorEditor(gc::Value value,
+                 gc::ParameterSpec param_spec,
+                 GraphBroker* broker,
+                 QWidget* parent) :
+        widget_{ new EditorWidgetType{ std::move(value), parent } }
+    {
+        QObject::connect(
+            widget_,
+            &EditorWidgetType::valueChanged,
+            broker,
+            [=](const gc::Value& v, gc::ValuePathView path)
+            {
+                auto subspec = param_spec;
+                subspec.path /= path;
+                broker->set_parameter(subspec, v);
+            });
+    }
+
+    auto widget()
+        -> EditorWidgetType*
+    { return widget_; }
+
+private:
+    EditorWidgetType* widget_;
+};
+
+// ---
 
 template <typename Editor>
 auto wrap_edtor(std::shared_ptr<Editor> editor)
@@ -207,6 +236,28 @@ auto make_color(const ParamBinding& binding,
     return wrap_edtor(std::move(editor));
 }
 
+auto make_vector(const ParamBinding& binding,
+                 GraphBroker* broker,
+                 const YAML::Node& item_node)
+    -> std::shared_ptr<QWidget>
+{
+    auto value = broker->get_parameter(binding.param_spec);
+
+    if (value.type()->aggregate_type() != gc::AggregateType::Vector)
+        common::throw_(
+            "Invalid binding: 'vector' can only bind to a vector type",
+            ", whereas" " the parameter ", common::format(binding),
+            " is of type ", value.type());
+
+    auto editor
+        = std::make_shared<VectorEditor>(value,
+                                         binding.param_spec,
+                                         broker,
+                                         nullptr);
+
+    return wrap_edtor(std::move(editor));
+}
+
 } // anonymous namespace
 
 
@@ -223,6 +274,8 @@ GraphParameterEditor::GraphParameterEditor(const std::string& type,
         res_ = make_spin(binding, broker, item_node);
     else if (type == "color")
         res_ = make_color(binding, broker, item_node);
+    else if (type == "vector")
+        res_ = make_vector(binding, broker, item_node);
 
     auto layout = new QVBoxLayout{};
     setLayout(layout);

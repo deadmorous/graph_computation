@@ -66,7 +66,7 @@ auto parse_layout_item(GraphBroker* broker,
     {
         QWidget* widget = nullptr;
 
-        if (type == "spin" || type == "color")
+        if (type == "spin" || type == "color" || type == "vector")
             widget = new GraphParameterEditor(type, broker, item_node);
         else if (type == "image")
             widget = new GraphOutputVisualizer(type, broker, item_node);

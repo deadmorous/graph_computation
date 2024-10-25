@@ -51,9 +51,9 @@ auto ColorEditorWidget::paintEvent(QPaintEvent*)
             auto c = (ix+iy) & 1 ?  c1 : c0;
             painter.fillRect(x, y, w, h, c);
         }
-    painter.setPen(QColor(0, 0, 0, 0xc7));
+    painter.setPen(QColor(0, 0, 0, 0x80));
     painter.setBrush(Qt::NoBrush);
-    painter.drawRect(rc.adjusted(0, 0, -1, -1));
+    painter.drawRect(rc.adjusted(1, 0, 0, 0));
 }
 
 auto ColorEditorWidget::mouseReleaseEvent(QMouseEvent *event)

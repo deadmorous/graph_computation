@@ -15,12 +15,15 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 set(PROJECT_SOURCES
     bitmap_view.cpp             ../include/gc_visual/bitmap_view.hpp
     color_editor_widget.cpp     ../include/gc_visual/color_editor_widget.hpp
+    flatten_type.cpp
     graph_broker.cpp            ../include/gc_visual/graph_broker.hpp
     graph_parameter_editor.cpp  ../include/gc_visual/graph_parameter_editor.hpp
     graph_output_visualizer.cpp ../include/gc_visual/graph_output_visualizer.hpp
     main.cpp
     mainwindow.cpp              ../include/gc_visual/mainwindow.hpp
     parse_layout.cpp
+    vector_editor_widget.cpp    ../include/gc_visual/vector_editor_widget.hpp
+    vector_item_model.cpp       ../include/gc_visual/vector_item_model.hpp
 )
 
 

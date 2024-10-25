@@ -35,7 +35,7 @@ graph:
       init:
         - type: IndexedPalette
           value:
-            color_map: [0xffffffff]
+            color_map: [0xffff0000]
             overflow_color: 0xff000000
 
     - name: pw
@@ -78,8 +78,11 @@ layout:
       - type: color
         bind:
           node: palette
-          index: 0
           path: /overflow_color
+      - type: vector
+        bind:
+          node: palette
+          path: /color_map
       - type: stretch
     - type: image
       bind: view
