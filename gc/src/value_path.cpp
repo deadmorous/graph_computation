@@ -8,6 +8,16 @@
 
 namespace gc {
 
+namespace {
+
+template <ValuePathLikeType ValuePathLike>
+auto print_path(std::ostream& s, const ValuePathLike& path)
+    -> void
+{ s << '/' << common::format_seq(path, "/"); }
+
+} // anonymous namespace
+
+
 ValuePathItem::ValuePathItem() = default;
 
 ValuePathItem::ValuePathItem(size_t index) :
@@ -72,11 +82,17 @@ auto ValuePathItem::from_string(std::string_view s)
 }
 
 
+auto operator<<(std::ostream& s, ValuePathView path)
+    -> std::ostream&
+{
+    print_path(s, path);
+    return s;
+}
 
 auto operator<<(std::ostream& s, const ValuePath& path)
     -> std::ostream&
 {
-    s << '/' << common::format_seq(path, "/");
+    print_path(s, path);
     return s;
 }
 
@@ -104,43 +120,6 @@ auto ValuePath::from_string(std::string_view s)
 
     return result;
 }
-
-auto operator/(ValuePathItem i1, ValuePathItem i2)
-    -> ValuePath
-{ return ValuePath{ i1, i2 }; }
-
-inline auto operator/(const ValuePath& p1, ValuePathItem i2)
-    -> ValuePath
-{
-    auto result = p1;
-    result.push_back( i2 );
-    return result;
-}
-
-inline auto operator/(const ValuePathItem& i1, ValuePath p2)
-    -> ValuePath
-{
-    auto result = ValuePath{i1};
-    result.insert(result.end(), p2.begin(), p2.end());
-    return result;
-}
-
-inline auto operator/(const ValuePath& p1, ValuePath p2)
-    -> ValuePath
-{
-    auto result = p1;
-    result.insert(result.end(), p2.begin(), p2.end());
-    return result;
-}
-
-auto ValuePath::operator/=(const ValuePathItem& i2)
-    -> ValuePath&
-{ return *this = *this / i2; }
-
-auto ValuePath::operator/=(const ValuePath& p2)
-    -> ValuePath&
-{ return *this = *this / p2; }
-
 
 using ValuePathView = std::span<const ValuePathItem>;
 
