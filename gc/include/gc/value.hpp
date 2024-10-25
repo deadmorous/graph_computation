@@ -37,6 +37,8 @@ public:
     /* implicit */ Value(const Value&) = default;
     /* implicit */ Value(Value&&) = default;
 
+    /* implicit */ Value(Value&) = default;
+
     template <typename T>
     /* implicit */ Value(T&& value) :
         Value{ common::Type<std::remove_cvref_t<T>>, std::forward<T>(value) }
