@@ -8,6 +8,7 @@ add_library(gc-lib STATIC
     graph_computation.cpp
     node_port_names.cpp
     node_registry.cpp
+    parse_simple_value.cpp
     source_param.cpp
     type.cpp
     type_registry.cpp

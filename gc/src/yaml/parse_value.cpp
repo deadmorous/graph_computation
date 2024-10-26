@@ -1,5 +1,6 @@
 #include "gc/yaml/parse_value.hpp"
 
+#include "gc/parse_simple_value.hpp"
 #include "gc/type.hpp"
 #include "gc/value.hpp"
 
@@ -15,110 +16,32 @@ namespace gc::yaml {
 
 namespace {
 
-template <typename T, typename... Fcargs>
-requires (std::is_integral_v<T> || std::is_floating_point_v<T>)
-auto parse_as_decimal(common::Type_Tag<T>, std::string_view s, Fcargs... fcargs)
-    -> T
-{
-    auto result = T{};
-    auto fcres = std::from_chars(s.begin(), s.end(), result, fcargs...);
-
-    if (fcres.ec == std::errc::invalid_argument)
-        common::throw_(
-            "Failed to parse scalar of type ", type_of<T>(),
-            " from string '", s, "' - not a number");
-
-    else if (fcres.ec == std::errc::result_out_of_range)
-        common::throw_(
-            "Failed to parse scalar of type ", type_of<T>(),
-            " from string '", s, "' - out of range");
-
-    assert (fcres.ec == std::error_code{});
-    if(fcres.ptr != s.end())
-        common::throw_(
-            "Failed to parse scalar of type ", type_of<T>(),
-            " from string '", s, "' - extra characters remain");
-
-    return result;
-}
-
-struct ScalarParser final
-{
-    template <typename T>
-    requires std::is_integral_v<T>
-    auto operator()(common::Type_Tag<T> tag, Value& v, std::string_view s) const
-        -> void
-    {
-        if (s.starts_with("0x"sv))
-            v = parse_as_decimal(tag, s.substr(2), 16);
-        else
-            v = parse_as_decimal(tag, s);
-    }
-
-    template <typename T>
-    requires std::is_floating_point_v<T>
-    auto operator()(common::Type_Tag<T> tag, Value& v, std::string_view s) const
-        -> void
-    { v = parse_as_decimal(tag, s); }
-
-    auto operator()(common::Type_Tag<bool>, Value& v, std::string_view s) const
-        -> void
-    {
-        if (s == "true")
-            v = true;
-        else if (s == "false")
-            v = false;
-        else
-            common::throw_(
-                "Failed to parse boolean scalar from string '", s, "'");
-    }
-
-    auto operator()(common::Type_Tag<std::byte>, Value&, std::string_view) const
-        -> void
-    {
-        common::throw_("TODO: Parse std::byte");
-    }
-};
-
 struct YamlValueParser final
 {
-    auto operator()(const CustomT& t, Value& value, const YAML::Node& node)
+    auto operator()(const CustomT& t, Value& value, const YAML::Node& node) const
         -> void
     {
         common::throw_(
             "YamlValueParser: Failed to parse value of type ", t.type(),
             " because custom types are not supported");
     }
-    auto operator()(const PathT& t, Value& value, const YAML::Node& node)
+    auto operator()(const PathT& t, Value& value, const YAML::Node& node) const
         -> void
-    {
-        value = ValuePath::from_string(node.as<std::string>());
-    }
-    auto operator()(const ScalarT& t, Value& value, const YAML::Node& node)
-        -> void
-    {
-        t.visit(ScalarParser{}, value, node.as<std::string>());
-    }
+    { value = parse_simple_value(node.as<std::string>(), t.type()); }
 
-    auto operator()(const StringT& t, Value& value, const YAML::Node& node)
+    auto operator()(const ScalarT& t, Value& value, const YAML::Node& node) const
         -> void
-    {
-        value = node.as<std::string>();
-    }
+    { value = parse_simple_value(node.as<std::string>(), t.type()); }
 
-    auto operator()(const StrongT& t, Value& value, const YAML::Node& node)
+    auto operator()(const StringT& t, Value& value, const YAML::Node& node) const
         -> void
-    {
-        auto path = ValuePath{} / "v"sv;
-        auto weak_value = value.get(path);
-        visit(t.weak_type(),
-              YamlValueParser{},
-              weak_value,
-              node);
-        value.set(path, weak_value);
-    }
+    { value = parse_simple_value(node.as<std::string>(), t.type()); }
 
-    auto operator()(const StructT& t, Value& value, const YAML::Node& node)
+    auto operator()(const StrongT& t, Value& value, const YAML::Node& node) const
+        -> void
+    { value = parse_simple_value(node.as<std::string>(), t.type()); }
+
+    auto operator()(const StructT& t, Value& value, const YAML::Node& node) const
         -> void
     {
         for (const auto& key: value.keys())
@@ -140,7 +63,7 @@ struct YamlValueParser final
         }
     }
 
-    auto operator()(const TupleT& t, Value& value, const YAML::Node& node)
+    auto operator()(const TupleT& t, Value& value, const YAML::Node& node) const
         -> void
     {
         auto keys = value.keys();
@@ -164,7 +87,7 @@ struct YamlValueParser final
         }
     }
 
-    auto operator()(const VectorT& t, Value& value, const YAML::Node& node)
+    auto operator()(const VectorT& t, Value& value, const YAML::Node& node) const
         -> void
     {
         value.resize({}, node.size());
@@ -185,6 +108,7 @@ struct YamlValueParser final
 };
 
 } // anonymous namespace
+
 
 auto parse_value(const YAML::Node& node,
                  const TypeRegistry& type_registry)
