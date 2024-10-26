@@ -35,7 +35,14 @@ graph:
       init:
         - type: IndexedPalette
           value:
-            color_map: [0xffff0000]
+            color_map:
+              - 0xffffffff
+              - 0xff5953ff
+              - 0xff8adabf
+              - 0xffffc7f9
+              - 0xffffff7f
+              - 0xffd40004
+              - 0xff00aa00
             overflow_color: 0xff000000
 
     - name: pw
@@ -69,12 +76,20 @@ layout:
   items:
     - type: vertical_layout
       items:
-      - type: spin
-        bind:
-          node: img_size
-          index: 0
-          path: /width
-        range: [1, 5000]
+      - type: horizontal_layout
+        items:
+        - type: spin
+          bind:
+            node: img_size
+            index: 0
+            path: /width
+          range: [1, 5000]
+        - type: spin
+          bind:
+            node: img_size
+            index: 0
+            path: /height
+          range: [1, 2000]
       - type: color
         bind:
           node: palette
