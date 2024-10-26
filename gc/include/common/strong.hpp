@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common/macro.hpp"
+
 
 namespace common {
 
@@ -9,7 +11,7 @@ struct Strong final
     using Traits = Traits_;
     using Self = Strong<Traits>;
     using Weak = typename Traits::Weak;
-    Weak v;
+    Weak v = Traits::default_value();
 
     auto operator<=>(const Self&) const noexcept = default;
 };
@@ -35,6 +37,8 @@ concept StrongType =
 } // namespace common
 
 
-#define GCLIB_STRONG_TYPE(Name, Weak)                                       \
-    struct Name##_StrongTraits : ::common::StrongTraits<Weak> {};           \
+#define GCLIB_STRONG_TYPE(Name, Weak, ...)                                  \
+    struct Name##_StrongTraits : ::common::StrongTraits<Weak> {             \
+        static auto default_value() noexcept -> Weak                        \
+        { return GCLIB_DEFAULT_TO({}, ##__VA_ARGS__); } };                  \
     using Name = ::common::Strong<Name##_StrongTraits>
