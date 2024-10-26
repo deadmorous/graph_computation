@@ -16,7 +16,7 @@ class Value final
 public:
     // Construction
 
-    Value() noexcept = default;
+    Value() noexcept;
 
     template <typename T, std::convertible_to<T> V>
     Value(common::Type_Tag<T> tag, V&& value) :
@@ -30,71 +30,56 @@ public:
             "dangling string view");
     }
 
-    Value(common::Type_Tag<std::string> tag, std::string_view value) :
-        Value(tag, std::string(value))
-    {}
+    Value(common::Type_Tag<std::string> tag, std::string_view value);
 
-    /* implicit */ Value(const Value&) = default;
-    /* implicit */ Value(Value&&) = default;
+    /* implicit */ Value(const Value&);
+    /* implicit */ Value(Value&&);
 
-    /* implicit */ Value(Value&) = default;
+    /* implicit */ Value(Value&);
 
     template <typename T>
     /* implicit */ Value(T&& value) :
         Value{ common::Type<std::remove_cvref_t<T>>, std::forward<T>(value) }
     {}
 
-    auto operator=(const Value&) -> Value& = default;
-    auto operator=(Value&&) -> Value& = default;
+    auto operator=(const Value&) -> Value&;
+    auto operator=(Value&&) -> Value&;
 
 
     // Field access
 
     auto type() const noexcept
-        -> const Type*
-    { return type_; }
+        -> const Type*;
 
     auto data() noexcept
-        -> std::any&
-    { return data_; }
+        -> std::any&;
 
     auto data() const noexcept
-        -> const std::any&
-    { return data_; }
+        -> const std::any&;
 
 
     // Interface for C++ type-unaware users
 
     auto keys() const
-        -> std::vector<ValuePathItem>
-    { return type_->value_component_access()->keys(data_); }
+        -> std::vector<ValuePathItem>;
 
     auto get(ValuePathView path) const
-        -> Value
-    {
-        auto [t, d] = type_->value_component_access()->get(path, data_);
-        return { t, std::move(d) };
-    }
+        -> Value;
 
     auto set(ValuePathView path, const Value& v)
-        -> void
-    { type_->value_component_access()->set(path, data_, v.data_); }
+        -> void;
 
     auto size(ValuePathView path) const
-        -> size_t
-    { return type_->value_component_access()->size(path, data_); }
+        -> size_t;
 
     auto size() const
-        -> size_t
-    { return type_->value_component_access()->size({}, data_); }
+        -> size_t;
 
     auto resize(ValuePathView path, size_t size)
-        -> void
-    { return type_->value_component_access()->resize(path, data_, size); }
+        -> void;
 
     static auto make(const Type* type)
-        -> Value
-    { return { type, type->value_component_access()->make_data() }; }
+        -> Value;
 
     // Interface for C++ type-aware users
 
@@ -141,10 +126,7 @@ public:
         -> std::ostream&;
 
 private:
-    Value(const Type* type, std::any data) :
-        type_{ type },
-        data_{ std::move(data) }
-    {}
+    Value(const Type* type, std::any data);
 
     const Type* type_{};
     std::any data_;

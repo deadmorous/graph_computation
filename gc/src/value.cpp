@@ -132,8 +132,72 @@ private:
     std::string result_;
 };
 
-
 } // anonymous namespace
+
+
+Value::Value() noexcept = default;
+
+Value::Value(common::Type_Tag<std::string> tag, std::string_view value) :
+    Value(tag, std::string(value))
+{}
+
+Value::Value(const Value&) = default;
+Value::Value(Value&&) = default;
+
+Value::Value(Value&) = default;
+
+auto Value::operator=(const Value&) -> Value& = default;
+auto Value::operator=(Value&&) -> Value& = default;
+
+
+auto Value::type() const noexcept
+    -> const Type*
+{ return type_; }
+
+auto Value::data() noexcept
+    -> std::any&
+{ return data_; }
+
+auto Value::data() const noexcept
+    -> const std::any&
+{ return data_; }
+
+
+auto Value::keys() const
+    -> std::vector<ValuePathItem>
+{ return type_->value_component_access()->keys(data_); }
+
+auto Value::get(ValuePathView path) const
+    -> Value
+{
+    auto [t, d] = type_->value_component_access()->get(path, data_);
+    return { t, std::move(d) };
+}
+
+auto Value::set(ValuePathView path, const Value& v)
+    -> void
+{ type_->value_component_access()->set(path, data_, v.data_); }
+
+auto Value::size(ValuePathView path) const
+    -> size_t
+{ return type_->value_component_access()->size(path, data_); }
+
+auto Value::size() const
+    -> size_t
+{ return type_->value_component_access()->size({}, data_); }
+
+auto Value::resize(ValuePathView path, size_t size)
+    -> void
+{ return type_->value_component_access()->resize(path, data_, size); }
+
+auto Value::make(const Type* type)
+    -> Value
+{ return { type, type->value_component_access()->make_data() }; }
+
+Value::Value(const Type* type, std::any data) :
+    type_{ type },
+    data_{ std::move(data) }
+{}
 
 auto operator<<(std::ostream& s, const Value& v)
     -> std::ostream&
