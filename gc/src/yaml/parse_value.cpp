@@ -42,10 +42,10 @@ auto parse_as_decimal(common::Type_Tag<T>, std::string_view s, Fcargs... fcargs)
     return result;
 }
 
-struct ScalarParser
+struct ScalarParser final
 {
     template <typename T>
-    requires (std::is_integral_v<T>)
+    requires std::is_integral_v<T>
     auto operator()(common::Type_Tag<T> tag, Value& v, std::string_view s) const
         -> void
     {
@@ -56,7 +56,7 @@ struct ScalarParser
     }
 
     template <typename T>
-    requires (std::is_floating_point_v<T>)
+    requires std::is_floating_point_v<T>
     auto operator()(common::Type_Tag<T> tag, Value& v, std::string_view s) const
         -> void
     { v = parse_as_decimal(tag, s); }
@@ -80,7 +80,7 @@ struct ScalarParser
     }
 };
 
-struct YamlValueParser
+struct YamlValueParser final
 {
     auto operator()(const CustomT& t, Value& value, const YAML::Node& node)
         -> void

@@ -84,6 +84,10 @@ public:
         -> size_t
     { return type_->value_component_access()->size(path, data_); }
 
+    auto size() const
+        -> size_t
+    { return type_->value_component_access()->size({}, data_); }
+
     auto resize(ValuePathView path, size_t size)
         -> void
     { return type_->value_component_access()->resize(path, data_, size); }
@@ -132,6 +136,9 @@ public:
                 [&](auto tag) -> T
                 { return T{ as(tag) }; });
     }
+
+    friend auto operator<<(std::ostream& s, const Value& v)
+        -> std::ostream&;
 
 private:
     Value(const Type* type, std::any data) :

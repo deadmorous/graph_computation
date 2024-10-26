@@ -11,6 +11,7 @@ add_library(gc-lib STATIC
     source_param.cpp
     type.cpp
     type_registry.cpp
+    value.cpp
     value_path.cpp
     yaml/parse_graph.cpp
     yaml/parse_value.cpp)

@@ -457,6 +457,7 @@ auto visit(const Type* type, F&& f, Args&&... args)
             return std::invoke(
                 std::forward<F>(f), VectorT(type), std::forward<Args>(args)...);
     }
+    __builtin_unreachable();
 }
 
 } // namespace gc

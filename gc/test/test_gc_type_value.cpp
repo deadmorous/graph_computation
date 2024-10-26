@@ -237,3 +237,44 @@ TEST(Gc, StrongType)
     auto v1 = gc::Value::make(type);
     EXPECT_EQ(v1.as<MyIndex>(), MyIndex{0});
 }
+
+TEST(Gc, FormatValue)
+{
+    // EXPECT_EQ(common::format(gc::Value(123)), "123");
+    EXPECT_EQ(common::format(gc::Value(common::Type<uint8_t>, 123)), "123");
+
+    // int8_t is formatted as int, but it's not the same as char - we don't
+    // currently support char
+    EXPECT_EQ(common::format(gc::Value(common::Type<int8_t>, 'A')), "65");
+
+    // TODO: Uncomment when we support char
+    // EXPECT_EQ(common::format(gc::Value(common::Type<char>, 'A')), "A");
+
+    EXPECT_EQ(common::format(gc::Value(-1.23)), "-1.23");
+    EXPECT_EQ(common::format(gc::Value(std::byte{0x9c})), "9c");
+
+    EXPECT_EQ(common::format(gc::Value(true)), "true");
+    EXPECT_EQ(common::format(gc::Value(false)), "false");
+
+    EXPECT_EQ(common::format(gc::Value("Hello"sv)), "Hello");
+    EXPECT_EQ(common::format(gc::Value("World"s)), "World");
+
+    EXPECT_EQ(common::format(gc::Value(MyIndex{534})), "534");
+
+    auto v = std::vector<int>{9,8,75};
+    EXPECT_EQ(common::format(gc::Value(v)), "[9,8,75]");
+
+    auto t = std::make_tuple(1, 2.3, true, "hello"sv);
+    EXPECT_EQ(common::format(gc::Value(t)), "{1,2.3,true,hello}");
+
+    auto s = MyStruct
+    {
+        .foo = 345,
+        .bar = 1.3e11,
+            .flags = {1, 3, 7, 13, 23}
+    };
+    EXPECT_EQ(common::format(gc::Value(s)),
+              "{foo=345,bar=1.3e+11,flags=[1,3,7,13,23]}");
+
+    EXPECT_EQ(common::format(gc::Value(MyBlob{})), "custom");
+}
