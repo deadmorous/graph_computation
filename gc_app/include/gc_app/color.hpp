@@ -10,7 +10,7 @@ namespace gc_app {
 
 GCLIB_STRONG_TYPE(ColorComponent, uint8_t);
 
-GCLIB_STRONG_TYPE(Color, uint32_t);
+GCLIB_STRONG_TYPE(Color, uint32_t, 0xff000000);
 
 inline constexpr auto rgba(ColorComponent r,
                            ColorComponent g,
@@ -77,7 +77,7 @@ inline constexpr auto gray_color(ColorComponent lightness,
     -> Color
 { return rgba(lightness, lightness, lightness, a); }
 
-inline constexpr auto blend_colors(Color back, Color front) noexcept
+inline auto blend_colors(Color back, Color front) noexcept
     -> Color
 {
     auto back_components = r_g_b_a(back);
