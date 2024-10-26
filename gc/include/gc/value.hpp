@@ -78,6 +78,9 @@ public:
     auto resize(ValuePathView path, size_t size)
         -> void;
 
+    auto resize(size_t size)
+        -> void;
+
     static auto make(const Type* type)
         -> Value;
 

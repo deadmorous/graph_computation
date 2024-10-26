@@ -190,6 +190,10 @@ auto Value::resize(ValuePathView path, size_t size)
     -> void
 { return type_->value_component_access()->resize(path, data_, size); }
 
+auto Value::resize(size_t size)
+    -> void
+{ return resize({}, size); }
+
 auto Value::make(const Type* type)
     -> Value
 { return { type, type->value_component_access()->make_data() }; }
