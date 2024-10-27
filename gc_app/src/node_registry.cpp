@@ -1,6 +1,7 @@
 #include "gc_app/node_registry.hpp"
 
 #include "gc_app/eratosthenes_sieve.hpp"
+#include "gc_app/filter_seq.hpp"
 #include "gc_app/multiply.hpp"
 #include "gc_app/project.hpp"
 #include "gc_app/rect_view.hpp"
@@ -16,6 +17,7 @@ auto populate_node_registry(gc::NodeRegistry& result)
     result.register_value(#name, gc_app::make_##name)
 
     GC_APP_REGISTER(eratosthenes_sieve);
+    GC_APP_REGISTER(filter_seq);
     GC_APP_REGISTER(multiply);
     GC_APP_REGISTER(project);
     GC_APP_REGISTER(rect_view);
