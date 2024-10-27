@@ -20,13 +20,4 @@ public:
         GraphBroker* broker,
         const YAML::Node& item_node,
         QWidget* parent = nullptr);
-
-public slots:
-    auto on_output_updated(gc::EdgeEnd output)
-        -> void;
-
-private:
-    GraphBroker* broker_;
-    BitmapView* view_;
-    gc::EdgeEnd output_port_;
 };

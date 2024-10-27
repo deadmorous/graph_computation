@@ -2,29 +2,29 @@
 
 #include "gc_visual/bitmap_view.hpp"
 #include "gc_visual/graph_broker.hpp"
+#include "gc_visual/qstr.hpp"
 
 #include "gc/detail/parse_node_port.hpp"
 
 #include <QSlider>
+#include <QTextEdit>
 #include <QVBoxLayout>
 
 
-GraphOutputVisualizer::GraphOutputVisualizer(const std::string& type,
-                                             GraphBroker* broker,
-                                             const YAML::Node& item_node,
-                                             QWidget* parent) :
-    QWidget{ parent },
-    broker_{ broker }
-{
-    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    auto* layout = new QVBoxLayout{};
-    setLayout(layout);
+namespace {
 
-    assert(type == "image");
+auto make_image(GraphBroker* broker,
+                const YAML::Node& item_node,
+                GraphOutputVisualizer* parent)
+    -> void
+{
+    parent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    auto* layout = new QVBoxLayout{};
+    parent->setLayout(layout);
 
     // Resolve output port binding
     auto node_port_str = item_node["bind"].as<std::string>();
-    output_port_ =
+    auto output_port =
         gc::detail::parse_node_port(node_port_str,
                                     broker->named_nodes(),
                                     gc::Output);
@@ -34,23 +34,97 @@ GraphOutputVisualizer::GraphOutputVisualizer(const std::string& type,
     slider->setMaximum(100);
     layout->addWidget(slider);
 
-    view_ = new BitmapView{};
-    layout->addWidget(view_);
+    auto view = new BitmapView{};
+    layout->addWidget(view);
 
-    connect(slider, &QSlider::valueChanged,
-            [this](int pos) { view_->set_scale(1. + (pos-1)/10.); });
+    QObject::connect(
+        slider, &QSlider::valueChanged,
+        view,
+        [=](int pos) { view->set_scale(1. + (pos-1)/10.); });
 
-    connect(broker, &GraphBroker::output_updated,
-            this, &GraphOutputVisualizer::on_output_updated);
+    auto on_output_updated = [=](gc::EdgeEnd output)
+    {
+        if (output != output_port)
+            return;
 
-    on_output_updated(output_port_);
+        view->set_image(broker->get_port_value(output_port, gc::Output));
+    };
+
+    QObject::connect(
+        broker, &GraphBroker::output_updated,
+        view, on_output_updated );
+
+    on_output_updated(output_port);
 }
 
-auto GraphOutputVisualizer::on_output_updated(gc::EdgeEnd output)
+auto make_text(GraphBroker* broker,
+                const YAML::Node& item_node,
+                GraphOutputVisualizer* parent)
     -> void
 {
-    if (output != output_port_)
-        return;
+    parent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    auto* layout = new QVBoxLayout{};
+    parent->setLayout(layout);
 
-    view_->set_image(broker_->get_port_value(output_port_, gc::Output));
+    // Resolve output port binding
+    auto node_port_str = item_node["bind"].as<std::string>();
+    auto output_port =
+        gc::detail::parse_node_port(node_port_str,
+                                    broker->named_nodes(),
+                                    gc::Output);
+
+    auto view = new QTextEdit{};
+    layout->addWidget(view);
+
+    view->setReadOnly(true);
+    view->setAcceptRichText(false);
+
+    auto on_output_updated = [=](gc::EdgeEnd output)
+    {
+        if (output != output_port)
+            return;
+
+        const auto& v = broker->get_port_value(output_port, gc::Output);
+
+        constexpr auto max_lines = 1000ul;
+
+        if (v.type()->aggregate_type() == gc::AggregateType::Vector)
+        {
+            view->clear();
+            for (size_t i=0, n=std::min(v.size(), max_lines); i<n; ++i)
+                view->append(format_qstr(i, '\t', v.get(gc::ValuePath{i})));
+
+            if (v.size() > max_lines)
+                view->append("...");
+        }
+        else
+            view->setText(format_qstr(v));
+
+        auto cursor = view->textCursor();
+        cursor.setPosition(0);
+        view->setTextCursor(cursor);
+    };
+
+    QObject::connect(
+        broker, &GraphBroker::output_updated,
+        view, on_output_updated );
+
+    on_output_updated(output_port);
+}
+
+} // anonymous namespace
+
+
+GraphOutputVisualizer::GraphOutputVisualizer(const std::string& type,
+                                             GraphBroker* broker,
+                                             const YAML::Node& item_node,
+                                             QWidget* parent) :
+    QWidget{ parent }
+{
+    if(type == "image")
+        make_image(broker, item_node, this);
+    else if(type == "text")
+        make_text(broker, item_node, this);
+    else
+        common::throw_("Unknown graph output visualizer type '", type, '\'');
 }

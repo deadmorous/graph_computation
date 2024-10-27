@@ -276,6 +276,8 @@ GraphParameterEditor::GraphParameterEditor(const std::string& type,
         res_ = make_color(binding, broker, item_node);
     else if (type == "vector")
         res_ = make_vector(binding, broker, item_node);
+    else
+        common::throw_("Unknown graph parameter ediror type '", type, '\'');
 
     auto layout = new QVBoxLayout{};
     setLayout(layout);

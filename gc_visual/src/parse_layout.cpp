@@ -68,7 +68,7 @@ auto parse_layout_item(GraphBroker* broker,
 
         if (type == "spin" || type == "color" || type == "vector")
             widget = new GraphParameterEditor(type, broker, item_node);
-        else if (type == "image")
+        else if (type == "image" || type == "text")
             widget = new GraphOutputVisualizer(type, broker, item_node);
         else
             common::throw_("Unknown layout item type '", type, "'");

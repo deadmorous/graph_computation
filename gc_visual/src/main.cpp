@@ -45,6 +45,12 @@ graph:
               - 0xff00aa00
             overflow_color: 0xff000000
 
+    - name: filter_value
+      type: source_param
+      init:
+        - type: U32
+          value: 0
+
     - name: pw
       type: project
 
@@ -59,6 +65,10 @@ graph:
 
     - name: view
       type: rect_view
+
+    - name: filter
+      type: filter_seq
+
   edges:
     - [img_size.0,          pw.value]
     - [img_size_w.out_0,    pw.path]
@@ -70,6 +80,8 @@ graph:
     - [img_size,            view.size]
     - [sieve.sequence,      view.sequence]
     - [palette,             view.palette]
+    - [filter_value,        filter.value]
+    - [sieve.sequence,      filter.sequence]
 
 layout:
   type: horizontal_layout
@@ -98,9 +110,17 @@ layout:
         bind:
           node: palette
           path: /color_map
+      - type: spin
+        bind:
+          node: filter_value
+        range: [0, 100]
       - type: stretch
-    - type: image
-      bind: view
+    - type: vertical_layout
+      items:
+      - type: image
+        bind: view
+      - type: text
+        bind: filter.indices
 )";
 
 auto run(int argc, char *argv[])
