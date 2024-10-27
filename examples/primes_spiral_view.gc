@@ -71,6 +71,14 @@ layout:
           node: spiral_scale
           index: 0
         range: [1, 5000]
+      - type: color
+        bind:
+          node: palette
+          path: /overflow_color
+      - type: vector
+        bind:
+          node: palette
+          path: /color_map
       - type: stretch
     - type: image
       bind: view
