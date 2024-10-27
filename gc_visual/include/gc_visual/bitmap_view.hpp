@@ -23,6 +23,9 @@ protected:
     auto paintEvent(QPaintEvent*)
         -> void override;
 
+    auto mouseMoveEvent(QMouseEvent *event)
+        -> void override;
+
 private:
     QImage img_;
     double scale_{1};
