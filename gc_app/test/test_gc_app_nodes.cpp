@@ -3,6 +3,7 @@
 #include "gc_app/multiply.hpp"
 #include "gc_app/project.hpp"
 #include "gc_app/test_sequence.hpp"
+#include "gc_app/waring.hpp"
 #include "gc_app/types.hpp"
 
 #include "gc/node.hpp"
@@ -183,4 +184,68 @@ TEST(GcApp, Project)
 
     check(std::vector<int>{123, 45}, gc::ValuePath{}/0u, 123);
     check(std::vector<int>{123, 45}, gc::ValuePath{}/1u, 45);
+}
+
+TEST(GcApp, Waring)
+{
+    auto node = gc_app::make_waring({});
+
+    ASSERT_EQ(node->input_count(), 3);
+    ASSERT_EQ(node->output_count(), 1);
+
+    ASSERT_EQ(node->input_names().size(), 3);
+    ASSERT_EQ(node->input_names()[0], "count");
+    ASSERT_EQ(node->input_names()[1], "s");
+    ASSERT_EQ(node->input_names()[2], "k");
+
+    ASSERT_EQ(node->output_names().size(), 1);
+    ASSERT_EQ(node->output_names()[0], "sequence");
+
+    auto check = [&](Uint count,
+                    Uint s, Uint k,
+                    std::vector<std::pair<Uint, UintVec>> expected)
+    {
+        gc::ValueVec inputs{ count, s, k };
+        gc::ValueVec outputs(1);
+
+        node->compute_outputs(outputs, inputs);
+        const auto& seq = outputs[0].as<UintVec>();
+        // for (size_t i=0, n=seq.size(); i<n; ++i)
+        //     std::cout << i << '\t' << seq[i] << std::endl;
+
+        EXPECT_EQ(seq.size(), count);
+        auto actual = std::vector<std::pair<Uint, UintVec>>{};
+        Uint v = 1;
+        while(true)
+        {
+            auto vi = UintVec{};
+            for (Uint i=0, n=seq.size(); i<n; ++i)
+                if (seq[i] == v)
+                    vi.push_back(i);
+            if (vi.empty())
+                break;
+            actual.push_back({v, std::move(vi)});
+            ++v;
+        }
+        EXPECT_EQ(actual, expected);
+    };
+
+    check(100, 1, 2, {{1, {0, 1, 4, 9, 16, 25, 36, 49, 64, 81}}});
+
+    check(35, 2, 2,
+          {{1, {0, 1, 2, 4, 5, 8, 9, 10, 13, 16, 17, 18, 20, 26, 29, 32, 34}},
+           {2, {25}}});
+
+    check(22, 3, 2,
+          {{1, {0, 1, 2, 3, 4, 5, 6, 8, 10, 11, 12, 13, 14, 16, 19, 20, 21}},
+           {2, {9, 17, 18}}});
+
+    check(100, 1, 3,
+          {{1, {0, 1, 8, 27, 64}}});
+
+    check(100, 2, 3,
+          {{1, {0, 1, 2, 8, 9, 16, 27, 28, 35, 54, 64, 65, 72, 91}}});
+
+    check(36, 3, 3,
+          {{1, {0, 1, 2, 3, 8, 9, 10, 16, 17, 24, 27, 28, 29, 35}}});
 }

@@ -13,7 +13,8 @@ add_library(gc_app-lib STATIC
     project.cpp
     spiral_view.cpp
     test_sequence.cpp
-    type_registry.cpp)
+    type_registry.cpp
+    waring.cpp)
 
 add_library(gc_app::lib ALIAS gc_app-lib)
 
