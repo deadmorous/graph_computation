@@ -81,6 +81,9 @@ public:
     auto resize(size_t size)
         -> void;
 
+    auto operator==(const Value& that) const
+        -> bool;
+
     static auto make(const Type* type)
         -> Value;
 

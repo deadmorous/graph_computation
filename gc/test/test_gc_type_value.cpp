@@ -271,10 +271,30 @@ TEST(Gc, FormatValue)
     {
         .foo = 345,
         .bar = 1.3e11,
-            .flags = {1, 3, 7, 13, 23}
+        .flags = {1, 3, 7, 13, 23}
     };
     EXPECT_EQ(common::format(gc::Value(s)),
               "{foo=345,bar=1.3e+11,flags=[1,3,7,13,23]}");
 
     EXPECT_EQ(common::format(gc::Value(MyBlob{})), "custom");
+}
+
+TEST(Gc, ValueEquality)
+{
+    EXPECT_EQ(gc::Value{123}, gc::Value{123});
+    EXPECT_NE(gc::Value{123}, gc::Value{123u});
+    EXPECT_NE(gc::Value{123}, gc::Value{456});
+    auto myval_1a = MyStruct{
+        .foo = 1,
+        .bar = 2.34,
+        .flags = {4, 8}
+    };
+    auto myval_1b = myval_1a;
+    auto myval_2 = MyStruct{
+        .foo = 1,
+        .bar = 2.34,
+        .flags = {4, 8, 16}
+    };
+    EXPECT_EQ(gc::Value{myval_1a}, gc::Value{myval_1b});
+    EXPECT_NE(gc::Value{myval_1a}, gc::Value{myval_2});
 }

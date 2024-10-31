@@ -194,6 +194,18 @@ auto Value::resize(size_t size)
     -> void
 { return resize({}, size); }
 
+auto Value::operator==(const Value& that) const
+    -> bool
+{
+    if (type_ != that.type_)
+        return false;
+
+    if (!type_)
+        return true;
+
+    return type_->value_component_access()->equal(data_, that.data_);
+}
+
 auto Value::make(const Type* type)
     -> Value
 { return { type, type->value_component_access()->make_data() }; }

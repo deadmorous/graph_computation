@@ -44,6 +44,9 @@ struct ValueComponentAccess
                         size_t size) const
         -> void = 0;
 
+    virtual auto equal(const std::any& lhs, const std::any& rhs) const
+        -> bool = 0;
+
     virtual auto make_data() const
         -> std::any = 0;
 };
@@ -170,6 +173,29 @@ struct ValueComponentAccessImpl final : ValueComponentAccess<Type>
                     throw std::invalid_argument(
                         "Objects of this type cannot be resized");
             });
+    }
+
+    auto equal(const std::any& lhs, const std::any& rhs) const
+        -> bool override
+    {
+        if constexpr (std::equality_comparable<T>)
+            return unpack<T>(lhs) == unpack<T>(rhs);
+        else
+        {
+            auto k = keys(lhs);
+            if (k != keys(rhs))
+                return false;
+            for (const auto& key : k)
+            {
+                auto [tl, dl] = get(ValuePath{key}, lhs);
+                auto [tr, dr] = get(ValuePath{key}, rhs);
+                if (tl != tr)
+                    return false;
+                if (!tl->value_component_access()->equal(dl, dr))
+                    return false;
+            }
+            return true;
+        }
     }
 
     auto make_data() const
