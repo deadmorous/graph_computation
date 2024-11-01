@@ -19,7 +19,10 @@ class TestNode final
     : public gc::Node
 {
 public:
-    TestNode(uint32_t input_count, uint32_t output_count)
+    TestNode(uint32_t input_count,
+             uint32_t output_count,
+             bool stateful = false) :
+        state_inc_{stateful? 1: 0}
     {
         input_names_.resize(input_count);
         output_names_.resize(output_count);
@@ -41,7 +44,9 @@ public:
                          gc::ConstValueSpan inputs) const
         -> void override
     {
-        std::iota(result.begin(), result.end(), 1);
+        ++computation_count_;
+
+        std::iota(result.begin(), result.end(), 1 + state_);
 
         if (output_count() == 0)
             return;
@@ -52,17 +57,27 @@ public:
             result[output_index].as<int>() += input.as<int>();
             output_index = (output_index + 1) % output_count();
         }
+
+        state_ += state_inc_;
     }
 
+    auto computation_count() const noexcept
+        -> size_t
+    { return computation_count_; }
+
 private:
+    int state_inc_;
+    mutable int state_{};
+    mutable size_t computation_count_{};
     gc::DynamicInputNames input_names_;
     gc::DynamicOutputNames output_names_;
 };
 
 struct TestGraphNodeSpec
 {
-    uint32_t input_count;
-    uint32_t output_count;
+    uint32_t input_count{};
+    uint32_t output_count{};
+    bool stateful{false};
 };
 
 struct TestGraphEdgeEndSpec
@@ -85,7 +100,8 @@ auto test_graph(std::initializer_list<TestGraphNodeSpec> nodes,
     for (const auto& node_spec : nodes)
         result.nodes.emplace_back(
             std::make_shared<TestNode>(node_spec.input_count,
-                                       node_spec.output_count));
+                                       node_spec.output_count,
+                                       node_spec.stateful));
 
     auto edge_end =
         [&](const TestGraphEdgeEndSpec& ee) -> gc::EdgeEnd
@@ -110,6 +126,37 @@ auto check_comple_graph(const gc::Graph& g,
     EXPECT_EQ(common::format(*instructions), expected_formatted_instructions);
 }
 
+
+auto test_graph_net_3x3()
+    -> gc::Graph
+{
+    // 8 -> 7 -> 5
+    //
+    // |    |    |
+    // v    v    v
+    //
+    // 6 -> 4 -> 2
+    //
+    // |    |    |
+    // v    v    v
+    //
+    // 3 -> 1 -> 0
+    return test_graph(
+        {{2,0}, {2,1}, {2,1}, {1,1}, {2,2}, {1,1}, {1,2}, {1,2}, {0,2}},
+        {{{1,0}, {0,0}},
+         {{2,0}, {0,1}},
+         {{3,0}, {1,0}},
+         {{4,0}, {1,1}},
+         {{4,1}, {2,0}},
+         {{5,0}, {2,1}},
+         {{6,0}, {3,0}},
+         {{6,1}, {4,0}},
+         {{7,0}, {4,1}},
+         {{7,1}, {5,0}},
+         {{8,0}, {6,0}},
+         {{8,1}, {7,0}}});
+}
+
 } // anonymous namespace
 
 TEST(Gc, compile)
@@ -118,7 +165,7 @@ TEST(Gc, compile)
         test_graph(
             {},
             {}),
-        "{}");
+        "{}; []");
 
     // 0 -> 1 -> 2 -> 3
     check_comple_graph(
@@ -130,7 +177,7 @@ TEST(Gc, compile)
         "{(0) => ([(0,0)->(1,0)]) |"
         " (1) => ([(1,0)->(2,0)]) |"
         " (2) => ([(2,0)->(3,0)]) |"
-        " (3)}");
+        " (3)}; [(),(0),(1),(2)]");
 
     // 1 -> 2 -> 3 -> 0
     check_comple_graph(
@@ -142,7 +189,7 @@ TEST(Gc, compile)
         "{(1) => ([(1,0)->(2,0)]) |"
         " (2) => ([(2,0)->(3,0)]) |"
         " (3) => ([(3,0)->(0,0)]) |"
-        " (0)}");
+        " (0)}; [(3),(),(1),(2)]");
 
     // 0 -> 2 <- 1
     check_comple_graph(
@@ -151,7 +198,7 @@ TEST(Gc, compile)
             {{{0,0}, {2,0}},
              {{1,0}, {2,1}}}),
         "{(0,1) => ([(0,0)->(2,0)],[(1,0)->(2,1)]) |"
-        " (2)}");
+        " (2)}; [(),(),(0,1)]");
 
     // 8 -> 7 -> 5
     //
@@ -165,25 +212,12 @@ TEST(Gc, compile)
     //
     // 3 -> 1 -> 0
     check_comple_graph(
-        test_graph(
-            {{2,0}, {2,1}, {2,1}, {1,1}, {2,2}, {1,1}, {1,2}, {1,2}, {0,2}},
-            {{{1,0}, {0,0}},
-             {{2,0}, {0,1}},
-             {{3,0}, {1,0}},
-             {{4,0}, {1,1}},
-             {{4,1}, {2,0}},
-             {{5,0}, {2,1}},
-             {{6,0}, {3,0}},
-             {{6,1}, {4,0}},
-             {{7,0}, {4,1}},
-             {{7,1}, {5,0}},
-             {{8,0}, {6,0}},
-             {{8,1}, {7,0}}}),
+        test_graph_net_3x3(),
         "{(8) => ([(8,0)->(6,0)],[(8,1)->(7,0)]) |"
         " (6,7) => ([(6,0)->(3,0)],[(6,1)->(4,0)],[(7,0)->(4,1)],[(7,1)->(5,0)]) |"
         " (3,4,5) => ([(3,0)->(1,0)],[(4,0)->(1,1)],[(4,1)->(2,0)],[(5,0)->(2,1)]) |"
         " (1,2) => ([(1,0)->(0,0)],[(2,0)->(0,1)]) |"
-        " (0)}");
+        " (0)}; [(1,2),(3,4),(4,5),(6),(6,7),(7),(8),(8),()]");
 
     // Graph is not connected. Unreachable nodes are 1
     EXPECT_THROW(
@@ -289,20 +323,7 @@ TEST(Gc, compute_2)
     // v    v    v
     //
     // 3 -> 1 -> 0
-    auto g = test_graph(
-        {{2,0}, {2,1}, {2,1}, {1,1}, {2,2}, {1,1}, {1,2}, {1,2}, {0,2}},
-        {{{1,0}, {0,0}},
-         {{2,0}, {0,1}},
-         {{3,0}, {1,0}},
-         {{4,0}, {1,1}},
-         {{4,1}, {2,0}},
-         {{5,0}, {2,1}},
-         {{6,0}, {3,0}},
-         {{6,1}, {4,0}},
-         {{7,0}, {4,1}},
-         {{7,1}, {5,0}},
-         {{8,0}, {6,0}},
-         {{8,1}, {7,0}}});
+    auto g = test_graph_net_3x3();
 
     auto instr = gc::compile(g);
 
@@ -334,5 +355,73 @@ TEST(Gc, compute_2)
 6: (2,2)
 7: (3,2)
 8: (1,2)
+)");
+}
+
+TEST(Gc, compute_partially)
+{
+    auto format_result = [](const gc::ComputationResult& res,
+                            const gc::Graph& g)
+        -> std::string
+    {
+        std::ostringstream s;
+        auto node_count = g.nodes.size();
+        for (size_t inode=0; inode<node_count; ++inode)
+        {
+            auto gr = group(res.outputs, inode);
+            auto seq = std::ranges::transform_view(
+                gr,
+                [](const gc::Value& v)
+                { return v.as<int>(); });
+            const auto* node =
+                static_cast<const TestNode*>(g.nodes.at(inode).get());
+            s << inode << ": (" << common::format_seq(seq)
+              << ") - ts: " << res.node_ts.at(inode)
+              << ", computed: " << node->computation_count()
+              << std::endl;
+        }
+        return s.str();
+    };
+
+    // stateful  stateless
+    //       0*   1
+    //       |    |
+    //       +--. +--.
+    //       |  | |  |
+    //       v  v v  v
+    //       2   3   4
+    auto g = test_graph({{0, 1, true}, {0, 1, false},
+                         {1, 1}, {2, 1}, {1, 1}},
+                        {{{0,0}, {2,0}},
+                         {{0,0}, {3,0}},
+                         {{1,0}, {3,1}},
+                         {{1,0}, {4,0}}});
+
+    auto instr = gc::compile(g);
+
+    auto result = gc::ComputationResult{};
+
+    compute(result, g, instr.get());
+    EXPECT_EQ(format_result(result, g), R"(0: (1) - ts: 1, computed: 1
+1: (1) - ts: 1, computed: 1
+2: (2) - ts: 1, computed: 1
+3: (3) - ts: 1, computed: 1
+4: (2) - ts: 1, computed: 1
+)");
+
+    compute(result, g, instr.get());
+    EXPECT_EQ(format_result(result, g), R"(0: (2) - ts: 2, computed: 2
+1: (1) - ts: 1, computed: 2
+2: (3) - ts: 2, computed: 2
+3: (4) - ts: 2, computed: 2
+4: (2) - ts: 1, computed: 1
+)");
+
+    compute(result, g, instr.get());
+    EXPECT_EQ(format_result(result, g), R"(0: (3) - ts: 3, computed: 3
+1: (1) - ts: 1, computed: 3
+2: (4) - ts: 3, computed: 3
+3: (5) - ts: 3, computed: 3
+4: (2) - ts: 1, computed: 1
 )");
 }

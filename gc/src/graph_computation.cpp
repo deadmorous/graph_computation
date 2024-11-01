@@ -44,8 +44,16 @@ auto operator<<(std::ostream& s, const IndexEdge& e)
 
 struct ComputationInstructions final
 {
+    // i-th group contains node indices of i-th graph level
     common::Grouped<uint32_t>       nodes;
+
+    // i-th group contains edges from nodes of level i
+    // to nodes of level i+1
     common::Grouped<IndexEdge>      edges;
+
+    // i-th group contains indices of nodes supplying data
+    // to the i-th node
+    common::Grouped<uint32_t>       sources;
 };
 
 auto operator<<(std::ostream& s, const ComputationInstructions& instr)
@@ -67,7 +75,14 @@ auto operator<<(std::ostream& s, const ComputationInstructions& instr)
         s << " | ";
         print_group(instr.nodes, i);
     }
-    s << '}';
+    s << "}; [";
+    auto* delim = "";
+    for (uint32_t i=0, ns=group_count(instr.sources); i<ns; ++i, delim=",")
+    {
+        s << delim;
+        print_group(instr.sources, i);
+    }
+    s << ']';
     return s;
 }
 
@@ -127,7 +142,8 @@ auto compile(const Graph& g)
     auto level = IndexSet{};
     std::ranges::copy_if(
         node_ind_range,
-        std::inserter(level, level.end()), has_all_inputs );
+        std::inserter(level, level.end()),
+        has_all_inputs);
     if (level.empty())
         throw std::invalid_argument("Graph has no sources");
 
@@ -288,6 +304,26 @@ auto compile(const Graph& g)
             common::format_seq(unprocessed_edges));
     }
 
+    // Build source map
+    using SimpleEdge = std::array<uint32_t, 2>; // [1] -> [0]
+    auto simple_edges = std::vector<SimpleEdge>{};
+    for (const auto& e : edges)
+        simple_edges.push_back({e[1].inode, e[0].inode});
+    std::sort(simple_edges.begin(), simple_edges.end());
+    simple_edges.resize(
+        std::unique(simple_edges.begin(), simple_edges.end()) -
+        simple_edges.begin());
+
+    {
+        auto ie = uint32_t{};
+        for (uint32_t i=0, n=nodes.size(); i<n; ++i)
+        {
+            for (; ie<simple_edges.size() && simple_edges[ie][0] == i; ++ie)
+                add_to_last_group(result->sources, simple_edges[ie][1]);
+            next_group(result->sources);
+        }
+    }
+
     return result;
 }
 
@@ -302,25 +338,29 @@ auto compute(ComputationResult& result,
     if (result.outputs.values.empty())
     {
         // Allocate result grouped data
-        auto fill = [&](common::Grouped<Value>& grouped, auto count)
+        auto fill = [&]<typename T>(common::Grouped<T>& grouped, auto count)
         {
             grouped = {};
             for (const auto& node : g.nodes)
             {
                 for (uint32_t i=0, n=count(*node); i<n; ++i)
-                    common::add_to_last_group(grouped, Value{});
+                    common::add_to_last_group(grouped, T{});
                 common::next_group(grouped);
             }
         };
 
         fill(result.inputs, input_count);
         fill(result.outputs, output_count);
+        fill(result.prev_source_outputs, output_count);
+        result.node_ts = std::vector<Timestamp>(g.nodes.size(), 0);
+        result.computation_ts = 0;
     }
 
     else
     {
         // Validate result grouped data
-        auto check = [&](const common::Grouped<Value>& grouped, auto count)
+        auto check = [&]<typename T>(const common::Grouped<T>& grouped,
+                                     auto count)
         {
             assert (group_count(grouped) == g.nodes.size());
             for (uint32_t inode=0, n=g.nodes.size(); inode<n; ++inode)
@@ -330,26 +370,65 @@ auto compute(ComputationResult& result,
 
         check(result.inputs, input_count);
         check(result.outputs, output_count);
+        check(result.prev_source_outputs, output_count);
+        assert(result.node_ts.size() == g.nodes.size());
     }
+
+    ++result.computation_ts;
 
     auto nlevels = group_count(instructions->nodes);
     for (auto level=0; level<nlevels; ++level)
     {
+        if (level > 0)
+        {
+            for (const auto& e : group(instructions->edges, level-1))
+            {
+                const auto& [e0, e1] = e;
+                group(result.inputs, e1.inode)[e1.port] =
+                    group(result.outputs, e0.inode)[e0.port];
+            }
+        }
+
         for (auto inode : group(instructions->nodes, level))
         {
+            auto upstream_ts = Timestamp{};
+            auto upstream_updated = true;
             if (level > 0)
             {
-                for (const auto& e : group(instructions->edges, level-1))
-                {
-                    const auto& [e0, e1] = e;
-                    group(result.inputs, e1.inode)[e1.port] =
-                        group(result.outputs, e0.inode)[e0.port];
-                }
+                for (auto i : group(instructions->sources, inode))
+                    upstream_ts = std::max(upstream_ts, result.node_ts[i]);
+                upstream_updated = result.node_ts[inode] < upstream_ts;
             }
+            else
+                upstream_updated = true;
+
+            if (!upstream_updated)
+                continue;
 
             g.nodes[inode]->compute_outputs(
                 group(result.outputs, inode),
                 group(result.inputs, inode));
+
+            if (level == 0)
+            {
+                auto outputs = group(result.outputs, inode);
+                auto prev_outputs = group(result.prev_source_outputs, inode);
+                auto source_changed = false;
+                for (size_t i=0, n=outputs.size(); i<n; ++i)
+                {
+                    if (outputs[i] == prev_outputs[i])
+                        continue;
+
+                    prev_outputs[i] = outputs[i];
+                    source_changed = true;
+                }
+
+                if (!source_changed)
+                    continue;
+                upstream_ts = result.computation_ts;
+            }
+
+            result.node_ts[inode] = upstream_ts;
         }
     }
 }

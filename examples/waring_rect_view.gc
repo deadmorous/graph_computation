@@ -5,8 +5,14 @@ graph:
       init:
         - type: UintSize
           value:
-            width: 600
-            height: 500
+            width: 100
+            height: 100
+
+    - name:  seq_size
+      type:  source_param
+      init:
+        - type: U32
+          value: 10000
 
     - name:  waring_s
       type:  source_param
@@ -19,18 +25,6 @@ graph:
       init:
         - type: U32
           value: 2
-
-    - name:  img_size_w
-      type:  source_param
-      init:
-        - type: ValuePath
-          value: /width
-
-    - name:  img_size_h
-      type:  source_param
-      init:
-        - type: ValuePath
-          value: /height
 
     - name: palette
       type: source_param
@@ -53,15 +47,6 @@ graph:
         - type: U32
           value: 0
 
-    - name: pw
-      type: project
-
-    - name: ph
-      type: project
-
-    - name: seq_size
-      type: multiply
-
     - name: sieve
       type: waring
 
@@ -72,13 +57,7 @@ graph:
       type: filter_seq
 
   edges:
-    - [img_size.0,          pw.value]
-    - [img_size_w.out_0,    pw.path]
-    - [img_size,            ph.value]
-    - [img_size_h,          ph.path]
-    - [pw.projection,       seq_size.lhs]
-    - [ph.projection,       seq_size.rhs]
-    - [seq_size.product,    sieve.count]
+    - [seq_size,            sieve.count]
     - [img_size,            view.size]
     - [sieve.sequence,      view.sequence]
     - [palette,             view.palette]
@@ -111,11 +90,15 @@ layout:
         - type: spin
           bind:
             node: waring_s
-          range: [1, 10]
+          range: [1, 100]
         - type: spin
           bind:
             node: waring_k
-          range: [2, 10]
+          range: [2, 100]
+        - type: spin
+          bind:
+            node: seq_size
+          range: [1, 1000000]
       - type: color
         bind:
           node: palette

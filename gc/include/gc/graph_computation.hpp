@@ -18,10 +18,15 @@ auto operator<<(std::ostream& s, const ComputationInstructions& instructions)
 auto compile(const Graph& g)
     -> ComputationInstructionsPtr;
 
+using Timestamp = uint64_t;
+
 struct ComputationResult final
 {
     common::Grouped<Value> inputs;
     common::Grouped<Value> outputs;
+    common::Grouped<Value> prev_source_outputs;
+    std::vector<Timestamp> node_ts;
+    Timestamp computation_ts{};
 };
 
 auto compute(ComputationResult& result,
