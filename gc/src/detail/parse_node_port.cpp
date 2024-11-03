@@ -4,6 +4,7 @@
 
 #include "common/throw.hpp"
 
+#include <algorithm>
 #include <charconv>
 
 

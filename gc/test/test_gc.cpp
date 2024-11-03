@@ -41,15 +41,17 @@ public:
     { std::fill(result.begin(), result.end(), 0); }
 
     auto compute_outputs(gc::ValueSpan result,
-                         gc::ConstValueSpan inputs) const
-        -> void override
+                         gc::ConstValueSpan inputs,
+                         const std::stop_token& stoken,
+                         const gc::NodeProgress& progress) const
+        -> bool override
     {
         ++computation_count_;
 
         std::iota(result.begin(), result.end(), 1 + state_);
 
         if (output_count() == 0)
-            return;
+            return true;
 
         auto output_index = 0;
         for (const auto& input : inputs)
@@ -59,6 +61,7 @@ public:
         }
 
         state_ += state_inc_;
+        return true;
     }
 
     auto computation_count() const noexcept

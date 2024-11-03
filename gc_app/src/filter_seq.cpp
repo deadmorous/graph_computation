@@ -16,15 +16,15 @@ class FilterSeq final :
 {
 public:
     auto input_names() const
-        -> common::ConstNameSpan
+        -> common::ConstNameSpan override
     { return gc::node_input_names<FilterSeq>( "sequence"sv, "value"sv ); }
 
     auto output_names() const
-        -> common::ConstNameSpan
+        -> common::ConstNameSpan override
     { return gc::node_output_names<FilterSeq>( "indices"sv ); }
 
     auto default_inputs(gc::ValueSpan result) const
-        -> void
+        -> void override
     {
         assert(result.size() == 2);
         result[0] = uint_vec_val({0, 1, 2, 3, 0, 1, 2, 3});
@@ -33,8 +33,10 @@ public:
 
     auto compute_outputs(
             gc::ValueSpan result,
-            gc::ConstValueSpan inputs) const
-        -> void
+            gc::ConstValueSpan inputs,
+            const std::stop_token& stoken,
+            const gc::NodeProgress& progress) const
+        -> bool override
     {
         assert(inputs.size() == 2);
         assert(result.size() == 1);
@@ -43,10 +45,15 @@ public:
 
         auto filtered = UintVec{};
         for (size_t i=0, n=seq.size(); i<n; ++i)
+        {
             if (seq[i] == value)
                 filtered.push_back(Uint(i));
+            if (stoken.stop_requested())
+                return false;
+        }
 
         result[0] = uint_vec_val(std::move(filtered));
+        return true;
     }
 };
 

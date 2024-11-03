@@ -16,16 +16,16 @@ class Multiply final :
 {
 public:
     auto input_names() const
-        -> common::ConstNameSpan
+        -> common::ConstNameSpan override
     { return gc::node_input_names<Multiply>( "lhs"sv, "rhs"sv ); }
 
     auto output_names() const
-        -> common::ConstNameSpan
+        -> common::ConstNameSpan override
     { return gc::node_output_names<Multiply>( "product"sv ); }
 
 
     auto default_inputs(gc::ValueSpan result) const
-        -> void
+        -> void override
     {
         assert(result.size() == 2);
         result[0] = uint_val(2);
@@ -34,8 +34,10 @@ public:
 
     auto compute_outputs(
             gc::ValueSpan result,
-            gc::ConstValueSpan inputs) const
-        -> void
+            gc::ConstValueSpan inputs,
+            const std::stop_token& stoken,
+            const gc::NodeProgress& progress) const
+        -> bool override
     {
         assert(inputs.size() == 2);
         assert(result.size() == 1);
@@ -47,6 +49,7 @@ public:
             {
                 result[0] = inputs[0].as(tag) * inputs[1].as(tag);
             });
+        return true;
     }
 };
 

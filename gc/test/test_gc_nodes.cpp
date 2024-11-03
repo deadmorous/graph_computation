@@ -1,6 +1,8 @@
 #include "gc/source_param.hpp"
 
-#include "gc/node.hpp"
+#include "gc/value.hpp"
+
+#include "common/func_ref.hpp"
 
 #include <gtest/gtest.h>
 
@@ -35,7 +37,7 @@ TEST(Gc, SourceParam)
     // ---
 
     gc::ValueVec outputs(2);
-    node->compute_outputs(outputs, {});
+    node->compute_outputs(outputs, {}, {}, {});
     check(outputs);
 
     gc::ValueVec inputs_copy(2);

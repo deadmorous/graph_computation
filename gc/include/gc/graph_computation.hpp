@@ -3,7 +3,10 @@
 #include "gc/graph.hpp"
 #include "gc/value.hpp"
 
+#include "common/func_ref_fwd.hpp"
 #include "common/grouped.hpp"
+
+#include <stop_token>
 
 
 namespace gc {
@@ -34,6 +37,16 @@ auto compute(ComputationResult& result,
              const ComputationInstructions* instructions)
     -> void;
 
+using GraphProgress =
+    common::FuncRef<void(uint32_t inode, double node_progress)>;
+
+auto compute(ComputationResult& result,
+             const Graph& g,
+             const ComputationInstructions* instructions,
+             const std::stop_token& stoken,
+             const GraphProgress& progress)
+    -> bool;
+
 struct Computation final
 {
     Graph graph;
@@ -54,5 +67,17 @@ inline auto computation(Graph g)
 inline auto compute(Computation& computation)
     -> void
 { compute(computation.result, computation.graph, computation.instr.get()); }
+
+inline auto compute(Computation& computation,
+                    const std::stop_token& stoken,
+                    const GraphProgress& progress)
+    -> bool
+{
+    return compute(computation.result,
+                   computation.graph,
+                   computation.instr.get(),
+                   stoken,
+                   progress);
+}
 
 } // namespace gc

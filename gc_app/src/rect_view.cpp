@@ -17,18 +17,18 @@ class RectView final :
 {
 public:
     auto input_names() const
-        -> common::ConstNameSpan
+        -> common::ConstNameSpan override
     {
         return gc::node_input_names<RectView>(
             "size"sv, "sequence"sv, "palette"sv);
     }
 
     auto output_names() const
-        -> common::ConstNameSpan
+        -> common::ConstNameSpan override
     { return gc::node_output_names<RectView>( "image"sv ); }
 
     auto default_inputs(gc::ValueSpan result) const
-        -> void
+        -> void override
     {
         assert(result.size() == 3);
         result[0] = UintSize(100, 100);
@@ -41,8 +41,10 @@ public:
 
     auto compute_outputs(
             gc::ValueSpan result,
-            gc::ConstValueSpan inputs) const
-        -> void
+            gc::ConstValueSpan inputs,
+            const std::stop_token& stoken,
+            const gc::NodeProgress& progress) const
+        -> bool override
     {
         assert(inputs.size() == 3);
         assert(result.size() == 1);
@@ -61,9 +63,12 @@ public:
         {
             auto value = seq[index];
             image.data[index] = map_color(palette, value);
+            if (stoken.stop_requested())
+                return false;
         }
 
         result[0] = std::move(image);
+        return true;
     }
 };
 

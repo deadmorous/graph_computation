@@ -8,6 +8,8 @@
 
 #include "gc/node.hpp"
 
+#include "common/func_ref.hpp"
+
 #include <gtest/gtest.h>
 
 
@@ -37,7 +39,7 @@ TEST(GcApp, EratosthenesSieve)
     ASSERT_LE(count, 10000);
 
     inputs[0] = uint_val(10);
-    node->compute_outputs(outputs, inputs);
+    node->compute_outputs(outputs, inputs, {}, {});
     ASSERT_EQ(outputs[0].type(), gc::type_of<UintVec>());
 
     const auto& actual_output = uint_vec_val(outputs[0]);
@@ -79,7 +81,7 @@ TEST(GcApp, FilterSeq)
         [&](Uint value, UintVec expected_output)
     {
         inputs[1] = uint_val(value);
-        node->compute_outputs(outputs, inputs);
+            node->compute_outputs(outputs, inputs, {}, {});
         ASSERT_EQ(outputs[0].type(), gc::type_of<UintVec>());
 
         const auto& actual_output = uint_vec_val(outputs[0]);
@@ -120,7 +122,7 @@ TEST(GcApp, TestSequence)
     ASSERT_LE(count, 10000);
 
     inputs[0] = uint_val(10);
-    node->compute_outputs(outputs, inputs);
+    node->compute_outputs(outputs, inputs, {}, {});
     ASSERT_EQ(outputs[0].type(), gc::type_of<UintVec>());
 
     const auto& actual_output = uint_vec_val(outputs[0]);
@@ -150,7 +152,7 @@ TEST(GcApp, Multiply)
         gc::ValueVec inputs{ a, b };
         gc::ValueVec outputs(1);
 
-        node->compute_outputs(outputs, inputs);
+        node->compute_outputs(outputs, inputs, {}, {});
         ASSERT_EQ(outputs[0].as<T>(), a*b);
     };
 
@@ -178,7 +180,7 @@ TEST(GcApp, Project)
         gc::ValueVec inputs{ value, path };
         gc::ValueVec outputs(1);
 
-        node->compute_outputs(outputs, inputs);
+        node->compute_outputs(outputs, inputs, {}, {});
         ASSERT_EQ(outputs[0].as<P>(), projection);
     };
 
@@ -208,7 +210,7 @@ TEST(GcApp, Waring)
         gc::ValueVec inputs{ count, s, k };
         gc::ValueVec outputs(1);
 
-        node->compute_outputs(outputs, inputs);
+        node->compute_outputs(outputs, inputs, {}, {});
         const auto& seq = outputs[0].as<UintVec>();
         // for (size_t i=0, n=seq.size(); i<n; ++i)
         //     std::cout << i << '\t' << seq[i] << std::endl;

@@ -1,6 +1,7 @@
 #include "gc/graph_computation.hpp"
 #include "gc/node.hpp"
 
+#include "common/func_ref.hpp"
 #include "common/log.hpp"
 #include "common/throw.hpp"
 
@@ -331,6 +332,14 @@ auto compute(ComputationResult& result,
              const Graph& g,
              const ComputationInstructions* instructions)
     -> void
+{ compute(result, g, instructions, {}, {}); }
+
+auto compute(ComputationResult& result,
+             const Graph& g,
+             const ComputationInstructions* instructions,
+             const std::stop_token& stoken,
+             const GraphProgress& progress)
+    -> bool
 {
     auto input_count = [](const gc::Node& node){ return node.input_count(); };
     auto output_count = [](const gc::Node& node){ return node.output_count(); };
@@ -405,9 +414,19 @@ auto compute(ComputationResult& result,
             if (!upstream_updated)
                 continue;
 
-            g.nodes[inode]->compute_outputs(
-                group(result.outputs, inode),
-                group(result.inputs, inode));
+            auto node_progress =
+                [&](double progress_value)
+            { progress(inode, progress_value); };
+            auto node_progress_func = NodeProgress{ &node_progress };
+
+            auto computed =
+                g.nodes[inode]->compute_outputs(
+                    group(result.outputs, inode),
+                    group(result.inputs, inode),
+                    stoken, node_progress_func);
+
+            if (!computed)
+                return false;
 
             if (level == 0)
             {
@@ -431,6 +450,8 @@ auto compute(ComputationResult& result,
             result.node_ts[inode] = upstream_ts;
         }
     }
+
+    return true;
 }
 
 } // namespace gc

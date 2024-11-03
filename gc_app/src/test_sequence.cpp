@@ -30,15 +30,15 @@ class TestSequence final :
 {
 public:
     auto input_names() const
-        -> common::ConstNameSpan
+        -> common::ConstNameSpan override
     { return gc::node_input_names<TestSequence>( "count"sv ); }
 
     auto output_names() const
-        -> common::ConstNameSpan
+        -> common::ConstNameSpan override
     { return gc::node_output_names<TestSequence>( "sequence"sv ); }
 
     auto default_inputs(gc::ValueSpan result) const
-        -> void
+        -> void override
     {
         assert(result.size() == 1);
         result[0] = uint_val(1000);
@@ -46,13 +46,16 @@ public:
 
     auto compute_outputs(
             gc::ValueSpan result,
-            gc::ConstValueSpan inputs) const
-        -> void
+            gc::ConstValueSpan inputs,
+            const std::stop_token& stoken,
+            const gc::NodeProgress& progress) const
+        -> bool override
     {
         assert(inputs.size() == 1);
         assert(result.size() == 1);
         auto count = uint_val(inputs[0]);
         result[0] = uint_vec_val(test_seq(count));
+        return true;
     }
 };
 

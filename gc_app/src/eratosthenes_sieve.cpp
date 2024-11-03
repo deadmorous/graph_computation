@@ -14,8 +14,10 @@ using namespace std::string_view_literals;
 namespace gc_app {
 namespace {
 
-auto sieve(Uint limit)
-    -> UintVec
+auto sieve(Uint limit,
+           const std::stop_token& stoken,
+           const gc::NodeProgress& progress)
+    -> std::pair<UintVec, bool>
 {
     auto result = UintVec(limit, 0);
     auto prime = Uint{2};
@@ -26,8 +28,11 @@ auto sieve(Uint limit)
         for (++prime; prime<limit; ++prime)
             if (result[prime] == 0)
                 break;
+        if (stoken.stop_requested())
+            return { std::move(result), false };
     }
-    return result;
+
+    return { std::move(result), true };
 }
 
 } // anonymous namespace
@@ -38,15 +43,15 @@ class EratosthenesSieve final :
 {
 public:
     auto input_names() const
-        -> common::ConstNameSpan
+        -> common::ConstNameSpan override
     { return gc::node_input_names<EratosthenesSieve>( "count"sv ); }
 
     auto output_names() const
-        -> common::ConstNameSpan
+        -> common::ConstNameSpan override
     { return gc::node_output_names<EratosthenesSieve>( "sequence"sv ); }
 
     auto default_inputs(gc::ValueSpan result) const
-        -> void
+        -> void override
     {
         assert(result.size() == 1);
         result[0] = uint_val(1000);
@@ -54,13 +59,17 @@ public:
 
     auto compute_outputs(
             gc::ValueSpan result,
-            gc::ConstValueSpan inputs) const
-        -> void
+            gc::ConstValueSpan inputs,
+            const std::stop_token& stoken,
+            const gc::NodeProgress& progress) const
+        -> bool override
     {
         assert(inputs.size() == 1);
         assert(result.size() == 1);
         auto count = uint_val(inputs[0]);
-        result[0] = uint_vec_val(sieve(count));
+        auto [seq, computed] = sieve(count, stoken, progress);
+        result[0] = uint_vec_val(std::move(seq));
+        return computed;
     }
 };
 

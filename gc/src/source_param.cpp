@@ -19,35 +19,38 @@ public:
     {}
 
     auto input_names() const
-        -> common::ConstNameSpan
+        -> common::ConstNameSpan override
     { return {}; }
 
     auto output_names() const
-        -> common::ConstNameSpan
+        -> common::ConstNameSpan override
     { return out_names_(); }
 
     auto default_inputs(ValueSpan result) const
-        -> void
+        -> void override
     {}
 
     auto compute_outputs(ValueSpan result,
-                         ConstValueSpan inputs) const
-        -> void
+                         ConstValueSpan inputs,
+                         const std::stop_token& stoken,
+                         const NodeProgress& progress) const
+        -> bool override
     {
         assert(inputs.empty());
         get_inputs(result);
+        return true;
     }
 
 
     auto get_inputs(ValueSpan inputs) const
-        -> void
+        -> void override
     {
         assert(inputs.size() == param_.size());
         std::copy(param_.begin(), param_.end(), inputs.begin());
     }
 
     auto set_inputs(ConstValueSpan inputs)
-        -> void
+        -> void override
     {
         if (inputs.size() != param_.size())
             common::throw_<std::invalid_argument>(

@@ -16,8 +16,12 @@ using namespace std::string_view_literals;
 namespace gc_app {
 namespace {
 
-auto waring(Uint limit, Uint s, Uint k)
--> UintVec
+auto waring(Uint limit,
+            Uint s,
+            Uint k,
+            const std::stop_token& stoken,
+            const gc::NodeProgress& progress)
+    -> std::pair<UintVec, bool>
 {
     auto result = UintVec(limit, 0);
 
@@ -41,10 +45,12 @@ auto waring(Uint limit, Uint s, Uint k)
             sum += n[i];
         if (sum < limit)
             ++result[sum];
+        if (stoken.stop_requested())
+            return { std::move(result), false };
     }
     while(inc_multi_index_mono(index, tlim));
 
-    return result;
+    return { std::move(result), true };
 }
 
 } // anonymous namespace
@@ -54,15 +60,15 @@ class Waring final :
 {
 public:
     auto input_names() const
-        -> common::ConstNameSpan
+        -> common::ConstNameSpan override
     { return gc::node_input_names<Waring>( "count"sv, "s"sv, "k"sv ); }
 
     auto output_names() const
-        -> common::ConstNameSpan
+        -> common::ConstNameSpan override
     { return gc::node_output_names<Waring>( "sequence"sv ); }
 
     auto default_inputs(gc::ValueSpan result) const
-        -> void
+        -> void override
     {
         assert(result.size() == 3);
         result[0] = uint_val(1000);
@@ -72,15 +78,19 @@ public:
 
     auto compute_outputs(
             gc::ValueSpan result,
-            gc::ConstValueSpan inputs) const
-        -> void
+            gc::ConstValueSpan inputs,
+            const std::stop_token& stoken,
+            const gc::NodeProgress& progress) const
+        -> bool override
     {
         assert(inputs.size() == 3);
         assert(result.size() == 1);
         auto count = uint_val(inputs[0]);
         auto s = uint_val(inputs[1]);
         auto k = uint_val(inputs[2]);
-        result[0] = uint_vec_val(waring(count, s, k));
+        auto [seq, computed] = waring(count, s, k, stoken, progress);
+        result[0] = uint_vec_val(std::move(seq));
+        return computed;
     }
 };
 
