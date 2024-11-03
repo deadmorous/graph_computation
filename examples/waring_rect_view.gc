@@ -90,7 +90,7 @@ layout:
         - type: spin
           bind:
             node: waring_s
-          range: [1, 100]
+          range: [1, 1000]
         - type: spin
           bind:
             node: waring_k
