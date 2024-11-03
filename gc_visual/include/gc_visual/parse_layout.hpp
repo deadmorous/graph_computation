@@ -1,7 +1,8 @@
 #pragma once
 
+#include "gc_visual/computation_thread.hpp"
+
 #include "gc/detail/named_nodes.hpp"
-#include "gc/graph_computation.hpp"
 
 #include "yaml-cpp/node/node.h"
 
@@ -9,7 +10,7 @@
 
 
 auto parse_layout(const YAML::Node& config,
-                  gc::Computation& computation,
+                  ComputationThread& computation_thread,
                   const gc::detail::NamedNodes& node_map,
                   QWidget* parent = nullptr)
     -> QWidget*;

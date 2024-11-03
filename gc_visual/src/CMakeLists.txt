@@ -15,6 +15,7 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 set(PROJECT_SOURCES
     bitmap_view.cpp             ../include/gc_visual/bitmap_view.hpp
     color_editor_widget.cpp     ../include/gc_visual/color_editor_widget.hpp
+    computation_thread.cpp      ../include/gc_visual/computation_thread.hpp
     flatten_type.cpp
     graph_broker.cpp            ../include/gc_visual/graph_broker.hpp
     graph_parameter_editor.cpp  ../include/gc_visual/graph_parameter_editor.hpp
@@ -24,6 +25,7 @@ set(PROJECT_SOURCES
     parse_layout.cpp
     vector_editor_widget.cpp    ../include/gc_visual/vector_editor_widget.hpp
     vector_item_model.cpp       ../include/gc_visual/vector_item_model.hpp
+    wait_widget.cpp             ../include/gc_visual/wait_widget.hpp
 )
 
 

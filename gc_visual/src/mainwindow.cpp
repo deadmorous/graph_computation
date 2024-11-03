@@ -1,6 +1,7 @@
 #include "gc_visual/mainwindow.hpp"
 
 #include "gc_visual/parse_layout.hpp"
+#include "gc_visual/wait_widget.hpp"
 
 #include "gc_app/node_registry.hpp"
 #include "gc_app/type_registry.hpp"
@@ -102,6 +103,10 @@ MainWindow::MainWindow(const gc_visual::ConfigSpecification& spec,
     file_menu->addSeparator();
     auto* quit_action = file_menu->addAction("&Quit", QKeySequence::Quit);
 
+    auto* comp_menu = menu_bar->addMenu("&Computation");
+    auto stop_action =
+        comp_menu->addAction("&Stop", QKeyCombination{Qt::CTRL, Qt::Key_K});
+
     setMenuBar(menu_bar);
 
     connect(open_action, &QAction::triggered, this, &MainWindow::open);
@@ -111,6 +116,22 @@ MainWindow::MainWindow(const gc_visual::ConfigSpecification& spec,
 
     connect(recents_mapper_, &QSignalMapper::mappedString,
             this, &MainWindow::open_recent);
+
+    connect(this, &MainWindow::load_finished,
+            this, &MainWindow::on_load_finished);
+
+    connect(stop_action, &QAction::triggered,
+            &computation_thread_, &ComputationThread::stop);
+
+    connect(&computation_thread_, &ComputationThread::running_state_changed,
+            stop_action, &QAction::setEnabled);
+    stop_action->setEnabled(false);
+
+    auto wait_widget = new WaitWidget(this);
+    connect(&computation_thread_, &ComputationThread::running_state_changed,
+            wait_widget, &WaitWidget::set_waiting);
+    connect(wait_widget, &WaitWidget::cancel_waiting,
+            stop_action, &QAction::trigger);
 
     load(spec);
 }
@@ -135,14 +156,7 @@ auto MainWindow::open()
     if (file_name.isEmpty())
         return;
 
-    if (!load({ .type = FileSpec, .spec = file_name }))
-        return;
-
-    if (spec_.type == FileSpec)
-    {
-        add_recent_file(file_name);
-        reload_recent_files_menu();
-    }
+    load({ .type = FileSpec, .spec = file_name });
 }
 
 auto MainWindow::open_recent(const QString& file_name)
@@ -169,9 +183,18 @@ auto MainWindow::reload()
     -> void
 { load(spec_); }
 
+auto MainWindow::on_load_finished(const gc_visual::ConfigSpecification& spec)
+    -> void
+{
+    if (spec.type == FileSpec)
+    {
+        add_recent_file(spec.spec);
+        reload_recent_files_menu();
+    }
+}
 
 auto MainWindow::load(const gc_visual::ConfigSpecification& spec)
-    -> bool
+    -> void
 {
     try {
         // Parse YAML config
@@ -189,21 +212,43 @@ auto MainWindow::load(const gc_visual::ConfigSpecification& spec)
             gc::yaml::parse_graph(graph_config, node_registry, type_registry);
 
         // Compile and compute the graph
-        computation_ = computation(std::move(g));
-        compute(computation_);
+        computation_thread_.set_graph(std::move(g));
 
-        // Create visual layout
-        auto layout = config["layout"];
-        auto central_widget = parse_layout(layout, computation_, node_map);
-        setCentralWidget(central_widget);
+        connect(
+            &computation_thread_,
+            &ComputationThread::finished,
+            this,
+            [config, node_map, spec, this]{
+                computation_thread_.disconnect(this);
 
-        spec_ = spec;
-        return true;
+                try {
+                    if (!computation_thread_.ok())
+                        common::throw_("Graph computation has been terminated");
+
+                    // Create visual layout
+                    auto layout = config["layout"];
+                    auto central_widget =
+                        parse_layout(layout,
+                                     computation_thread_,
+                                     node_map);
+                    setCentralWidget(central_widget);
+
+                    spec_ = spec;
+                    emit load_finished(spec);
+                }
+                catch (std::exception& e)
+                {
+                    setCentralWidget(nullptr);
+                    QMessageBox::critical(
+                        this, "Load failed", QString::fromUtf8(e.what()));
+                }
+            });
+
+        computation_thread_.start();
     }
     catch (std::exception& e)
     {
         QMessageBox::critical(this, "Load failed", QString::fromUtf8(e.what()));
-        return false;
     }
 }
 

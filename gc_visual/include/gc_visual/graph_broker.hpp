@@ -1,7 +1,8 @@
 #pragma once
 
+#include "gc_visual/computation_thread.hpp"
+
 #include "gc/detail/named_nodes.hpp"
-#include "gc/graph_computation.hpp"
 #include "gc/node_port_tags.hpp"
 #include "gc/param_spec.hpp"
 #include "gc/value_fwd.hpp"
@@ -14,7 +15,7 @@ class GraphBroker final :
 {
     Q_OBJECT
 public:
-    explicit GraphBroker(gc::Computation& computation,
+    explicit GraphBroker(ComputationThread& computation_thread,
                          const gc::detail::NamedNodes& named_nodes_,
                          QObject* parent = nullptr);
 
@@ -44,8 +45,12 @@ public slots:
     auto set_parameter(const gc::ParameterSpec&, const gc::Value&)
         -> void;
 
+private slots:
+    auto on_computation_finished()
+        -> void;
+
 private:
-    gc::Computation& computation_;
+    ComputationThread& computation_thread_;
     const gc::detail::NamedNodes& named_nodes_;
     std::unordered_map<const gc::Node*, uint32_t> node_indices_;
 };

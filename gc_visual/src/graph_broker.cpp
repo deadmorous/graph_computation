@@ -19,15 +19,20 @@ auto group_value(uint32_t node_index,
 } // anonymous namespace
 
 
-GraphBroker::GraphBroker(gc::Computation& computation,
+GraphBroker::GraphBroker(ComputationThread& computation_thread,
                          const gc::detail::NamedNodes& named_nodes,
                          QObject* parent) :
     QObject{ parent },
-    computation_{ computation },
+    computation_thread_{ computation_thread },
     named_nodes_{ named_nodes }
 {
+    const auto& computation =
+        computation_thread_.computation();
     for (uint32_t index=0; const auto& node: computation.graph.nodes)
         node_indices_[node.get()] = index++;
+
+    connect(&computation_thread_, &ComputationThread::finished,
+            this, &GraphBroker::on_computation_finished);
 }
 
 auto GraphBroker::node(const std::string& name) const
@@ -53,15 +58,19 @@ auto GraphBroker::get_parameter(const gc::ParameterSpec& spec) const
 auto GraphBroker::get_port_value(gc::EdgeEnd port, gc::Output_Tag) const
     -> const gc::Value&
 {
+    Q_ASSERT(!computation_thread_.isRunning());
+    auto& computation = computation_thread_.computation();
     return group_value(
-        node_index(port.node), port.port, computation_.result.outputs);
+        node_index(port.node), port.port, computation.result.outputs);
 }
 
 auto GraphBroker::get_port_value(gc::EdgeEnd port, gc::Input_Tag) const
     -> const gc::Value&
 {
+    Q_ASSERT(!computation_thread_.isRunning());
+    auto& computation = computation_thread_.computation();
     return group_value(
-        node_index(port.node), port.port, computation_.result.inputs);
+        node_index(port.node), port.port, computation.result.inputs);
 }
 
 
@@ -69,18 +78,25 @@ auto GraphBroker::set_parameter(const gc::ParameterSpec& spec,
                                 const gc::Value& value)
     -> void
 {
+    computation_thread_.stop();
+
     auto inputs = std::vector<gc::Value>(spec.node->output_count());
     gc::InputParameters::get(spec.node)->get_inputs(inputs);
     inputs.at(spec.index).set(spec.path, value);
     gc::InputParameters::get(spec.node)->set_inputs(inputs);
 
-    // TODO better: Only compute part of the graph depending on the parameter
-    // just changed.
+    computation_thread_.start();
+}
 
-    compute(computation_);
+auto GraphBroker::on_computation_finished()
+    -> void
+{
+    if (!computation_thread_.ok())
+        return; // "Graph computation has been terminated";
 
-    const auto& nodes = computation_.graph.nodes;
-    const auto& outputs = computation_.result.outputs;
+    auto& computation = computation_thread_.computation();
+    const auto& nodes = computation.graph.nodes;
+    const auto& outputs = computation.result.outputs;
 
     for (uint32_t ng=group_count(outputs), ig=0; ig<ng; ++ig)
     {
