@@ -15,7 +15,72 @@
 
 using namespace gc_app;
 
-TEST(GcApp, EratosthenesSieve)
+namespace {
+
+class ProgressChecker final
+{
+public:
+    ProgressChecker() :
+        t_{ std::chrono::steady_clock::now() }
+    {}
+
+    auto operator()(double progress_value)
+        -> void
+    {
+        auto t = std::chrono::steady_clock::now();
+        auto dt = t - t_;
+        auto dp = progress_value - last_progress_value_;
+        t_ = t;
+        last_progress_value_ = progress_value;
+        ++count_;
+
+        EXPECT_GE(progress_value, 0.);
+        EXPECT_LE(progress_value, 1.);
+
+        if (count_ == 1)
+            // Skip fisrt interval
+            return;
+
+        if (count_ == 2)
+        {
+            shortest_interval_ = longest_interval_ = dt;
+            shortest_progress_delta_ = longest_progress_delta_ = dp;
+            return;
+        }
+
+        shortest_interval_ = std::min(shortest_interval_, dt);
+        longest_interval_ = std::max(longest_interval_, dt);
+        shortest_progress_delta_ = std::min(shortest_progress_delta_, dp);
+        longest_progress_delta_ = std::min(longest_progress_delta_, dp);
+    }
+
+    auto check() const
+    {
+        EXPECT_GE(count_, 1);
+
+        if (count_ < 2)
+            return;
+
+        EXPECT_GT(shortest_progress_delta_, 0);
+        EXPECT_GT(shortest_progress_delta_/longest_progress_delta_, 0.1);
+        EXPECT_GT(static_cast<double>(shortest_interval_.count())/
+                      longest_interval_.count(), 0.1);
+    }
+
+private:
+    std::chrono::steady_clock::time_point t_;
+    size_t count_{};
+    double last_progress_value_{};
+    std::chrono::nanoseconds shortest_interval_;
+    std::chrono::nanoseconds longest_interval_;
+    double shortest_progress_delta_;
+    double longest_progress_delta_;
+};
+
+} // anonymous namespace
+
+
+TEST(GcApp_Node, EratosthenesSieve)
 {
     auto node = make_eratosthenes_sieve({});
 
@@ -49,7 +114,7 @@ TEST(GcApp, EratosthenesSieve)
     ASSERT_EQ(actual_output, expected_output);
 }
 
-TEST(GcApp, FilterSeq)
+TEST(GcApp_Node, FilterSeq)
 {
     auto node = make_filter_seq({});
 
@@ -98,7 +163,7 @@ TEST(GcApp, FilterSeq)
     test_filter_value(7, {});
 }
 
-TEST(GcApp, TestSequence)
+TEST(GcApp_Node, TestSequence)
 {
     auto node = gc_app::make_test_sequence({});
 
@@ -132,7 +197,7 @@ TEST(GcApp, TestSequence)
     ASSERT_EQ(actual_output, expected_output);
 }
 
-TEST(GcApp, Multiply)
+TEST(GcApp_Node, Multiply)
 {
     auto node = gc_app::make_multiply({});
 
@@ -160,7 +225,7 @@ TEST(GcApp, Multiply)
     check(1.2, 3.4);
 }
 
-TEST(GcApp, Project)
+TEST(GcApp_Node, Project)
 {
     auto node = gc_app::make_project({});
 
@@ -188,7 +253,7 @@ TEST(GcApp, Project)
     check(std::vector<int>{123, 45}, gc::ValuePath{}/1u, 45);
 }
 
-TEST(GcApp, Waring)
+TEST(GcApp_Node, Waring)
 {
     auto node = gc_app::make_waring({});
 
@@ -250,4 +315,38 @@ TEST(GcApp, Waring)
 
     check(36, 3, 3,
           {{1, {0, 1, 2, 3, 8, 9, 10, 16, 17, 24, 27, 28, 29, 35}}});
+}
+
+// ---
+
+TEST(GcApp_Progress, EratosthenesSieve)
+{
+    auto node = make_eratosthenes_sieve({});
+
+    gc::ValueVec inputs(1);
+    gc::ValueVec outputs(1);
+
+    auto progress_checker = ProgressChecker{};
+
+    inputs[0] = uint_val(10'000'000);
+    node->compute_outputs(outputs, inputs, {}, &progress_checker);
+
+    progress_checker.check();
+}
+
+TEST(GcApp_Progress, Waring)
+{
+    auto node = make_waring({});
+
+    gc::ValueVec inputs(3);
+    gc::ValueVec outputs(1);
+
+    auto progress_checker = ProgressChecker{};
+
+    inputs[0] = uint_val(10'000);
+    inputs[1] = uint_val(3);
+    inputs[2] = uint_val(2);
+    node->compute_outputs(outputs, inputs, {}, &progress_checker);
+
+    progress_checker.check();
 }

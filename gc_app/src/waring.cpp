@@ -8,6 +8,9 @@
 #include "gc/node.hpp"
 #include "gc/node_port_names.hpp"
 
+#include "common/binomial.hpp"
+#include "common/func_ref.hpp"
+
 #include <cmath>
 #include <numeric>
 
@@ -23,6 +26,9 @@ auto waring(Uint limit,
             const gc::NodeProgress& progress)
     -> std::pair<UintVec, bool>
 {
+    assert(s > 0);
+    assert(k > 1);
+
     auto result = UintVec(limit, 0);
 
     auto tlim = static_cast<Uint>(pow(limit, 1./k)) + 1;
@@ -38,6 +44,12 @@ auto waring(Uint limit,
 
     auto index = std::vector<Uint>(s, 0);
 
+    auto iter_count = binomial(common::Type<uint64_t>, tlim+s-1, s);
+    auto progress_factor = 1. / iter_count;
+    auto iter_till_progress_report = uint64_t{1};
+    auto iter = uint64_t{0};
+    constexpr auto iters_per_progress_report{10000};
+
     do
     {
         Uint sum = 0;
@@ -47,6 +59,13 @@ auto waring(Uint limit,
             ++result[sum];
         if (stoken.stop_requested())
             return { std::move(result), false };
+
+        ++iter;
+        if (progress && --iter_till_progress_report == 0)
+        {
+            iter_till_progress_report = iters_per_progress_report;
+            progress(progress_factor*iter);
+        }
     }
     while(inc_multi_index_mono(index, tlim));
 

@@ -6,7 +6,9 @@
 #include "gc/node.hpp"
 #include "gc/node_port_names.hpp"
 
-// #include <chrono>
+#include "common/func_ref.hpp"
+
+#include <cmath>
 
 
 using namespace std::string_view_literals;
@@ -21,15 +23,29 @@ auto sieve(Uint limit,
 {
     auto result = UintVec(limit, 0);
     auto prime = Uint{2};
+
+    auto progress_factor = std::log(2.) / std::log(std::max(limit, 2u));
+    auto progress_k = 1;
+    auto next_progress = 2;
+
     while (prime+1 < limit)
     {
         for (auto n=prime*2; n<limit; n+=prime)
             ++result[n];
+
         for (++prime; prime<limit; ++prime)
             if (result[prime] == 0)
                 break;
+
         if (stoken.stop_requested())
             return { std::move(result), false };
+
+        if (progress && prime >= next_progress)
+        {
+            progress(progress_k * progress_factor);
+            ++progress_k;
+            next_progress += next_progress;
+        }
     }
 
     return { std::move(result), true };
