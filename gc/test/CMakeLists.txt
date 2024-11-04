@@ -7,6 +7,7 @@ enable_testing()
 add_executable(
     gc-lib-test
     main.cpp
+    test_binomial.cpp
     test_func_ref.cpp
     test_gc.cpp
     test_gc_nodes.cpp
