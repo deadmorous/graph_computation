@@ -1,5 +1,6 @@
 #include "gc_visual/mainwindow.hpp"
 
+#include "gc_visual/computation_progress_widget.hpp"
 #include "gc_visual/parse_layout.hpp"
 #include "gc_visual/wait_widget.hpp"
 
@@ -19,6 +20,7 @@
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QSettings>
+#include <QStatusBar>
 #include <QUrl>
 
 
@@ -109,6 +111,9 @@ MainWindow::MainWindow(const gc_visual::ConfigSpecification& spec,
 
     setMenuBar(menu_bar);
 
+    auto progress_widget = new ComputationProgressWidget{};
+    statusBar()->addPermanentWidget(progress_widget);
+
     connect(open_action, &QAction::triggered, this, &MainWindow::open);
     connect(edit_action, &QAction::triggered, this, &MainWindow::edit);
     connect(reload_action, &QAction::triggered, this, &MainWindow::reload);
@@ -132,6 +137,11 @@ MainWindow::MainWindow(const gc_visual::ConfigSpecification& spec,
             wait_widget, &WaitWidget::set_waiting);
     connect(wait_widget, &WaitWidget::cancel_waiting,
             stop_action, &QAction::trigger);
+
+    connect(&computation_thread_, &ComputationThread::progress,
+            progress_widget, &ComputationProgressWidget::set_progress);
+    connect(&computation_thread_, &ComputationThread::running_state_changed,
+            progress_widget, &ComputationProgressWidget::setVisible);
 
     load(spec);
 }
