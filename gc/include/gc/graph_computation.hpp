@@ -23,6 +23,15 @@ auto compile(const Graph& g)
 
 using Timestamp = uint64_t;
 
+struct SourceInput final
+{
+    size_t node_index;
+    size_t input_index;
+    Value value;
+};
+
+using SourceInputVec = std::vector<SourceInput>;
+
 struct ComputationResult final
 {
     common::Grouped<Value> inputs;
@@ -34,7 +43,8 @@ struct ComputationResult final
 
 auto compute(ComputationResult& result,
              const Graph& g,
-             const ComputationInstructions* instructions)
+             const ComputationInstructions* instructions,
+             const SourceInputVec& source_inputs = {})
     -> void;
 
 using GraphProgress =
@@ -43,6 +53,7 @@ using GraphProgress =
 auto compute(ComputationResult& result,
              const Graph& g,
              const ComputationInstructions* instructions,
+             const SourceInputVec& source_inputs,
              const std::stop_token& stoken,
              const GraphProgress& progress)
     -> bool;
@@ -51,31 +62,34 @@ struct Computation final
 {
     Graph graph;
     ComputationInstructionsPtr instr;
+    SourceInputVec source_inputs;
     ComputationResult result;
 };
 
-inline auto computation(Graph g)
+inline auto computation(Graph g, SourceInputVec source_inputs = {})
     -> Computation
 {
     auto instr = compile(g);
 
     return {
         .graph = std::move(g),
-        .instr = instr };
+        .instr = instr,
+        .source_inputs = source_inputs };
 }
 
-inline auto compute(Computation& computation)
+inline auto compute(Computation& c)
     -> void
-{ compute(computation.result, computation.graph, computation.instr.get()); }
+{ compute(c.result, c.graph, c.instr.get(), c.source_inputs); }
 
-inline auto compute(Computation& computation,
+inline auto compute(Computation& c,
                     const std::stop_token& stoken,
                     const GraphProgress& progress)
     -> bool
 {
-    return compute(computation.result,
-                   computation.graph,
-                   computation.instr.get(),
+    return compute(c.result,
+                   c.graph,
+                   c.instr.get(),
+                   c.source_inputs,
                    stoken,
                    progress);
 }

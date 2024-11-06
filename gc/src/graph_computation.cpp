@@ -330,13 +330,15 @@ auto compile(const Graph& g)
 
 auto compute(ComputationResult& result,
              const Graph& g,
-             const ComputationInstructions* instructions)
+             const ComputationInstructions* instructions,
+             const SourceInputVec& source_inputs)
     -> void
-{ compute(result, g, instructions, {}, {}); }
+{ compute(result, g, instructions, source_inputs, {}, {}); }
 
 auto compute(ComputationResult& result,
              const Graph& g,
              const ComputationInstructions* instructions,
+             const SourceInputVec& source_inputs,
              const std::stop_token& stoken,
              const GraphProgress& progress)
     -> bool
