@@ -419,7 +419,9 @@ auto compute(ComputationResult& result,
             auto node_progress =
                 [&](double progress_value)
             { progress(inode, progress_value); };
-            auto node_progress_func = NodeProgress{ &node_progress };
+            auto node_progress_func = progress
+                ? NodeProgress{ &node_progress }
+                : NodeProgress{};
 
             auto computed =
                 g.nodes[inode]->compute_outputs(
