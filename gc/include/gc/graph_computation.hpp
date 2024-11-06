@@ -20,10 +20,14 @@ auto operator<<(std::ostream& s, const ComputationInstructions& instructions)
 
 struct SourceInput final
 {
-    size_t node_index;
-    size_t input_index;
+    size_t node;
+    size_t port;
     Value value;
+
+    auto operator==(const SourceInput&) const noexcept -> bool = default;
 };
+auto operator<<(std::ostream& s, const SourceInput& source_input)
+    -> std::ostream&;
 
 using SourceInputVec = std::vector<SourceInput>;
 

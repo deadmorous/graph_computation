@@ -9,9 +9,9 @@
 #include <cassert>
 #include <iostream>
 #include <ranges>
+#include <set>
 #include <stdexcept>
 #include <unordered_map>
-#include <set>
 
 #include <quill/std/Set.h>
 
@@ -87,6 +87,15 @@ auto operator<<(std::ostream& s, const ComputationInstructions& instr)
     return s;
 }
 
+auto operator<<(std::ostream& s, const SourceInput& source_input)
+    -> std::ostream&
+{
+    return s
+      << "{node=" << source_input.node
+      << ", port=" << source_input.port
+      << ", value=" << source_input.value
+      << "}";
+}
 
 // -----------
 
@@ -112,44 +121,6 @@ auto compile(const Graph& g)
     for (size_t i=0, n=nodes.size(); i<n; ++i)
         node_ind[nodes[i]] = i;
 
-    // Obtain information on node input and output counts.
-    struct NodeData
-    {
-        uint32_t input_count{};
-        uint32_t output_count{};
-        uint32_t inputs_avail{};
-    };
-    auto node_data = std::vector<NodeData>{};
-    node_data.reserve(nodes.size());
-    std::ranges::transform(
-        nodes,
-        std::back_inserter(node_data),
-        [](const Node* node) -> NodeData
-            { return { node->input_count(), node->output_count(), 0 }; } );
-
-    auto has_all_inputs =
-        [&](uint32_t node_index)
-        {
-            auto& d = node_data[node_index];
-            return d.inputs_avail == d.input_count;
-        };
-
-    using IndexSet = std::set<uint32_t>;
-
-    const auto node_ind_range =
-        std::ranges::iota_view{uint32_t{}, static_cast<uint32_t>(nodes.size())};
-
-    // Add all sources to the initial level of the graph
-    auto level = IndexSet{};
-    std::ranges::copy_if(
-        node_ind_range,
-        std::inserter(level, level.end()),
-        has_all_inputs);
-    if (level.empty())
-        throw std::invalid_argument("Graph has no sources");
-
-    auto known = level;
-
     // Map node-pointer-based edges to node-index-based ones
     auto edges = std::vector<IndexEdge>{};
     edges.reserve(g.edges.size());
@@ -162,17 +133,6 @@ auto compile(const Graph& g)
                 { return { node_ind.at(ee.node), ee.port }; };
             return { transform_end(e[0]), transform_end(e[1]) };
         } );
-
-    // We will further track connections of all inputs & outputs by edges
-    using BitVec = std::vector<bool>;
-    using BitVecs = std::vector<BitVec>;
-    auto all_inputs = BitVecs{};
-    all_inputs.reserve(nodes.size());
-    for (size_t i=0, n=nodes.size(); i<n; ++i)
-    {
-        const auto* node = nodes[i];
-        all_inputs.emplace_back(BitVec(node->input_count(), false));
-    }
 
     // Check edges
     auto check_edge_end = [&](const IndexEdgeEnd& ee, bool input)
@@ -201,11 +161,63 @@ auto compile(const Graph& g)
 
     std::ranges::for_each(edges, check_edge);
 
+    using BitVec = std::vector<bool>;
+
+    // Obtain information on node input and output counts.
+    struct NodeData
+    {
+        uint32_t input_count{};
+        uint32_t output_count{};
+        uint32_t inputs_avail{};
+
+        // We will further track connections of all inputs & outputs by edges
+        BitVec connected_inputs{};
+
+        // Number of inputs connected to outputs of other nodes with graph edges
+        uint32_t connected_input_count{};
+    };
+    auto node_data = std::vector<NodeData>{};
+    node_data.reserve(nodes.size());
+    std::ranges::transform(
+        nodes,
+        std::back_inserter(node_data),
+        [](const Node* node) -> NodeData
+            { return { node->input_count(),
+                       node->output_count(),
+                       0,
+                       BitVec(node->input_count(), false) }; } );
+
+    for (const auto& e : edges)
+        ++node_data.at(e[1].inode).connected_input_count;
+
+    auto has_all_inputs =
+        [&](uint32_t node_index)
+        {
+            auto& d = node_data[node_index];
+            return d.inputs_avail == d.connected_input_count;
+        };
+
+    using IndexSet = std::set<uint32_t>;
+
+    const auto node_ind_range =
+        std::ranges::iota_view{uint32_t{}, static_cast<uint32_t>(nodes.size())};
+
+    // Add all sources to the initial level of the graph
+    auto level = IndexSet{};
+    std::ranges::copy_if(
+        node_ind_range,
+        std::inserter(level, level.end()),
+        has_all_inputs);
+    if (level.empty())
+        throw std::invalid_argument("Graph has no sources");
+
+    auto known = level;
+
     auto process_edge = [&](const IndexEdge& e)
     {
         const auto& e1 = e[1];
-        assert (e1.inode < all_inputs.size());
-        auto& ports = all_inputs[e1.inode];
+        assert (e1.inode < node_data.size());
+        auto& ports = node_data[e1.inode].connected_inputs;
         if (ports.at(e1.port))
             common::throw_<std::invalid_argument>(
                 "Edge end ", e1,
@@ -325,7 +337,28 @@ auto compile(const Graph& g)
         }
     }
 
-    return { std::move(result), {} };
+    // Build source inputs
+    auto source_inputs = SourceInputVec{};
+    for (size_t i=0, n=nodes.size(); i<n; ++i)
+    {
+        const auto& nd = node_data[i];
+        if (nd.connected_input_count == nd.input_count)
+            continue;
+        const auto* node = nodes[i];
+        auto default_inputs = ValueVec(node->input_count());
+        nodes[i]->default_inputs(default_inputs);
+        for (size_t port=0; port<nd.input_count; ++port)
+        {
+            if (nd.connected_inputs[port])
+                continue;
+            source_inputs.push_back({
+                .node = i,
+                .port = port,
+                .value = default_inputs[port]});
+        }
+    }
+
+    return { std::move(result), std::move(source_inputs) };
 }
 
 auto compute(ComputationResult& result,
@@ -387,6 +420,25 @@ auto compute(ComputationResult& result,
 
     ++result.computation_ts;
 
+    auto source_updated = std::vector<bool>(g.nodes.size(), false);
+
+    for (const auto& in : source_inputs)
+    {
+        if (in.node >= g.nodes.size())
+            common::throw_<std::out_of_range>(
+                "Source input ", in, " refers to an inexistent graph node");
+        auto node_inputs = group(result.inputs, in.node);
+        if (in.port >= node_inputs.size())
+            common::throw_<std::out_of_range>(
+                "Source input ", in, " refers to an inexistent input port");
+        auto& node_input = node_inputs[in.port];
+        if (node_input != in.value)
+        {
+            node_input = in.value;
+            source_updated[in.node] = true;
+        }
+    }
+
     auto nlevels = group_count(instructions->nodes);
     for (auto level=0; level<nlevels; ++level)
     {
@@ -402,16 +454,23 @@ auto compute(ComputationResult& result,
 
         for (auto inode : group(instructions->nodes, level))
         {
-            auto upstream_ts = Timestamp{};
-            auto upstream_updated = true;
+            Timestamp upstream_ts;
+            bool upstream_updated;
             if (level > 0)
             {
+                upstream_ts = {};
                 for (auto i : group(instructions->sources, inode))
                     upstream_ts = std::max(upstream_ts, result.node_ts[i]);
                 upstream_updated = result.node_ts[inode] < upstream_ts;
             }
             else
-                upstream_updated = true;
+            {
+                auto node_ts = result.node_ts[inode];
+                upstream_updated = source_updated[inode] ||
+                                   node_ts == Timestamp{};
+                upstream_ts =
+                    upstream_updated ? result.computation_ts : node_ts;
+            }
 
             if (!upstream_updated)
                 continue;
@@ -431,25 +490,6 @@ auto compute(ComputationResult& result,
 
             if (!computed)
                 return false;
-
-            if (level == 0)
-            {
-                auto outputs = group(result.outputs, inode);
-                auto prev_outputs = group(result.prev_source_outputs, inode);
-                auto source_changed = false;
-                for (size_t i=0, n=outputs.size(); i<n; ++i)
-                {
-                    if (outputs[i] == prev_outputs[i])
-                        continue;
-
-                    prev_outputs[i] = outputs[i];
-                    source_changed = true;
-                }
-
-                if (!source_changed)
-                    continue;
-                upstream_ts = result.computation_ts;
-            }
 
             result.node_ts[inode] = upstream_ts;
         }

@@ -20,9 +20,7 @@ class TestNode final
 {
 public:
     TestNode(uint32_t input_count,
-             uint32_t output_count,
-             bool stateful = false) :
-        state_inc_{stateful? 1: 0}
+             uint32_t output_count)
     {
         input_names_.resize(input_count);
         output_names_.resize(output_count);
@@ -48,7 +46,7 @@ public:
     {
         ++computation_count_;
 
-        std::iota(result.begin(), result.end(), 1 + state_);
+        std::iota(result.begin(), result.end(), 1);
 
         if (output_count() == 0)
             return true;
@@ -60,7 +58,6 @@ public:
             output_index = (output_index + 1) % output_count();
         }
 
-        state_ += state_inc_;
         return true;
     }
 
@@ -69,8 +66,6 @@ public:
     { return computation_count_; }
 
 private:
-    int state_inc_;
-    mutable int state_{};
     mutable size_t computation_count_{};
     gc::DynamicInputNames input_names_;
     gc::DynamicOutputNames output_names_;
@@ -80,7 +75,6 @@ struct TestGraphNodeSpec
 {
     uint32_t input_count{};
     uint32_t output_count{};
-    bool stateful{false};
 };
 
 struct TestGraphEdgeEndSpec
@@ -103,8 +97,7 @@ auto test_graph(std::initializer_list<TestGraphNodeSpec> nodes,
     for (const auto& node_spec : nodes)
         result.nodes.emplace_back(
             std::make_shared<TestNode>(node_spec.input_count,
-                                       node_spec.output_count,
-                                       node_spec.stateful));
+                                       node_spec.output_count));
 
     auto edge_end =
         [&](const TestGraphEdgeEndSpec& ee) -> gc::EdgeEnd
@@ -118,7 +111,8 @@ auto test_graph(std::initializer_list<TestGraphNodeSpec> nodes,
 }
 
 auto check_comple_graph(const gc::Graph& g,
-                        std::string_view expected_formatted_instructions)
+                        std::string_view expected_formatted_instructions,
+                        const gc::SourceInputVec& expected_source_inputs = {})
     -> void
 {
 
@@ -127,6 +121,7 @@ auto check_comple_graph(const gc::Graph& g,
     // std::cout << "Compiled instructions: " << *instructions << std::endl;
 
     EXPECT_EQ(common::format(*instructions), expected_formatted_instructions);
+    EXPECT_EQ(source_inputs, expected_source_inputs);
 }
 
 
@@ -278,7 +273,7 @@ TEST(Gc, compile_inputless)
 
 TEST(Gc, compile_with_inputs)
 {
-    // -> 1 -> 2 -> 3
+    // -> 0 -> 1 -> 2
     check_comple_graph(
         test_graph(
             {{1,1}, {1,1}, {1,1}},
@@ -286,7 +281,11 @@ TEST(Gc, compile_with_inputs)
              {{1,0}, {2,0}}}),
         "{(0) => ([(0,0)->(1,0)]) |"
         " (1) => ([(1,0)->(2,0)]) |"
-        " (2)}; [(0),(1),(2)]");
+        " (2)}; [(),(0),(1)]",
+        gc::SourceInputVec{ {
+            .node = 0,
+            .port = 0,
+            .value = 0 } });
 }
 
 TEST(Gc, compile2)
@@ -374,6 +373,42 @@ TEST(Gc, compute_2)
 )");
 }
 
+TEST(Gc, compute_3)
+{
+    auto g = test_graph(
+        {{2, 1}, {1, 1}},
+        {{{0,0}, {1,0}}});
+
+    auto [instr, source_inputs] = compile(g);
+
+    auto result = gc::ComputationResult{};
+
+    // Throws because one of source inputs refers to an inexistent node.
+    source_inputs[0].node = 2;
+    EXPECT_THROW(compute(result, g, instr.get(), source_inputs),
+                 std::out_of_range);
+
+    // Throws because one of source inputs refers to an inexistent port.
+    source_inputs[0].node = 0;
+    source_inputs[0].port = 2;
+    EXPECT_THROW(compute(result, g, instr.get(), source_inputs),
+                 std::out_of_range);
+
+    // Not all external inputs are connected. We currently do not
+    // detect it in `compute`. In this particular example, `compute` fails
+    // because the empty input value is invalid and fails to cast to `int`.
+    source_inputs[0].port = 1;
+    EXPECT_THROW(compute(result, g, instr.get(), source_inputs),
+                 std::bad_any_cast);
+
+    // And if we feed all external inputs properly, `compute` will succeed.
+    source_inputs[0].port = 0;
+    source_inputs[0].value = 123 - 1;
+    source_inputs[1].value = 321 - 1;
+    compute(result, g, instr.get(), source_inputs);
+    EXPECT_EQ(group(result.outputs, 1)[0].as<int>(), 444);
+}
+
 TEST(Gc, compute_partially)
 {
     auto format_result = [](const gc::ComputationResult& res,
@@ -399,14 +434,15 @@ TEST(Gc, compute_partially)
         return s.str();
     };
 
-    // stateful  stateless
-    //       0*   1
-    //       |    |
-    //       +--. +--.
-    //       |  | |  |
-    //       v  v v  v
-    //       2   3   4
-    auto g = test_graph({{0, 1, true}, {0, 1, false},
+    // [0]  [1]
+    //  |    |
+    //  0    1
+    //  |    |
+    //  +--. +--.
+    //  |  | |  |
+    //  v  v v  v
+    //  2   3   4
+    auto g = test_graph({{1, 1}, {1, 1},
                          {1, 1}, {2, 1}, {1, 1}},
                         {{{0,0}, {2,0}},
                          {{0,0}, {3,0}},
@@ -425,19 +461,36 @@ TEST(Gc, compute_partially)
 4: (2) - ts: 1, computed: 1
 )");
 
+    // Update input [0]
+    ++source_inputs[0].value.as<int>();
+
     compute(result, g, instr.get(), source_inputs);
     EXPECT_EQ(format_result(result, g), R"(0: (2) - ts: 2, computed: 2
-1: (1) - ts: 1, computed: 2
+1: (1) - ts: 1, computed: 1
 2: (3) - ts: 2, computed: 2
 3: (4) - ts: 2, computed: 2
 4: (2) - ts: 1, computed: 1
 )");
 
+    // Update input [0] again
+    ++source_inputs[0].value.as<int>();
+
     compute(result, g, instr.get(), source_inputs);
     EXPECT_EQ(format_result(result, g), R"(0: (3) - ts: 3, computed: 3
-1: (1) - ts: 1, computed: 3
+1: (1) - ts: 1, computed: 1
 2: (4) - ts: 3, computed: 3
 3: (5) - ts: 3, computed: 3
 4: (2) - ts: 1, computed: 1
+)");
+
+    // Now update input [1]
+    ++source_inputs[1].value.as<int>();
+
+    compute(result, g, instr.get(), source_inputs);
+    EXPECT_EQ(format_result(result, g), R"(0: (3) - ts: 3, computed: 3
+1: (2) - ts: 4, computed: 2
+2: (4) - ts: 3, computed: 3
+3: (6) - ts: 4, computed: 4
+4: (3) - ts: 4, computed: 2
 )");
 }

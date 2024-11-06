@@ -46,7 +46,7 @@ class ValueFormatter final
 {
 public:
     explicit ValueFormatter(const Value& value) :
-        result_{ visit(value.type(), *this, value) }
+        result_{ value.type() ? visit(value.type(), *this, value) : "<empty>" }
     {}
 
     auto operator()(const gc::CustomT& t, const Value& value) const
