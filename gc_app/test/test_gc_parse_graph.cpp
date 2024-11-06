@@ -106,9 +106,9 @@ edges:
     EXPECT_EQ(size.height, 500);
 
     // Compute graph
-    auto instr = compile(g);
+    auto [instr, source_inputs] = compile(g);
     auto result = gc::ComputationResult{};
-    compute(result, g, instr.get());
+    compute(result, g, instr.get(), source_inputs);
 
     // Check computation results
     const auto& image = group(result.outputs,8)[0].as<gc_app::Image>();

@@ -91,7 +91,7 @@ auto operator<<(std::ostream& s, const ComputationInstructions& instr)
 // -----------
 
 auto compile(const Graph& g)
-    -> ComputationInstructionsPtr
+    -> std::pair<ComputationInstructionsPtr, SourceInputVec>
 {
     // GC_LOG_DEBUG(
     //     "gc::compile: begin, nodes: {}, edges: {}",
@@ -100,7 +100,7 @@ auto compile(const Graph& g)
     auto result = std::make_shared<ComputationInstructions>();
 
     if (g.edges.empty() && g.nodes.empty())
-        return result;
+        return { std::move(result), {} };
 
     // View graph nodes as raw pointers
     auto nodes = std::ranges::transform_view(
@@ -325,7 +325,7 @@ auto compile(const Graph& g)
         }
     }
 
-    return result;
+    return { std::move(result), {} };
 }
 
 auto compute(ComputationResult& result,

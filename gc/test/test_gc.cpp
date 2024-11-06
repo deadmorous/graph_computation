@@ -122,7 +122,7 @@ auto check_comple_graph(const gc::Graph& g,
     -> void
 {
 
-    auto instructions = compile(g);
+    auto [instructions, source_inputs] = compile(g);
 
     // std::cout << "Compiled instructions: " << *instructions << std::endl;
 
@@ -162,7 +162,7 @@ auto test_graph_net_3x3()
 
 } // anonymous namespace
 
-TEST(Gc, compile)
+TEST(Gc, compile_inputless)
 {
     check_comple_graph(
         test_graph(
@@ -276,6 +276,19 @@ TEST(Gc, compile)
         std::invalid_argument);
 }
 
+TEST(Gc, compile_with_inputs)
+{
+    // -> 1 -> 2 -> 3
+    check_comple_graph(
+        test_graph(
+            {{1,1}, {1,1}, {1,1}},
+            {{{0,0}, {1,0}},
+             {{1,0}, {2,0}}}),
+        "{(0) => ([(0,0)->(1,0)]) |"
+        " (1) => ([(1,0)->(2,0)]) |"
+        " (2)}; [(0),(1),(2)]");
+}
+
 TEST(Gc, compile2)
 {
     auto n0 = std::make_shared<TestNode>( 0, 1 );
@@ -301,10 +314,10 @@ TEST(Gc, compute_1)
         {{0, 1}, {1, 1}},
         {{{0,0}, {1,0}}});
 
-    auto instr = compile(g);
+    auto [instr, source_inputs] = compile(g);
 
     auto result = gc::ComputationResult{};
-    compute(result, g, instr.get());
+    compute(result, g, instr.get(), source_inputs);
 
     EXPECT_EQ(group(result.outputs, 0).size(), 1);
     EXPECT_EQ(group(result.outputs, 0)[0].as<int>(), 1);
@@ -328,7 +341,7 @@ TEST(Gc, compute_2)
     // 3 -> 1 -> 0
     auto g = test_graph_net_3x3();
 
-    auto instr = gc::compile(g);
+    auto [instr, source_inputs] = gc::compile(g);
 
     auto format_result = [](const gc::ComputationResult& res)
         -> std::string
@@ -347,7 +360,7 @@ TEST(Gc, compute_2)
     };
 
     auto result = gc::ComputationResult{};
-    compute(result, g, instr.get());
+    compute(result, g, instr.get(), source_inputs);
 
     EXPECT_EQ(format_result(result), R"(0: ()
 1: (7)
@@ -400,11 +413,11 @@ TEST(Gc, compute_partially)
                          {{1,0}, {3,1}},
                          {{1,0}, {4,0}}});
 
-    auto instr = gc::compile(g);
+    auto [instr, source_inputs] = gc::compile(g);
 
     auto result = gc::ComputationResult{};
 
-    compute(result, g, instr.get());
+    compute(result, g, instr.get(), source_inputs);
     EXPECT_EQ(format_result(result, g), R"(0: (1) - ts: 1, computed: 1
 1: (1) - ts: 1, computed: 1
 2: (2) - ts: 1, computed: 1
@@ -412,7 +425,7 @@ TEST(Gc, compute_partially)
 4: (2) - ts: 1, computed: 1
 )");
 
-    compute(result, g, instr.get());
+    compute(result, g, instr.get(), source_inputs);
     EXPECT_EQ(format_result(result, g), R"(0: (2) - ts: 2, computed: 2
 1: (1) - ts: 1, computed: 2
 2: (3) - ts: 2, computed: 2
@@ -420,7 +433,7 @@ TEST(Gc, compute_partially)
 4: (2) - ts: 1, computed: 1
 )");
 
-    compute(result, g, instr.get());
+    compute(result, g, instr.get(), source_inputs);
     EXPECT_EQ(format_result(result, g), R"(0: (3) - ts: 3, computed: 3
 1: (1) - ts: 1, computed: 3
 2: (4) - ts: 3, computed: 3

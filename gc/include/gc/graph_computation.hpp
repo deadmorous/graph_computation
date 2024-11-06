@@ -18,11 +18,6 @@ auto operator<<(std::ostream& s, const ComputationInstructions& instructions)
 
 // -----------
 
-auto compile(const Graph& g)
-    -> ComputationInstructionsPtr;
-
-using Timestamp = uint64_t;
-
 struct SourceInput final
 {
     size_t node_index;
@@ -31,6 +26,11 @@ struct SourceInput final
 };
 
 using SourceInputVec = std::vector<SourceInput>;
+
+auto compile(const Graph& g)
+    -> std::pair<ComputationInstructionsPtr, SourceInputVec>;
+
+using Timestamp = uint64_t;
 
 struct ComputationResult final
 {
@@ -66,10 +66,10 @@ struct Computation final
     ComputationResult result;
 };
 
-inline auto computation(Graph g, SourceInputVec source_inputs = {})
+inline auto computation(Graph g)
     -> Computation
 {
-    auto instr = compile(g);
+    auto [instr, source_inputs] = compile(g);
 
     return {
         .graph = std::move(g),
