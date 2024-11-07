@@ -18,21 +18,19 @@ auto operator<<(std::ostream& s, const ComputationInstructions& instructions)
 
 // -----------
 
-struct SourceInput final
+struct SourceInputs final
 {
-    size_t node;
-    size_t port;
-    Value value;
+    ValueVec values;
+    common::Grouped<EdgeEnd> destinations;
 
-    auto operator==(const SourceInput&) const noexcept -> bool = default;
+    auto operator==(const SourceInputs&) const noexcept -> bool = default;
 };
-auto operator<<(std::ostream& s, const SourceInput& source_input)
+
+auto operator<<(std::ostream& s, const SourceInputs& source_inputs)
     -> std::ostream&;
 
-using SourceInputVec = std::vector<SourceInput>;
-
 auto compile(const Graph& g)
-    -> std::pair<ComputationInstructionsPtr, SourceInputVec>;
+    -> std::pair<ComputationInstructionsPtr, SourceInputs>;
 
 using Timestamp = uint64_t;
 
@@ -48,7 +46,7 @@ struct ComputationResult final
 auto compute(ComputationResult& result,
              const Graph& g,
              const ComputationInstructions* instructions,
-             const SourceInputVec& source_inputs = {})
+             const SourceInputs& source_inputs = {})
     -> void;
 
 using GraphProgress =
@@ -57,7 +55,7 @@ using GraphProgress =
 auto compute(ComputationResult& result,
              const Graph& g,
              const ComputationInstructions* instructions,
-             const SourceInputVec& source_inputs,
+             const SourceInputs& source_inputs,
              const std::stop_token& stoken,
              const GraphProgress& progress)
     -> bool;
@@ -66,7 +64,7 @@ struct Computation final
 {
     Graph graph;
     ComputationInstructionsPtr instr;
-    SourceInputVec source_inputs;
+    SourceInputs source_inputs;
     ComputationResult result;
 };
 

@@ -95,7 +95,7 @@ auto test_graph(std::initializer_list<TestGraphNodeSpec> nodes,
 
 auto check_comple_graph(const gc::Graph& g,
                         std::string_view expected_formatted_instructions,
-                        const gc::SourceInputVec& expected_source_inputs = {})
+                        const gc::SourceInputs& expected_source_inputs = {})
     -> void
 {
 
@@ -136,6 +136,26 @@ auto test_graph_net_3x3()
          gc::edge({7,1}, {5,0}),
          gc::edge({8,0}, {6,0}),
          gc::edge({8,1}, {7,0})});
+}
+
+struct SourceInput final
+{
+    uint32_t node;
+    uint32_t port;
+    gc::Value value;
+};
+
+auto make_source_inputs(std::initializer_list<SourceInput> inputs)
+    -> gc::SourceInputs
+{
+    auto result = gc::SourceInputs{};
+    for (const auto& in : inputs)
+    {
+        add_to_last_group(result.destinations, gc::EdgeEnd{in.node, in.port});
+        next_group(result.destinations);
+        result.values.push_back(in.value);
+    }
+    return result;
 }
 
 } // anonymous namespace
@@ -265,10 +285,10 @@ TEST(Gc, compile_with_inputs)
         "{(0) => ([(0,0)->(1,0)]) |"
         " (1) => ([(1,0)->(2,0)]) |"
         " (2)}; [(),(0),(1)]",
-        gc::SourceInputVec{ {
+        make_source_inputs({{
             .node = 0,
             .port = 0,
-            .value = 0 } });
+            .value = 0 }}));
 }
 
 TEST(Gc, compile2)
@@ -367,27 +387,27 @@ TEST(Gc, compute_3)
     auto result = gc::ComputationResult{};
 
     // Throws because one of source inputs refers to an inexistent node.
-    source_inputs[0].node = 2;
+    source_inputs.destinations.values[0].node = 2;
     EXPECT_THROW(compute(result, g, instr.get(), source_inputs),
                  std::out_of_range);
 
     // Throws because one of source inputs refers to an inexistent port.
-    source_inputs[0].node = 0;
-    source_inputs[0].port = 2;
+    source_inputs.destinations.values[0].node = 0;
+    source_inputs.destinations.values[0].port = 2;
     EXPECT_THROW(compute(result, g, instr.get(), source_inputs),
                  std::out_of_range);
 
     // Not all external inputs are connected. We currently do not
     // detect it in `compute`. In this particular example, `compute` fails
     // because the empty input value is invalid and fails to cast to `int`.
-    source_inputs[0].port = 1;
+    source_inputs.destinations.values[0].port = 1;
     EXPECT_THROW(compute(result, g, instr.get(), source_inputs),
                  std::bad_any_cast);
 
     // And if we feed all external inputs properly, `compute` will succeed.
-    source_inputs[0].port = 0;
-    source_inputs[0].value = 123 - 1;
-    source_inputs[1].value = 321 - 1;
+    source_inputs.destinations.values[0].port = 0;
+    source_inputs.values[0] = 123 - 1;
+    source_inputs.values[1] = 321 - 1;
     compute(result, g, instr.get(), source_inputs);
     EXPECT_EQ(group(result.outputs, 1)[0].as<int>(), 444);
 }
@@ -445,7 +465,7 @@ TEST(Gc, compute_partially)
 )");
 
     // Update input [0]
-    ++source_inputs[0].value.as<int>();
+    ++source_inputs.values[0].as<int>();
 
     compute(result, g, instr.get(), source_inputs);
     EXPECT_EQ(format_result(result, g), R"(0: (2) - ts: 2, computed: 2
@@ -456,7 +476,7 @@ TEST(Gc, compute_partially)
 )");
 
     // Update input [0] again
-    ++source_inputs[0].value.as<int>();
+    ++source_inputs.values[0].as<int>();
 
     compute(result, g, instr.get(), source_inputs);
     EXPECT_EQ(format_result(result, g), R"(0: (3) - ts: 3, computed: 3
@@ -467,7 +487,7 @@ TEST(Gc, compute_partially)
 )");
 
     // Now update input [1]
-    ++source_inputs[1].value.as<int>();
+    ++source_inputs.values[1].as<int>();
 
     compute(result, g, instr.get(), source_inputs);
     EXPECT_EQ(format_result(result, g), R"(0: (3) - ts: 3, computed: 3

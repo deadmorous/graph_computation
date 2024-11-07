@@ -64,20 +64,33 @@ auto operator<<(std::ostream& s, const ComputationInstructions& instr)
     return s;
 }
 
-auto operator<<(std::ostream& s, const SourceInput& source_input)
+auto operator<<(std::ostream& s, const SourceInputs& source_inputs)
     -> std::ostream&
 {
-    return s
-      << "{node=" << source_input.node
-      << ", port=" << source_input.port
-      << ", value=" << source_input.value
-      << "}";
+    auto n = source_inputs.values.size();
+
+    if (group_count(source_inputs.destinations) != n)
+        return s << "<invalid SourceInputs>";
+
+    s << '{';
+    auto delim = "";
+    for (size_t i=0; i<n; ++i, delim = ", ")
+    {
+        auto destinations = group(source_inputs.destinations, i);
+        s << delim
+          << source_inputs.values[i] << " -> ["
+          << common::format_seq(destinations)
+          << "]";
+    }
+    s << '}';
+
+    return s;
 }
 
 // -----------
 
 auto compile(const Graph& g)
-    -> std::pair<ComputationInstructionsPtr, SourceInputVec>
+    -> std::pair<ComputationInstructionsPtr, SourceInputs>
 {
     // GC_LOG_DEBUG(
     //     "gc::compile: begin, nodes: {}, edges: {}",
@@ -305,8 +318,8 @@ auto compile(const Graph& g)
     }
 
     // Build source inputs
-    auto source_inputs = SourceInputVec{};
-    for (size_t i=0, n=nodes.size(); i<n; ++i)
+    auto source_inputs = SourceInputs{};
+    for (uint32_t i=0, n=nodes.size(); i<n; ++i)
     {
         const auto& nd = node_data[i];
         if (nd.connected_input_count == nd.input_count)
@@ -314,14 +327,13 @@ auto compile(const Graph& g)
         const auto* node = nodes[i];
         auto default_inputs = ValueVec(node->input_count());
         nodes[i]->default_inputs(default_inputs);
-        for (size_t port=0; port<nd.input_count; ++port)
+        for (uint32_t port=0; port<nd.input_count; ++port)
         {
             if (nd.connected_inputs[port])
                 continue;
-            source_inputs.push_back({
-                .node = i,
-                .port = port,
-                .value = default_inputs[port]});
+            source_inputs.values.push_back(default_inputs[port]);
+            add_to_last_group(source_inputs.destinations, EdgeEnd{i, port});
+            next_group(source_inputs.destinations);
         }
     }
 
@@ -331,14 +343,14 @@ auto compile(const Graph& g)
 auto compute(ComputationResult& result,
              const Graph& g,
              const ComputationInstructions* instructions,
-             const SourceInputVec& source_inputs)
+             const SourceInputs& source_inputs)
     -> void
 { compute(result, g, instructions, source_inputs, {}, {}); }
 
 auto compute(ComputationResult& result,
              const Graph& g,
              const ComputationInstructions* instructions,
-             const SourceInputVec& source_inputs,
+             const SourceInputs& source_inputs,
              const std::stop_token& stoken,
              const GraphProgress& progress)
     -> bool
@@ -389,20 +401,26 @@ auto compute(ComputationResult& result,
 
     auto source_updated = std::vector<bool>(g.nodes.size(), false);
 
-    for (const auto& in : source_inputs)
+    // Set external inputs
+    for (uint32_t i=0, n=source_inputs.values.size(); i<n; ++i)
     {
-        if (in.node >= g.nodes.size())
-            common::throw_<std::out_of_range>(
-                "Source input ", in, " refers to an inexistent graph node");
-        auto node_inputs = group(result.inputs, in.node);
-        if (in.port >= node_inputs.size())
-            common::throw_<std::out_of_range>(
-                "Source input ", in, " refers to an inexistent input port");
-        auto& node_input = node_inputs[in.port];
-        if (node_input != in.value)
+        const auto& value = source_inputs.values[i];
+
+        for (auto d : group(source_inputs.destinations, i))
         {
-            node_input = in.value;
-            source_updated[in.node] = true;
+            if (d.node >= g.nodes.size())
+                common::throw_<std::out_of_range>(
+                    "Source input ", d, " refers to an inexistent graph node");
+            auto node_inputs = group(result.inputs, d.node);
+            if (d.port >= node_inputs.size())
+                common::throw_<std::out_of_range>(
+                    "Source input ", d, " refers to an inexistent input port");
+            auto& node_input = node_inputs[d.port];
+            if (node_input != value)
+            {
+                node_input = value;
+                source_updated[d.node] = true;
+            }
         }
     }
 
