@@ -16,22 +16,22 @@ TEST(GcApp, ParseGraph)
     // Graph definition in the YAML format
     constexpr auto* config_text = R"(
 nodes:
-  - name:  img_size
-    type:  source_param
+  - name: img_size
+    type: source_param
     init:
       - type: UintSize
         value:
           width: 600
           height: 500
 
-  - name:  img_size_w
-    type:  source_param
+  - name: img_size_w
+    type: source_param
     init:
       - type: ValuePath
         value: /width
 
-  - name:  img_size_h
-    type:  source_param
+  - name: img_size_h
+    type: source_param
     init:
       - type: ValuePath
         value: /height

@@ -43,6 +43,10 @@ auto GraphBroker::named_nodes() const
     -> const gc::detail::NamedNodes&
 { return named_nodes_; }
 
+auto GraphBroker::node_indices() const
+    -> const gc::detail::NodeIndices&
+{ return node_indices_; }
+
 auto GraphBroker::node_index(const gc::Node* node) const
     -> uint32_t
 { return node_indices_.at(node); }
@@ -61,7 +65,7 @@ auto GraphBroker::get_port_value(gc::EdgeEnd port, gc::Output_Tag) const
     Q_ASSERT(!computation_thread_.isRunning());
     auto& computation = computation_thread_.computation();
     return group_value(
-        node_index(port.node), port.port, computation.result.outputs);
+        port.node, port.port, computation.result.outputs);
 }
 
 auto GraphBroker::get_port_value(gc::EdgeEnd port, gc::Input_Tag) const
@@ -70,7 +74,7 @@ auto GraphBroker::get_port_value(gc::EdgeEnd port, gc::Input_Tag) const
     Q_ASSERT(!computation_thread_.isRunning());
     auto& computation = computation_thread_.computation();
     return group_value(
-        node_index(port.node), port.port, computation.result.inputs);
+        port.node, port.port, computation.result.inputs);
 }
 
 
@@ -103,7 +107,7 @@ auto GraphBroker::on_computation_finished()
         const auto* node = nodes.at(ig).get();
         for (uint32_t np=group(outputs,ig).size(), ip=0; ip<np; ++ip)
         {
-            auto port = gc::EdgeEnd{ node, ip };
+            auto port = gc::EdgeEnd{ ig, ip };
             emit output_updated(port);
         }
     }

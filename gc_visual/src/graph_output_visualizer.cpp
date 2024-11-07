@@ -29,6 +29,7 @@ auto make_image(GraphBroker* broker,
     auto output_port =
         gc::detail::parse_node_port(node_port_str,
                                     broker->named_nodes(),
+                                    broker->node_indices(),
                                     gc::Output);
 
     auto slider = new QSlider{ Qt::Horizontal };
@@ -73,6 +74,7 @@ auto make_text(GraphBroker* broker,
     auto output_port =
         gc::detail::parse_node_port(node_port_str,
                                     broker->named_nodes(),
+                                    broker->node_indices(),
                                     gc::Output);
 
     auto view = new QTextEdit{};

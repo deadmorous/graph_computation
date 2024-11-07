@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gc/detail/named_nodes.hpp"
+#include "gc/detail/node_indices.hpp"
 #include "gc/edge.hpp"
 #include "gc/node_port_tags.hpp"
 
@@ -9,10 +10,16 @@
 
 namespace gc::detail {
 
-auto parse_node_port(std::string_view, const NamedNodes&, Input_Tag)
+auto parse_node_port(std::string_view,
+                     const NamedNodes&,
+                     const NodeIndices& node_indices,
+                     Input_Tag)
     -> EdgeEnd;
 
-auto parse_node_port(std::string_view, const NamedNodes&, Output_Tag)
+auto parse_node_port(std::string_view,
+                     const NamedNodes&,
+                     const NodeIndices& node_indices,
+                     Output_Tag)
     -> EdgeEnd;
 
 } // namespace gc::detail

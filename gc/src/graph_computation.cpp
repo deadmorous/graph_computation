@@ -20,41 +20,18 @@ using namespace std::string_view_literals;
 
 namespace gc {
 
-namespace {
-
-struct IndexEdgeEnd
-{
-    uint32_t inode;
-    uint32_t port;
-
-    auto operator<=>(const IndexEdgeEnd&) const noexcept
-        -> std::strong_ordering = default;
-};
-
-using IndexEdge = std::array<IndexEdgeEnd, 2>;
-
-auto operator<<(std::ostream& s, const IndexEdgeEnd& ee)
-    -> std::ostream&
-{ return s << '(' << ee.inode << ',' << ee.port << ')'; }
-
-auto operator<<(std::ostream& s, const IndexEdge& e)
-    -> std::ostream&
-{ return s << '[' << e[0] << "->" << e[1] << ']'; }
-
-} // anonymous namespace
-
 struct ComputationInstructions final
 {
     // i-th group contains node indices of i-th graph level
-    common::Grouped<uint32_t>       nodes;
+    common::Grouped<uint32_t>   nodes;
 
     // i-th group contains edges from nodes of level i
     // to nodes of level i+1
-    common::Grouped<IndexEdge>      edges;
+    common::Grouped<Edge>       edges;
 
     // i-th group contains indices of nodes supplying data
     // to the i-th node
-    common::Grouped<uint32_t>       sources;
+    common::Grouped<uint32_t>   sources;
 };
 
 auto operator<<(std::ostream& s, const ComputationInstructions& instr)
@@ -121,24 +98,14 @@ auto compile(const Graph& g)
     for (size_t i=0, n=nodes.size(); i<n; ++i)
         node_ind[nodes[i]] = i;
 
-    // Map node-pointer-based edges to node-index-based ones
-    auto edges = std::vector<IndexEdge>{};
-    edges.reserve(g.edges.size());
-    std::ranges::transform(
-        g.edges,
-        std::back_inserter(edges),
-        [&](const Edge e) -> IndexEdge
-        {
-            auto transform_end = [&](const EdgeEnd& ee) -> IndexEdgeEnd
-                { return { node_ind.at(ee.node), ee.port }; };
-            return { transform_end(e[0]), transform_end(e[1]) };
-        } );
-
     // Check edges
-    auto check_edge_end = [&](const IndexEdgeEnd& ee, bool input)
+    auto check_edge_end = [&](const EdgeEnd& ee, bool input)
     {
-        assert(ee.inode < nodes.size());
-        const auto* node = nodes[ee.inode];
+        if(ee.node >= nodes.size())
+            common::throw_<std::out_of_range>(
+                "Edge end ", ee, " refers to a non-existent node");
+
+        const auto* node = nodes[ee.node];
         if (input)
         {
             if (ee.port >= node->input_count())
@@ -153,13 +120,13 @@ auto compile(const Graph& g)
         }
     };
 
-    auto check_edge = [&](const IndexEdge& e)
+    auto check_edge = [&](const Edge& e)
     {
         check_edge_end(e[0], false);
         check_edge_end(e[1], true);
     };
 
-    std::ranges::for_each(edges, check_edge);
+    std::ranges::for_each(g.edges, check_edge);
 
     using BitVec = std::vector<bool>;
 
@@ -187,8 +154,8 @@ auto compile(const Graph& g)
                        0,
                        BitVec(node->input_count(), false) }; } );
 
-    for (const auto& e : edges)
-        ++node_data.at(e[1].inode).connected_input_count;
+    for (const auto& e : g.edges)
+        ++node_data.at(e[1].node).connected_input_count;
 
     auto has_all_inputs =
         [&](uint32_t node_index)
@@ -213,11 +180,11 @@ auto compile(const Graph& g)
 
     auto known = level;
 
-    auto process_edge = [&](const IndexEdge& e)
+    auto process_edge = [&](const Edge& e)
     {
         const auto& e1 = e[1];
-        assert (e1.inode < node_data.size());
-        auto& ports = node_data[e1.inode].connected_inputs;
+        assert (e1.node < node_data.size());
+        auto& ports = node_data[e1.node].connected_inputs;
         if (ports.at(e1.port))
             common::throw_<std::invalid_argument>(
                 "Edge end ", e1,
@@ -249,27 +216,27 @@ auto compile(const Graph& g)
         // GC_LOG_DEBUG("gc::compile: level: {}", level);
         auto next_level = IndexSet{};
 
-        for (const auto& e : edges)
+        for (const auto& e : g.edges)
         {
             const auto& [e0, e1] = e;
 
-            if (!level.contains(e0.inode))
+            if (!level.contains(e0.node))
                 continue;
 
-            if (known.contains(e1.inode))
+            if (known.contains(e1.node))
                 continue;
 
             process_edge(e);
 
             // GC_LOG_DEBUG("gc::compile: {}", common::format(e));
 
-            ++node_data[e1.inode].inputs_avail;
-            if (has_all_inputs(e1.inode))
+            ++node_data[e1.node].inputs_avail;
+            if (has_all_inputs(e1.node))
             {
                 // GC_LOG_DEBUG(
                 //     "gc::compile: node {} has all inputs ready", e1.inode);
-                assert(!next_level.contains(e1.inode));
-                next_level.insert(e1.inode);
+                assert(!next_level.contains(e1.node));
+                next_level.insert(e1.node);
             }
         }
 
@@ -299,15 +266,15 @@ auto compile(const Graph& g)
     if(result->edges.values.size() != g.edges.size())
     {
         auto& sorted_edges = result->edges.values;
-        auto is_edge_unprocessed = [&](const IndexEdge& e)
+        auto is_edge_unprocessed = [&](const Edge& e)
         {
             auto it = std::ranges::lower_bound(sorted_edges, e);
             return it == sorted_edges.end() || *it != e;
         };
         std::ranges::sort(sorted_edges);
-        auto unprocessed_edges = std::set<IndexEdge>{};
+        auto unprocessed_edges = std::set<Edge>{};
         std::ranges::copy_if(
-            edges,
+            g.edges,
             std::inserter(unprocessed_edges, unprocessed_edges.end()),
             is_edge_unprocessed);
 
@@ -320,8 +287,8 @@ auto compile(const Graph& g)
     // Build source map
     using SimpleEdge = std::array<uint32_t, 2>; // [1] -> [0]
     auto simple_edges = std::vector<SimpleEdge>{};
-    for (const auto& e : edges)
-        simple_edges.push_back({e[1].inode, e[0].inode});
+    for (const auto& e : g.edges)
+        simple_edges.push_back({e[1].node, e[0].node});
     std::sort(simple_edges.begin(), simple_edges.end());
     simple_edges.resize(
         std::unique(simple_edges.begin(), simple_edges.end()) -
@@ -447,8 +414,8 @@ auto compute(ComputationResult& result,
             for (const auto& e : group(instructions->edges, level-1))
             {
                 const auto& [e0, e1] = e;
-                group(result.inputs, e1.inode)[e1.port] =
-                    group(result.outputs, e0.inode)[e0.port];
+                group(result.inputs, e1.node)[e1.port] =
+                    group(result.outputs, e0.node)[e0.port];
             }
         }
 

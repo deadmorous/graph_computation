@@ -77,20 +77,8 @@ struct TestGraphNodeSpec
     uint32_t output_count{};
 };
 
-struct TestGraphEdgeEndSpec
-{
-    uint32_t inode;
-    uint32_t port;
-};
-
-struct TestGraphEdgeSpec
-{
-    TestGraphEdgeEndSpec from;
-    TestGraphEdgeEndSpec to;
-};
-
 auto test_graph(std::initializer_list<TestGraphNodeSpec> nodes,
-                std::initializer_list<TestGraphEdgeSpec> edges)
+                std::initializer_list<gc::Edge> edges)
     -> gc::Graph
 {
     auto result = gc::Graph{};
@@ -99,13 +87,8 @@ auto test_graph(std::initializer_list<TestGraphNodeSpec> nodes,
             std::make_shared<TestNode>(node_spec.input_count,
                                        node_spec.output_count));
 
-    auto edge_end =
-        [&](const TestGraphEdgeEndSpec& ee) -> gc::EdgeEnd
-    { return { result.nodes.at(ee.inode).get(), ee.port }; };
-
-    for (const auto& edge_spec : edges)
-        result.edges.push_back(
-            { edge_end(edge_spec.from), edge_end(edge_spec.to) });
+    result.edges.reserve(edges.size());
+    std::copy(edges.begin(), edges.end(), back_inserter(result.edges));
 
     return result;
 }
@@ -141,18 +124,18 @@ auto test_graph_net_3x3()
     // 3 -> 1 -> 0
     return test_graph(
         {{2,0}, {2,1}, {2,1}, {1,1}, {2,2}, {1,1}, {1,2}, {1,2}, {0,2}},
-        {{{1,0}, {0,0}},
-         {{2,0}, {0,1}},
-         {{3,0}, {1,0}},
-         {{4,0}, {1,1}},
-         {{4,1}, {2,0}},
-         {{5,0}, {2,1}},
-         {{6,0}, {3,0}},
-         {{6,1}, {4,0}},
-         {{7,0}, {4,1}},
-         {{7,1}, {5,0}},
-         {{8,0}, {6,0}},
-         {{8,1}, {7,0}}});
+        {gc::edge({1,0}, {0,0}),
+         gc::edge({2,0}, {0,1}),
+         gc::edge({3,0}, {1,0}),
+         gc::edge({4,0}, {1,1}),
+         gc::edge({4,1}, {2,0}),
+         gc::edge({5,0}, {2,1}),
+         gc::edge({6,0}, {3,0}),
+         gc::edge({6,1}, {4,0}),
+         gc::edge({7,0}, {4,1}),
+         gc::edge({7,1}, {5,0}),
+         gc::edge({8,0}, {6,0}),
+         gc::edge({8,1}, {7,0})});
 }
 
 } // anonymous namespace
@@ -169,9 +152,9 @@ TEST(Gc, compile_inputless)
     check_comple_graph(
         test_graph(
             {{0,1}, {1,1}, {1,1}, {1,1}},
-            {{{0,0}, {1,0}},
-             {{1,0}, {2,0}},
-             {{2,0}, {3,0}}}),
+            {gc::edge({0,0}, {1,0}),
+             gc::edge({1,0}, {2,0}),
+             gc::edge({2,0}, {3,0})}),
         "{(0) => ([(0,0)->(1,0)]) |"
         " (1) => ([(1,0)->(2,0)]) |"
         " (2) => ([(2,0)->(3,0)]) |"
@@ -181,9 +164,9 @@ TEST(Gc, compile_inputless)
     check_comple_graph(
         test_graph(
             {{1,0}, {0,1}, {1,1}, {1,1}},
-            {{{1,0}, {2,0}},
-             {{2,0}, {3,0}},
-             {{3,0}, {0,0}}}),
+            {gc::edge({1,0}, {2,0}),
+             gc::edge({2,0}, {3,0}),
+             gc::edge({3,0}, {0,0})}),
         "{(1) => ([(1,0)->(2,0)]) |"
         " (2) => ([(2,0)->(3,0)]) |"
         " (3) => ([(3,0)->(0,0)]) |"
@@ -193,8 +176,8 @@ TEST(Gc, compile_inputless)
     check_comple_graph(
         test_graph(
             {{0,1}, {0,1}, {2,0}},
-            {{{0,0}, {2,0}},
-             {{1,0}, {2,1}}}),
+            {gc::edge({0,0}, {2,0}),
+             gc::edge({1,0}, {2,1})}),
         "{(0,1) => ([(0,0)->(2,0)],[(1,0)->(2,1)]) |"
         " (2)}; [(),(),(0,1)]");
 
@@ -222,8 +205,8 @@ TEST(Gc, compile_inputless)
         check_comple_graph(
             test_graph(
                 {{0,1}, {2,1}},
-                {{{0,0}, {1,0}},
-                 {{1,0}, {1,1}}}),
+                {gc::edge({0,0}, {1,0}),
+                 gc::edge({1,0}, {1,1})}),
             ""),
         std::invalid_argument);
 
@@ -232,8 +215,8 @@ TEST(Gc, compile_inputless)
         check_comple_graph(
             test_graph(
                 {{0,1}, {1,1}},
-                {{{0,0}, {1,0}},
-                 {{1,0}, {1,1}}}),
+                {gc::edge({0,0}, {1,0}),
+                 gc::edge({1,0}, {1,1})}),
             ""),
         std::invalid_argument);
 
@@ -242,8 +225,8 @@ TEST(Gc, compile_inputless)
         check_comple_graph(
             test_graph(
                 {{0,1}, {1,1}},
-                {{{0,2}, {1,0}},
-                 {{1,0}, {1,1}}}),
+                {gc::edge({0,2}, {1,0}),
+                 gc::edge({1,0}, {1,1})}),
             ""),
         std::invalid_argument);
 
@@ -253,10 +236,10 @@ TEST(Gc, compile_inputless)
         check_comple_graph(
             test_graph(
                 {{1,0}, {0,1}, {1,1}, {1,1}},
-                {{{1,0}, {2,0}},
-                 {{2,0}, {3,0}},
-                 {{2,0}, {0,0}},
-                 {{3,0}, {2,0}}}),
+                {gc::edge({1,0}, {2,0}),
+                 gc::edge({2,0}, {3,0}),
+                 gc::edge({2,0}, {0,0}),
+                 gc::edge({3,0}, {2,0})}),
             ""),
         std::invalid_argument);
 
@@ -265,8 +248,8 @@ TEST(Gc, compile_inputless)
         check_comple_graph(
             test_graph(
                 {{0,1}, {0,1}, {1,0}},
-                {{{0,0}, {2,0}},
-                 {{1,0}, {2,0}}}),
+                {gc::edge({0,0}, {2,0}),
+                 gc::edge({1,0}, {2,0})}),
             ""),
         std::invalid_argument);
 }
@@ -277,8 +260,8 @@ TEST(Gc, compile_with_inputs)
     check_comple_graph(
         test_graph(
             {{1,1}, {1,1}, {1,1}},
-            {{{0,0}, {1,0}},
-             {{1,0}, {2,0}}}),
+            {gc::edge({0,0}, {1,0}),
+             gc::edge({1,0}, {2,0})}),
         "{(0) => ([(0,0)->(1,0)]) |"
         " (1) => ([(1,0)->(2,0)]) |"
         " (2)}; [(),(0),(1)]",
@@ -298,8 +281,8 @@ TEST(Gc, compile2)
 
     auto g = gc::Graph{
         .nodes = { n1, n2 },
-        .edges = {{EE{n0.get(), 0}, EE{n2.get(), 0}},
-                  {EE{n1.get(), 0}, EE{n2.get(), 1}}}
+        .edges = {gc::edge({0, 0}, EE{2, 0}),
+                  gc::edge({1, 0}, EE{2, 1})}
     };
 
     // Throws because n0 is missing among graph nodes but is present
@@ -311,7 +294,7 @@ TEST(Gc, compute_1)
 {
     auto g = test_graph(
         {{0, 1}, {1, 1}},
-        {{{0,0}, {1,0}}});
+        {gc::edge({0,0}, {1,0})});
 
     auto [instr, source_inputs] = compile(g);
 
@@ -377,7 +360,7 @@ TEST(Gc, compute_3)
 {
     auto g = test_graph(
         {{2, 1}, {1, 1}},
-        {{{0,0}, {1,0}}});
+        {gc::edge({0,0}, {1,0})});
 
     auto [instr, source_inputs] = compile(g);
 
@@ -444,10 +427,10 @@ TEST(Gc, compute_partially)
     //  2   3   4
     auto g = test_graph({{1, 1}, {1, 1},
                          {1, 1}, {2, 1}, {1, 1}},
-                        {{{0,0}, {2,0}},
-                         {{0,0}, {3,0}},
-                         {{1,0}, {3,1}},
-                         {{1,0}, {4,0}}});
+                        {gc::edge({0,0}, {2,0}),
+                         gc::edge({0,0}, {3,0}),
+                         gc::edge({1,0}, {3,1}),
+                         gc::edge({1,0}, {4,0})});
 
     auto [instr, source_inputs] = gc::compile(g);
 

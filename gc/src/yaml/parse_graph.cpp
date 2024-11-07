@@ -17,6 +17,7 @@ auto parse_graph(const YAML::Node& config,
 {
     auto g = Graph{};
     auto node_map = detail::NamedNodes{};
+    auto node_indices = detail::NodeIndices{};
     for (auto node : config["nodes"])
     {
         auto name = node["name"].as<std::string>();
@@ -33,17 +34,18 @@ auto parse_graph(const YAML::Node& config,
         auto graph_node =
             node_registry.at(type)(init);
 
-        g.nodes.push_back(graph_node);
+        node_indices.emplace(graph_node.get(), g.nodes.size());
         node_map.emplace(name, graph_node.get());
+        g.nodes.push_back(graph_node);
     }
 
     // Parse graph edges
     for (auto edge : config["edges"])
     {
         auto e0 = detail::parse_node_port(
-            edge[0].as<std::string>(), node_map, Output);
+            edge[0].as<std::string>(), node_map, node_indices, Output);
         auto e1 = detail::parse_node_port(
-            edge[1].as<std::string>(), node_map, Input);
+            edge[1].as<std::string>(), node_map, node_indices, Input);
         g.edges.push_back({e0, e1});
     }
 

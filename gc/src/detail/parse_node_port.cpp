@@ -15,6 +15,7 @@ namespace {
 template <typename PortNamesFunc>
 auto parse_node_port_impl(std::string_view ee_str,
                           const NamedNodes& node_map,
+                          const NodeIndices& node_indices,
                           PortNamesFunc port_names)
     -> EdgeEnd
 {
@@ -71,7 +72,7 @@ auto parse_node_port_impl(std::string_view ee_str,
         common::throw_(
             "Number of ports in node ", node_name, " is ", pnames.size(),
             ", port index ", port, " is out of range");
-    return {node, port};
+    return {node_indices.at(node), port};
 }
 
 } // anonymous namespace
@@ -79,24 +80,26 @@ auto parse_node_port_impl(std::string_view ee_str,
 
 auto parse_node_port(std::string_view ee_str,
                      const NamedNodes& node_map,
+                     const NodeIndices& node_indices,
                      Input_Tag)
     -> EdgeEnd
 {
     auto input_ports = [](const Node* node)
     { return node->input_names(); };
 
-    return parse_node_port_impl(ee_str, node_map, input_ports);
+    return parse_node_port_impl(ee_str, node_map, node_indices, input_ports);
 }
 
 auto parse_node_port(std::string_view ee_str,
                      const NamedNodes& node_map,
+                     const NodeIndices& node_indices,
                      Output_Tag)
     -> EdgeEnd
 {
     auto output_ports = [](const Node* node)
     { return node->output_names(); };
 
-    return parse_node_port_impl(ee_str, node_map, output_ports);
+    return parse_node_port_impl(ee_str, node_map, node_indices, output_ports);
 }
 
 } // namespace gc::detail

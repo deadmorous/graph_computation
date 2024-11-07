@@ -3,6 +3,7 @@
 #include "gc_visual/computation_thread.hpp"
 
 #include "gc/detail/named_nodes.hpp"
+#include "gc/detail/node_indices.hpp"
 #include "gc/node_port_tags.hpp"
 #include "gc/param_spec.hpp"
 #include "gc/value_fwd.hpp"
@@ -16,7 +17,7 @@ class GraphBroker final :
     Q_OBJECT
 public:
     explicit GraphBroker(ComputationThread& computation_thread,
-                         const gc::detail::NamedNodes& named_nodes_,
+                         const gc::detail::NamedNodes& named_nodes,
                          QObject* parent = nullptr);
 
     auto node(const std::string& name) const
@@ -24,6 +25,9 @@ public:
 
     auto named_nodes() const
         -> const gc::detail::NamedNodes&;
+
+    auto node_indices() const
+        -> const gc::detail::NodeIndices&;
 
     auto node_index(const gc::Node* node) const
         -> uint32_t;
@@ -52,5 +56,5 @@ private slots:
 private:
     ComputationThread& computation_thread_;
     const gc::detail::NamedNodes& named_nodes_;
-    std::unordered_map<const gc::Node*, uint32_t> node_indices_;
+    gc::detail::NodeIndices node_indices_;
 };
