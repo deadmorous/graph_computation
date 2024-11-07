@@ -91,8 +91,8 @@ public:
     {
         assert(result.size() == 3);
         result[0] = uint_val(1000);
-        result[0] = uint_val(2);
-        result[0] = uint_val(2);
+        result[1] = uint_val(2);
+        result[2] = uint_val(2);
     }
 
     auto compute_outputs(
