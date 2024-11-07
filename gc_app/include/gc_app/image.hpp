@@ -12,6 +12,8 @@ struct Size final
 {
     T width;
     T height;
+
+    auto operator==(const Size&) const noexcept -> bool = default;
 };
 
 using UintSize = Size<Uint>;
