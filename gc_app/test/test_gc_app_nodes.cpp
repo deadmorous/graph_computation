@@ -1,8 +1,10 @@
 #include "gc_app/eratosthenes_sieve.hpp"
 #include "gc_app/filter_seq.hpp"
+#include "gc_app/image.hpp"
 #include "gc_app/multiply.hpp"
 #include "gc_app/project.hpp"
 #include "gc_app/test_sequence.hpp"
+#include "gc_app/uint_size.hpp"
 #include "gc_app/waring.hpp"
 #include "gc_app/types.hpp"
 
@@ -251,6 +253,34 @@ TEST(GcApp_Node, Project)
 
     check(std::vector<int>{123, 45}, gc::ValuePath{}/0u, 123);
     check(std::vector<int>{123, 45}, gc::ValuePath{}/1u, 45);
+}
+
+TEST(GcApp_Node, UintSizeNode)
+{
+    auto node = make_uint_size({});
+
+    ASSERT_EQ(node->input_count(), 2);
+    ASSERT_EQ(node->output_count(), 1);
+
+    ASSERT_EQ(node->input_names().size(), 2);
+    ASSERT_EQ(node->input_names()[0], "width");
+    ASSERT_EQ(node->input_names()[1], "height");
+
+    ASSERT_EQ(node->output_names().size(), 1);
+    ASSERT_EQ(node->output_names()[0], "size");
+
+    gc::ValueVec inputs(2);
+    gc::ValueVec outputs(1);
+    node->default_inputs(inputs);
+    ASSERT_EQ(inputs[0].type(), gc::type_of<Uint>());
+    ASSERT_EQ(inputs[1].type(), gc::type_of<Uint>());
+
+    auto expected_size = gc_app::UintSize{ 800, 600 };
+    inputs[0] = expected_size.width;
+    inputs[1] = expected_size.height;
+
+    node->compute_outputs(outputs, inputs, {}, {});
+    ASSERT_EQ(outputs[0].as<UintSize>(), expected_size);
 }
 
 TEST(GcApp_Node, Waring)

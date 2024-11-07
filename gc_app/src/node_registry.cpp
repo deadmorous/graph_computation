@@ -7,6 +7,7 @@
 #include "gc_app/rect_view.hpp"
 #include "gc_app/spiral_view.hpp"
 #include "gc_app/test_sequence.hpp"
+#include "gc_app/uint_size.hpp"
 #include "gc_app/waring.hpp"
 
 namespace gc_app {
@@ -24,6 +25,7 @@ auto populate_node_registry(gc::NodeRegistry& result)
     GC_APP_REGISTER(rect_view);
     GC_APP_REGISTER(spiral_view);
     GC_APP_REGISTER(test_sequence);
+    GC_APP_REGISTER(uint_size);
     GC_APP_REGISTER(waring);
 
 #undef GC_APP_REGISTER
