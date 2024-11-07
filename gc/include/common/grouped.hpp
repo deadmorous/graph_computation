@@ -15,6 +15,8 @@ struct Grouped
 {
     std::vector<T>          values;
     std::vector<uint32_t>   groups{0};
+
+    auto operator==(const Grouped&) const noexcept -> bool = default;
 };
 
 template <typename T, typename V>
