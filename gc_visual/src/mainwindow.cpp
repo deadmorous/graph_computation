@@ -218,7 +218,7 @@ auto MainWindow::load(const gc_visual::ConfigSpecification& spec)
 
         // Parse graph from the node object.
         auto graph_config = config["graph"];
-        auto [g, node_map] =
+        auto [g, provided_inputs, node_map, input_names] =
             gc::yaml::parse_graph(graph_config, node_registry, type_registry);
 
         // Compile and compute the graph

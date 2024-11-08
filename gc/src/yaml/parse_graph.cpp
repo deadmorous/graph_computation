@@ -11,9 +11,9 @@
 namespace gc::yaml {
 
 auto parse_graph(const YAML::Node& config,
-                const NodeRegistry& node_registry,
-                const TypeRegistry& type_registry)
-    -> std::pair< Graph, detail::NamedNodes >
+                 const NodeRegistry& node_registry,
+                 const TypeRegistry& type_registry)
+    -> ParseGraphResult
 {
     auto g = Graph{};
     auto node_map = detail::NamedNodes{};
@@ -49,7 +49,27 @@ auto parse_graph(const YAML::Node& config,
         g.edges.push_back({e0, e1});
     }
 
-    return { g, node_map };
+    // Parse graph source inputs
+    auto source_inputs = gc::SourceInputs{};
+    auto input_names = std::vector<std::string>{};
+    for (auto in : config["inputs"])
+    {
+        input_names.push_back(in["name"].as<std::string>());
+        source_inputs.values.push_back(parse_value(in, type_registry));
+        for (auto d_ : in["destinations"])
+        {
+            auto d = detail::parse_node_port(
+                d_.as<std::string>(), node_map, node_indices, Input);
+            add_to_last_group(source_inputs.destinations, d);
+        }
+        next_group(source_inputs.destinations);
+    }
+
+    return {
+        .graph = std::move(g),
+        .inputs = source_inputs,
+        .node_names = std::move(node_map),
+        .input_names = std::move(input_names) };
 }
 
 } // namespace gc::yaml

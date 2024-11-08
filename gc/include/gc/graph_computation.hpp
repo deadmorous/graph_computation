@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gc/graph.hpp"
+#include "gc/source_inputs.hpp"
 #include "gc/value.hpp"
 
 #include "common/func_ref_fwd.hpp"
@@ -17,17 +18,6 @@ auto operator<<(std::ostream& s, const ComputationInstructions& instructions)
     -> std::ostream&;
 
 // -----------
-
-struct SourceInputs final
-{
-    ValueVec values;
-    common::Grouped<EdgeEnd> destinations;
-
-    auto operator==(const SourceInputs&) const noexcept -> bool = default;
-};
-
-auto operator<<(std::ostream& s, const SourceInputs& source_inputs)
-    -> std::ostream&;
 
 auto compile(const Graph& g)
     -> std::pair<ComputationInstructionsPtr, SourceInputs>;

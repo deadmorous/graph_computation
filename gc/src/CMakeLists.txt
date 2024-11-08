@@ -10,6 +10,7 @@ add_library(gc-lib STATIC
     node_port_names.cpp
     node_registry.cpp
     parse_simple_value.cpp
+    source_inputs.cpp
     source_param.cpp
     type.cpp
     type_registry.cpp
