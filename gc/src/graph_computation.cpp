@@ -66,7 +66,7 @@ auto operator<<(std::ostream& s, const ComputationInstructions& instr)
 
 // -----------
 
-auto compile(const Graph& g)
+auto compile(const Graph& g, const SourceInputs& provided_inputs)
     -> std::pair<ComputationInstructionsPtr, SourceInputs>
 {
     // GC_LOG_DEBUG(
@@ -89,14 +89,14 @@ auto compile(const Graph& g)
         node_ind[nodes[i]] = i;
 
     // Check edges
-    auto check_edge_end = [&](const EdgeEnd& ee, bool input)
+    auto check_edge_end = [&](const EdgeEnd& ee, auto is_input)
     {
         if(ee.node >= nodes.size())
             common::throw_<std::out_of_range>(
                 "Edge end ", ee, " refers to a non-existent node");
 
         const auto* node = nodes[ee.node];
-        if (input)
+        if constexpr (is_input.value)
         {
             if (ee.port >= node->input_count())
                 common::throw_<std::invalid_argument>(
@@ -112,8 +112,8 @@ auto compile(const Graph& g)
 
     auto check_edge = [&](const Edge& e)
     {
-        check_edge_end(e[0], false);
-        check_edge_end(e[1], true);
+        check_edge_end(e[0], common::Const<false>);
+        check_edge_end(e[1], common::Const<true>);
     };
 
     std::ranges::for_each(g.edges, check_edge);
@@ -294,20 +294,61 @@ auto compile(const Graph& g)
         }
     }
 
-    // Build source inputs
-    auto source_inputs = SourceInputs{};
+    // Build source inputs.
+    // Start with provided inputs and augment with any missing ones.
+    auto source_inputs = provided_inputs;
+
+    // Build a sorted vector
+    // of all destinations of inputs provided.
+    auto input_dst = provided_inputs.destinations.values;
+    std::ranges::sort(input_dst);
+
+    auto input_provided = [&](const EdgeEnd& dst)
+    {
+        auto it = std::ranges::lower_bound(input_dst, dst);
+        return it != input_dst.end() && *it == dst;
+    };
+
+    // Check that the destinations of inputs provided are valid
+    for (const auto& dst : input_dst)
+    {
+        if(dst.node >= nodes.size())
+            common::throw_<std::out_of_range>(
+                "Source input destination ", dst,
+                " refers to a non-existent node");
+
+        if (dst.port >= nodes[dst.node]->input_count())
+            common::throw_<std::invalid_argument>(
+                "Source input destination ", dst,
+                " refers to a non-existent input port");
+    }
+
+    // Check that provided inputs do not specify destinations
+    // coincident with any edge targets. Add inputs that were not
+    // provided.
     for (uint32_t i=0, n=nodes.size(); i<n; ++i)
     {
         const auto& nd = node_data[i];
-        if (nd.connected_input_count == nd.input_count)
-            continue;
         const auto* node = nodes[i];
         auto default_inputs = ValueVec(node->input_count());
         nodes[i]->default_inputs(default_inputs);
         for (uint32_t port=0; port<nd.input_count; ++port)
         {
+            auto dst = EdgeEnd{i, port};
+            auto provided = input_provided(dst);
             if (nd.connected_inputs[port])
+            {
+                if (provided)
+                    common::throw_<std::invalid_argument>(
+                        "Input for destination ", dst, " is provided,"
+                        " but an output of another node is"
+                        " connected to the same destination.");
                 continue;
+            }
+
+            if (provided)
+                continue;
+
             source_inputs.values.push_back(default_inputs[port]);
             add_to_last_group(source_inputs.destinations, EdgeEnd{i, port});
             next_group(source_inputs.destinations);
@@ -417,21 +458,21 @@ auto compute(ComputationResult& result,
         for (auto inode : group(instructions->nodes, level))
         {
             Timestamp upstream_ts;
-            bool upstream_updated;
-            if (level > 0)
-            {
-                upstream_ts = {};
-                for (auto i : group(instructions->sources, inode))
-                    upstream_ts = std::max(upstream_ts, result.node_ts[i]);
-                upstream_updated = result.node_ts[inode] < upstream_ts;
-            }
+
+            // Check if a source input of the node `inode` has been updated
+            auto node_ts = result.node_ts[inode];
+            auto upstream_updated = source_updated[inode] ||
+                                    node_ts == Timestamp{};
+            if (upstream_updated)
+                upstream_ts = result.computation_ts;
             else
             {
-                auto node_ts = result.node_ts[inode];
-                upstream_updated = source_updated[inode] ||
-                                   node_ts == Timestamp{};
-                upstream_ts =
-                    upstream_updated ? result.computation_ts : node_ts;
+                // If no source inputs have been updated,
+                // also check if any of source nodes has been updated
+                upstream_ts = node_ts;
+                for (auto i : group(instructions->sources, inode))
+                    upstream_ts = std::max(upstream_ts, result.node_ts[i]);
+                upstream_updated = node_ts < upstream_ts;
             }
 
             if (!upstream_updated)

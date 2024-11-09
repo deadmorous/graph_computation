@@ -19,7 +19,7 @@ auto operator<<(std::ostream& s, const ComputationInstructions& instructions)
 
 // -----------
 
-auto compile(const Graph& g)
+auto compile(const Graph& g, const SourceInputs& provided_inputs = {})
     -> std::pair<ComputationInstructionsPtr, SourceInputs>;
 
 using Timestamp = uint64_t;
@@ -58,10 +58,10 @@ struct Computation final
     ComputationResult result;
 };
 
-inline auto computation(Graph g)
+inline auto computation(Graph g, const SourceInputs& provided_inputs)
     -> Computation
 {
-    auto [instr, source_inputs] = compile(g);
+    auto [instr, source_inputs] = compile(g, provided_inputs);
 
     return {
         .graph = std::move(g),
