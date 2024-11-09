@@ -1,7 +1,5 @@
 #include "gc_visual/graph_broker.hpp"
 
-#include "gc/source_param.hpp"
-
 namespace {
 
 auto group_value(uint32_t node_index,

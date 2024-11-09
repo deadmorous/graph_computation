@@ -1,5 +1,4 @@
 #include "gc_app/node_registry.hpp"
-#include "gc/source_param.hpp"
 #include "gc_app/image.hpp"
 #include "gc_app/type_registry.hpp"
 

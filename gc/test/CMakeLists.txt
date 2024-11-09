@@ -10,7 +10,6 @@ add_executable(
     test_binomial.cpp
     test_func_ref.cpp
     test_gc.cpp
-    test_gc_nodes.cpp
     test_gc_type_value.cpp)
 
 target_link_libraries(
