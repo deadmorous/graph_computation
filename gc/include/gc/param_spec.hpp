@@ -7,8 +7,7 @@ namespace gc {
 
 struct ParameterSpec
 {
-    gc::Node*       node;
-    size_t          index;
+    size_t          input;
     gc::ValuePath   path;
 };
 
