@@ -26,7 +26,6 @@ set(PROJECT_SOURCES
     parse_layout.cpp
     vector_editor_widget.cpp    ../include/gc_visual/vector_editor_widget.hpp
     vector_item_model.cpp       ../include/gc_visual/vector_item_model.hpp
-    wait_widget.cpp             ../include/gc_visual/wait_widget.hpp
 )
 
 

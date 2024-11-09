@@ -2,7 +2,6 @@
 
 #include "gc_visual/computation_progress_widget.hpp"
 #include "gc_visual/parse_layout.hpp"
-#include "gc_visual/wait_widget.hpp"
 
 #include "gc_app/node_registry.hpp"
 #include "gc_app/type_registry.hpp"
@@ -132,16 +131,12 @@ MainWindow::MainWindow(const gc_visual::ConfigSpecification& spec,
             stop_action, &QAction::setEnabled);
     stop_action->setEnabled(false);
 
-    auto wait_widget = new WaitWidget(this);
-    connect(&computation_thread_, &ComputationThread::running_state_changed,
-            wait_widget, &WaitWidget::set_waiting);
-    connect(wait_widget, &WaitWidget::cancel_waiting,
-            stop_action, &QAction::trigger);
-
     connect(&computation_thread_, &ComputationThread::progress,
             progress_widget, &ComputationProgressWidget::set_progress);
     connect(&computation_thread_, &ComputationThread::running_state_changed,
             progress_widget, &ComputationProgressWidget::setVisible);
+    connect(progress_widget, &ComputationProgressWidget::stop,
+            stop_action, &QAction::trigger);
 
     load(spec);
 }
@@ -202,6 +197,10 @@ auto MainWindow::on_load_finished(const gc_visual::ConfigSpecification& spec)
         reload_recent_files_menu();
     }
 }
+
+auto MainWindow::closeEvent(QCloseEvent*)
+    -> void
+{ computation_thread_.stop(); }
 
 auto MainWindow::load(const gc_visual::ConfigSpecification& spec)
     -> void

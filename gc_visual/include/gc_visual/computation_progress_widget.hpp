@@ -8,8 +8,14 @@ class QProgressBar;
 class ComputationProgressWidget :
     public QWidget
 {
+    Q_OBJECT
+
 public:
     explicit ComputationProgressWidget(QWidget* parent = nullptr);
+
+signals:
+    auto stop()
+        -> void;
 
 public slots:
     auto set_progress(uint32_t inode, double node_progress)

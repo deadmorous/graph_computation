@@ -3,6 +3,7 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QProgressBar>
+#include <QPushButton>
 
 ComputationProgressWidget::ComputationProgressWidget(QWidget* parent) :
     QWidget{ parent }
@@ -17,6 +18,12 @@ ComputationProgressWidget::ComputationProgressWidget(QWidget* parent) :
     progress_bar_->setMaximumHeight(20);
     progress_bar_->setMaximumWidth(200);
     layout->addWidget(progress_bar_);
+
+    auto stop_button = new QPushButton(tr("&Stop"));
+    layout->addWidget(stop_button);
+
+    connect(stop_button, &QPushButton::clicked,
+            this, &ComputationProgressWidget::stop);
 
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 }

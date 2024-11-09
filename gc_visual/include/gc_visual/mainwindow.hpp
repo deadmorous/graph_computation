@@ -30,6 +30,9 @@ private slots:
 signals:
     auto load_finished(const gc_visual::ConfigSpecification& spec) -> void;
 
+protected:
+    auto closeEvent(QCloseEvent*) -> void override;
+
 private:
     auto load(const gc_visual::ConfigSpecification& spec) -> void;
     auto reload_recent_files_menu() -> void;
