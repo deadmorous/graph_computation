@@ -5,7 +5,6 @@
 #include "gc/detail/named_nodes.hpp"
 #include "gc/detail/node_indices.hpp"
 #include "gc/node_port_tags.hpp"
-#include "gc/param_spec.hpp"
 #include "gc/value_fwd.hpp"
 #include "gc/value_path.hpp"
 
@@ -18,6 +17,7 @@ class GraphBroker final :
 public:
     explicit GraphBroker(ComputationThread& computation_thread,
                          const gc::detail::NamedNodes& named_nodes,
+                         const std::vector<std::string>& input_names,
                          QObject* parent = nullptr);
 
     auto node(const std::string& name) const
@@ -30,6 +30,9 @@ public:
         -> const gc::detail::NodeIndices&;
 
     auto node_index(const gc::Node* node) const
+        -> uint32_t;
+
+    auto input_index(const std::string& input_name) const
         -> uint32_t;
 
     auto get_parameter(const gc::ParameterSpec&) const
@@ -56,5 +59,8 @@ private slots:
 private:
     ComputationThread& computation_thread_;
     const gc::detail::NamedNodes& named_nodes_;
+    const std::vector<std::string>& input_names_;
     gc::detail::NodeIndices node_indices_;
+
+    gc::ComputationResult computation_result_;
 };

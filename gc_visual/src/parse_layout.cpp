@@ -88,11 +88,13 @@ auto parse_layout_item(GraphBroker* broker,
 auto parse_layout(const YAML::Node& config,
                   ComputationThread& computation_thread,
                   const gc::detail::NamedNodes& node_map,
+                  const std::vector<std::string>& input_names,
                   QWidget* parent)
     -> QWidget*
 {
     auto host = new QWidget(parent);
-    auto broker = new GraphBroker(computation_thread, node_map, host);
+    auto broker =
+        new GraphBroker{ computation_thread, node_map, input_names, host };
 
     auto host_layout_item = QWidgetItem{host};
     parse_layout_item(broker, config, &host_layout_item);

@@ -16,10 +16,11 @@ ComputationThread::ComputationThread(QObject* parent) :
 
 auto ComputationThread::computation()
     -> gc::Computation&
-{
-    Q_ASSERT(!isRunning());
-    return computation_;
-}
+{ return computation_; }
+
+auto ComputationThread::get_parameter(const gc::ParameterSpec& spec) const
+    -> gc::Value
+{ return computation_.source_inputs.values[spec.input].get(spec.path); }
 
 auto ComputationThread::ok()
     -> bool
@@ -35,11 +36,20 @@ auto ComputationThread::stop()
     wait();
 }
 
-auto ComputationThread::set_graph(gc::Graph g)
+auto ComputationThread::set_graph(gc::Graph g,
+                                  const gc::SourceInputs& provided_inputs)
     -> void
 {
     stop();
-    computation_ = gc::computation(std::move(g));
+    computation_ = gc::computation(std::move(g), provided_inputs);
+}
+
+auto ComputationThread::set_parameter(const gc::ParameterSpec& spec,
+                                      const gc::Value& value)
+    -> void
+{
+    stop();
+    computation_.source_inputs.values[spec.input].set(spec.path, value);
 }
 
 auto ComputationThread::on_started()

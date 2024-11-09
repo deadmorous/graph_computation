@@ -12,5 +12,6 @@
 auto parse_layout(const YAML::Node& config,
                   ComputationThread& computation_thread,
                   const gc::detail::NamedNodes& node_map,
+                  const std::vector<std::string>& input_names,
                   QWidget* parent = nullptr)
     -> QWidget*;

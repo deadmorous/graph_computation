@@ -54,14 +54,18 @@ auto WaitWidget::switch_to_waiting_layout()
 
     focus_backup_ = QApplication::focusWidget();
 
-    central_widget_backup_ = main_window_->centralWidget();
-
-    if (central_widget_backup_)
+    auto* central_widget = main_window_->centralWidget();
+    if (central_widget != this)
     {
-        central_widget_backup_->setParent(parent_proxy_);
-        central_widget_backup_->hide();
+        central_widget_backup_ = central_widget;
+
+        if (central_widget_backup_)
+        {
+            central_widget_backup_->setParent(parent_proxy_);
+            central_widget_backup_->hide();
+        }
+        main_window_->setCentralWidget(this);
     }
-    main_window_->setCentralWidget(this);
     show();
 }
 

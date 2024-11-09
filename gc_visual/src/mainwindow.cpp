@@ -222,13 +222,13 @@ auto MainWindow::load(const gc_visual::ConfigSpecification& spec)
             gc::yaml::parse_graph(graph_config, node_registry, type_registry);
 
         // Compile and compute the graph
-        computation_thread_.set_graph(std::move(g));
+        computation_thread_.set_graph(std::move(g), provided_inputs);
 
         connect(
             &computation_thread_,
             &ComputationThread::finished,
             this,
-            [config, node_map, spec, this]{
+            [config, node_map, input_names, spec, this]{
                 computation_thread_.disconnect(this);
 
                 try {
@@ -240,7 +240,8 @@ auto MainWindow::load(const gc_visual::ConfigSpecification& spec)
                     auto central_widget =
                         parse_layout(layout,
                                      computation_thread_,
-                                     node_map);
+                                     node_map,
+                                     input_names);
                     setCentralWidget(central_widget);
 
                     spec_ = spec;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gc/graph_computation.hpp"
+#include "gc/param_spec.hpp"
 
 #include <QThread>
 
@@ -14,6 +15,9 @@ public:
 
     auto computation()
         -> gc::Computation&;
+
+    auto get_parameter(const gc::ParameterSpec&) const
+        -> gc::Value;
 
     auto ok()
         -> bool;
@@ -29,7 +33,10 @@ public slots:
     auto stop()
         -> void;
 
-    auto set_graph(gc::Graph g)
+    auto set_graph(gc::Graph g, const gc::SourceInputs& provided_inputs)
+        -> void;
+
+    auto set_parameter(const gc::ParameterSpec&, const gc::Value&)
         -> void;
 
 private slots:

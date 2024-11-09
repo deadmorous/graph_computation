@@ -1,84 +1,70 @@
 graph:
   nodes:
-    - name:  img_size
-      type:  source_param
-      init:
-        - type: UintSize
-          value:
-            width: 600
-            height: 500
-
-    - name:  img_size_w
-      type:  source_param
-      init:
-        - type: ValuePath
-          value: /width
-
-    - name:  img_size_h
-      type:  source_param
-      init:
-        - type: ValuePath
-          value: /height
-
-    - name:  spiral_scale
-      type:  source_param
-      init:
-        - type: F64
-          value: 5
-
-    - name: palette
-      type: source_param
-      init:
-        - type: IndexedPalette
-          value:
-            color_map: [0xffffffff]
-            overflow_color: 0xff000000
-
-    - name: pw
-      type: project
-
-    - name: ph
-      type: project
-
-    - name: seq_size
-      type: multiply
-
     - name: sieve
       type: eratosthenes_sieve
-
     - name: view
       type: spiral_view
+    - name: filter
+      type: filter_seq
   edges:
-    - [img_size.0,          pw.value]
-    - [img_size_w.out_0,    pw.path]
-    - [img_size,            ph.value]
-    - [img_size_h,          ph.path]
-    - [pw.projection,       seq_size.lhs]
-    - [ph.projection,       seq_size.rhs]
-    - [seq_size.product,    sieve.count]
-    - [img_size,            view.size]
     - [sieve.sequence,      view.sequence]
-    - [spiral_scale,        view.scale]
-    - [palette,             view.palette]
+    - [sieve.sequence,      filter.sequence]
+  inputs:
+    - name: img_size
+      type: UintSize
+      value:
+        width: 600
+        height: 500
+      destinations: [view.size]
+    - name: spiral_scale
+      type: F64
+      value: 5
+      destinations: [view.scale]
+    - name: seq_size
+      type: U32
+      value: 300000
+      destinations: [sieve.count]
+    - name: palette
+      type: IndexedPalette
+      value:
+        color_map: [0xffffffff]
+        overflow_color: 0xff000000
+      destinations: [view.palette]
+    - name: filter
+      type: U32
+      value: 0
+      destinations: [filter.value]
 
 layout:
   type: horizontal_layout
   items:
     - type: vertical_layout
       items:
-      - type: spin
-        bind:
-          node: spiral_scale
-          index: 0
-        range: [1, 5000]
+      - type: horizontal_layout
+        items:
+        - type: spin
+          bind: img_size/width
+          range: [1, 5000]
+        - type: spin
+          bind: img_size/height
+          range: [1, 2000]
+        - type: spin
+          bind: spiral_scale
+          range: [1, 100]
+        - type: spin
+          bind: seq_size
+          range: [1, 1000000]
       - type: color
-        bind:
-          node: palette
-          path: /overflow_color
+        bind: palette/overflow_color
       - type: vector
-        bind:
-          node: palette
-          path: /color_map
+        bind: palette/color_map
+      - type: spin
+        bind: filter
+        range: [0, 100]
       - type: stretch
-    - type: image
-      bind: view
+    - type: vertical_layout
+      items:
+      - type: image
+        bind: view
+      - type: text
+        bind: filter.indices

@@ -134,25 +134,22 @@ auto wrap_edtor(std::shared_ptr<Editor> editor)
 
 struct ParamBinding
 {
-    gc::ParameterSpec param_spec;
-    std::string node_name;
+    gc::ParameterSpec   param_spec;
+    std::string         input_name;
 };
 
 auto operator<<(std::ostream& s, const ParamBinding& binding)
     -> std::ostream&
 {
     return
-        s << binding.node_name
-          << '[' << binding.param_spec.index << ']'
+        s << binding.input_name
           << binding.param_spec.path;
 }
 
-auto binding_label(const ParamBinding& binding, const gc::Node* node)
+auto binding_label(const ParamBinding& binding)
     -> std::string
 {
-    auto result = binding.node_name;
-    if (node->output_count() != 1)
-        result += common::format('[', binding.param_spec.index, ']');
+    auto result = binding.input_name;
     if (!binding.param_spec.path.empty())
         result += common::format(binding.param_spec.path);
     return result;
@@ -163,19 +160,19 @@ auto parse_param_binding(GraphBroker* broker,
     -> ParamBinding
 {
     // Resolve parameter binding
-    auto bind_node = item_node["bind"];
-    auto node_name = bind_node["node"].as<std::string>();
+    auto input_name = item_node["bind"].as<std::string>();
 
-    auto* node = broker->node(node_name);
-
-    auto index = size_t{0};
-    if (auto index_node = bind_node["index"])
-        index = index_node.as<uint32_t>();
     auto path = gc::ValuePath{};
-    if (auto path_node = bind_node["path"])
-        path = gc::ValuePath::from_string(path_node.as<std::string>());
+    auto path_pos = input_name.find_first_of('/');
+    if (path_pos != std::string::npos)
+    {
+        path = gc::ValuePath::from_string(input_name.substr(path_pos));
+        input_name = input_name.substr(0, path_pos);
+    }
 
-    return { { node, index, path }, std::move(node_name) };
+    auto input = broker->input_index(input_name);
+
+    return { { input, path }, std::move(input_name) };
 }
 
 // ---
@@ -282,7 +279,7 @@ GraphParameterEditor::GraphParameterEditor(const std::string& type,
     auto layout = new QVBoxLayout{};
     setLayout(layout);
     auto* label =
-        new QLabel(qstr(binding_label(binding, binding.param_spec.node)));
+        new QLabel(qstr(binding_label(binding)));
     label->setBuddy(res_.get());
     layout->addWidget(label);
     layout->addWidget(res_.get());

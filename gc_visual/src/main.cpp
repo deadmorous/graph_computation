@@ -10,78 +10,47 @@ using namespace std::string_view_literals;
 constexpr auto* example_config_text = R"(
 graph:
   nodes:
-    - name:  img_size
-      type:  source_param
-      init:
-        - type: UintSize
-          value:
-            width: 600
-            height: 500
-
-    - name:  img_size_w
-      type:  source_param
-      init:
-        - type: ValuePath
-          value: /width
-
-    - name:  img_size_h
-      type:  source_param
-      init:
-        - type: ValuePath
-          value: /height
-
-    - name: palette
-      type: source_param
-      init:
-        - type: IndexedPalette
-          value:
-            color_map:
-              - 0xffffffff
-              - 0xff5953ff
-              - 0xff8adabf
-              - 0xffffc7f9
-              - 0xffffff7f
-              - 0xffd40004
-              - 0xff00aa00
-            overflow_color: 0xff000000
-
-    - name: filter_value
-      type: source_param
-      init:
-        - type: U32
-          value: 0
-
-    - name: pw
-      type: project
-
-    - name: ph
-      type: project
-
+    - name: img_size
+      type: uint_size
     - name: seq_size
       type: multiply
-
     - name: sieve
       type: eratosthenes_sieve
-
     - name: view
       type: rect_view
-
     - name: filter
       type: filter_seq
-
   edges:
-    - [img_size.0,          pw.value]
-    - [img_size_w.out_0,    pw.path]
-    - [img_size,            ph.value]
-    - [img_size_h,          ph.path]
-    - [pw.projection,       seq_size.lhs]
-    - [ph.projection,       seq_size.rhs]
     - [seq_size.product,    sieve.count]
     - [img_size,            view.size]
     - [sieve.sequence,      view.sequence]
-    - [palette,             view.palette]
-    - [filter_value,        filter.value]
     - [sieve.sequence,      filter.sequence]
+  inputs:
+    - name: img_width
+      type: U32
+      value: 600
+      destinations: [img_size.width, seq_size.lhs]
+    - name: img_height
+      type: U32
+      value: 500
+      destinations: [img_size.height, seq_size.rhs]
+    - name: palette
+      type: IndexedPalette
+      value:
+        color_map:
+          - 0xffffffff
+          - 0xff5953ff
+          - 0xff8adabf
+          - 0xffffc7f9
+          - 0xffffff7f
+          - 0xffd40004
+          - 0xff00aa00
+        overflow_color: 0xff000000
+      destinations: [view.palette]
+    - name: filter
+      type: U32
+      value: 0
+      destinations: [filter.value]
 
 layout:
   type: horizontal_layout
@@ -91,28 +60,17 @@ layout:
       - type: horizontal_layout
         items:
         - type: spin
-          bind:
-            node: img_size
-            index: 0
-            path: /width
+          bind: img_width
           range: [1, 5000]
         - type: spin
-          bind:
-            node: img_size
-            index: 0
-            path: /height
+          bind: img_height
           range: [1, 2000]
       - type: color
-        bind:
-          node: palette
-          path: /overflow_color
+        bind: palette/overflow_color
       - type: vector
-        bind:
-          node: palette
-          path: /color_map
+        bind: palette/color_map
       - type: spin
-        bind:
-          node: filter_value
+        bind: filter
         range: [0, 100]
       - type: stretch
     - type: vertical_layout
