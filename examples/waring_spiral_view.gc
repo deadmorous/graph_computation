@@ -3,7 +3,7 @@ graph:
     - name: sieve
       type: waring
     - name: view
-      type: rect_view
+      type: spiral_view
     - name: filter
       type: filter_seq
   edges:
@@ -16,6 +16,10 @@ graph:
         width: 100
         height: 100
       destinations: [view.size]
+    - name: spiral_scale
+      type: F64
+      value: 5
+      destinations: [view.scale]
     - name: seq_size
       type: U32
       value: 10000
@@ -66,10 +70,13 @@ layout:
         items:
         - type: spin
           bind: waring_s
-          range: [1, 10000]
+          range: [1, 1000]
         - type: spin
           bind: waring_k
           range: [2, 100]
+        - type: spin
+          bind: spiral_scale
+          range: [1, 100]
       - type: color
         bind: palette/overflow_color
       - type: vector
