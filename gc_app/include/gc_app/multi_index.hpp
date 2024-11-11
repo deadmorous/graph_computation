@@ -1,8 +1,13 @@
 #pragma once
 
-#include <span> // We need a visible definition of std::size
+#include "common/binomial.hpp"
+
+#include <algorithm>
 #include <concepts>
+#include <cstdint>
+#include <span>
 #include <type_traits>
+#include <vector>
 
 namespace gc_app {
 
@@ -29,6 +34,11 @@ auto inc_multi_index(C& multi_index, const T& n)
         }
         mi = 0;
     }
+    if (s > 0)
+    {
+        multi_index[0] = n;
+        std::fill(std::begin(multi_index)+1, std::end(multi_index), T{});
+    }
     return false;
 }
 
@@ -48,7 +58,97 @@ auto inc_multi_index_mono(C& multi_index, const T& n)
             return true;
         }
     }
+    std::fill(std::begin(multi_index), std::end(multi_index), n);
     return false;
+}
+
+inline auto multi_index_mono_range_length(uint32_t n, uint32_t s)
+    -> uint64_t
+{ return s > 0 ?   binomial(common::Type<uint64_t>, n + s - 1, s) :   0; };
+
+namespace detail {
+
+template <typename T>
+auto multi_index_mono_subrange_boundary(std::span<T> result,
+                                        std::type_identity_t<T> n,
+                                        uint64_t b,
+                                        std::type_identity_t<T> n0)
+    -> void
+{
+    auto s = result.size();
+
+    if (s == 0)
+        return;
+
+    if (b == 0)
+    {
+        std::ranges::fill(result, n0);
+        return;
+    }
+
+    if (s == 1)
+    {
+        result[0] = std::min(n0 + n - 1, n0 + static_cast<T>(b));
+        return;
+    }
+
+    auto ncur = uint64_t{};
+    for (T i=0; i<n; ++i)
+    {
+        result[0] = n0 + i;
+        auto np = multi_index_mono_range_length(n-i, s-1);
+        if (ncur + np <= b)
+            ncur += np;
+        else
+        {
+            multi_index_mono_subrange_boundary(
+                result.subspan(1), n-i, b-ncur, n0+i);
+            return;
+        }
+    }
+    std::ranges::fill(result.subspan(1), result[0]);
+}
+
+} // namespace detail
+
+template <typename T>
+auto multi_index_mono_subrange_boundary(std::span<T> result,
+                                        std::type_identity_t<T> n,
+                                        uint32_t k,
+                                        uint32_t p)
+    -> void
+{
+    if (result.empty())
+        return;
+
+    if (k == 0)
+    {
+        std::fill(result.begin(), result.end(), T{});
+        return;
+    }
+
+    if (k == p)
+    {
+        std::fill(result.begin(), result.end(), n);
+        return;
+    }
+
+    auto b = multi_index_mono_range_length(n, result.size()) * k / p;
+
+    ::gc_app::detail::multi_index_mono_subrange_boundary(result, n, b, 0);
+}
+
+template <typename T>
+auto multi_index_mono_subrange_boundary(common::Type_Tag<T>,
+                                        uint32_t s,
+                                        std::type_identity_t<T> n,
+                                        uint32_t k,
+                                        uint32_t p)
+    -> std::vector<T>
+{
+    auto result = std::vector<T>(s);
+    multi_index_mono_subrange_boundary(std::span{result}, n, k, p);
+    return result;
 }
 
 } // namespace gc_app
