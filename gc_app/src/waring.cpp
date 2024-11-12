@@ -10,6 +10,7 @@
 
 #include "common/binomial.hpp"
 #include "common/func_ref.hpp"
+#include "common/pow2.hpp"
 
 #include <cmath>
 #include <numeric>
@@ -46,9 +47,9 @@ auto waring(Uint limit,
 
     auto iter_count = binomial(common::Type<uint64_t>, tlim+s-1, s);
     auto progress_factor = 1. / iter_count;
-    auto iter_till_progress_report = uint64_t{1};
     auto iter = uint64_t{0};
-    constexpr auto iters_per_progress_report{10000};
+    auto iter_granularity =
+        std::max(2ul, common::ceil2(iter_count / 100)) - 1;
 
     do
     {
@@ -57,15 +58,19 @@ auto waring(Uint limit,
             sum += n[i];
         if (sum < limit)
             ++result[sum];
-        if (stoken.stop_requested())
+
+        if (stoken.stop_requested()) [[unlikely]]
             return { std::move(result), false };
 
+        if (!progress) [[unlikely]]
+            continue;
+
         ++iter;
-        if (progress && --iter_till_progress_report == 0)
-        {
-            iter_till_progress_report = iters_per_progress_report;
-            progress(progress_factor*iter);
-        }
+
+        if ((iter & iter_granularity) != 0) [[likely]]
+            continue;
+
+        progress(progress_factor*iter);
     }
     while(inc_multi_index_mono(index, tlim));
 

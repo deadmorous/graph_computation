@@ -1,7 +1,11 @@
 graph:
   nodes:
     - name: sieve
-      type: waring
+#      type: waring
+      type: waring_parallel
+      init:
+        - type: U32
+          value: 32
     - name: view
       type: rect_view
     - name: filter

@@ -9,6 +9,7 @@
 #include "gc_app/test_sequence.hpp"
 #include "gc_app/uint_size.hpp"
 #include "gc_app/waring.hpp"
+#include "gc_app/waring_parallel.hpp"
 
 namespace gc_app {
 
@@ -27,6 +28,7 @@ auto populate_node_registry(gc::NodeRegistry& result)
     GC_APP_REGISTER(test_sequence);
     GC_APP_REGISTER(uint_size);
     GC_APP_REGISTER(waring);
+    GC_APP_REGISTER(waring_parallel);
 
 #undef GC_APP_REGISTER
 }

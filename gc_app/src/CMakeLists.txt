@@ -15,7 +15,8 @@ add_library(gc_app-lib STATIC
     test_sequence.cpp
     type_registry.cpp
     uint_size.cpp
-    waring.cpp)
+    waring.cpp
+    waring_parallel.cpp)
 
 add_library(gc_app::lib ALIAS gc_app-lib)
 
