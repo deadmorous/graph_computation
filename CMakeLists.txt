@@ -14,6 +14,7 @@ option(GRAPH_COMPUTATION_SANITIZE_ADDRESS "Enable address sanitizer" OFF)
 
 add_subdirectory(gc)
 add_subdirectory(gc_app)
+add_subdirectory(gc_cli)
 add_subdirectory(gc_visual)
 
 add_subdirectory(3p)
