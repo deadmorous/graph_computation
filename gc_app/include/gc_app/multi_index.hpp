@@ -20,7 +20,7 @@ concept MutableIndexedContainerOf =
     };
 
 template <typename T, MutableIndexedContainerOf<T> C>
-auto inc_multi_index(C& multi_index, const T& n)
+auto inc_multi_index(C& multi_index, const T& n) noexcept
     -> bool
 {
     auto s = std::size(multi_index);
@@ -43,7 +43,7 @@ auto inc_multi_index(C& multi_index, const T& n)
 }
 
 template <typename T, MutableIndexedContainerOf<T> C>
-auto inc_multi_index_mono(C& multi_index, const T& n)
+auto inc_multi_index_mono(C& multi_index, const T& n) noexcept
     -> bool
 {
     auto s = std::size(multi_index);
@@ -72,7 +72,7 @@ template <typename T>
 auto multi_index_mono_subrange_boundary(std::span<T> result,
                                         std::type_identity_t<T> n,
                                         uint64_t b,
-                                        std::type_identity_t<T> n0)
+                                        std::type_identity_t<T> n0) noexcept
     -> void
 {
     auto s = result.size();
@@ -115,7 +115,7 @@ template <typename T>
 auto multi_index_mono_subrange_boundary(std::span<T> result,
                                         std::type_identity_t<T> n,
                                         uint32_t k,
-                                        uint32_t p)
+                                        uint32_t p) noexcept
     -> void
 {
     if (result.empty())
@@ -143,7 +143,7 @@ auto multi_index_mono_subrange_boundary(common::Type_Tag<T>,
                                         uint32_t s,
                                         std::type_identity_t<T> n,
                                         uint32_t k,
-                                        uint32_t p)
+                                        uint32_t p) noexcept
     -> std::vector<T>
 {
     auto result = std::vector<T>(s);
