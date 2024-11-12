@@ -15,6 +15,7 @@
 #include <QFileDialog>
 #include <QKeyCombination>
 #include <QKeySequence>
+#include <QLabel>
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
@@ -110,6 +111,9 @@ MainWindow::MainWindow(const gc_visual::ConfigSpecification& spec,
 
     setMenuBar(menu_bar);
 
+    computing_time_indicator_ = new QLabel{};
+    statusBar()->addPermanentWidget(computing_time_indicator_);
+
     auto progress_widget = new ComputationProgressWidget{};
     statusBar()->addPermanentWidget(progress_widget);
 
@@ -137,6 +141,26 @@ MainWindow::MainWindow(const gc_visual::ConfigSpecification& spec,
             progress_widget, &ComputationProgressWidget::setVisible);
     connect(progress_widget, &ComputationProgressWidget::stop,
             stop_action, &QAction::trigger);
+
+    auto set_computing_start_time = [this]
+    {
+        computing_start_time_ = std::chrono::steady_clock::now();
+        computing_end_time_ = computing_start_time_;
+        update_computing_time_indicator();
+    };
+
+    auto set_computing_end_time = [this]
+    {
+        computing_end_time_ = std::chrono::steady_clock::now();
+        update_computing_time_indicator();
+    };
+
+    connect(&computation_thread_, &ComputationThread::started,
+            set_computing_start_time);
+    connect(&computation_thread_, &ComputationThread::finished,
+            set_computing_end_time);
+    connect(&computation_thread_, &ComputationThread::progress,
+            set_computing_end_time);
 
     load(spec);
 }
@@ -276,4 +300,13 @@ auto MainWindow::reload_recent_files_menu()
         recent_files_->addAction(action);
         ++index;
     }
+}
+
+auto MainWindow::update_computing_time_indicator()
+    -> void
+{
+    auto dt =
+        std::chrono::nanoseconds{ computing_end_time_ - computing_start_time_ }
+        .count() / 1e9;
+    computing_time_indicator_->setText(QString::number(dt) + " s");
 }

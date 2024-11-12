@@ -8,6 +8,7 @@
 #include <QSignalMapper>
 
 class GraphBroker;
+class QLabel;
 class QMenu;
 
 class MainWindow : public QMainWindow
@@ -36,9 +37,14 @@ protected:
 private:
     auto load(const gc_visual::ConfigSpecification& spec) -> void;
     auto reload_recent_files_menu() -> void;
+    auto update_computing_time_indicator() -> void;
 
     ComputationThread computation_thread_;
     gc_visual::ConfigSpecification spec_;
     QSignalMapper* recents_mapper_;
     QMenu* recent_files_;
+
+    std::chrono::steady_clock::time_point computing_start_time_;
+    std::chrono::steady_clock::time_point computing_end_time_;
+    QLabel* computing_time_indicator_;
 };
