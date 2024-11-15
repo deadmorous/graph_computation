@@ -4,13 +4,13 @@ project(gc-lib LANGUAGES CXX)
 
 add_library(gc-lib STATIC
     detail/parse_node_port.cpp
-    edge.cpp
     expect_n_node_args.cpp
-    graph_computation.cpp
+    gc/edge.cpp
+    gc/graph_computation.cpp
+    gc/node_registry.cpp
+    gc/source_inputs.cpp
     node_port_names.cpp
-    node_registry.cpp
     parse_simple_value.cpp
-    source_inputs.cpp
     type.cpp
     type_registry.cpp
     value.cpp
