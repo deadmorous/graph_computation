@@ -64,16 +64,19 @@ inline constexpr auto transparent_color() noexcept
     -> Color
 { return rgba(Color{0}, ColorComponent{0}); }
 
-inline constexpr auto black_color(ColorComponent a = {0xff}) noexcept
+inline constexpr auto black_color(
+                        ColorComponent a = ColorComponent{0xff}) noexcept
     -> Color
 { return rgba(Color{0}, a); }
 
-inline constexpr auto white_color(ColorComponent a = {0xff}) noexcept
+inline constexpr auto white_color(
+                        ColorComponent a = ColorComponent{0xff}) noexcept
     -> Color
 { return rgba(Color{0xffffff}, a); }
 
-inline constexpr auto gray_color(ColorComponent lightness,
-                                 ColorComponent a = {0xff}) noexcept
+inline constexpr auto gray_color(
+                        ColorComponent lightness,
+                        ColorComponent a = ColorComponent{0xff}) noexcept
     -> Color
 { return rgba(lightness, lightness, lightness, a); }
 

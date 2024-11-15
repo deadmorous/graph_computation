@@ -13,6 +13,12 @@ struct Strong final
     using Weak = typename Traits::Weak;
     Weak v = Traits::default_value();
 
+    constexpr Strong() = default;
+
+    constexpr explicit Strong(Weak v)
+        : v{ v }
+    {}
+
     auto operator<=>(const Self&) const noexcept = default;
 };
 
