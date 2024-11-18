@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(gc-lib LANGUAGES CXX)
+project(gc_app-lib LANGUAGES CXX)
 
 add_library(gc_app-lib STATIC
     color.cpp
