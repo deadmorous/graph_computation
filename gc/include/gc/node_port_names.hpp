@@ -13,7 +13,7 @@
 
 namespace gc {
 
-template <std::derived_from<Node> NodeImpl,
+template <typename NodeImpl,
           std::same_as<std::string_view>... Args>
 auto node_input_names(common::Type_Tag<NodeImpl>, Args... names)
     -> common::ConstNameSpan
@@ -23,7 +23,7 @@ auto node_input_names(common::Type_Tag<NodeImpl>, Args... names)
         names...);
 }
 
-template <std::derived_from<Node> NodeImpl,
+template <typename NodeImpl,
          std::same_as<std::string_view>... Args>
 auto node_input_names(Args... names)
     -> common::ConstNameSpan
@@ -31,7 +31,7 @@ auto node_input_names(Args... names)
 
 
 
-template <std::derived_from<Node> NodeImpl,
+template <typename NodeImpl,
          std::same_as<std::string_view>... Args>
 auto node_output_names(common::Type_Tag<NodeImpl>, Args... names)
     -> common::ConstNameSpan
@@ -41,7 +41,7 @@ auto node_output_names(common::Type_Tag<NodeImpl>, Args... names)
         names...);
 }
 
-template <std::derived_from<Node> NodeImpl,
+template <typename NodeImpl,
          std::same_as<std::string_view>... Args>
 auto node_output_names(Args... names)
     -> common::ConstNameSpan
