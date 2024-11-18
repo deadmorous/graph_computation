@@ -2,6 +2,8 @@
 
 #include "common/macro.hpp"
 
+#include <utility>
+
 
 namespace common {
 
@@ -16,7 +18,7 @@ struct Strong final
     constexpr Strong() = default;
 
     constexpr explicit Strong(Weak v)
-        : v{ v }
+        : v{ std::move(v) }
     {}
 
     auto operator<=>(const Self&) const noexcept = default;
