@@ -89,22 +89,22 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
         node_ind[nodes[i]] = i;
 
     // Check edges
-    auto check_edge_end = [&](const EdgeEnd& ee, auto is_input)
+    auto check_edge_end = [&]<typename Tag>(const EdgeEnd<Tag>& ee)
     {
         if(ee.node >= nodes.size())
             common::throw_<std::out_of_range>(
                 "Edge end ", ee, " refers to a non-existent node");
 
         const auto* node = nodes[ee.node];
-        if constexpr (is_input.value)
+        if constexpr (std::same_as<Tag, Input_Tag>)
         {
-            if (ee.port >= node->input_count())
+            if (ee.port.v >= node->input_count())
                 common::throw_<std::invalid_argument>(
                     "Edge end ", ee, " refers to a non-existent input port");
         }
         else
         {
-            if (ee.port >= node->output_count())
+            if (ee.port.v >= node->output_count())
                 common::throw_<std::invalid_argument>(
                     "Edge end ", ee, " refers to a non-existent output port");
         }
@@ -112,8 +112,8 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
 
     auto check_edge = [&](const Edge& e)
     {
-        check_edge_end(e[0], common::Const<false>);
-        check_edge_end(e[1], common::Const<true>);
+        check_edge_end(e.from);
+        check_edge_end(e.to);
     };
 
     std::ranges::for_each(g.edges, check_edge);
@@ -123,15 +123,15 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
     // Obtain information on node input and output counts.
     struct NodeData
     {
-        uint32_t input_count{};
-        uint32_t output_count{};
-        uint32_t inputs_avail{};
+        uint8_t input_count{};
+        uint8_t output_count{};
+        uint8_t inputs_avail{};
 
         // We will further track connections of all inputs & outputs by edges
         BitVec connected_inputs{};
 
         // Number of inputs connected to outputs of other nodes with graph edges
-        uint32_t connected_input_count{};
+        uint8_t connected_input_count{};
     };
     auto node_data = std::vector<NodeData>{};
     node_data.reserve(nodes.size());
@@ -145,7 +145,7 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
                        BitVec(node->input_count(), false) }; } );
 
     for (const auto& e : g.edges)
-        ++node_data.at(e[1].node).connected_input_count;
+        ++node_data.at(e.to.node).connected_input_count;
 
     auto has_all_inputs =
         [&](uint32_t node_index)
@@ -172,14 +172,14 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
 
     auto process_edge = [&](const Edge& e)
     {
-        const auto& e1 = e[1];
+        const auto& e1 = e.to;
         assert (e1.node < node_data.size());
         auto& ports = node_data[e1.node].connected_inputs;
-        if (ports.at(e1.port))
+        if (ports.at(e1.port.v))
             common::throw_<std::invalid_argument>(
                 "Edge end ", e1,
                 " is not the only one coming to the input port");
-        ports[e1.port] = true;
+        ports[e1.port.v] = true;
 
         add_to_last_group(result->edges, e);
     };
@@ -275,10 +275,10 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
     }
 
     // Build source map
-    using SimpleEdge = std::array<uint32_t, 2>; // [1] -> [0]
+    using SimpleEdge = std::array<uint32_t, 2>; // to -> from
     auto simple_edges = std::vector<SimpleEdge>{};
     for (const auto& e : g.edges)
-        simple_edges.push_back({e[1].node, e[0].node});
+        simple_edges.push_back({e.to.node, e.from.node});
     std::sort(simple_edges.begin(), simple_edges.end());
     simple_edges.resize(
         std::unique(simple_edges.begin(), simple_edges.end()) -
@@ -303,7 +303,7 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
     auto input_dst = provided_inputs.destinations.values;
     std::ranges::sort(input_dst);
 
-    auto input_provided = [&](const EdgeEnd& dst)
+    auto input_provided = [&](const EdgeInputEnd& dst)
     {
         auto it = std::ranges::lower_bound(input_dst, dst);
         return it != input_dst.end() && *it == dst;
@@ -317,7 +317,7 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
                 "Source input destination ", dst,
                 " refers to a non-existent node");
 
-        if (dst.port >= nodes[dst.node]->input_count())
+        if (dst.port.v >= nodes[dst.node]->input_count())
             common::throw_<std::invalid_argument>(
                 "Source input destination ", dst,
                 " refers to a non-existent input port");
@@ -332,9 +332,9 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
         const auto* node = nodes[i];
         auto default_inputs = ValueVec(node->input_count());
         nodes[i]->default_inputs(default_inputs);
-        for (uint32_t port=0; port<nd.input_count; ++port)
+        for (uint8_t port=0; port<nd.input_count; ++port)
         {
-            auto dst = EdgeEnd{i, port};
+            auto dst = EdgeInputEnd{i, InputPort{port}};
             auto provided = input_provided(dst);
             if (nd.connected_inputs[port])
             {
@@ -350,7 +350,8 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
                 continue;
 
             source_inputs.values.push_back(default_inputs[port]);
-            add_to_last_group(source_inputs.destinations, EdgeEnd{i, port});
+            add_to_last_group(source_inputs.destinations,
+                              EdgeInputEnd{i, InputPort{port}});
             next_group(source_inputs.destinations);
         }
     }
@@ -430,10 +431,10 @@ auto compute(ComputationResult& result,
                 common::throw_<std::out_of_range>(
                     "Source input ", d, " refers to an inexistent graph node");
             auto node_inputs = group(result.inputs, d.node);
-            if (d.port >= node_inputs.size())
+            if (d.port.v >= node_inputs.size())
                 common::throw_<std::out_of_range>(
                     "Source input ", d, " refers to an inexistent input port");
-            auto& node_input = node_inputs[d.port];
+            auto& node_input = node_inputs[d.port.v];
             if (node_input != value)
             {
                 node_input = value;
@@ -450,8 +451,8 @@ auto compute(ComputationResult& result,
             for (const auto& e : group(instructions->edges, level-1))
             {
                 const auto& [e0, e1] = e;
-                group(result.inputs, e1.node)[e1.port] =
-                    group(result.outputs, e0.node)[e0.port];
+                group(result.inputs, e1.node)[e1.port.v] =
+                    group(result.outputs, e0.node)[e0.port.v];
             }
         }
 

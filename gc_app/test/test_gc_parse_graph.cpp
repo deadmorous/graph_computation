@@ -77,16 +77,16 @@ inputs:
     EXPECT_EQ(provided_inputs.values[0], uint32_t{600});
     auto in0_dst = group(provided_inputs.destinations, 0);
     EXPECT_EQ(in0_dst.size(), 2);
-    EXPECT_EQ(in0_dst[0], gc::EdgeEnd(0, 0));
-    EXPECT_EQ(in0_dst[1], gc::EdgeEnd(1, 0));
+    EXPECT_EQ(in0_dst[0], gc::EdgeInputEnd(0, gc::InputPort{0}));
+    EXPECT_EQ(in0_dst[1], gc::EdgeInputEnd(1, gc::InputPort{0}));
     auto in1_dst = group(provided_inputs.destinations, 1);
     EXPECT_EQ(provided_inputs.values[1], uint32_t{500});
     EXPECT_EQ(in1_dst.size(), 2);
-    EXPECT_EQ(in1_dst[0], gc::EdgeEnd(0, 1));
-    EXPECT_EQ(in1_dst[1], gc::EdgeEnd(1, 1));
+    EXPECT_EQ(in1_dst[0], gc::EdgeInputEnd(0, gc::InputPort{1}));
+    EXPECT_EQ(in1_dst[1], gc::EdgeInputEnd(1, gc::InputPort{1}));
     auto in2_dst = group(provided_inputs.destinations, 2);
     EXPECT_EQ(in2_dst.size(), 1);
-    EXPECT_EQ(in2_dst[0], gc::EdgeEnd(3, 2));
+    EXPECT_EQ(in2_dst[0], gc::EdgeInputEnd(3, gc::InputPort{2}));
 
     // Compute graph
     auto [instr, compiled_source_inputs] = compile(g);

@@ -66,13 +66,13 @@ auto GraphBroker::get_parameter(const gc::ParameterSpec& spec) const
     -> gc::Value
 { return computation_thread_.get_parameter(spec); }
 
-auto GraphBroker::get_port_value(gc::EdgeEnd port, gc::Output_Tag) const
+auto GraphBroker::get_port_value(gc::EdgeOutputEnd port) const
     -> const gc::Value&
-{ return group_value(port.node, port.port, computation_result_.outputs); }
+{ return group_value(port.node, port.port.v, computation_result_.outputs); }
 
-auto GraphBroker::get_port_value(gc::EdgeEnd port, gc::Input_Tag) const
+auto GraphBroker::get_port_value(gc::EdgeInputEnd port) const
     -> const gc::Value&
-{ return group_value(port.node, port.port, computation_result_.inputs); }
+{ return group_value(port.node, port.port.v, computation_result_.inputs); }
 
 auto GraphBroker::set_parameter(const gc::ParameterSpec& spec,
                                 const gc::Value& value)
@@ -96,9 +96,9 @@ auto GraphBroker::on_computation_finished()
 
     for (uint32_t ng=group_count(outputs), ig=0; ig<ng; ++ig)
     {
-        for (uint32_t np=group(outputs,ig).size(), ip=0; ip<np; ++ip)
+        for (uint8_t np=group(outputs,ig).size(), ip=0; ip<np; ++ip)
         {
-            auto port = gc::EdgeEnd{ ig, ip };
+            auto port = gc::EdgeOutputEnd{ ig, gc::OutputPort{ip} };
             emit output_updated(port);
         }
     }

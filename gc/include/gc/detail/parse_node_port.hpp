@@ -14,12 +14,12 @@ auto parse_node_port(std::string_view,
                      const NamedNodes&,
                      const NodeIndices& node_indices,
                      Input_Tag)
-    -> EdgeEnd;
+    -> EdgeInputEnd;
 
 auto parse_node_port(std::string_view,
                      const NamedNodes&,
                      const NodeIndices& node_indices,
                      Output_Tag)
-    -> EdgeEnd;
+    -> EdgeOutputEnd;
 
 } // namespace gc::detail

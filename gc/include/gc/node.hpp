@@ -6,6 +6,8 @@
 #include "common/const_name_span.hpp"
 #include "common/func_ref_fwd.hpp"
 
+#include <cassert>
+#include <limits>
 #include <stop_token>
 
 
@@ -30,11 +32,19 @@ struct Node
                                  const NodeProgress& progress) const
         -> bool = 0;
 
-    auto input_count() const -> uint32_t
-    { return input_names().size(); }
+    auto input_count() const -> uint8_t
+    {
+        auto result = input_names().size();
+        assert(result <= std::numeric_limits<uint8_t>::max());
+        return result;
+    }
 
-    auto output_count() const -> uint32_t
-    { return output_names().size(); }
+    auto output_count() const -> uint8_t
+    {
+        auto result = output_names().size();
+        assert(result <= std::numeric_limits<uint8_t>::max());
+        return result;
+    }
 
 };
 

@@ -21,7 +21,8 @@ struct Strong final
         : v{ std::move(v) }
     {}
 
-    auto operator<=>(const Self&) const noexcept = default;
+    auto operator<=>(const Self&) const noexcept
+        -> std::strong_ordering = default;
 };
 
 template <typename T>

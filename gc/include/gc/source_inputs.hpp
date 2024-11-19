@@ -13,7 +13,7 @@ namespace gc {
 struct SourceInputs final
 {
     ValueVec values;
-    common::Grouped<EdgeEnd> destinations;
+    common::Grouped<EdgeInputEnd> destinations;
 
     auto operator==(const SourceInputs&) const noexcept -> bool = default;
 };

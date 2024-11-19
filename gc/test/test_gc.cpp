@@ -107,6 +107,12 @@ auto check_comple_graph(const gc::Graph& g,
     EXPECT_EQ(source_inputs, expected_source_inputs);
 }
 
+auto edge(std::pair<uint32_t, uint8_t> from, std::pair<uint32_t, uint8_t> to)
+    -> gc::Edge
+{
+    return gc::edge({from.first, gc::OutputPort{from.second}},
+                    {to.first, gc::InputPort{to.second}});
+}
 
 auto test_graph_net_3x3()
     -> gc::Graph
@@ -124,24 +130,24 @@ auto test_graph_net_3x3()
     // 3 -> 1 -> 0
     return test_graph(
         {{2,0}, {2,1}, {2,1}, {1,1}, {2,2}, {1,1}, {1,2}, {1,2}, {0,2}},
-        {gc::edge({1,0}, {0,0}),
-         gc::edge({2,0}, {0,1}),
-         gc::edge({3,0}, {1,0}),
-         gc::edge({4,0}, {1,1}),
-         gc::edge({4,1}, {2,0}),
-         gc::edge({5,0}, {2,1}),
-         gc::edge({6,0}, {3,0}),
-         gc::edge({6,1}, {4,0}),
-         gc::edge({7,0}, {4,1}),
-         gc::edge({7,1}, {5,0}),
-         gc::edge({8,0}, {6,0}),
-         gc::edge({8,1}, {7,0})});
+        {edge({1,0}, {0,0}),
+         edge({2,0}, {0,1}),
+         edge({3,0}, {1,0}),
+         edge({4,0}, {1,1}),
+         edge({4,1}, {2,0}),
+         edge({5,0}, {2,1}),
+         edge({6,0}, {3,0}),
+         edge({6,1}, {4,0}),
+         edge({7,0}, {4,1}),
+         edge({7,1}, {5,0}),
+         edge({8,0}, {6,0}),
+         edge({8,1}, {7,0})});
 }
 
 struct SourceInput final
 {
     uint32_t node;
-    uint32_t port;
+    gc::InputPort port;
     gc::Value value;
 };
 
@@ -151,7 +157,8 @@ auto make_source_inputs(std::initializer_list<SourceInput> inputs)
     auto result = gc::SourceInputs{};
     for (const auto& in : inputs)
     {
-        add_to_last_group(result.destinations, gc::EdgeEnd{in.node, in.port});
+        add_to_last_group(result.destinations,
+                          gc::EdgeInputEnd{in.node, in.port});
         next_group(result.destinations);
         result.values.push_back(in.value);
     }
@@ -172,33 +179,33 @@ TEST(Gc, compile_inputless)
     check_comple_graph(
         test_graph(
             {{0,1}, {1,1}, {1,1}, {1,1}},
-            {gc::edge({0,0}, {1,0}),
-             gc::edge({1,0}, {2,0}),
-             gc::edge({2,0}, {3,0})}),
-        "{(0) => ([(0,0)->(1,0)]) |"
-        " (1) => ([(1,0)->(2,0)]) |"
-        " (2) => ([(2,0)->(3,0)]) |"
+            {edge({0,0}, {1,0}),
+             edge({1,0}, {2,0}),
+             edge({2,0}, {3,0})}),
+        "{(0) => ([O(0,0)->I(1,0)]) |"
+        " (1) => ([O(1,0)->I(2,0)]) |"
+        " (2) => ([O(2,0)->I(3,0)]) |"
         " (3)}; [(),(0),(1),(2)]");
 
     // 1 -> 2 -> 3 -> 0
     check_comple_graph(
         test_graph(
             {{1,0}, {0,1}, {1,1}, {1,1}},
-            {gc::edge({1,0}, {2,0}),
-             gc::edge({2,0}, {3,0}),
-             gc::edge({3,0}, {0,0})}),
-        "{(1) => ([(1,0)->(2,0)]) |"
-        " (2) => ([(2,0)->(3,0)]) |"
-        " (3) => ([(3,0)->(0,0)]) |"
+            {edge({1,0}, {2,0}),
+             edge({2,0}, {3,0}),
+             edge({3,0}, {0,0})}),
+        "{(1) => ([O(1,0)->I(2,0)]) |"
+        " (2) => ([O(2,0)->I(3,0)]) |"
+        " (3) => ([O(3,0)->I(0,0)]) |"
         " (0)}; [(3),(),(1),(2)]");
 
     // 0 -> 2 <- 1
     check_comple_graph(
         test_graph(
             {{0,1}, {0,1}, {2,0}},
-            {gc::edge({0,0}, {2,0}),
-             gc::edge({1,0}, {2,1})}),
-        "{(0,1) => ([(0,0)->(2,0)],[(1,0)->(2,1)]) |"
+            {edge({0,0}, {2,0}),
+             edge({1,0}, {2,1})}),
+        "{(0,1) => ([O(0,0)->I(2,0)],[O(1,0)->I(2,1)]) |"
         " (2)}; [(),(),(0,1)]");
 
     // 8 -> 7 -> 5
@@ -214,10 +221,10 @@ TEST(Gc, compile_inputless)
     // 3 -> 1 -> 0
     check_comple_graph(
         test_graph_net_3x3(),
-        "{(8) => ([(8,0)->(6,0)],[(8,1)->(7,0)]) |"
-        " (6,7) => ([(6,0)->(3,0)],[(6,1)->(4,0)],[(7,0)->(4,1)],[(7,1)->(5,0)]) |"
-        " (3,4,5) => ([(3,0)->(1,0)],[(4,0)->(1,1)],[(4,1)->(2,0)],[(5,0)->(2,1)]) |"
-        " (1,2) => ([(1,0)->(0,0)],[(2,0)->(0,1)]) |"
+        "{(8) => ([O(8,0)->I(6,0)],[O(8,1)->I(7,0)]) |"
+        " (6,7) => ([O(6,0)->I(3,0)],[O(6,1)->I(4,0)],[O(7,0)->I(4,1)],[O(7,1)->I(5,0)]) |"
+        " (3,4,5) => ([O(3,0)->I(1,0)],[O(4,0)->I(1,1)],[O(4,1)->I(2,0)],[O(5,0)->I(2,1)]) |"
+        " (1,2) => ([O(1,0)->I(0,0)],[O(2,0)->I(0,1)]) |"
         " (0)}; [(1,2),(3,4),(4,5),(6),(6,7),(7),(8),(8),()]");
 
     // Graph is not connected. Unreachable nodes are 1
@@ -225,8 +232,8 @@ TEST(Gc, compile_inputless)
         check_comple_graph(
             test_graph(
                 {{0,1}, {2,1}},
-                {gc::edge({0,0}, {1,0}),
-                 gc::edge({1,0}, {1,1})}),
+                {edge({0,0}, {1,0}),
+                 edge({1,0}, {1,1})}),
             ""),
         std::invalid_argument);
 
@@ -235,8 +242,8 @@ TEST(Gc, compile_inputless)
         check_comple_graph(
             test_graph(
                 {{0,1}, {1,1}},
-                {gc::edge({0,0}, {1,0}),
-                 gc::edge({1,0}, {1,1})}),
+                {edge({0,0}, {1,0}),
+                 edge({1,0}, {1,1})}),
             ""),
         std::invalid_argument);
 
@@ -245,21 +252,21 @@ TEST(Gc, compile_inputless)
         check_comple_graph(
             test_graph(
                 {{0,1}, {1,1}},
-                {gc::edge({0,2}, {1,0}),
-                 gc::edge({1,0}, {1,1})}),
+                {edge({0,2}, {1,0}),
+                 edge({1,0}, {1,1})}),
             ""),
         std::invalid_argument);
 
     // The following edges are not processed because
-    // the graph has a cycle: [(3,0)->(2,0)]
+    // the graph has a cycle: [O(3,0)->I(2,0)]
     EXPECT_THROW(
         check_comple_graph(
             test_graph(
                 {{1,0}, {0,1}, {1,1}, {1,1}},
-                {gc::edge({1,0}, {2,0}),
-                 gc::edge({2,0}, {3,0}),
-                 gc::edge({2,0}, {0,0}),
-                 gc::edge({3,0}, {2,0})}),
+                {edge({1,0}, {2,0}),
+                 edge({2,0}, {3,0}),
+                 edge({2,0}, {0,0}),
+                 edge({3,0}, {2,0})}),
             ""),
         std::invalid_argument);
 
@@ -268,8 +275,8 @@ TEST(Gc, compile_inputless)
         check_comple_graph(
             test_graph(
                 {{0,1}, {0,1}, {1,0}},
-                {gc::edge({0,0}, {2,0}),
-                 gc::edge({1,0}, {2,0})}),
+                {edge({0,0}, {2,0}),
+                 edge({1,0}, {2,0})}),
             ""),
         std::invalid_argument);
 }
@@ -280,14 +287,14 @@ TEST(Gc, compile_with_inputs)
     check_comple_graph(
         test_graph(
             {{1,1}, {1,1}, {1,1}},
-            {gc::edge({0,0}, {1,0}),
-             gc::edge({1,0}, {2,0})}),
-        "{(0) => ([(0,0)->(1,0)]) |"
-        " (1) => ([(1,0)->(2,0)]) |"
+            {edge({0,0}, {1,0}),
+             edge({1,0}, {2,0})}),
+        "{(0) => ([O(0,0)->I(1,0)]) |"
+        " (1) => ([O(1,0)->I(2,0)]) |"
         " (2)}; [(),(0),(1)]",
         make_source_inputs({{
             .node = 0,
-            .port = 0,
+            .port = gc::InputPort{0},
             .value = 0 }}));
 }
 
@@ -297,13 +304,10 @@ TEST(Gc, compile2)
     auto n1 = std::make_shared<TestNode>( 0, 1 );
     auto n2 = std::make_shared<TestNode>( 2, 0 );
 
-    using EE = gc::EdgeEnd;
-
     auto g = gc::Graph{
         .nodes = { n1, n2 },
-        .edges = {gc::edge({0, 0}, EE{2, 0}),
-                  gc::edge({1, 0}, EE{2, 1})}
-    };
+        .edges = {edge({0, 0}, {2, 0}),
+                  edge({1, 0}, {2, 1})}};
 
     // Throws because n0 is missing among graph nodes but is present
     // among graph edges.
@@ -314,7 +318,7 @@ TEST(Gc, compute_1)
 {
     auto g = test_graph(
         {{0, 1}, {1, 1}},
-        {gc::edge({0,0}, {1,0})});
+        {edge({0,0}, {1,0})});
 
     auto [instr, source_inputs] = compile(g);
 
@@ -380,7 +384,7 @@ TEST(Gc, compute_3)
 {
     auto g = test_graph(
         {{2, 1}, {1, 1}},
-        {gc::edge({0,0}, {1,0})});
+        {edge({0,0}, {1,0})});
 
     auto [instr, source_inputs] = compile(g);
 
@@ -393,19 +397,19 @@ TEST(Gc, compute_3)
 
     // Throws because one of source inputs refers to an inexistent port.
     source_inputs.destinations.values[0].node = 0;
-    source_inputs.destinations.values[0].port = 2;
+    source_inputs.destinations.values[0].port.v = 2;
     EXPECT_THROW(compute(result, g, instr.get(), source_inputs),
                  std::out_of_range);
 
     // Not all external inputs are connected. We currently do not
     // detect it in `compute`. In this particular example, `compute` fails
     // because the empty input value is invalid and fails to cast to `int`.
-    source_inputs.destinations.values[0].port = 1;
+    source_inputs.destinations.values[0].port.v = 1;
     EXPECT_THROW(compute(result, g, instr.get(), source_inputs),
                  std::bad_any_cast);
 
     // And if we feed all external inputs properly, `compute` will succeed.
-    source_inputs.destinations.values[0].port = 0;
+    source_inputs.destinations.values[0].port.v = 0;
     source_inputs.values[0] = 123 - 1;
     source_inputs.values[1] = 321 - 1;
     compute(result, g, instr.get(), source_inputs);
@@ -447,10 +451,10 @@ TEST(Gc, compute_partially)
     //  2   3   4
     auto g = test_graph({{1, 1}, {1, 1},
                          {1, 1}, {2, 1}, {1, 1}},
-                        {gc::edge({0,0}, {2,0}),
-                         gc::edge({0,0}, {3,0}),
-                         gc::edge({1,0}, {3,1}),
-                         gc::edge({1,0}, {4,0})});
+                        {edge({0,0}, {2,0}),
+                         edge({0,0}, {3,0}),
+                         edge({1,0}, {3,1}),
+                         edge({1,0}, {4,0})});
 
     auto [instr, source_inputs] = gc::compile(g);
 

@@ -38,14 +38,14 @@ public:
     auto get_parameter(const gc::ParameterSpec&) const
         -> gc::Value;
 
-    auto get_port_value(gc::EdgeEnd port, gc::Output_Tag) const
+    auto get_port_value(gc::EdgeOutputEnd port) const
         -> const gc::Value&;
 
-    auto get_port_value(gc::EdgeEnd port, gc::Input_Tag) const
+    auto get_port_value(gc::EdgeInputEnd port) const
         -> const gc::Value&;
 
 signals:
-    auto output_updated(gc::EdgeEnd output)
+    auto output_updated(gc::EdgeOutputEnd output)
         -> void;
 
 public slots:

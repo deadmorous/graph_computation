@@ -45,12 +45,12 @@ auto make_image(GraphBroker* broker,
         view,
         [=](int pos) { view->set_scale(1. + (pos-1)/10.); });
 
-    auto on_output_updated = [=](gc::EdgeEnd output)
+    auto on_output_updated = [=](gc::EdgeOutputEnd output)
     {
         if (output != output_port)
             return;
 
-        view->set_image(broker->get_port_value(output_port, gc::Output));
+        view->set_image(broker->get_port_value(output_port));
     };
 
     QObject::connect(
@@ -83,12 +83,12 @@ auto make_text(GraphBroker* broker,
     view->setReadOnly(true);
     view->setAcceptRichText(false);
 
-    auto on_output_updated = [=](gc::EdgeEnd output)
+    auto on_output_updated = [=](gc::EdgeOutputEnd output)
     {
         if (output != output_port)
             return;
 
-        const auto& v = broker->get_port_value(output_port, gc::Output);
+        const auto& v = broker->get_port_value(output_port);
 
         constexpr auto max_lines = 1000ul;
 
