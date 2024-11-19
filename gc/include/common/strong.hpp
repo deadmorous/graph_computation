@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/macro.hpp"
+#include "common/zero.hpp"
 
 #include <utility>
 
@@ -20,6 +21,23 @@ struct Strong final
     constexpr explicit Strong(Weak v)
         : v{ std::move(v) }
     {}
+
+    constexpr /* implicit */ Strong(Zero_Tag)
+    requires std::default_initializable<Weak>
+        : v{}
+    {}
+
+    Strong(const Strong&) = default;
+    Strong(Strong&&) = default;
+    auto operator=(const Strong&) -> Strong& = default;
+    auto operator=(Strong&&) -> Strong& = default;
+
+    auto operator=(Zero_Tag) -> Strong&
+    requires std::assignable_from<Weak&, const Weak&>
+    {
+        v = Weak{};
+        return *this;
+    }
 
     auto operator<=>(const Self&) const noexcept
         -> std::strong_ordering = default;
