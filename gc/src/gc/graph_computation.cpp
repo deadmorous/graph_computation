@@ -98,13 +98,13 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
         const auto* node = nodes[ee.node];
         if constexpr (std::same_as<Tag, Input_Tag>)
         {
-            if (ee.port.v >= node->input_count())
+            if (ee.port >= node->input_count())
                 common::throw_<std::invalid_argument>(
                     "Edge end ", ee, " refers to a non-existent input port");
         }
         else
         {
-            if (ee.port.v >= node->output_count())
+            if (ee.port >= node->output_count())
                 common::throw_<std::invalid_argument>(
                     "Edge end ", ee, " refers to a non-existent output port");
         }
@@ -123,15 +123,15 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
     // Obtain information on node input and output counts.
     struct NodeData
     {
-        uint8_t input_count{};
-        uint8_t output_count{};
-        uint8_t inputs_avail{};
+        InputPortCount input_count{};
+        OutputPortCount output_count{};
+        InputPortCount inputs_avail{};
 
         // We will further track connections of all inputs & outputs by edges
         BitVec connected_inputs{};
 
         // Number of inputs connected to outputs of other nodes with graph edges
-        uint8_t connected_input_count{};
+        InputPortCount connected_input_count{};
     };
     auto node_data = std::vector<NodeData>{};
     node_data.reserve(nodes.size());
@@ -141,11 +141,11 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
         [](const Node* node) -> NodeData
             { return { node->input_count(),
                        node->output_count(),
-                       0,
-                       BitVec(node->input_count(), false) }; } );
+                       common::Zero,
+                       BitVec(node->input_count().v, false) }; } );
 
     for (const auto& e : g.edges)
-        ++node_data.at(e.to.node).connected_input_count;
+        ++node_data.at(e.to.node).connected_input_count.v;
 
     auto has_all_inputs =
         [&](uint32_t node_index)
@@ -220,7 +220,7 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
 
             // GC_LOG_DEBUG("gc::compile: {}", common::format(e));
 
-            ++node_data[e1.node].inputs_avail;
+            ++node_data[e1.node].inputs_avail.v;
             if (has_all_inputs(e1.node))
             {
                 // GC_LOG_DEBUG(
@@ -317,7 +317,7 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
                 "Source input destination ", dst,
                 " refers to a non-existent node");
 
-        if (dst.port.v >= nodes[dst.node]->input_count())
+        if (dst.port >= nodes[dst.node]->input_count())
             common::throw_<std::invalid_argument>(
                 "Source input destination ", dst,
                 " refers to a non-existent input port");
@@ -330,13 +330,13 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
     {
         const auto& nd = node_data[i];
         const auto* node = nodes[i];
-        auto default_inputs = ValueVec(node->input_count());
+        auto default_inputs = ValueVec(node->input_count().v);
         nodes[i]->default_inputs(default_inputs);
-        for (uint8_t port=0; port<nd.input_count; ++port)
+        for (InputPort port=common::Zero; port<nd.input_count; ++port.v)
         {
-            auto dst = EdgeInputEnd{i, InputPort{port}};
+            auto dst = EdgeInputEnd{i, port};
             auto provided = input_provided(dst);
-            if (nd.connected_inputs[port])
+            if (nd.connected_inputs[port.v])
             {
                 if (provided)
                     common::throw_<std::invalid_argument>(
@@ -349,9 +349,9 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
             if (provided)
                 continue;
 
-            source_inputs.values.push_back(default_inputs[port]);
+            source_inputs.values.push_back(default_inputs[port.v]);
             add_to_last_group(source_inputs.destinations,
-                              EdgeInputEnd{i, InputPort{port}});
+                              EdgeInputEnd{i, port});
             next_group(source_inputs.destinations);
         }
     }
@@ -385,7 +385,7 @@ auto compute(ComputationResult& result,
             grouped = {};
             for (const auto& node : g.nodes)
             {
-                for (uint32_t i=0, n=count(*node); i<n; ++i)
+                for (auto n=count(*node), i=decltype(n){}; i<n; ++i.v)
                     common::add_to_last_group(grouped, T{});
                 common::next_group(grouped);
             }
@@ -407,7 +407,7 @@ auto compute(ComputationResult& result,
             assert (group_count(grouped) == g.nodes.size());
             for (uint32_t inode=0, n=g.nodes.size(); inode<n; ++inode)
                 assert(group(grouped, inode).size() ==
-                       count(*g.nodes[inode]));
+                       count(*g.nodes[inode]).v);
         };
 
         check(result.inputs, input_count);

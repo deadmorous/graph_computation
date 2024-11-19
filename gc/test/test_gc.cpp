@@ -48,14 +48,16 @@ public:
 
         std::iota(result.begin(), result.end(), 1);
 
-        if (output_count() == 0)
+        auto out_count = output_count();
+
+        if (out_count == common::Zero)
             return true;
 
         auto output_index = 0;
         for (const auto& input : inputs)
         {
             result[output_index].as<int>() += input.as<int>();
-            output_index = (output_index + 1) % output_count();
+            output_index = (output_index + 1) % out_count.v;
         }
 
         return true;

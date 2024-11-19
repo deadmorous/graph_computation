@@ -86,8 +86,8 @@ TEST(GcApp_Node, EratosthenesSieve)
 {
     auto node = make_eratosthenes_sieve({});
 
-    ASSERT_EQ(node->input_count(), 1);
-    ASSERT_EQ(node->output_count(), 1);
+    ASSERT_EQ(node->input_count(), gc::InputPortCount{1});
+    ASSERT_EQ(node->output_count(), gc::OutputPortCount{1});
 
     ASSERT_EQ(node->input_names().size(), 1);
     ASSERT_EQ(node->input_names()[0], "count");
@@ -120,8 +120,8 @@ TEST(GcApp_Node, FilterSeq)
 {
     auto node = make_filter_seq({});
 
-    ASSERT_EQ(node->input_count(), 2);
-    ASSERT_EQ(node->output_count(), 1);
+    ASSERT_EQ(node->input_count(), gc::InputPortCount{2});
+    ASSERT_EQ(node->output_count(), gc::OutputPortCount{1});
 
     ASSERT_EQ(node->input_names().size(), 2);
     ASSERT_EQ(node->input_names()[0], "sequence");
@@ -169,8 +169,8 @@ TEST(GcApp_Node, TestSequence)
 {
     auto node = gc_app::make_test_sequence({});
 
-    ASSERT_EQ(node->input_count(), 1);
-    ASSERT_EQ(node->output_count(), 1);
+    ASSERT_EQ(node->input_count(), gc::InputPortCount{1});
+    ASSERT_EQ(node->output_count(), gc::OutputPortCount{1});
 
     ASSERT_EQ(node->input_names().size(), 1);
     ASSERT_EQ(node->input_names()[0], "count");
@@ -203,8 +203,8 @@ TEST(GcApp_Node, Multiply)
 {
     auto node = gc_app::make_multiply({});
 
-    ASSERT_EQ(node->input_count(), 2);
-    ASSERT_EQ(node->output_count(), 1);
+    ASSERT_EQ(node->input_count(), gc::InputPortCount{2});
+    ASSERT_EQ(node->output_count(), gc::OutputPortCount{1});
 
     ASSERT_EQ(node->input_names().size(), 2);
     ASSERT_EQ(node->input_names()[0], "lhs");
@@ -231,8 +231,8 @@ TEST(GcApp_Node, Project)
 {
     auto node = gc_app::make_project({});
 
-    ASSERT_EQ(node->input_count(), 2);
-    ASSERT_EQ(node->output_count(), 1);
+    ASSERT_EQ(node->input_count(), gc::InputPortCount{2});
+    ASSERT_EQ(node->output_count(), gc::OutputPortCount{1});
 
     ASSERT_EQ(node->input_names().size(), 2);
     ASSERT_EQ(node->input_names()[0], "value");
@@ -259,8 +259,8 @@ TEST(GcApp_Node, UintSizeNode)
 {
     auto node = make_uint_size({});
 
-    ASSERT_EQ(node->input_count(), 2);
-    ASSERT_EQ(node->output_count(), 1);
+    ASSERT_EQ(node->input_count(), gc::InputPortCount{2});
+    ASSERT_EQ(node->output_count(), gc::OutputPortCount{1});
 
     ASSERT_EQ(node->input_names().size(), 2);
     ASSERT_EQ(node->input_names()[0], "width");
@@ -287,8 +287,8 @@ TEST(GcApp_Node, Waring)
 {
     auto node = gc_app::make_waring({});
 
-    ASSERT_EQ(node->input_count(), 3);
-    ASSERT_EQ(node->output_count(), 1);
+    ASSERT_EQ(node->input_count(), gc::InputPortCount{3});
+    ASSERT_EQ(node->output_count(), gc::OutputPortCount{1});
 
     ASSERT_EQ(node->input_names().size(), 3);
     ASSERT_EQ(node->input_names()[0], "count");

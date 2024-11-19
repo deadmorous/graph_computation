@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gc/node_fwd.hpp"
+#include "gc/port.hpp"
 #include "gc/value_fwd.hpp"
 
 #include "common/const_name_span.hpp"
@@ -32,18 +33,18 @@ struct Node
                                  const NodeProgress& progress) const
         -> bool = 0;
 
-    auto input_count() const -> uint8_t
+    auto input_count() const -> InputPortCount
     {
         auto result = input_names().size();
         assert(result <= std::numeric_limits<uint8_t>::max());
-        return result;
+        return InputPortCount(result);
     }
 
-    auto output_count() const -> uint8_t
+    auto output_count() const -> OutputPortCount
     {
         auto result = output_names().size();
         assert(result <= std::numeric_limits<uint8_t>::max());
-        return result;
+        return OutputPortCount(result);
     }
 
 };
