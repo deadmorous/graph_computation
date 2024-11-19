@@ -11,7 +11,8 @@ add_executable(
     test_func_ref.cpp
     test_gc.cpp
     test_gc_type_value.cpp
-    test_pow2.cpp)
+    test_pow2.cpp
+    test_strong.cpp)
 
 target_link_libraries(
     gc-lib-test
