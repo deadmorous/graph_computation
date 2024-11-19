@@ -1,18 +1,17 @@
 #pragma once
 
+#include "gc/node_index.hpp"
 #include "gc/port.hpp"
 
 #include <compare>
-#include <ostream>
 
 
 namespace gc {
 
-
 template <PortTagType Tag>
 struct EdgeEnd final
 {
-    uint32_t node;
+    NodeIndex node;
     Port<Tag> port;
 
     auto operator<=>(const EdgeEnd&) const noexcept

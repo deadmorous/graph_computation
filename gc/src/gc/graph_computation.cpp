@@ -23,15 +23,15 @@ namespace gc {
 struct ComputationInstructions final
 {
     // i-th group contains node indices of i-th graph level
-    common::Grouped<uint32_t>   nodes;
+    common::Grouped<uint32_t>       nodes;
 
     // i-th group contains edges from nodes of level i
     // to nodes of level i+1
-    common::Grouped<Edge>       edges;
+    common::Grouped<Edge>           edges;
 
     // i-th group contains indices of nodes supplying data
     // to the i-th node
-    common::Grouped<uint32_t>   sources;
+    common::Grouped<gc::NodeIndex>  sources;
 };
 
 auto operator<<(std::ostream& s, const ComputationInstructions& instr)
@@ -91,11 +91,11 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
     // Check edges
     auto check_edge_end = [&]<typename Tag>(const EdgeEnd<Tag>& ee)
     {
-        if(ee.node >= nodes.size())
+        if(ee.node.v >= nodes.size())
             common::throw_<std::out_of_range>(
                 "Edge end ", ee, " refers to a non-existent node");
 
-        const auto* node = nodes[ee.node];
+        const auto* node = nodes[ee.node.v];
         if constexpr (std::same_as<Tag, Input_Tag>)
         {
             if (ee.port >= node->input_count())
@@ -145,19 +145,21 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
                        BitVec(node->input_count().v, false) }; } );
 
     for (const auto& e : g.edges)
-        ++node_data.at(e.to.node).connected_input_count.v;
+        ++node_data.at(e.to.node.v).connected_input_count.v;
 
     auto has_all_inputs =
-        [&](uint32_t node_index)
+        [&](gc::NodeIndex node_index)
         {
-            auto& d = node_data[node_index];
+            auto& d = node_data[node_index.v];
             return d.inputs_avail == d.connected_input_count;
         };
 
-    using IndexSet = std::set<uint32_t>;
+    using IndexSet = std::set<gc::NodeIndex>;
 
     const auto node_ind_range =
-        std::ranges::iota_view{uint32_t{}, static_cast<uint32_t>(nodes.size())};
+        std::ranges::iota_view{uint32_t{},
+                               static_cast<uint32_t>(nodes.size())} |
+        std::views::transform( [](uint32_t x){ return gc::NodeIndex{x}; } );
 
     // Add all sources to the initial level of the graph
     auto level = IndexSet{};
@@ -173,8 +175,8 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
     auto process_edge = [&](const Edge& e)
     {
         const auto& e1 = e.to;
-        assert (e1.node < node_data.size());
-        auto& ports = node_data[e1.node].connected_inputs;
+        assert (e1.node.v < node_data.size());
+        auto& ports = node_data[e1.node.v].connected_inputs;
         if (ports.at(e1.port.v))
             common::throw_<std::invalid_argument>(
                 "Edge end ", e1,
@@ -187,7 +189,7 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
     auto process_level = [&]
     {
         for (auto inode : level)
-            add_to_last_group(result->nodes, inode);
+            add_to_last_group(result->nodes, inode.v);
         next_group(result->nodes);
     };
 
@@ -220,7 +222,7 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
 
             // GC_LOG_DEBUG("gc::compile: {}", common::format(e));
 
-            ++node_data[e1.node].inputs_avail.v;
+            ++node_data[e1.node.v].inputs_avail.v;
             if (has_all_inputs(e1.node))
             {
                 // GC_LOG_DEBUG(
@@ -238,7 +240,7 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
             std::ranges::copy_if(
                 node_ind_range,
                 std::inserter(unreachable, unreachable.end()),
-                [&](uint32_t inode)
+                [&](gc::NodeIndex inode)
                     { return !known.contains(inode); } );
 
             common::throw_<std::invalid_argument>(
@@ -275,7 +277,7 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
     }
 
     // Build source map
-    using SimpleEdge = std::array<uint32_t, 2>; // to -> from
+    using SimpleEdge = std::array<gc::NodeIndex, 2>; // to -> from
     auto simple_edges = std::vector<SimpleEdge>{};
     for (const auto& e : g.edges)
         simple_edges.push_back({e.to.node, e.from.node});
@@ -288,7 +290,7 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
         auto ie = uint32_t{};
         for (uint32_t i=0, n=nodes.size(); i<n; ++i)
         {
-            for (; ie<simple_edges.size() && simple_edges[ie][0] == i; ++ie)
+            for (; ie<simple_edges.size() && simple_edges[ie][0].v == i; ++ie)
                 add_to_last_group(result->sources, simple_edges[ie][1]);
             next_group(result->sources);
         }
@@ -312,12 +314,12 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
     // Check that the destinations of inputs provided are valid
     for (const auto& dst : input_dst)
     {
-        if(dst.node >= nodes.size())
+        if(dst.node.v >= nodes.size())
             common::throw_<std::out_of_range>(
                 "Source input destination ", dst,
                 " refers to a non-existent node");
 
-        if (dst.port >= nodes[dst.node]->input_count())
+        if (dst.port >= nodes[dst.node.v]->input_count())
             common::throw_<std::invalid_argument>(
                 "Source input destination ", dst,
                 " refers to a non-existent input port");
@@ -334,7 +336,7 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
         nodes[i]->default_inputs(default_inputs);
         for (InputPort port=common::Zero; port<nd.input_count; ++port.v)
         {
-            auto dst = EdgeInputEnd{i, port};
+            auto dst = EdgeInputEnd{gc::NodeIndex{i}, port};
             auto provided = input_provided(dst);
             if (nd.connected_inputs[port.v])
             {
@@ -351,7 +353,7 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
 
             source_inputs.values.push_back(default_inputs[port.v]);
             add_to_last_group(source_inputs.destinations,
-                              EdgeInputEnd{i, port});
+                              EdgeInputEnd{gc::NodeIndex{i}, port});
             next_group(source_inputs.destinations);
         }
     }
@@ -427,10 +429,10 @@ auto compute(ComputationResult& result,
 
         for (auto d : group(source_inputs.destinations, i))
         {
-            if (d.node >= g.nodes.size())
+            if (d.node.v >= g.nodes.size())
                 common::throw_<std::out_of_range>(
                     "Source input ", d, " refers to an inexistent graph node");
-            auto node_inputs = group(result.inputs, d.node);
+            auto node_inputs = group(result.inputs, d.node.v);
             if (d.port.v >= node_inputs.size())
                 common::throw_<std::out_of_range>(
                     "Source input ", d, " refers to an inexistent input port");
@@ -438,7 +440,7 @@ auto compute(ComputationResult& result,
             if (node_input != value)
             {
                 node_input = value;
-                source_updated[d.node] = true;
+                source_updated[d.node.v] = true;
             }
         }
     }
@@ -451,8 +453,8 @@ auto compute(ComputationResult& result,
             for (const auto& e : group(instructions->edges, level-1))
             {
                 const auto& [e0, e1] = e;
-                group(result.inputs, e1.node)[e1.port.v] =
-                    group(result.outputs, e0.node)[e0.port.v];
+                group(result.inputs, e1.node.v)[e1.port.v] =
+                    group(result.outputs, e0.node.v)[e0.port.v];
             }
         }
 
@@ -472,7 +474,7 @@ auto compute(ComputationResult& result,
                 // also check if any of source nodes has been updated
                 upstream_ts = node_ts;
                 for (auto i : group(instructions->sources, inode))
-                    upstream_ts = std::max(upstream_ts, result.node_ts[i]);
+                    upstream_ts = std::max(upstream_ts, result.node_ts[i.v]);
                 upstream_updated = node_ts < upstream_ts;
             }
 

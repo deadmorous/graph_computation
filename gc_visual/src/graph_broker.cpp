@@ -30,7 +30,7 @@ GraphBroker::GraphBroker(ComputationThread& computation_thread,
     const auto& computation =
         computation_thread_.computation();
     for (uint32_t index=0; const auto& node: computation.graph.nodes)
-        node_indices_[node.get()] = index++;
+        node_indices_[node.get()] = gc::NodeIndex{index++};
 
     connect(&computation_thread_, &ComputationThread::finished,
             this, &GraphBroker::on_computation_finished);
@@ -49,7 +49,7 @@ auto GraphBroker::node_indices() const
 { return node_indices_; }
 
 auto GraphBroker::node_index(const gc::Node* node) const
-    -> uint32_t
+    -> gc::NodeIndex
 { return node_indices_.at(node); }
 
 auto GraphBroker::input_index(const std::string& input_name) const
@@ -68,11 +68,11 @@ auto GraphBroker::get_parameter(const gc::ParameterSpec& spec) const
 
 auto GraphBroker::get_port_value(gc::EdgeOutputEnd port) const
     -> const gc::Value&
-{ return group_value(port.node, port.port.v, computation_result_.outputs); }
+{ return group_value(port.node.v, port.port.v, computation_result_.outputs); }
 
 auto GraphBroker::get_port_value(gc::EdgeInputEnd port) const
     -> const gc::Value&
-{ return group_value(port.node, port.port.v, computation_result_.inputs); }
+{ return group_value(port.node.v, port.port.v, computation_result_.inputs); }
 
 auto GraphBroker::set_parameter(const gc::ParameterSpec& spec,
                                 const gc::Value& value)
@@ -98,7 +98,8 @@ auto GraphBroker::on_computation_finished()
     {
         for (uint8_t np=group(outputs,ig).size(), ip=0; ip<np; ++ip)
         {
-            auto port = gc::EdgeOutputEnd{ ig, gc::OutputPort{ip} };
+            auto port = gc::EdgeOutputEnd{ gc::NodeIndex{ig},
+                                           gc::OutputPort{ip} };
             emit output_updated(port);
         }
     }

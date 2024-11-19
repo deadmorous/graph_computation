@@ -112,8 +112,8 @@ auto check_comple_graph(const gc::Graph& g,
 auto edge(std::pair<uint32_t, uint8_t> from, std::pair<uint32_t, uint8_t> to)
     -> gc::Edge
 {
-    return gc::edge({from.first, gc::OutputPort{from.second}},
-                    {to.first, gc::InputPort{to.second}});
+    return gc::edge({gc::NodeIndex{from.first}, gc::OutputPort{from.second}},
+                    {gc::NodeIndex{to.first},   gc::InputPort{to.second}});
 }
 
 auto test_graph_net_3x3()
@@ -148,7 +148,7 @@ auto test_graph_net_3x3()
 
 struct SourceInput final
 {
-    uint32_t node;
+    gc::NodeIndex node;
     gc::InputPort port;
     gc::Value value;
 };
@@ -295,7 +295,7 @@ TEST(Gc, compile_with_inputs)
         " (1) => ([O(1,0)->I(2,0)]) |"
         " (2)}; [(),(0),(1)]",
         make_source_inputs({{
-            .node = 0,
+            .node = gc::NodeIndex{0},
             .port = gc::InputPort{0},
             .value = 0 }}));
 }
@@ -393,25 +393,25 @@ TEST(Gc, compute_3)
     auto result = gc::ComputationResult{};
 
     // Throws because one of source inputs refers to an inexistent node.
-    source_inputs.destinations.values[0].node = 2;
+    source_inputs.destinations.values[0].node = gc::NodeIndex{2};
     EXPECT_THROW(compute(result, g, instr.get(), source_inputs),
                  std::out_of_range);
 
     // Throws because one of source inputs refers to an inexistent port.
-    source_inputs.destinations.values[0].node = 0;
-    source_inputs.destinations.values[0].port.v = 2;
+    source_inputs.destinations.values[0].node = gc::NodeIndex{0};
+    source_inputs.destinations.values[0].port = gc::InputPort{2};
     EXPECT_THROW(compute(result, g, instr.get(), source_inputs),
                  std::out_of_range);
 
     // Not all external inputs are connected. We currently do not
     // detect it in `compute`. In this particular example, `compute` fails
     // because the empty input value is invalid and fails to cast to `int`.
-    source_inputs.destinations.values[0].port.v = 1;
+    source_inputs.destinations.values[0].port = gc::InputPort{1};
     EXPECT_THROW(compute(result, g, instr.get(), source_inputs),
                  std::bad_any_cast);
 
     // And if we feed all external inputs properly, `compute` will succeed.
-    source_inputs.destinations.values[0].port.v = 0;
+    source_inputs.destinations.values[0].port = gc::InputPort{0};
     source_inputs.values[0] = 123 - 1;
     source_inputs.values[1] = 321 - 1;
     compute(result, g, instr.get(), source_inputs);

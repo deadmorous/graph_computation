@@ -30,7 +30,7 @@ public:
         -> const gc::detail::NodeIndices&;
 
     auto node_index(const gc::Node* node) const
-        -> uint32_t;
+        -> gc::NodeIndex;
 
     auto input_index(const std::string& input_name) const
         -> uint32_t;
