@@ -1,11 +1,9 @@
 #pragma once
 
-#include "gc/node_fwd.hpp"
 #include "gc/node_port_tags.hpp"
 
 #include "common/strong.hpp"
 
-#include <array>
 #include <compare>
 #include <cstdint>
 #include <ostream>

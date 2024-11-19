@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gc/edge.hpp"
+#include "gc/node_fwd.hpp"
 
 #include <vector>
 
