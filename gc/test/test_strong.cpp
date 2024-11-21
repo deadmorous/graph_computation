@@ -1,8 +1,12 @@
 #include "common/strong.hpp"
 #include "common/index_range.hpp"
+#include "common/strong_span.hpp"
+#include "common/strong_vector.hpp"
 
 #include <gtest/gtest.h>
 
+
+using namespace std::literals;
 
 namespace {
 
@@ -161,4 +165,114 @@ TEST(Common_Strong, Ranges)
     test_range(common::index_range(5, 10), int_tag, 5, 10-5);
     test_range(common::sized_index_range(5, 10), int_tag, 5, 10);
     test_range(common::index_range(10), int_tag, 0, 10);
+}
+
+TEST(Common_Strong, Vector)
+{
+    using V = common::StrongVector<std::string, Index>;
+
+    V v(Count(3));
+    v[common::Zero] = "one";
+    v.at(Index{1}) = "two";
+    v.at(Index{2}) = "three";
+    v.reserve(Count{11});
+    EXPECT_EQ(v.capacity(), Count{11});
+    v.resize(Count{6}, "many");
+    v.resize(Count{10});
+    v.back() = "a lot";
+    v.push_back("a lot + 1");
+    EXPECT_EQ(v.size(), Count{11});
+
+    auto expected = std::initializer_list<std::string_view>{
+        "one"sv,
+        "two"sv,
+        "three"sv,
+        "many"sv,
+        "many"sv,
+        "many"sv,
+        ""sv,
+        ""sv,
+        ""sv,
+        "a lot"sv,
+        "a lot + 1"sv };
+    auto expected_it = expected.begin();
+    for (const auto& s : v)
+    {
+        EXPECT_EQ(s, *expected_it);
+        ++expected_it;
+    }
+
+    expected_it = expected.begin();
+    for (auto i : v.index_range())
+    {
+        EXPECT_EQ(v[i], *expected_it);
+        EXPECT_EQ(v.at(i), *expected_it);
+        ++expected_it;
+    }
+
+    v.pop_back();
+    EXPECT_EQ(v.size(), Count{10});
+
+    EXPECT_THROW(v.at(Index{11}), std::out_of_range);
+
+    auto v1 = v;
+    EXPECT_EQ(v1, v);
+    EXPECT_FALSE(v1 < v);
+    EXPECT_FALSE(v1 != v);
+    EXPECT_FALSE(v1 > v);
+    EXPECT_TRUE(v1 <= v);
+    EXPECT_TRUE(v1 >= v);
+}
+
+TEST(Common_Strong, Span)
+{
+    auto check_span =
+        []<typename V, typename I, std::size_t E>(
+            common::StrongSpan<V, I, E> span,
+            std::initializer_list<V> contents)
+    {
+        using C = typename I::StrongDiff;
+        EXPECT_EQ(span.size(), C(contents.size()));
+        EXPECT_EQ(span.empty(), span.size() == common::Zero);
+        auto it = contents.begin();
+        for (I i : span.index_range())
+        {
+            EXPECT_EQ(span[i], *it);
+            ++it;
+        }
+
+        it = contents.begin();
+        for (const auto& v : span)
+            EXPECT_EQ(v, *it++);
+        };
+
+    {
+        using V = common::StrongVector<std::string, Index>;
+        using W = V::Weak;
+        auto v = V{ W{ "one", "two", "three", "four" } };
+        using S = common::StrongSpan<std::string, Index>;
+
+        auto s = S{v};
+        check_span(s, { "one"s, "two"s, "three"s, "four"s });
+        check_span(s.subspan(Count{2}), {"one"s, "two"s});
+        check_span(s.subspan(Index{2}), {"three"s, "four"s});
+        check_span(s.subspan(Index{1}, Count{2}), {"two"s, "three"s});
+        check_span(s.subspan(Index{1}, Index{2}), {"two"s});
+        check_span(s.subspan(Index{1}, Index{1}), {});
+    }
+
+    {
+        int n3[] = {123, 45, 67};
+        using S3 = common::StrongSpan<int, Index, 3>;
+        using S = common::StrongSpan<int, Index>;
+
+        auto s3 = S3{n3};
+        auto s = S{n3};
+
+        check_span(s3, {123, 45, 67});
+        check_span(s, {123, 45, 67});
+
+        check_span(s3.subspan(Index{1}), {45, 67});
+        check_span(s.subspan(Index{1}), {45, 67});
+    }
 }
