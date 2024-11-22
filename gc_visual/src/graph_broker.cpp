@@ -2,9 +2,10 @@
 
 namespace {
 
-auto group_value(uint32_t node_index,
-                 uint32_t port_index,
-                 const common::Grouped<gc::Value>& groups)
+template<common::StrongGroupedType SG, typename Port>
+auto group_value(gc::NodeIndex node_index,
+                 Port port_index,
+                 const SG& groups)
     -> const gc::Value&
 {
     auto values =
@@ -68,11 +69,11 @@ auto GraphBroker::get_parameter(const gc::ParameterSpec& spec) const
 
 auto GraphBroker::get_port_value(gc::EdgeOutputEnd port) const
     -> const gc::Value&
-{ return group_value(port.node.v, port.port.v, computation_result_.outputs); }
+{ return group_value(port.node, port.port, computation_result_.outputs); }
 
 auto GraphBroker::get_port_value(gc::EdgeInputEnd port) const
     -> const gc::Value&
-{ return group_value(port.node.v, port.port.v, computation_result_.inputs); }
+{ return group_value(port.node, port.port, computation_result_.inputs); }
 
 auto GraphBroker::set_parameter(const gc::ParameterSpec& spec,
                                 const gc::Value& value)
@@ -94,12 +95,11 @@ auto GraphBroker::on_computation_finished()
     const auto& nodes = computation.graph.nodes;
     const auto& outputs = computation.result.outputs;
 
-    for (uint32_t ng=group_count(outputs), ig=0; ig<ng; ++ig)
+    for (auto ig : group_indices(outputs))
     {
-        for (uint8_t np=group(outputs,ig).size(), ip=0; ip<np; ++ip)
+        for (auto ip : group(outputs,ig).index_range())
         {
-            auto port = gc::EdgeOutputEnd{ gc::NodeIndex{ig},
-                                           gc::OutputPort{ip} };
+            auto port = gc::EdgeOutputEnd{ ig, ip };
             emit output_updated(port);
         }
     }

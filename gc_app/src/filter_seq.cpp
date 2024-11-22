@@ -8,6 +8,7 @@
 
 
 using namespace std::string_view_literals;
+using namespace gc::literals;
 
 namespace gc_app {
 
@@ -23,25 +24,25 @@ public:
         -> common::ConstNameSpan override
     { return gc::node_output_names<FilterSeq>( "indices"sv ); }
 
-    auto default_inputs(gc::ValueSpan result) const
+    auto default_inputs(gc::InputValues result) const
         -> void override
     {
-        assert(result.size() == 2);
-        result[0] = uint_vec_val({0, 1, 2, 3, 0, 1, 2, 3});
-        result[1] = uint_val(0);
+        assert(result.size() == 2_gc_ic);
+        result[0_gc_i] = uint_vec_val({0, 1, 2, 3, 0, 1, 2, 3});
+        result[1_gc_i] = uint_val(0);
     }
 
     auto compute_outputs(
-            gc::ValueSpan result,
-            gc::ConstValueSpan inputs,
+            gc::OutputValues result,
+            gc::ConstInputValues inputs,
             const std::stop_token& stoken,
             const gc::NodeProgress& progress) const
         -> bool override
     {
-        assert(inputs.size() == 2);
-        assert(result.size() == 1);
-        const auto& seq = uint_vec_val(inputs[0]);
-        auto value = uint_val(inputs[1]);
+        assert(inputs.size() == 2_gc_ic);
+        assert(result.size() == 1_gc_oc);
+        const auto& seq = uint_vec_val(inputs[0_gc_i]);
+        auto value = uint_val(inputs[1_gc_i]);
 
         auto filtered = UintVec{};
         for (size_t i=0, n=seq.size(); i<n; ++i)
@@ -52,7 +53,7 @@ public:
                 return false;
         }
 
-        result[0] = uint_vec_val(std::move(filtered));
+        result.front() = uint_vec_val(std::move(filtered));
         return true;
     }
 };

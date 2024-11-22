@@ -28,11 +28,11 @@ ComputationProgressWidget::ComputationProgressWidget(QWidget* parent) :
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 }
 
-auto ComputationProgressWidget::set_progress(uint32_t inode,
+auto ComputationProgressWidget::set_progress(gc::NodeIndex inode,
                                              double node_progress)
     -> void
 {
-    label_->setText(tr("Node ") + QString::number(inode));
+    label_->setText(tr("Node ") + QString::number(inode.v));
     auto progress_percent = static_cast<int>(node_progress * 100);
     progress_bar_->setValue(progress_percent);
 }

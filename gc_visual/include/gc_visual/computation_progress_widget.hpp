@@ -1,5 +1,7 @@
 #pragma once
 
+#include "gc/node_index.hpp"
+
 #include <QWidget>
 
 class QLabel;
@@ -18,7 +20,7 @@ signals:
         -> void;
 
 public slots:
-    auto set_progress(uint32_t inode, double node_progress)
+    auto set_progress(gc::NodeIndex inode, double node_progress)
         -> void;
 
 private:

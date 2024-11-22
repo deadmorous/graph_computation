@@ -9,6 +9,7 @@
 
 
 using namespace std::string_view_literals;
+using namespace gc::literals;
 
 namespace gc_app {
 
@@ -27,30 +28,30 @@ public:
         -> common::ConstNameSpan override
     { return gc::node_output_names<RectView>( "image"sv ); }
 
-    auto default_inputs(gc::ValueSpan result) const
+    auto default_inputs(gc::InputValues result) const
         -> void override
     {
-        assert(result.size() == 3);
-        result[0] = UintSize(100, 100);
-        result[1] = UintVec(10000, 1);
-        result[2] = IndexedPalette{
+        assert(result.size() == 3_gc_ic);
+        result[0_gc_i] = UintSize(100, 100);
+        result[1_gc_i] = UintVec(10000, 1);
+        result[2_gc_i] = IndexedPalette{
             .color_map = { rgba(Color{0xffffff}) },
             .overflow_color = rgba(Color{0})
         };
     }
 
     auto compute_outputs(
-            gc::ValueSpan result,
-            gc::ConstValueSpan inputs,
+            gc::OutputValues result,
+            gc::ConstInputValues inputs,
             const std::stop_token& stoken,
             const gc::NodeProgress& progress) const
         -> bool override
     {
-        assert(inputs.size() == 3);
-        assert(result.size() == 1);
-        const auto& size = inputs[0].as<UintSize>();
-        const auto& seq = inputs[1].as<UintVec>();
-        const auto& palette = inputs[2].as<IndexedPalette>();
+        assert(inputs.size() == 3_gc_ic);
+        assert(result.size() == 1_gc_oc);
+        const auto& size = inputs[0_gc_i].as<UintSize>();
+        const auto& seq = inputs[1_gc_i].as<UintVec>();
+        const auto& palette = inputs[2_gc_i].as<IndexedPalette>();
         auto image = Image
         {
             .size = size,
@@ -67,7 +68,7 @@ public:
                 return false;
         }
 
-        result[0] = std::move(image);
+        result.front() = std::move(image);
         return true;
     }
 };

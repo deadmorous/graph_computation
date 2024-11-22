@@ -68,7 +68,7 @@ auto ComputationThread::run()
     stop_source_ = {};
 
     auto graph_progress =
-        [this](uint32_t inode, double node_progress)
+        [this](gc::NodeIndex inode, double node_progress)
     { emit progress(inode, node_progress); };
 
     ok_ = compute(computation_, stop_source_.get_token(), &graph_progress);

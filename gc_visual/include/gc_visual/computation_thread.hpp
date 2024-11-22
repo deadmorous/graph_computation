@@ -23,7 +23,7 @@ public:
         -> bool;
 
 signals:
-    auto progress(uint32_t inode, double node_progress)
+    auto progress(gc::NodeIndex inode, double node_progress)
         -> void;
 
     auto running_state_changed(bool running)

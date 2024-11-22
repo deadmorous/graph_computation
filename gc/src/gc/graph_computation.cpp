@@ -2,6 +2,7 @@
 #include "gc/node.hpp"
 
 #include "common/func_ref.hpp"
+#include "common/index_range.hpp"
 #include "common/log.hpp"
 #include "common/throw.hpp"
 
@@ -20,10 +21,13 @@ using namespace std::string_view_literals;
 
 namespace gc {
 
+GCLIB_STRONG_TYPE(Count, uint32_t, 0, common::StrongCountFeatures);
+GCLIB_STRONG_TYPE(Index, uint32_t, 0, common::StrongIndexFeatures<Count>);
+
 struct ComputationInstructions final
 {
     // i-th group contains node indices of i-th graph level
-    common::Grouped<uint32_t>       nodes;
+    common::Grouped<NodeIndex>      nodes;
 
     // i-th group contains edges from nodes of level i
     // to nodes of level i+1
@@ -31,13 +35,13 @@ struct ComputationInstructions final
 
     // i-th group contains indices of nodes supplying data
     // to the i-th node
-    common::Grouped<gc::NodeIndex>  sources;
+    common::StrongGrouped<NodeIndex, NodeIndex, Index>  sources;
 };
 
 auto operator<<(std::ostream& s, const ComputationInstructions& instr)
     -> std::ostream&
 {
-    auto print_group = [&](const auto& grouped, uint32_t ig)
+    auto print_group = [&](const auto& grouped, auto ig)
         { s << '(' << common::format_seq(group(grouped, ig)) << ')'; };
 
     auto n = group_count(instr.nodes);
@@ -55,10 +59,11 @@ auto operator<<(std::ostream& s, const ComputationInstructions& instr)
     }
     s << "}; [";
     auto* delim = "";
-    for (uint32_t i=0, ns=group_count(instr.sources); i<ns; ++i, delim=",")
+    for (auto i : group_indices(instr.sources))
     {
         s << delim;
         print_group(instr.sources, i);
+        delim=",";
     }
     s << ']';
     return s;
@@ -78,24 +83,28 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
     if (g.edges.empty() && g.nodes.empty())
         return { std::move(result), {} };
 
-    // View graph nodes as raw pointers
-    auto nodes = std::ranges::transform_view(
+    // Create a vector of raw pointers to graph nodes
+    // TODO: Get rid of it?
+    auto nodes = common::StrongVector<const Node*, NodeIndex>{};
+    nodes.reserve(g.nodes.size());
+    std::ranges::transform(
         g.nodes,
-        [](const NodePtr& node) { return node.get(); } );
+        std::back_inserter(nodes),
+        [](const NodePtr& node) { return node.get(); });
 
     // Map node pointers to their indices in g.nodes
-    std::unordered_map<const Node*, uint32_t> node_ind;
-    for (size_t i=0, n=nodes.size(); i<n; ++i)
+    std::unordered_map<const Node*, NodeIndex> node_ind;
+    for (auto i : nodes.index_range())
         node_ind[nodes[i]] = i;
 
     // Check edges
     auto check_edge_end = [&]<typename Tag>(const EdgeEnd<Tag>& ee)
     {
-        if(ee.node.v >= nodes.size())
+        if(!nodes.index_range().contains(ee.node))
             common::throw_<std::out_of_range>(
                 "Edge end ", ee, " refers to a non-existent node");
 
-        const auto* node = nodes[ee.node.v];
+        const auto* node = nodes[ee.node];
         if constexpr (std::same_as<Tag, Input_Tag>)
         {
             if (ee.port >= node->input_count())
@@ -118,7 +127,7 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
 
     std::ranges::for_each(g.edges, check_edge);
 
-    using BitVec = std::vector<bool>;
+    using BitVec = common::StrongVector<bool, InputPort>;
 
     // Obtain information on node input and output counts.
     struct NodeData
@@ -133,7 +142,7 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
         // Number of inputs connected to outputs of other nodes with graph edges
         InputPortCount connected_input_count{};
     };
-    auto node_data = std::vector<NodeData>{};
+    auto node_data = common::StrongVector<NodeData, NodeIndex>{};
     node_data.reserve(nodes.size());
     std::ranges::transform(
         nodes,
@@ -142,24 +151,23 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
             { return { node->input_count(),
                        node->output_count(),
                        common::Zero,
-                       BitVec(node->input_count().v, false) }; } );
+                       BitVec(node->input_count(), false) }; } );
 
     for (const auto& e : g.edges)
-        ++node_data.at(e.to.node.v).connected_input_count.v;
+        ++node_data.at(e.to.node).connected_input_count;
 
     auto has_all_inputs =
         [&](gc::NodeIndex node_index)
         {
-            auto& d = node_data[node_index.v];
+            auto& d = node_data[node_index];
             return d.inputs_avail == d.connected_input_count;
         };
 
     using IndexSet = std::set<gc::NodeIndex>;
 
     const auto node_ind_range =
-        std::ranges::iota_view{uint32_t{},
-                               static_cast<uint32_t>(nodes.size())} |
-        std::views::transform( [](uint32_t x){ return gc::NodeIndex{x}; } );
+        std::ranges::iota_view{NodeIndex::Weak{}, nodes.size().v} |
+        std::views::transform( [](uint32_t x){ return NodeIndex{x}; } );
 
     // Add all sources to the initial level of the graph
     auto level = IndexSet{};
@@ -175,13 +183,13 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
     auto process_edge = [&](const Edge& e)
     {
         const auto& e1 = e.to;
-        assert (e1.node.v < node_data.size());
-        auto& ports = node_data[e1.node.v].connected_inputs;
-        if (ports.at(e1.port.v))
+        assert (node_data.index_range().contains(e1.node));
+        auto& ports = node_data[e1.node].connected_inputs;
+        if (ports.at(e1.port))
             common::throw_<std::invalid_argument>(
                 "Edge end ", e1,
                 " is not the only one coming to the input port");
-        ports[e1.port.v] = true;
+        ports[e1.port] = true;
 
         add_to_last_group(result->edges, e);
     };
@@ -189,7 +197,7 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
     auto process_level = [&]
     {
         for (auto inode : level)
-            add_to_last_group(result->nodes, inode.v);
+            add_to_last_group(result->nodes, inode);
         next_group(result->nodes);
     };
 
@@ -203,7 +211,7 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
     process_level();
 
     // Process graph level by level
-    while (known.size() < nodes.size())
+    while (known.size() < nodes.size().v)
     {
         // GC_LOG_DEBUG("gc::compile: level: {}", level);
         auto next_level = IndexSet{};
@@ -222,7 +230,7 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
 
             // GC_LOG_DEBUG("gc::compile: {}", common::format(e));
 
-            ++node_data[e1.node.v].inputs_avail.v;
+            ++node_data[e1.node].inputs_avail;
             if (has_all_inputs(e1.node))
             {
                 // GC_LOG_DEBUG(
@@ -253,7 +261,7 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
         process_level();
     }
 
-    assert(result->nodes.values.size() == g.nodes.size());
+    assert(result->nodes.values.size() == g.nodes.size().v);
 
     if(result->edges.values.size() != g.edges.size())
     {
@@ -288,9 +296,9 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
 
     {
         auto ie = uint32_t{};
-        for (uint32_t i=0, n=nodes.size(); i<n; ++i)
+        for (auto i : nodes.index_range())
         {
-            for (; ie<simple_edges.size() && simple_edges[ie][0].v == i; ++ie)
+            for (; ie<simple_edges.size() && simple_edges[ie][0] == i; ++ie)
                 add_to_last_group(result->sources, simple_edges[ie][1]);
             next_group(result->sources);
         }
@@ -314,12 +322,12 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
     // Check that the destinations of inputs provided are valid
     for (const auto& dst : input_dst)
     {
-        if(dst.node.v >= nodes.size())
+        if(!nodes.index_range().contains(dst.node))
             common::throw_<std::out_of_range>(
                 "Source input destination ", dst,
                 " refers to a non-existent node");
 
-        if (dst.port >= nodes[dst.node.v]->input_count())
+        if (dst.port >= InputPort{} + nodes[dst.node]->input_count())
             common::throw_<std::invalid_argument>(
                 "Source input destination ", dst,
                 " refers to a non-existent input port");
@@ -328,17 +336,18 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
     // Check that provided inputs do not specify destinations
     // coincident with any edge targets. Add inputs that were not
     // provided.
-    for (uint32_t i=0, n=nodes.size(); i<n; ++i)
+    for (auto i : nodes.index_range())
     {
         const auto& nd = node_data[i];
         const auto* node = nodes[i];
-        auto default_inputs = ValueVec(node->input_count().v);
+        using InputValueVec = common::StrongVector<Value, InputPort>;
+        auto default_inputs = InputValueVec(node->input_count());
         nodes[i]->default_inputs(default_inputs);
-        for (InputPort port=common::Zero; port<nd.input_count; ++port.v)
+        for (auto port : default_inputs.index_range())
         {
-            auto dst = EdgeInputEnd{gc::NodeIndex{i}, port};
+            auto dst = EdgeInputEnd{i, port};
             auto provided = input_provided(dst);
-            if (nd.connected_inputs[port.v])
+            if (nd.connected_inputs[port])
             {
                 if (provided)
                     common::throw_<std::invalid_argument>(
@@ -351,9 +360,8 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
             if (provided)
                 continue;
 
-            source_inputs.values.push_back(default_inputs[port.v]);
-            add_to_last_group(source_inputs.destinations,
-                              EdgeInputEnd{gc::NodeIndex{i}, port});
+            source_inputs.values.push_back(default_inputs[port]);
+            add_to_last_group(source_inputs.destinations, EdgeInputEnd{i,port});
             next_group(source_inputs.destinations);
         }
     }
@@ -379,15 +387,16 @@ auto compute(ComputationResult& result,
     auto input_count = [](const gc::Node& node){ return node.input_count(); };
     auto output_count = [](const gc::Node& node){ return node.output_count(); };
 
-    if (result.outputs.values.empty())
+    if (result.outputs.v.values.empty())
     {
         // Allocate result grouped data
-        auto fill = [&]<typename T>(common::Grouped<T>& grouped, auto count)
+        auto fill = [&]<typename T, typename IO, typename II>(
+                        common::StrongGrouped<T, IO, II>& grouped, auto count)
         {
             grouped = {};
             for (const auto& node : g.nodes)
             {
-                for (auto n=count(*node), i=decltype(n){}; i<n; ++i.v)
+                for (auto i : common::index_range<II>(count(*node)))
                     common::add_to_last_group(grouped, T{});
                 common::next_group(grouped);
             }
@@ -396,20 +405,19 @@ auto compute(ComputationResult& result,
         fill(result.inputs, input_count);
         fill(result.outputs, output_count);
         fill(result.prev_source_outputs, output_count);
-        result.node_ts = std::vector<Timestamp>(g.nodes.size(), 0);
+        result.node_ts =
+            common::StrongVector<Timestamp, NodeIndex>(g.nodes.size(), 0);
         result.computation_ts = 0;
     }
 
     else
     {
         // Validate result grouped data
-        auto check = [&]<typename T>(const common::Grouped<T>& grouped,
-                                     auto count)
+        auto check = [&](auto& grouped, auto count)
         {
             assert (group_count(grouped) == g.nodes.size());
-            for (uint32_t inode=0, n=g.nodes.size(); inode<n; ++inode)
-                assert(group(grouped, inode).size() ==
-                       count(*g.nodes[inode]).v);
+            for (auto inode : g.nodes.index_range())
+                assert(group(grouped, inode).size() == count(*g.nodes[inode]));
         };
 
         check(result.inputs, input_count);
@@ -420,7 +428,8 @@ auto compute(ComputationResult& result,
 
     ++result.computation_ts;
 
-    auto source_updated = std::vector<bool>(g.nodes.size(), false);
+    auto source_updated =
+        common::StrongVector<bool, NodeIndex>(g.nodes.size(), false);
 
     // Set external inputs
     for (uint32_t i=0, n=source_inputs.values.size(); i<n; ++i)
@@ -429,18 +438,18 @@ auto compute(ComputationResult& result,
 
         for (auto d : group(source_inputs.destinations, i))
         {
-            if (d.node.v >= g.nodes.size())
+            if (!g.nodes.index_range().contains(d.node))
                 common::throw_<std::out_of_range>(
                     "Source input ", d, " refers to an inexistent graph node");
-            auto node_inputs = group(result.inputs, d.node.v);
-            if (d.port.v >= node_inputs.size())
+            auto node_inputs = group(result.inputs, d.node);
+            if (!node_inputs.index_range().contains(d.port))
                 common::throw_<std::out_of_range>(
                     "Source input ", d, " refers to an inexistent input port");
-            auto& node_input = node_inputs[d.port.v];
+            auto& node_input = node_inputs[d.port];
             if (node_input != value)
             {
                 node_input = value;
-                source_updated[d.node.v] = true;
+                source_updated[d.node] = true;
             }
         }
     }
@@ -453,8 +462,8 @@ auto compute(ComputationResult& result,
             for (const auto& e : group(instructions->edges, level-1))
             {
                 const auto& [e0, e1] = e;
-                group(result.inputs, e1.node.v)[e1.port.v] =
-                    group(result.outputs, e0.node.v)[e0.port.v];
+                group(result.inputs, e1.node)[e1.port] =
+                    group(result.outputs, e0.node)[e0.port];
             }
         }
 
@@ -474,7 +483,7 @@ auto compute(ComputationResult& result,
                 // also check if any of source nodes has been updated
                 upstream_ts = node_ts;
                 for (auto i : group(instructions->sources, inode))
-                    upstream_ts = std::max(upstream_ts, result.node_ts[i.v]);
+                    upstream_ts = std::max(upstream_ts, result.node_ts[i]);
                 upstream_updated = node_ts < upstream_ts;
             }
 

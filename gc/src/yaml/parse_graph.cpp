@@ -34,7 +34,7 @@ auto parse_graph(const YAML::Node& config,
         auto graph_node =
             node_registry.at(type)(init);
 
-        node_indices.emplace(graph_node.get(), g.nodes.size());
+        node_indices.emplace(graph_node.get(), NodeIndex{} + g.nodes.size());
         node_map.emplace(name, graph_node.get());
         g.nodes.push_back(graph_node);
     }

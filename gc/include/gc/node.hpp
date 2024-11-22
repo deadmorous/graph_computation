@@ -6,6 +6,7 @@
 
 #include "common/const_name_span.hpp"
 #include "common/func_ref_fwd.hpp"
+#include "common/strong_span.hpp"
 
 #include <cassert>
 #include <limits>
@@ -17,6 +18,15 @@ namespace gc {
 using NodeProgress =
     common::FuncRef<void(double)>;
 
+using OutputValues =
+    common::StrongSpan<Value, OutputPort>;
+
+using InputValues =
+    common::StrongSpan<Value, InputPort>;
+
+using ConstInputValues =
+    common::StrongSpan<const Value, InputPort>;
+
 struct Node
 {
     virtual ~Node() = default;
@@ -25,10 +35,10 @@ struct Node
 
     virtual auto output_names() const -> common::ConstNameSpan = 0;
 
-    virtual auto default_inputs(ValueSpan result) const -> void = 0;
+    virtual auto default_inputs(InputValues result) const -> void = 0;
 
-    virtual auto compute_outputs(ValueSpan result,
-                                 ConstValueSpan inputs,
+    virtual auto compute_outputs(OutputValues result,
+                                 ConstInputValues inputs,
                                  const std::stop_token& stoken,
                                  const NodeProgress& progress) const
         -> bool = 0;

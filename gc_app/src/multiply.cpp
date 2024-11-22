@@ -8,6 +8,7 @@
 
 
 using namespace std::string_view_literals;
+using namespace gc::literals;
 
 namespace gc_app {
 
@@ -24,30 +25,31 @@ public:
     { return gc::node_output_names<Multiply>( "product"sv ); }
 
 
-    auto default_inputs(gc::ValueSpan result) const
+    auto default_inputs(gc::InputValues result) const
         -> void override
     {
-        assert(result.size() == 2);
-        result[0] = uint_val(2);
-        result[1] = uint_val(3);
+        assert(result.size() == 2_gc_ic);
+        result[0_gc_i] = uint_val(2);
+        result[1_gc_i] = uint_val(3);
     }
 
     auto compute_outputs(
-            gc::ValueSpan result,
-            gc::ConstValueSpan inputs,
+            gc::OutputValues result,
+            gc::ConstInputValues inputs,
             const std::stop_token& stoken,
             const gc::NodeProgress& progress) const
         -> bool override
     {
-        assert(inputs.size() == 2);
-        assert(result.size() == 1);
-        auto type = inputs[0].type();
-        assert(type == inputs[1].type());
+        assert(inputs.size() == 2_gc_ic);
+        assert(result.size() == 1_gc_oc);
+        auto type = inputs[0_gc_i].type();
+        assert(type == inputs[1_gc_i].type());
         assert(type->aggregate_type() == gc::AggregateType::Scalar);
         gc::ScalarT(type).visit_numeric(
             [&](auto tag)
             {
-                result[0] = inputs[0].as(tag) * inputs[1].as(tag);
+                result.front() =
+                    inputs[0_gc_i].as(tag) * inputs[1_gc_i].as(tag);
             });
         return true;
     }

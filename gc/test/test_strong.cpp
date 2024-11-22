@@ -305,6 +305,9 @@ TEST(Common_Strong, Grouped)
               "[(1,2,3), (10,20), (100,200,300,400), (), (10000)]");
     EXPECT_EQ(group_count(g), Count{5});
 
+    EXPECT_EQ(group_indices(g), common::index_range<Index>(Count{5}));
+    EXPECT_EQ(group_indices(g.v), common::index_range(uint32_t{5}));
+
     auto g0 = group(g, Index{0});
     EXPECT_EQ(g0.size(), Count2{3});
     EXPECT_EQ(g0[Index2{0}], 1);

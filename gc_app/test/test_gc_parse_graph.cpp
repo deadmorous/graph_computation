@@ -10,6 +10,8 @@
 #include <gtest/gtest.h>
 
 
+using namespace gc::literals;
+
 TEST(GcApp, ParseGraph)
 {
     // Graph definition in the YAML format
@@ -62,15 +64,15 @@ inputs:
         gc::yaml::parse_graph(config, node_registry, type_registry);
 
     // Check number of nodes and edges
-    EXPECT_EQ(g.nodes.size(), 4);
+    EXPECT_EQ(g.nodes.size(), 4_gc_nc);
     EXPECT_EQ(g.edges.size(), 3);
 
     // Check that nodes in the graph are in the same order as in
     // the YAML file; check `node_map`.
-    EXPECT_EQ(g.nodes.at(0).get(), node_map.at("img_size"));
-    EXPECT_EQ(g.nodes.at(1).get(), node_map.at("seq_size"));
-    EXPECT_EQ(g.nodes.at(2).get(), node_map.at("sieve"));
-    EXPECT_EQ(g.nodes.at(3).get(), node_map.at("view"));
+    EXPECT_EQ(g.nodes.at(0_gc_n).get(), node_map.at("img_size"));
+    EXPECT_EQ(g.nodes.at(1_gc_n).get(), node_map.at("seq_size"));
+    EXPECT_EQ(g.nodes.at(2_gc_n).get(), node_map.at("sieve"));
+    EXPECT_EQ(g.nodes.at(3_gc_n).get(), node_map.at("view"));
 
     // Check source inputs
     EXPECT_EQ(provided_inputs.values.size(), 3);
@@ -94,7 +96,8 @@ inputs:
     compute(result, g, instr.get(), provided_inputs);
 
     // Check computation results
-    const auto& image = group(result.outputs, 3)[0].as<gc_app::Image>();
+    const auto& image =
+        group(result.outputs, 3_gc_n)[0_gc_o].as<gc_app::Image>();
     EXPECT_EQ(image.size.width, 600);
     EXPECT_EQ(image.size.height, 500);
     EXPECT_EQ(image.data.size(), 500 * 600);

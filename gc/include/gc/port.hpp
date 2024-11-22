@@ -9,8 +9,22 @@
 
 namespace gc {
 
-GCLIB_STRONG_TYPE(InputPort, uint8_t);
-GCLIB_STRONG_TYPE(OutputPort, uint8_t);
+GCLIB_STRONG_TYPE(InputPortCount, uint8_t, 0, common::StrongCountFeatures);
+
+GCLIB_STRONG_TYPE(OutputPortCount, uint8_t, 0, common::StrongCountFeatures);
+
+GCLIB_STRONG_TYPE(
+    InputPort, uint8_t, 0, common::StrongIndexFeatures<InputPortCount>);
+
+GCLIB_STRONG_TYPE(
+    OutputPort, uint8_t, 0, common::StrongIndexFeatures<OutputPortCount>);
+
+namespace literals {
+GCLIB_STRONG_LITERAL_SUFFIX(InputPortCount, _gc_ic);
+GCLIB_STRONG_LITERAL_SUFFIX(InputPort, _gc_i);
+GCLIB_STRONG_LITERAL_SUFFIX(OutputPortCount, _gc_oc);
+GCLIB_STRONG_LITERAL_SUFFIX(OutputPort, _gc_o);
+} // namespace literals
 
 template <PortTagType Tag>
 struct PortType;
@@ -29,9 +43,6 @@ template <>
 struct PortType<Output_Tag> final
 { using type = OutputPort; };
 
-
-GCLIB_STRONG_TYPE(InputPortCount, uint8_t);
-GCLIB_STRONG_TYPE(OutputPortCount, uint8_t);
 
 constexpr inline auto operator<=>(const InputPort& a,
                                   const InputPortCount& b) noexcept

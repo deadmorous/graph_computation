@@ -9,6 +9,7 @@
 
 
 using namespace std::string_view_literals;
+using namespace gc::literals;
 
 namespace gc_app {
 
@@ -24,23 +25,24 @@ public:
         -> common::ConstNameSpan override
     { return gc::node_output_names<Project>( "projection"sv ); }
 
-    auto default_inputs(gc::ValueSpan result) const
+    auto default_inputs(gc::InputValues result) const
         -> void override
     {
-        result[0] = uint_vec_val({10, 20});
-        result[1] = uint_val(gc::ValuePath{} / 0u);
+        assert(result.size() == 2_gc_ic);
+        result[0_gc_i] = uint_vec_val({10, 20});
+        result[1_gc_i] = uint_val(gc::ValuePath{} / 0u);
     }
 
     auto compute_outputs(
-            gc::ValueSpan result,
-            gc::ConstValueSpan inputs,
+            gc::OutputValues result,
+            gc::ConstInputValues inputs,
             const std::stop_token& stoken,
             const gc::NodeProgress& progress) const
         -> bool override
     {
-        assert(inputs.size() == 2);
-        assert(result.size() == 1);
-        result[0] = inputs[0].get(inputs[1].as<gc::ValuePath>());
+        assert(inputs.size() == 2_gc_ic);
+        assert(result.size() == 1_gc_oc);
+        result.front() = inputs[0_gc_i].get(inputs[1_gc_i].as<gc::ValuePath>());
         return true;
     }
 };

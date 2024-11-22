@@ -12,6 +12,7 @@
 
 
 using namespace std::literals;
+using namespace gc::literals;
 
 namespace {
 
@@ -34,12 +35,12 @@ public:
         -> common::ConstNameSpan override
     { return output_names_(); }
 
-    auto default_inputs(gc::ValueSpan result) const
+    auto default_inputs(gc::InputValues result) const
         -> void override
     { std::fill(result.begin(), result.end(), 0); }
 
-    auto compute_outputs(gc::ValueSpan result,
-                         gc::ConstValueSpan inputs,
+    auto compute_outputs(gc::OutputValues result,
+                         gc::ConstInputValues inputs,
                          const std::stop_token& stoken,
                          const gc::NodeProgress& progress) const
         -> bool override
@@ -53,11 +54,11 @@ public:
         if (out_count == common::Zero)
             return true;
 
-        auto output_index = 0;
+        auto output_index = 0_gc_o;
         for (const auto& input : inputs)
         {
             result[output_index].as<int>() += input.as<int>();
-            output_index = (output_index + 1) % out_count.v;
+            output_index = gc::OutputPort((output_index.v + 1) % out_count.v);
         }
 
         return true;
@@ -327,11 +328,11 @@ TEST(Gc, compute_1)
     auto result = gc::ComputationResult{};
     compute(result, g, instr.get(), source_inputs);
 
-    EXPECT_EQ(group(result.outputs, 0).size(), 1);
-    EXPECT_EQ(group(result.outputs, 0)[0].as<int>(), 1);
+    EXPECT_EQ(group(result.outputs, 0_gc_n).size(), 1_gc_oc);
+    EXPECT_EQ(group(result.outputs, 0_gc_n)[0_gc_o].as<int>(), 1);
 
-    EXPECT_EQ(group(result.outputs, 1).size(), 1);
-    EXPECT_EQ(group(result.outputs, 1)[0].as<int>(), 2);
+    EXPECT_EQ(group(result.outputs, 1_gc_n).size(), 1_gc_oc);
+    EXPECT_EQ(group(result.outputs, 1_gc_n)[0_gc_o].as<int>(), 2);
 }
 
 TEST(Gc, compute_2)
@@ -355,7 +356,7 @@ TEST(Gc, compute_2)
         -> std::string
     {
         std::ostringstream s;
-        for (size_t inode=0; inode<9; ++inode)
+        for (auto inode=0_gc_n; inode<9_gc_n; ++inode)
         {
             auto gr = group(res.outputs, inode);
             auto seq = std::ranges::transform_view(
@@ -415,7 +416,7 @@ TEST(Gc, compute_3)
     source_inputs.values[0] = 123 - 1;
     source_inputs.values[1] = 321 - 1;
     compute(result, g, instr.get(), source_inputs);
-    EXPECT_EQ(group(result.outputs, 1)[0].as<int>(), 444);
+    EXPECT_EQ(group(result.outputs, 1_gc_n)[0_gc_o].as<int>(), 444);
 }
 
 TEST(Gc, compute_partially)
@@ -426,7 +427,7 @@ TEST(Gc, compute_partially)
     {
         std::ostringstream s;
         auto node_count = g.nodes.size();
-        for (size_t inode=0; inode<node_count; ++inode)
+        for (auto inode : g.nodes.index_range())
         {
             auto gr = group(res.outputs, inode);
             auto seq = std::ranges::transform_view(

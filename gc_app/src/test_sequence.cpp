@@ -8,6 +8,7 @@
 
 
 using namespace std::string_view_literals;
+using namespace gc::literals;
 
 namespace gc_app {
 namespace {
@@ -37,24 +38,24 @@ public:
         -> common::ConstNameSpan override
     { return gc::node_output_names<TestSequence>( "sequence"sv ); }
 
-    auto default_inputs(gc::ValueSpan result) const
+    auto default_inputs(gc::InputValues result) const
         -> void override
     {
-        assert(result.size() == 1);
-        result[0] = uint_val(1000);
+        assert(result.size() == 1_gc_ic);
+        result[0_gc_i] = uint_val(1000);
     }
 
     auto compute_outputs(
-            gc::ValueSpan result,
-            gc::ConstValueSpan inputs,
+            gc::OutputValues result,
+            gc::ConstInputValues inputs,
             const std::stop_token& stoken,
             const gc::NodeProgress& progress) const
         -> bool override
     {
-        assert(inputs.size() == 1);
-        assert(result.size() == 1);
-        auto count = uint_val(inputs[0]);
-        result[0] = uint_vec_val(test_seq(count));
+        assert(inputs.size() == 1_gc_ic);
+        assert(result.size() == 1_gc_oc);
+        auto count = uint_val(inputs[0_gc_i]);
+        result[0_gc_o] = uint_vec_val(test_seq(count));
         return true;
     }
 };

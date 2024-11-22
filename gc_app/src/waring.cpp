@@ -16,6 +16,7 @@
 #include <numeric>
 
 using namespace std::string_view_literals;
+using namespace gc::literals;
 
 namespace gc_app {
 namespace {
@@ -91,29 +92,29 @@ public:
         -> common::ConstNameSpan override
     { return gc::node_output_names<Waring>( "sequence"sv ); }
 
-    auto default_inputs(gc::ValueSpan result) const
+    auto default_inputs(gc::InputValues result) const
         -> void override
     {
-        assert(result.size() == 3);
-        result[0] = uint_val(1000);
-        result[1] = uint_val(2);
-        result[2] = uint_val(2);
+        assert(result.size() == 3_gc_ic);
+        result[0_gc_i] = uint_val(1000);
+        result[1_gc_i] = uint_val(2);
+        result[2_gc_i] = uint_val(2);
     }
 
     auto compute_outputs(
-            gc::ValueSpan result,
-            gc::ConstValueSpan inputs,
+            gc::OutputValues result,
+            gc::ConstInputValues inputs,
             const std::stop_token& stoken,
             const gc::NodeProgress& progress) const
         -> bool override
     {
-        assert(inputs.size() == 3);
-        assert(result.size() == 1);
-        auto count = uint_val(inputs[0]);
-        auto s = uint_val(inputs[1]);
-        auto k = uint_val(inputs[2]);
+        assert(inputs.size() == 3_gc_ic);
+        assert(result.size() == 1_gc_oc);
+        auto count = uint_val(inputs[0_gc_i]);
+        auto s = uint_val(inputs[1_gc_i]);
+        auto k = uint_val(inputs[2_gc_i]);
         auto [seq, computed] = waring(count, s, k, stoken, progress);
-        result[0] = uint_vec_val(std::move(seq));
+        result.front() = uint_vec_val(std::move(seq));
         return computed;
     }
 };
