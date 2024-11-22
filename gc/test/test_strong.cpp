@@ -1,5 +1,6 @@
 #include "common/strong.hpp"
 #include "common/index_range.hpp"
+#include "common/strong_grouped.hpp"
 #include "common/strong_span.hpp"
 #include "common/strong_vector.hpp"
 
@@ -17,6 +18,9 @@ GCLIB_STRONG_TYPE(IntCountDefaultedTo33,
 
 GCLIB_STRONG_TYPE(Count, ptrdiff_t, 0, common::StrongCountFeatures);
 GCLIB_STRONG_TYPE(Index, ptrdiff_t, 0, common::StrongIndexFeatures<Count>);
+
+GCLIB_STRONG_TYPE(Count2, ptrdiff_t, 0, common::StrongCountFeatures);
+GCLIB_STRONG_TYPE(Index2, ptrdiff_t, 0, common::StrongIndexFeatures<Count2>);
 
 template <typename Lhs, typename Rhs>
 concept CanAdd = requires(Lhs lhs, Rhs rhs)
@@ -129,7 +133,6 @@ TEST(Common_Strong, Arithmetic)
 
 TEST(Common_Strong, Ranges)
 {
-    std::cout << "-----\n";
     auto i1 = Index{5};
     auto i2 = Index{10};
     auto c = Count{10};
@@ -275,4 +278,50 @@ TEST(Common_Strong, Span)
         check_span(s3.subspan(Index{1}), {45, 67});
         check_span(s.subspan(Index{1}), {45, 67});
     }
+}
+
+TEST(Common_Strong, Grouped)
+{
+    using G = common::StrongGrouped<int, Index, Index2>;
+
+    auto g = G{};
+    add_to_last_group(g, 1);
+    add_to_last_group(g, 2);
+    add_to_last_group(g, 3);
+    next_group(g);
+    add_to_last_group(g, 10);
+    add_to_last_group(g, 20);
+    next_group(g);
+    add_to_last_group(g, 100);
+    add_to_last_group(g, 200);
+    add_to_last_group(g, 300);
+    add_to_last_group(g, 400);
+    next_group(g);
+    next_group(g);
+    add_to_last_group(g, 10'000);
+    next_group(g);
+
+    EXPECT_EQ(common::format(g),
+              "[(1,2,3), (10,20), (100,200,300,400), (), (10000)]");
+    EXPECT_EQ(group_count(g), Count{5});
+
+    auto g0 = group(g, Index{0});
+    EXPECT_EQ(g0.size(), Count2{3});
+    EXPECT_EQ(g0[Index2{0}], 1);
+    EXPECT_EQ(g0[Index2{1}], 2);
+    EXPECT_EQ(g0[Index2{2}], 3);
+    auto g4 = group(g, Index{3});
+    EXPECT_TRUE(g4.empty());
+    auto g5 = group(g, Index{4});
+    EXPECT_EQ(g5.size(), Count2{1});
+    EXPECT_EQ(g5[Index2{0}], 10'000);
+
+    g0[Index2{1}] = 8;
+
+    const auto& cg = g;
+    auto cg0 = group(cg, Index{0});
+    EXPECT_EQ(cg0.size(), Count2{3});
+    EXPECT_EQ(cg0[Index2{0}], 1);
+    EXPECT_EQ(cg0[Index2{1}], 8);
+    EXPECT_EQ(cg0[Index2{2}], 3);
 }

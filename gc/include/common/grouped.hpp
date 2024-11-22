@@ -13,6 +13,8 @@ namespace common {
 template <typename T>
 struct Grouped
 {
+    using value_type = T;
+
     std::vector<T>          values;
     std::vector<uint32_t>   groups{0};
 
