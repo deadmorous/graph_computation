@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/grouped.hpp"
+#include "common/index_range.hpp"
 #include "common/strong_fwd.hpp"
 #include "common/strong_span.hpp"
 
@@ -50,6 +51,17 @@ auto group_count(const SG& grouped)
     auto raw = group_count(grouped.v);
     assert(raw <= std::numeric_limits<typename SG::OuterCount::Weak>::max());
     return typename SG::OuterCount(raw);
+}
+
+template <StrongGroupedType SG>
+auto group_indices(const SG& grouped)
+    -> IndexRange<typename SG::OuterIndex>
+{
+    using OuterIndex = typename SG::OuterIndex;
+    using OuterCount = typename SG::OuterCount;
+    auto raw = group_count(grouped.v);
+    assert(raw <= std::numeric_limits<typename OuterCount::Weak>::max());
+    return index_range<OuterIndex>(OuterCount(raw));
 }
 
 template <StrongGroupedType SG>

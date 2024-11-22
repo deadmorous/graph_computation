@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/format.hpp"
+#include "common/index_range.hpp"
 
 #include <cassert>
 #include <cstdint>
@@ -39,6 +40,11 @@ auto group_count(const Grouped<T>& grouped)
     assert(!grouped.groups.empty());
     return grouped.groups.size() - 1;
 }
+
+template <typename T>
+auto group_indices(const Grouped<T>& grouped)
+    -> IndexRange<uint32_t>
+{ return index_range(group_count(grouped)); }
 
 template <typename T>
 auto group(const Grouped<T>& grouped, uint32_t igroup)
