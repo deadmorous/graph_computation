@@ -6,7 +6,9 @@
 #include "common/type.hpp"
 #include "common/zero.hpp"
 
+#include <cassert>
 #include <iostream>
+#include <limits>
 #include <utility>
 
 
@@ -90,15 +92,15 @@ struct Strong final
 
     auto operator+(StrongDiff that) const -> Self
         requires is_index
-    { return Self{ v + that.v }; }
+    { return Self{ static_cast<Weak>(v + that.v) }; }
 
     auto operator-(StrongDiff that) const -> Self
         requires is_index
-    { return Self{ v - that.v }; }
+    { return Self{ static_cast<Weak>(v - that.v) }; }
 
     auto operator-(Self that) const -> StrongDiff
         requires is_index
-    { return StrongDiff{ v - that.v }; }
+    { return StrongDiff{ static_cast<Weak>(v - that.v) }; }
 
     auto operator+=(StrongDiff that) -> Self&
         requires is_index
@@ -197,3 +199,11 @@ auto operator<<(std::ostream& s, const T& x)
             GCLIB_DEFAULT_A1_TO(::common::StrongIdFeatures, ##__VA_ARGS__); \
     };                                                                      \
     using Name = ::common::Strong<Name##_StrongTraits>
+
+#define GCLIB_STRONG_LITERAL_SUFFIX(Name, suffix)                           \
+    inline Name operator"" suffix(unsigned long long value)                 \
+    {                                                                       \
+        assert(value <= std::numeric_limits<Name::Weak>::max());            \
+        return Name{static_cast<Name::Weak>(value)};                        \
+    }                                                                       \
+    static_assert(true)
