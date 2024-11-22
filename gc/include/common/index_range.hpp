@@ -146,6 +146,8 @@ public:
         -> bool
     { return begin_ <= index && index < end_; }
 
+    auto operator==(const IndexRange&) const noexcept -> bool = default;
+
 protected:
     IndexRange(T begin, T end) :
         begin_{begin},
