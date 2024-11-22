@@ -17,6 +17,8 @@ struct StrongVector
     using Count = typename I::StrongDiff;
     using value_type = V;
     using Weak = std::vector<V>;
+    using reference = typename Weak::reference;
+    using const_reference = typename Weak::const_reference;
     using iterator = typename Weak::iterator;
     using const_iterator = typename Weak::const_iterator;
     using reverse_iterator = typename Weak::reverse_iterator;
@@ -39,13 +41,22 @@ struct StrongVector
         v(std::move(v))
     {}
 
+    StrongVector(std::initializer_list<V> init) :
+        v{init}
+    {}
+
+    template< class InputIt >
+    StrongVector(InputIt first, InputIt last) :
+        v(first, last)
+    {}
+
     // TODO: More constructors
 
-    auto operator[](I i) noexcept -> V& { return v[i.v]; }
-    auto operator[](I i) const noexcept -> const V& { return v[i.v]; }
+    auto operator[](I i) noexcept -> reference { return v[i.v]; }
+    auto operator[](I i) const noexcept -> const_reference { return v[i.v]; }
 
-    auto at(I i) -> V& { return v.at(i.v); }
-    auto at(I i) const -> const V& { return v.at(i.v); }
+    auto at(I i) -> reference { return v.at(i.v); }
+    auto at(I i) const -> const_reference { return v.at(i.v); }
 
     auto begin() noexcept -> iterator { return v.begin(); }
     auto end() noexcept -> iterator { return v.end(); }
@@ -61,10 +72,10 @@ struct StrongVector
     auto crbegin() const noexcept -> const_iterator { return v.crbegin(); }
     auto crend() const noexcept -> const_iterator { return v.crend(); }
 
-    auto front() -> V& { return v.front(); }
-    auto back() -> V& { return v.back(); }
-    auto front() const -> const V& { return v.front(); }
-    auto back() const -> const V& { return v.back(); }
+    auto front() -> reference { return v.front(); }
+    auto back() -> reference { return v.back(); }
+    auto front() const -> const_reference { return v.front(); }
+    auto back() const -> const_reference { return v.back(); }
 
     auto data() noexcept -> V* { return v.data(); }
     auto data() const noexcept -> const V* { return v.data(); }
