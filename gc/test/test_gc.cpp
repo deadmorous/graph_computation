@@ -20,8 +20,8 @@ class TestNode final
     : public gc::Node
 {
 public:
-    TestNode(uint32_t input_count,
-             uint32_t output_count)
+    TestNode(gc::WeakPort input_count,
+             gc::WeakPort output_count)
     {
         input_names_.resize(input_count);
         output_names_.resize(output_count);
@@ -76,8 +76,8 @@ private:
 
 struct TestGraphNodeSpec
 {
-    uint32_t input_count{};
-    uint32_t output_count{};
+    gc::WeakPort input_count{};
+    gc::WeakPort output_count{};
 };
 
 auto test_graph(std::initializer_list<TestGraphNodeSpec> nodes,
@@ -110,7 +110,8 @@ auto check_comple_graph(const gc::Graph& g,
     EXPECT_EQ(source_inputs, expected_source_inputs);
 }
 
-auto edge(std::pair<uint32_t, uint8_t> from, std::pair<uint32_t, uint8_t> to)
+auto edge(std::pair<gc::WeakNodeIndex, gc::WeakPort> from,
+          std::pair<gc::WeakNodeIndex, gc::WeakPort> to)
     -> gc::Edge
 {
     return gc::edge({gc::NodeIndex{from.first}, gc::OutputPort{from.second}},

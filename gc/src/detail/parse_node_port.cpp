@@ -44,7 +44,7 @@ auto parse_node_port_impl(Tag,
             "Edge end '", ee_str, "' is invalid because node has no ports");
 
     // Resolve port index
-    auto port = uint8_t{0};
+    auto port = WeakPort{0};
     if (port_name.empty())
     {
         // Default index 0 can only be used if there is exactly one port

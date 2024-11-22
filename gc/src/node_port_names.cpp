@@ -5,11 +5,11 @@
 
 namespace gc {
 
-DynamicNames::DynamicNames(std::string_view prefix, uint32_t count)
+DynamicNames::DynamicNames(std::string_view prefix, WeakPort count)
     : prefix_{ prefix }
 { resize(count); }
 
-auto DynamicNames::resize(uint32_t count)
+auto DynamicNames::resize(WeakPort count)
     -> void
 {
     if (names_.size() == count)
@@ -19,7 +19,7 @@ auto DynamicNames::resize(uint32_t count)
         names_.resize(count);
 
     else
-        for (uint32_t i=names_.size(); i<count; ++i)
+        for (WeakPort i=names_.size(); i<count; ++i)
             names_.push_back(common::format(prefix_, i));
 
     name_views_.clear();

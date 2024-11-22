@@ -2,6 +2,7 @@
 
 #include "gc/node_fwd.hpp"
 #include "gc/node_port_tags.hpp"
+#include "gc/weak_port.hpp"
 
 #include "common/const_name_span.hpp"
 
@@ -52,8 +53,8 @@ auto node_output_names(Args... names)
 class DynamicNames
 {
 public:
-    explicit DynamicNames(std::string_view prefix, uint32_t count = 0);
-    auto resize(uint32_t count) -> void;
+    explicit DynamicNames(std::string_view prefix, WeakPort count = 0);
+    auto resize(WeakPort count) -> void;
     auto operator()() const
         -> common::ConstNameSpan;
 
@@ -67,7 +68,7 @@ class DynamicInputNames final :
     public DynamicNames
 {
 public:
-    explicit DynamicInputNames(uint32_t count = 0) :
+    explicit DynamicInputNames(WeakPort count = 0) :
         DynamicNames{ "in_", count }
     {}
 };
@@ -76,7 +77,7 @@ class DynamicOutputNames final :
     public DynamicNames
 {
 public:
-    explicit DynamicOutputNames(uint32_t count = 0) :
+    explicit DynamicOutputNames(WeakPort count = 0) :
         DynamicNames{ "out_", count }
     {}
 };

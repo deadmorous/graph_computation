@@ -46,14 +46,14 @@ struct Node
     auto input_count() const -> InputPortCount
     {
         auto result = input_names().size();
-        assert(result <= std::numeric_limits<uint8_t>::max());
+        assert(result <= std::numeric_limits<WeakPort>::max());
         return InputPortCount(result);
     }
 
     auto output_count() const -> OutputPortCount
     {
         auto result = output_names().size();
-        assert(result <= std::numeric_limits<uint8_t>::max());
+        assert(result <= std::numeric_limits<WeakPort>::max());
         return OutputPortCount(result);
     }
 

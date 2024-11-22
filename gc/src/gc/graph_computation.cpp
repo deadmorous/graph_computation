@@ -50,7 +50,7 @@ auto operator<<(std::ostream& s, const ComputationInstructions& instr)
     s << '{';
     if (n > 0)
         print_group(instr.nodes, 0);
-    for (uint32_t i=1; i<n; ++i)
+    for (decltype(n) i=1; i<n; ++i)
     {
         s << " => ";
         print_group(instr.edges, i-1);
@@ -166,8 +166,8 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
     using IndexSet = std::set<gc::NodeIndex>;
 
     const auto node_ind_range =
-        std::ranges::iota_view{NodeIndex::Weak{}, nodes.size().v} |
-        std::views::transform( [](uint32_t x){ return NodeIndex{x}; } );
+        std::ranges::iota_view{WeakNodeIndex{}, nodes.size().v} |
+        std::views::transform( [](WeakNodeIndex x){ return NodeIndex{x}; } );
 
     // Add all sources to the initial level of the graph
     auto level = IndexSet{};
@@ -295,7 +295,7 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
         simple_edges.begin());
 
     {
-        auto ie = uint32_t{};
+        auto ie = size_t{};
         for (auto i : nodes.index_range())
         {
             for (; ie<simple_edges.size() && simple_edges[ie][0] == i; ++ie)
@@ -432,7 +432,7 @@ auto compute(ComputationResult& result,
         common::StrongVector<bool, NodeIndex>(g.nodes.size(), false);
 
     // Set external inputs
-    for (uint32_t i=0, n=source_inputs.values.size(); i<n; ++i)
+    for (size_t i=0, n=source_inputs.values.size(); i<n; ++i)
     {
         const auto& value = source_inputs.values[i];
 
