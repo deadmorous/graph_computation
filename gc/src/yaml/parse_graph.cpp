@@ -1,5 +1,6 @@
 #include "gc/yaml/parse_graph.hpp"
 
+#include "gc/computation_node_registry.hpp"
 #include "gc/detail/parse_node_port.hpp"
 #include "gc/value.hpp"
 #include "gc/yaml/parse_value.hpp"
@@ -10,14 +11,15 @@
 
 namespace gc::yaml {
 
+template <typename Node>
 auto parse_graph(const YAML::Node& config,
-                 const NodeRegistry& node_registry,
+                 const NodeRegistry<Node>& node_registry,
                  const TypeRegistry& type_registry)
-    -> ParseGraphResult
+    -> ParseGraphResult<Node>
 {
-    auto g = Graph{};
-    auto node_map = detail::NamedNodes{};
-    auto node_indices = detail::NodeIndices{};
+    auto g = ComputationGraph{};
+    auto node_map = detail::NamedNodes<Node>{};
+    auto node_indices = detail::NodeIndices<Node>{};
     for (auto node : config["nodes"])
     {
         auto name = node["name"].as<std::string>();
@@ -71,5 +73,12 @@ auto parse_graph(const YAML::Node& config,
         .node_names = std::move(node_map),
         .input_names = std::move(input_names) };
 }
+
+template
+auto parse_graph<ComputationNode>(
+                const YAML::Node& config,
+                const ComputationNodeRegistry& node_registry,
+                const TypeRegistry& type_registry)
+    -> ParseComputationGraphResult;
 
 } // namespace gc::yaml

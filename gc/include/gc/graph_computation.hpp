@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gc/graph.hpp"
+#include "gc/computation_graph.hpp"
 #include "gc/source_inputs.hpp"
 #include "gc/value.hpp"
 
@@ -20,7 +20,8 @@ auto operator<<(std::ostream& s, const ComputationInstructions& instructions)
 
 // -----------
 
-auto compile(const Graph& g, const SourceInputs& provided_inputs = {})
+auto compile(const ComputationGraph& g,
+             const SourceInputs& provided_inputs = {})
     -> std::pair<ComputationInstructionsPtr, SourceInputs>;
 
 using Timestamp = uint64_t;
@@ -35,7 +36,7 @@ struct ComputationResult final
 };
 
 auto compute(ComputationResult& result,
-             const Graph& g,
+             const ComputationGraph& g,
              const ComputationInstructions* instructions,
              const SourceInputs& source_inputs = {})
     -> void;
@@ -44,7 +45,7 @@ using GraphProgress =
     common::FuncRef<void(NodeIndex inode, double node_progress)>;
 
 auto compute(ComputationResult& result,
-             const Graph& g,
+             const ComputationGraph& g,
              const ComputationInstructions* instructions,
              const SourceInputs& source_inputs,
              const std::stop_token& stoken,
@@ -53,13 +54,13 @@ auto compute(ComputationResult& result,
 
 struct Computation final
 {
-    Graph graph;
+    ComputationGraph graph;
     ComputationInstructionsPtr instr;
     SourceInputs source_inputs;
     ComputationResult result;
 };
 
-inline auto computation(Graph g, const SourceInputs& provided_inputs)
+inline auto computation(ComputationGraph g, const SourceInputs& provided_inputs)
     -> Computation
 {
     auto [instr, source_inputs] = compile(g, provided_inputs);

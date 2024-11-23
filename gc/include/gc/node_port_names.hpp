@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gc/node_fwd.hpp"
+#include "gc/computation_node_fwd.hpp"
 #include "gc/node_port_tags.hpp"
 #include "gc/weak_port.hpp"
 

@@ -5,7 +5,7 @@
 #include "gc_app/types.hpp"
 
 #include "gc/expect_n_node_args.hpp"
-#include "gc/node.hpp"
+#include "gc/computation_node.hpp"
 #include "gc/node_port_names.hpp"
 
 #include "common/binomial.hpp"
@@ -81,7 +81,7 @@ auto waring(Uint limit,
 } // anonymous namespace
 
 class Waring final :
-    public gc::Node
+    public gc::ComputationNode
 {
 public:
     auto input_names() const
@@ -120,7 +120,7 @@ public:
 };
 
 auto make_waring(gc::ConstValueSpan args)
-    -> std::shared_ptr<gc::Node>
+    -> std::shared_ptr<gc::ComputationNode>
 {
     gc::expect_no_node_args("Waring", args);
     return std::make_shared<Waring>();

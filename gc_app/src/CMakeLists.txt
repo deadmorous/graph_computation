@@ -4,10 +4,10 @@ project(gc_app-lib LANGUAGES CXX)
 
 add_library(gc_app-lib STATIC
     color.cpp
+    computation_node_registry.cpp
     eratosthenes_sieve.cpp
     filter_seq.cpp
     multiply.cpp
-    node_registry.cpp
     rect_view.cpp
     palette.cpp
     project.cpp

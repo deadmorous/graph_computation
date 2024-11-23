@@ -36,7 +36,7 @@ auto ComputationThread::stop()
     wait();
 }
 
-auto ComputationThread::set_graph(gc::Graph g,
+auto ComputationThread::set_graph(gc::ComputationGraph g,
                                   const gc::SourceInputs& provided_inputs)
     -> void
 {

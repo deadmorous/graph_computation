@@ -4,7 +4,7 @@
 #include "gc_app/palette.hpp"
 
 #include "gc/expect_n_node_args.hpp"
-#include "gc/node.hpp"
+#include "gc/computation_node.hpp"
 #include "gc/node_port_names.hpp"
 
 
@@ -14,7 +14,7 @@ using namespace gc::literals;
 namespace gc_app {
 
 class RectView final :
-    public gc::Node
+    public gc::ComputationNode
 {
 public:
     auto input_names() const
@@ -74,7 +74,7 @@ public:
 };
 
 auto make_rect_view(gc::ConstValueSpan args)
-    -> std::shared_ptr<gc::Node>
+    -> std::shared_ptr<gc::ComputationNode>
 {
     gc::expect_no_node_args("RectView", args);
     return std::make_shared<RectView>();

@@ -1,5 +1,5 @@
 #include "gc/graph_computation.hpp"
-#include "gc/node.hpp"
+#include "gc/computation_node.hpp"
 #include "gc/node_port_names.hpp"
 
 #include "common/format.hpp"
@@ -17,7 +17,7 @@ using namespace gc::literals;
 namespace {
 
 class TestNode final
-    : public gc::Node
+    : public gc::ComputationNode
 {
 public:
     TestNode(gc::WeakPort input_count,
@@ -82,9 +82,9 @@ struct TestGraphNodeSpec
 
 auto test_graph(std::initializer_list<TestGraphNodeSpec> nodes,
                 std::initializer_list<gc::Edge> edges)
-    -> gc::Graph
+    -> gc::ComputationGraph
 {
-    auto result = gc::Graph{};
+    auto result = gc::ComputationGraph{};
     for (const auto& node_spec : nodes)
         result.nodes.emplace_back(
             std::make_shared<TestNode>(node_spec.input_count,
@@ -96,7 +96,7 @@ auto test_graph(std::initializer_list<TestGraphNodeSpec> nodes,
     return result;
 }
 
-auto check_comple_graph(const gc::Graph& g,
+auto check_comple_graph(const gc::ComputationGraph& g,
                         std::string_view expected_formatted_instructions,
                         const gc::SourceInputs& expected_source_inputs = {})
     -> void
@@ -119,7 +119,7 @@ auto edge(std::pair<gc::WeakNodeIndex, gc::WeakPort> from,
 }
 
 auto test_graph_net_3x3()
-    -> gc::Graph
+    -> gc::ComputationGraph
 {
     // 8 -> 7 -> 5
     //
@@ -308,7 +308,7 @@ TEST(Gc, compile2)
     auto n1 = std::make_shared<TestNode>( 0, 1 );
     auto n2 = std::make_shared<TestNode>( 2, 0 );
 
-    auto g = gc::Graph{
+    auto g = gc::ComputationGraph{
         .nodes = { n1, n2 },
         .edges = {edge({0, 0}, {2, 0}),
                   edge({1, 0}, {2, 1})}};
@@ -423,7 +423,7 @@ TEST(Gc, compute_3)
 TEST(Gc, compute_partially)
 {
     auto format_result = [](const gc::ComputationResult& res,
-                            const gc::Graph& g)
+                            const gc::ComputationGraph& g)
         -> std::string
     {
         std::ostringstream s;

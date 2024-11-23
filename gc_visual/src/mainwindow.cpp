@@ -6,6 +6,7 @@
 #include "gc_app/node_registry.hpp"
 #include "gc_app/type_registry.hpp"
 
+#include "gc/computation_node_registry.hpp"
 #include "gc/yaml/parse_graph.hpp"
 
 #include "yaml-cpp/yaml.h"
@@ -234,7 +235,7 @@ auto MainWindow::load(const gc_visual::ConfigSpecification& spec)
         auto config = load_config(spec);
 
         // Initialize node registry and type registry
-        auto node_registry = gc::node_registry();
+        auto node_registry = gc::computation_node_registry();
         gc_app::populate_node_registry(node_registry);
         auto type_registry = gc::type_registry();
         gc_app::populate_type_registry(type_registry);

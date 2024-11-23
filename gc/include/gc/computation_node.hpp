@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gc/node_fwd.hpp"
+#include "gc/computation_node_fwd.hpp"
 #include "gc/port.hpp"
 #include "gc/value_fwd.hpp"
 
@@ -27,9 +27,9 @@ using InputValues =
 using ConstInputValues =
     common::StrongSpan<const Value, InputPort>;
 
-struct Node
+struct ComputationNode
 {
-    virtual ~Node() = default;
+    virtual ~ComputationNode() = default;
 
     virtual auto input_names() const -> common::ConstNameSpan = 0;
 

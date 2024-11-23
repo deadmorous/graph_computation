@@ -3,6 +3,7 @@
 #include "gc_app/node_registry.hpp"
 #include "gc_app/type_registry.hpp"
 
+#include "gc/computation_node_registry.hpp"
 #include "gc/graph_computation.hpp"
 #include "gc/yaml/parse_graph.hpp"
 
@@ -18,7 +19,7 @@ auto run(int argc, char* argv[])
         common::throw_("Usage: gc_cli gc-file");
 
     // Initialize node registry and type registry
-    auto node_registry = gc::node_registry();
+    auto node_registry = gc::computation_node_registry();
     gc_app::populate_node_registry(node_registry);
     auto type_registry = gc::type_registry();
     gc_app::populate_type_registry(type_registry);

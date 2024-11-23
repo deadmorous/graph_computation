@@ -1,4 +1,4 @@
-#include "gc_app/node_registry.hpp"
+#include "gc_app/computation_node_registry.hpp"
 
 #include "gc_app/eratosthenes_sieve.hpp"
 #include "gc_app/filter_seq.hpp"
@@ -13,7 +13,8 @@
 
 namespace gc_app {
 
-auto populate_node_registry(gc::NodeRegistry& result)
+template<>
+auto populate_node_registry(gc::ComputationNodeRegistry& result)
     -> void
 {
 #define GC_APP_REGISTER(name) \

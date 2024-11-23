@@ -2,15 +2,18 @@
 
 #include "gc/node_registry.hpp"
 
+
 namespace gc_app {
 
-auto populate_node_registry(gc::NodeRegistry&)
+template <typename Node>
+auto populate_node_registry(gc::NodeRegistry<Node>&)
     -> void;
 
-inline auto node_registry()
-    -> gc::NodeRegistry
+template <typename Node>
+auto node_registry(common::Type_Tag<Node> = {})
+    -> gc::NodeRegistry<Node>
 {
-    auto result = gc::NodeRegistry{};
+    auto result = gc::NodeRegistry<Node>{};
     populate_node_registry(result);
     return result;
 }

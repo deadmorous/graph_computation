@@ -6,7 +6,7 @@
 
 #include "gc_app/color.hpp"
 
-#include "gc/node.hpp"
+#include "gc/computation_node.hpp"
 
 #include "common/throw.hpp"
 

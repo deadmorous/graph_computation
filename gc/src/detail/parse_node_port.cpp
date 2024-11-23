@@ -1,6 +1,8 @@
 #include "gc/detail/parse_node_port.hpp"
 
-#include "gc/node.hpp"
+#include "gc/computation_node.hpp"
+#include "gc/detail/named_computation_nodes.hpp"
+#include "gc/detail/computation_node_indices.hpp"
 
 #include "common/throw.hpp"
 
@@ -12,11 +14,11 @@ namespace gc::detail {
 
 namespace {
 
-template <typename PortNamesFunc, PortTagType Tag>
+template <typename Node, typename PortNamesFunc, PortTagType Tag>
 auto parse_node_port_impl(Tag,
                           std::string_view ee_str,
-                          const NamedNodes& node_map,
-                          const NodeIndices& node_indices,
+                          const NamedNodes<Node>& node_map,
+                          const NodeIndices<Node>& node_indices,
                           PortNamesFunc port_names)
     -> EdgeEnd<Tag>
 {
@@ -79,30 +81,47 @@ auto parse_node_port_impl(Tag,
 } // anonymous namespace
 
 
+template <typename Node>
 auto parse_node_port(std::string_view ee_str,
-                     const NamedNodes& node_map,
-                     const NodeIndices& node_indices,
+                     const NamedNodes<Node>& node_map,
+                     const NodeIndices<Node>& node_indices,
                      Input_Tag)
     -> EdgeInputEnd
 {
-    auto input_ports = [](const Node* node)
+    auto input_ports = [](const ComputationNode* node)
     { return node->input_names(); };
 
     return parse_node_port_impl(
         Input, ee_str, node_map, node_indices, input_ports);
 }
 
+template <typename Node>
 auto parse_node_port(std::string_view ee_str,
-                     const NamedNodes& node_map,
-                     const NodeIndices& node_indices,
+                     const NamedNodes<Node>& node_map,
+                     const NodeIndices<Node>& node_indices,
                      Output_Tag)
     -> EdgeOutputEnd
 {
-    auto output_ports = [](const Node* node)
+    auto output_ports = [](const ComputationNode* node)
     { return node->output_names(); };
 
     return parse_node_port_impl(
         Output, ee_str, node_map, node_indices, output_ports);
 }
+
+
+template
+auto parse_node_port<ComputationNode>(std::string_view ee_str,
+                     const NamedComputationNodes& node_map,
+                     const ComputationNodeIndices& node_indices,
+                     Input_Tag)
+    -> EdgeInputEnd;
+
+template
+auto parse_node_port<ComputationNode>(std::string_view ee_str,
+                     const NamedComputationNodes& node_map,
+                     const ComputationNodeIndices& node_indices,
+                     Output_Tag)
+    -> EdgeOutputEnd;
 
 } // namespace gc::detail

@@ -3,7 +3,7 @@
 #include "gc_app/types.hpp"
 
 #include "gc/expect_n_node_args.hpp"
-#include "gc/node.hpp"
+#include "gc/computation_node.hpp"
 #include "gc/node_port_names.hpp"
 
 #include "common/func_ref.hpp"
@@ -56,7 +56,7 @@ auto sieve(Uint limit,
 
 
 class EratosthenesSieve final :
-    public gc::Node
+    public gc::ComputationNode
 {
 public:
     auto input_names() const
@@ -116,7 +116,7 @@ struct _{_(){
 #endif // 0
 
 auto make_eratosthenes_sieve(gc::ConstValueSpan args)
-    -> std::shared_ptr<gc::Node>
+    -> std::shared_ptr<gc::ComputationNode>
 {
     gc::expect_no_node_args("EratosthenesSieve", args);
     return std::make_shared<EratosthenesSieve>();

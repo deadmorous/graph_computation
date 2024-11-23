@@ -5,7 +5,7 @@
 #include "gc_app/types.hpp"
 
 #include "gc/expect_n_node_args.hpp"
-#include "gc/node.hpp"
+#include "gc/computation_node.hpp"
 #include "gc/node_port_names.hpp"
 
 #include "common/binomial.hpp"
@@ -174,7 +174,7 @@ auto waring_parallel(Uint limit,
 } // anonymous namespace
 
 class WaringParallel final :
-    public gc::Node
+    public gc::ComputationNode
 {
 public:
     WaringParallel(Uint thread_count)
@@ -221,7 +221,7 @@ private:
 };
 
 auto make_waring_parallel(gc::ConstValueSpan args)
-    -> std::shared_ptr<gc::Node>
+    -> std::shared_ptr<gc::ComputationNode>
 {
     gc::expect_n_node_args("WaringParallel", args, 1);
     auto thread_count = args[0].convert_to<Uint>();

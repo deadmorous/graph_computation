@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gc/node_fwd.hpp"
+#include "gc/computation_node_fwd.hpp"
 #include "gc/value_path.hpp"
 
 namespace gc {

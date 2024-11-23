@@ -2,8 +2,8 @@
 
 #include "gc_visual/computation_thread.hpp"
 
-#include "gc/detail/named_nodes.hpp"
-#include "gc/detail/node_indices.hpp"
+#include "gc/detail/named_computation_nodes.hpp"
+#include "gc/detail/computation_node_indices.hpp"
 #include "gc/node_port_tags.hpp"
 #include "gc/value_fwd.hpp"
 #include "gc/value_path.hpp"
@@ -16,20 +16,20 @@ class GraphBroker final :
     Q_OBJECT
 public:
     explicit GraphBroker(ComputationThread& computation_thread,
-                         const gc::detail::NamedNodes& named_nodes,
+                         const gc::detail::NamedComputationNodes& named_nodes,
                          const std::vector<std::string>& input_names,
                          QObject* parent = nullptr);
 
     auto node(const std::string& name) const
-        -> gc::Node*;
+        -> gc::ComputationNode*;
 
     auto named_nodes() const
-        -> const gc::detail::NamedNodes&;
+        -> const gc::detail::NamedComputationNodes&;
 
     auto node_indices() const
-        -> const gc::detail::NodeIndices&;
+        -> const gc::detail::ComputationNodeIndices&;
 
-    auto node_index(const gc::Node* node) const
+    auto node_index(const gc::ComputationNode* node) const
         -> gc::NodeIndex;
 
     auto input_index(const std::string& input_name) const
@@ -58,9 +58,9 @@ private slots:
 
 private:
     ComputationThread& computation_thread_;
-    const gc::detail::NamedNodes& named_nodes_;
+    const gc::detail::NamedComputationNodes& named_nodes_;
     const std::vector<std::string>& input_names_;
-    gc::detail::NodeIndices node_indices_;
+    gc::detail::ComputationNodeIndices node_indices_;
 
     gc::ComputationResult computation_result_;
 };

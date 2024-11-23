@@ -19,7 +19,7 @@ auto group_value(gc::NodeIndex node_index,
 
 
 GraphBroker::GraphBroker(ComputationThread& computation_thread,
-                         const gc::detail::NamedNodes& named_nodes,
+                         const gc::detail::NamedComputationNodes& named_nodes,
                          const std::vector<std::string>& input_names,
                          QObject* parent) :
     QObject{ parent },
@@ -38,18 +38,18 @@ GraphBroker::GraphBroker(ComputationThread& computation_thread,
 }
 
 auto GraphBroker::node(const std::string& name) const
-    -> gc::Node*
+    -> gc::ComputationNode*
 { return named_nodes_.at(name); }
 
 auto GraphBroker::named_nodes() const
-    -> const gc::detail::NamedNodes&
+    -> const gc::detail::NamedComputationNodes&
 { return named_nodes_; }
 
 auto GraphBroker::node_indices() const
-    -> const gc::detail::NodeIndices&
+    -> const gc::detail::ComputationNodeIndices&
 { return node_indices_; }
 
-auto GraphBroker::node_index(const gc::Node* node) const
+auto GraphBroker::node_index(const gc::ComputationNode* node) const
     -> gc::NodeIndex
 { return node_indices_.at(node); }
 

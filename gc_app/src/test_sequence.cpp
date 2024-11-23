@@ -3,7 +3,7 @@
 #include "gc_app/types.hpp"
 
 #include "gc/expect_n_node_args.hpp"
-#include "gc/node.hpp"
+#include "gc/computation_node.hpp"
 #include "gc/node_port_names.hpp"
 
 
@@ -27,7 +27,7 @@ auto test_seq(Uint limit)
 
 
 class TestSequence final :
-    public gc::Node
+    public gc::ComputationNode
 {
 public:
     auto input_names() const
@@ -61,7 +61,7 @@ public:
 };
 
 auto make_test_sequence(gc::ConstValueSpan arg)
-    -> std::shared_ptr<gc::Node>
+    -> std::shared_ptr<gc::ComputationNode>
 {
     assert(arg.empty());
     return std::make_shared<TestSequence>();

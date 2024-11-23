@@ -8,7 +8,7 @@
 #include "gc_app/waring.hpp"
 #include "gc_app/types.hpp"
 
-#include "gc/node.hpp"
+#include "gc/computation_node.hpp"
 
 #include "common/func_ref.hpp"
 

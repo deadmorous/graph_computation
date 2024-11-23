@@ -1,5 +1,5 @@
 #include "gc/graph_computation.hpp"
-#include "gc/node.hpp"
+#include "gc/computation_node.hpp"
 
 #include "common/func_ref.hpp"
 #include "common/index_range.hpp"
@@ -71,7 +71,7 @@ auto operator<<(std::ostream& s, const ComputationInstructions& instr)
 
 // -----------
 
-auto compile(const Graph& g, const SourceInputs& provided_inputs)
+auto compile(const ComputationGraph& g, const SourceInputs& provided_inputs)
     -> std::pair<ComputationInstructionsPtr, SourceInputs>
 {
     // GC_LOG_DEBUG(
@@ -85,7 +85,7 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
 
     // Create a vector of raw pointers to graph nodes
     // TODO: Get rid of it?
-    auto nodes = common::StrongVector<const Node*, NodeIndex>{};
+    auto nodes = common::StrongVector<const ComputationNode*, NodeIndex>{};
     nodes.reserve(g.nodes.size());
     std::ranges::transform(
         g.nodes,
@@ -93,7 +93,7 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
         [](const NodePtr& node) { return node.get(); });
 
     // Map node pointers to their indices in g.nodes
-    std::unordered_map<const Node*, NodeIndex> node_ind;
+    std::unordered_map<const ComputationNode*, NodeIndex> node_ind;
     for (auto i : nodes.index_range())
         node_ind[nodes[i]] = i;
 
@@ -147,7 +147,7 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
     std::ranges::transform(
         nodes,
         std::back_inserter(node_data),
-        [](const Node* node) -> NodeData
+        [](const ComputationNode* node) -> NodeData
             { return { node->input_count(),
                        node->output_count(),
                        common::Zero,
@@ -370,22 +370,24 @@ auto compile(const Graph& g, const SourceInputs& provided_inputs)
 }
 
 auto compute(ComputationResult& result,
-             const Graph& g,
+             const ComputationGraph& g,
              const ComputationInstructions* instructions,
              const SourceInputs& source_inputs)
     -> void
 { compute(result, g, instructions, source_inputs, {}, {}); }
 
 auto compute(ComputationResult& result,
-             const Graph& g,
+             const ComputationGraph& g,
              const ComputationInstructions* instructions,
              const SourceInputs& source_inputs,
              const std::stop_token& stoken,
              const GraphProgress& progress)
     -> bool
 {
-    auto input_count = [](const gc::Node& node){ return node.input_count(); };
-    auto output_count = [](const gc::Node& node){ return node.output_count(); };
+    auto input_count =
+       [](const gc::ComputationNode& node){ return node.input_count(); };
+    auto output_count =
+       [](const gc::ComputationNode& node){ return node.output_count(); };
 
     if (result.outputs.v.values.empty())
     {

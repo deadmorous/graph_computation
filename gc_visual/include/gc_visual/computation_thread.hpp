@@ -33,7 +33,8 @@ public slots:
     auto stop()
         -> void;
 
-    auto set_graph(gc::Graph g, const gc::SourceInputs& provided_inputs)
+    auto set_graph(gc::ComputationGraph g,
+                   const gc::SourceInputs& provided_inputs)
         -> void;
 
     auto set_parameter(const gc::ParameterSpec&, const gc::Value&)

@@ -10,15 +10,17 @@
 
 namespace gc::detail {
 
+template <typename Node>
 auto parse_node_port(std::string_view,
-                     const NamedNodes&,
-                     const NodeIndices& node_indices,
+                     const NamedNodes<Node>&,
+                     const NodeIndices<Node>& node_indices,
                      Input_Tag)
     -> EdgeInputEnd;
 
+template <typename Node>
 auto parse_node_port(std::string_view,
-                     const NamedNodes&,
-                     const NodeIndices& node_indices,
+                     const NamedNodes<Node>&,
+                     const NodeIndices<Node>& node_indices,
                      Output_Tag)
     -> EdgeOutputEnd;
 

@@ -6,9 +6,9 @@ add_library(gc-lib STATIC
     agc/algorithm.cpp
     detail/parse_node_port.cpp
     expect_n_node_args.cpp
+    gc/computation_node_registry.cpp
     gc/edge.cpp
     gc/graph_computation.cpp
-    gc/node_registry.cpp
     gc/source_inputs.cpp
     node_port_names.cpp
     parse_simple_value.cpp

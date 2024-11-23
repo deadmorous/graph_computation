@@ -3,7 +3,7 @@
 #include "gc_app/types.hpp"
 
 #include "gc/expect_n_node_args.hpp"
-#include "gc/node.hpp"
+#include "gc/computation_node.hpp"
 #include "gc/node_port_names.hpp"
 #include "gc/value.hpp"
 
@@ -14,7 +14,7 @@ using namespace gc::literals;
 namespace gc_app {
 
 class Project final :
-    public gc::Node
+    public gc::ComputationNode
 {
 public:
     auto input_names() const
@@ -48,7 +48,7 @@ public:
 };
 
 auto make_project(gc::ConstValueSpan args)
-    -> std::shared_ptr<gc::Node>
+    -> std::shared_ptr<gc::ComputationNode>
 {
     gc::expect_no_node_args("Project", args);
     return std::make_shared<Project>();
