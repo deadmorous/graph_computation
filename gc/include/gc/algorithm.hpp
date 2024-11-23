@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gc/algorithm_fwd.hpp"
+#include "gc/port.hpp"
 #include "gc/type_fwd.hpp"
 
 #include <memory>
@@ -32,7 +33,7 @@ struct Func final
 
 struct InputBinding
 {
-    uint32_t port;
+    gc::InputPort port;
     id::Var var;
 };
 

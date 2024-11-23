@@ -9,6 +9,7 @@
 #include <cassert>
 
 
+using namespace gc::literals;
 using namespace std::string_view_literals;
 
 namespace agc_app {
@@ -25,13 +26,13 @@ public:
         -> common::ConstNameSpan override
     { return gc::node_output_names<LinSpace>( "sequence"sv ); }
 
-    auto default_inputs(gc::ValueSpan result) const
+    auto default_inputs(gc::InputValues result) const
         -> void override
     {
-        assert(result.size() == 3);
-        result[0] = 0.;
-        result[1] = 1.;
-        result[2] = 11;
+        assert(result.size() == 3_gc_ic);
+        result[0_gc_i] = 0.;
+        result[1_gc_i] = 1.;
+        result[2_gc_i] = 11;
     }
 
     auto activation_algorithms(std::span<gc::PortActivationAlgorithm> result,
@@ -40,7 +41,7 @@ public:
     {
         assert(result.size() == 1);
         auto& result0 = result[0];
-        result0.required_inputs = gc::Ports{0u, 1u, 2u};
+        // result0.required_inputs = gc::Ports{0u, 1u, 2u};
     }
 };
 
