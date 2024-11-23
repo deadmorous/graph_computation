@@ -90,7 +90,7 @@ auto compile(const ComputationGraph& g, const SourceInputs& provided_inputs)
     std::ranges::transform(
         g.nodes,
         std::back_inserter(nodes),
-        [](const NodePtr& node) { return node.get(); });
+        [](const ComputationNodePtr& node) { return node.get(); });
 
     // Map node pointers to their indices in g.nodes
     std::unordered_map<const ComputationNode*, NodeIndex> node_ind;

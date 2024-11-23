@@ -7,6 +7,6 @@ namespace gc {
 
 struct ComputationNode;
 
-using NodePtr = std::shared_ptr<ComputationNode>;
+using ComputationNodePtr = std::shared_ptr<ComputationNode>;
 
 } // namespace gc
