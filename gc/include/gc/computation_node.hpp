@@ -1,12 +1,10 @@
 #pragma once
 
 #include "gc/computation_node_fwd.hpp"
-#include "gc/port.hpp"
-#include "gc/value_fwd.hpp"
+#include "gc/port_values.hpp"
 
 #include "common/const_name_span.hpp"
 #include "common/func_ref_fwd.hpp"
-#include "common/strong_span.hpp"
 
 #include <cassert>
 #include <limits>
@@ -17,15 +15,6 @@ namespace gc {
 
 using NodeProgress =
     common::FuncRef<void(double)>;
-
-using OutputValues =
-    common::StrongSpan<Value, OutputPort>;
-
-using InputValues =
-    common::StrongSpan<Value, InputPort>;
-
-using ConstInputValues =
-    common::StrongSpan<const Value, InputPort>;
 
 struct ComputationNode
 {
