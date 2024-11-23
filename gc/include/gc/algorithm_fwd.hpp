@@ -4,7 +4,7 @@
 
 #include <cstddef>
 
-namespace agc {
+namespace gc {
 
 namespace id {
 
@@ -25,4 +25,4 @@ GCLIB_STRONG_TYPE(Statement, size_t);
 
 class AlgorithmStorage;
 
-} // namespace agc
+} // namespace gc

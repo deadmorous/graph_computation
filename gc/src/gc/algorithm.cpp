@@ -1,8 +1,8 @@
-#include "agc/algorithm.hpp"
+#include "gc/algorithm.hpp"
 
 #include <unordered_map>
 
-namespace agc {
+namespace gc {
 
 struct Hash
 {
@@ -163,4 +163,4 @@ auto AlgorithmStorage::operator()(id::Statement statement)
 { return impl_->statement.at(statement); }
 
 
-} // namespace agc
+} // namespace gc

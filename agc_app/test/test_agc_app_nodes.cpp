@@ -1,6 +1,6 @@
 #include "agc_app/linspace.hpp"
 
-#include "agc/node.hpp"
+#include "gc/activation_node.hpp"
 
 #include <gtest/gtest.h>
 

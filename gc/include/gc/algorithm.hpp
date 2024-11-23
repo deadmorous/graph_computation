@@ -1,7 +1,6 @@
 #pragma once
 
-#include "agc/algorithm_fwd.hpp"
-
+#include "gc/algorithm_fwd.hpp"
 #include "gc/type_fwd.hpp"
 
 #include <memory>
@@ -9,7 +8,7 @@
 #include <vector>
 
 
-namespace agc {
+namespace gc {
 
 using Vars = std::vector<id::Var>;
 
@@ -124,4 +123,4 @@ private:
     std::unique_ptr<Impl> impl_;
 };
 
-} // namespace agc
+} // namespace gc

@@ -1,17 +1,15 @@
 #pragma once
 
-#include "agc/node_fwd.hpp"
-#include "agc/algorithm_fwd.hpp"
-
+#include "gc/activation_node_fwd.hpp"
+#include "gc/algorithm_fwd.hpp"
 #include "gc/value_fwd.hpp"
 
 #include "common/const_name_span.hpp"
-
 #include "common/pow2.hpp"
 
 #include <cassert>
 
-namespace agc {
+namespace gc {
 
 template <size_t> struct uint_of_size;
 
@@ -107,9 +105,9 @@ struct PortActivationAlgorithm final
     id::Statement activate;
 };
 
-struct Node
+struct ActivationNode
 {
-    virtual ~Node() = default;
+    virtual ~ActivationNode() = default;
 
     virtual auto input_names() const -> common::ConstNameSpan = 0;
 
@@ -128,4 +126,4 @@ struct Node
     { return output_names().size(); }
 };
 
-} // namespace agc
+} // namespace gc
