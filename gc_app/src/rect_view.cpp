@@ -18,14 +18,14 @@ class RectView final :
 {
 public:
     auto input_names() const
-        -> common::ConstNameSpan override
+        -> gc::InputNames override
     {
         return gc::node_input_names<RectView>(
             "size"sv, "sequence"sv, "palette"sv);
     }
 
     auto output_names() const
-        -> common::ConstNameSpan override
+        -> gc::OutputNames override
     { return gc::node_output_names<RectView>( "image"sv ); }
 
     auto default_inputs(gc::InputValues result) const

@@ -18,11 +18,11 @@ class Project final :
 {
 public:
     auto input_names() const
-        -> common::ConstNameSpan override
+        -> gc::InputNames override
     { return gc::node_input_names<Project>( "value"sv, "path"sv ); }
 
     auto output_names() const
-        -> common::ConstNameSpan override
+        -> gc::OutputNames override
     { return gc::node_output_names<Project>( "projection"sv ); }
 
     auto default_inputs(gc::InputValues result) const

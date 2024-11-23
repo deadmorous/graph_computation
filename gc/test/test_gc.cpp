@@ -28,11 +28,11 @@ public:
     }
 
     auto input_names() const
-        -> common::ConstNameSpan override
+        -> gc::InputNames override
     { return input_names_(); }
 
     auto output_names() const
-        -> common::ConstNameSpan override
+        -> gc::OutputNames override
     { return output_names_(); }
 
     auto default_inputs(gc::InputValues result) const

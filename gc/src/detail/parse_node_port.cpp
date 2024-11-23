@@ -50,7 +50,7 @@ auto parse_node_port_impl(Tag,
     if (port_name.empty())
     {
         // Default index 0 can only be used if there is exactly one port
-        if (pnames.size() != 1)
+        if (pnames.size().v != 1)
             common::throw_(
                 "Port name must be specified for node ", node_name,
                 ": please specify one of ", common::format_seq(pnames));
@@ -70,7 +70,7 @@ auto parse_node_port_impl(Tag,
                 ": please specify one of ", common::format_seq(pnames));
         port = it - pnames.begin();
     }
-    else if (port >= pnames.size())
+    else if (port >= pnames.size().v)
         // Check port index bounds
         common::throw_(
             "Number of ports in node ", node_name, " is ", pnames.size(),

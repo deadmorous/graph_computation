@@ -182,11 +182,11 @@ public:
     {}
 
     auto input_names() const
-        -> common::ConstNameSpan override
+        -> gc::InputNames override
     { return gc::node_input_names<WaringParallel>( "count"sv, "s"sv, "k"sv ); }
 
     auto output_names() const
-        -> common::ConstNameSpan override
+        -> gc::OutputNames override
     { return gc::node_output_names<WaringParallel>( "sequence"sv ); }
 
     auto default_inputs(gc::InputValues result) const

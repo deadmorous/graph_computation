@@ -16,6 +16,7 @@
 
 
 using namespace gc_app;
+using namespace gc::literals;
 
 namespace {
 
@@ -89,11 +90,11 @@ TEST(GcApp_Node, EratosthenesSieve)
     ASSERT_EQ(node->input_count(), gc::InputPortCount{1});
     ASSERT_EQ(node->output_count(), gc::OutputPortCount{1});
 
-    ASSERT_EQ(node->input_names().size(), 1);
-    ASSERT_EQ(node->input_names()[0], "count");
+    ASSERT_EQ(node->input_names().size(), 1_gc_ic);
+    ASSERT_EQ(node->input_names()[0_gc_i], "count");
 
-    ASSERT_EQ(node->output_names().size(), 1);
-    ASSERT_EQ(node->output_names()[0], "sequence");
+    ASSERT_EQ(node->output_names().size(), 1_gc_oc);
+    ASSERT_EQ(node->output_names()[0_gc_o], "sequence");
 
     gc::ValueVec inputs(1);
     gc::ValueVec outputs(1);
@@ -123,12 +124,12 @@ TEST(GcApp_Node, FilterSeq)
     ASSERT_EQ(node->input_count(), gc::InputPortCount{2});
     ASSERT_EQ(node->output_count(), gc::OutputPortCount{1});
 
-    ASSERT_EQ(node->input_names().size(), 2);
-    ASSERT_EQ(node->input_names()[0], "sequence");
-    ASSERT_EQ(node->input_names()[1], "value");
+    ASSERT_EQ(node->input_names().size(), 2_gc_ic);
+    ASSERT_EQ(node->input_names()[0_gc_i], "sequence");
+    ASSERT_EQ(node->input_names()[1_gc_i], "value");
 
-    ASSERT_EQ(node->output_names().size(), 1);
-    ASSERT_EQ(node->output_names()[0], "indices");
+    ASSERT_EQ(node->output_names().size(), 1_gc_oc);
+    ASSERT_EQ(node->output_names()[0_gc_o], "indices");
 
     gc::ValueVec inputs(2);
     gc::ValueVec outputs(1);
@@ -172,11 +173,11 @@ TEST(GcApp_Node, TestSequence)
     ASSERT_EQ(node->input_count(), gc::InputPortCount{1});
     ASSERT_EQ(node->output_count(), gc::OutputPortCount{1});
 
-    ASSERT_EQ(node->input_names().size(), 1);
-    ASSERT_EQ(node->input_names()[0], "count");
+    ASSERT_EQ(node->input_names().size(), 1_gc_ic);
+    ASSERT_EQ(node->input_names()[0_gc_i], "count");
 
-    ASSERT_EQ(node->output_names().size(), 1);
-    ASSERT_EQ(node->output_names()[0], "sequence");
+    ASSERT_EQ(node->output_names().size(), 1_gc_oc);
+    ASSERT_EQ(node->output_names()[0_gc_o], "sequence");
 
     gc::ValueVec inputs(1);
     gc::ValueVec outputs(1);
@@ -206,12 +207,12 @@ TEST(GcApp_Node, Multiply)
     ASSERT_EQ(node->input_count(), gc::InputPortCount{2});
     ASSERT_EQ(node->output_count(), gc::OutputPortCount{1});
 
-    ASSERT_EQ(node->input_names().size(), 2);
-    ASSERT_EQ(node->input_names()[0], "lhs");
-    ASSERT_EQ(node->input_names()[1], "rhs");
+    ASSERT_EQ(node->input_names().size(), 2_gc_ic);
+    ASSERT_EQ(node->input_names()[0_gc_i], "lhs");
+    ASSERT_EQ(node->input_names()[1_gc_i], "rhs");
 
-    ASSERT_EQ(node->output_names().size(), 1);
-    ASSERT_EQ(node->output_names()[0], "product");
+    ASSERT_EQ(node->output_names().size(), 1_gc_oc);
+    ASSERT_EQ(node->output_names()[0_gc_o], "product");
 
     auto check =
         [&]<typename T>(T a, T b)
@@ -234,12 +235,12 @@ TEST(GcApp_Node, Project)
     ASSERT_EQ(node->input_count(), gc::InputPortCount{2});
     ASSERT_EQ(node->output_count(), gc::OutputPortCount{1});
 
-    ASSERT_EQ(node->input_names().size(), 2);
-    ASSERT_EQ(node->input_names()[0], "value");
-    ASSERT_EQ(node->input_names()[1], "path");
+    ASSERT_EQ(node->input_names().size(), 2_gc_ic);
+    ASSERT_EQ(node->input_names()[0_gc_i], "value");
+    ASSERT_EQ(node->input_names()[1_gc_i], "path");
 
-    ASSERT_EQ(node->output_names().size(), 1);
-    ASSERT_EQ(node->output_names()[0], "projection");
+    ASSERT_EQ(node->output_names().size(), 1_gc_oc);
+    ASSERT_EQ(node->output_names()[0_gc_o], "projection");
 
     auto check =
         [&]<typename T, typename P>(T value, gc::ValuePath path, P projection)
@@ -262,12 +263,12 @@ TEST(GcApp_Node, UintSizeNode)
     ASSERT_EQ(node->input_count(), gc::InputPortCount{2});
     ASSERT_EQ(node->output_count(), gc::OutputPortCount{1});
 
-    ASSERT_EQ(node->input_names().size(), 2);
-    ASSERT_EQ(node->input_names()[0], "width");
-    ASSERT_EQ(node->input_names()[1], "height");
+    ASSERT_EQ(node->input_names().size(), 2_gc_ic);
+    ASSERT_EQ(node->input_names()[0_gc_i], "width");
+    ASSERT_EQ(node->input_names()[1_gc_i], "height");
 
-    ASSERT_EQ(node->output_names().size(), 1);
-    ASSERT_EQ(node->output_names()[0], "size");
+    ASSERT_EQ(node->output_names().size(), 1_gc_oc);
+    ASSERT_EQ(node->output_names()[0_gc_o], "size");
 
     gc::ValueVec inputs(2);
     gc::ValueVec outputs(1);
@@ -290,13 +291,13 @@ TEST(GcApp_Node, Waring)
     ASSERT_EQ(node->input_count(), gc::InputPortCount{3});
     ASSERT_EQ(node->output_count(), gc::OutputPortCount{1});
 
-    ASSERT_EQ(node->input_names().size(), 3);
-    ASSERT_EQ(node->input_names()[0], "count");
-    ASSERT_EQ(node->input_names()[1], "s");
-    ASSERT_EQ(node->input_names()[2], "k");
+    ASSERT_EQ(node->input_names().size(), 3_gc_ic);
+    ASSERT_EQ(node->input_names()[0_gc_i], "count");
+    ASSERT_EQ(node->input_names()[1_gc_i], "s");
+    ASSERT_EQ(node->input_names()[2_gc_i], "k");
 
-    ASSERT_EQ(node->output_names().size(), 1);
-    ASSERT_EQ(node->output_names()[0], "sequence");
+    ASSERT_EQ(node->output_names().size(), 1_gc_oc);
+    ASSERT_EQ(node->output_names()[0_gc_o], "sequence");
 
     auto check = [&](Uint count,
                     Uint s, Uint k,

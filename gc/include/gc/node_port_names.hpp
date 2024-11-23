@@ -2,6 +2,7 @@
 
 #include "gc/computation_node_fwd.hpp"
 #include "gc/node_port_tags.hpp"
+#include "gc/port_values.hpp"
 #include "gc/weak_port.hpp"
 
 #include "common/const_name_span.hpp"
@@ -17,17 +18,17 @@ namespace gc {
 template <typename NodeImpl,
           std::same_as<std::string_view>... Args>
 auto node_input_names(common::Type_Tag<NodeImpl>, Args... names)
-    -> common::ConstNameSpan
+    -> InputNames
 {
-    return common::const_name_span(
+    return InputNames{common::const_name_span(
         common::TypePack<NodeImpl, Input_Tag>,
-        names...);
+        names...)};
 }
 
 template <typename NodeImpl,
          std::same_as<std::string_view>... Args>
 auto node_input_names(Args... names)
-    -> common::ConstNameSpan
+    -> InputNames
 { return node_input_names(common::Type<NodeImpl>, names...); }
 
 
@@ -35,17 +36,17 @@ auto node_input_names(Args... names)
 template <typename NodeImpl,
          std::same_as<std::string_view>... Args>
 auto node_output_names(common::Type_Tag<NodeImpl>, Args... names)
-    -> common::ConstNameSpan
+    -> OutputNames
 {
-    return common::const_name_span(
+    return OutputNames{common::const_name_span(
         common::TypePack<NodeImpl, Output_Tag>,
-        names...);
+        names...)};
 }
 
 template <typename NodeImpl,
          std::same_as<std::string_view>... Args>
 auto node_output_names(Args... names)
-    -> common::ConstNameSpan
+    -> OutputNames
 { return node_output_names(common::Type<NodeImpl>, names...); }
 
 // ---
@@ -71,6 +72,10 @@ public:
     explicit DynamicInputNames(WeakPort count = 0) :
         DynamicNames{ "in_", count }
     {}
+
+    auto operator()() const
+        -> InputNames
+    { return InputNames{ DynamicNames::operator()() }; }
 };
 
 class DynamicOutputNames final :
@@ -80,6 +85,10 @@ public:
     explicit DynamicOutputNames(WeakPort count = 0) :
         DynamicNames{ "out_", count }
     {}
+
+    auto operator()() const
+        -> OutputNames
+    { return OutputNames{ DynamicNames::operator()() }; }
 };
 
 } // namespace gc

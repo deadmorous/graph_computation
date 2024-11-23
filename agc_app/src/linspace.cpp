@@ -19,11 +19,11 @@ class LinSpace final :
 {
 public:
     auto input_names() const
-        -> common::ConstNameSpan override
+        -> gc::InputNames override
     { return gc::node_input_names<LinSpace>( "first"sv, "last"sv, "count"sv ); }
 
     auto output_names() const
-        -> common::ConstNameSpan override
+        -> gc::OutputNames override
     { return gc::node_output_names<LinSpace>( "sequence"sv ); }
 
     auto default_inputs(gc::InputValues result) const

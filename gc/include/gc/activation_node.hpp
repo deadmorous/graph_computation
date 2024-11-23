@@ -112,9 +112,9 @@ struct ActivationNode
 {
     virtual ~ActivationNode() = default;
 
-    virtual auto input_names() const -> common::ConstNameSpan = 0;
+    virtual auto input_names() const -> InputNames = 0;
 
-    virtual auto output_names() const -> common::ConstNameSpan = 0;
+    virtual auto output_names() const -> OutputNames = 0;
 
     virtual auto default_inputs(gc::InputValues result) const -> void = 0;
 
@@ -123,18 +123,10 @@ struct ActivationNode
         -> void = 0;
 
     auto input_count() const -> InputPortCount
-    {
-        auto result = input_names().size();
-        assert(result <= std::numeric_limits<WeakPort>::max());
-        return InputPortCount(result);
-    }
+    { return input_names().size(); }
 
     auto output_count() const -> OutputPortCount
-    {
-        auto result = output_names().size();
-        assert(result <= std::numeric_limits<WeakPort>::max());
-        return OutputPortCount(result);
-    }
+    { return output_names().size(); }
 
 };
 

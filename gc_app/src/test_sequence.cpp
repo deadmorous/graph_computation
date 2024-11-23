@@ -31,11 +31,11 @@ class TestSequence final :
 {
 public:
     auto input_names() const
-        -> common::ConstNameSpan override
+        -> gc::InputNames override
     { return gc::node_input_names<TestSequence>( "count"sv ); }
 
     auto output_names() const
-        -> common::ConstNameSpan override
+        -> gc::OutputNames override
     { return gc::node_output_names<TestSequence>( "sequence"sv ); }
 
     auto default_inputs(gc::InputValues result) const

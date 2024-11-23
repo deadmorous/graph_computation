@@ -17,11 +17,11 @@ class UintSizeNode final :
 {
 public:
     auto input_names() const
-        -> common::ConstNameSpan override
+        -> gc::InputNames override
     { return gc::node_input_names<UintSizeNode>( "width"sv, "height"sv ); }
 
     auto output_names() const
-        -> common::ConstNameSpan override
+        -> gc::OutputNames override
     { return gc::node_output_names<UintSizeNode>( "size"sv ); }
 
     auto default_inputs(gc::InputValues result) const

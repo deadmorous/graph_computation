@@ -5,7 +5,16 @@
 
 #include "common/strong_span.hpp"
 
+#include <string_view>
+
+
 namespace gc {
+
+using InputNames =
+    common::StrongSpan<const std::string_view, InputPort>;
+
+using OutputNames =
+    common::StrongSpan<const std::string_view, OutputPort>;
 
 using OutputValues =
     common::StrongSpan<Value, OutputPort>;
