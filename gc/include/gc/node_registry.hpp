@@ -10,7 +10,7 @@ namespace gc {
 
 template <typename Node>
 using NodeRegistry =
-    common::ObjectRegstry<Node, ConstValueSpan>;
+    common::ObjectRegistry<Node, ConstValueSpan>;
 
 template <typename Node>
 auto populate_gc_node_registry(NodeRegistry<Node>&)

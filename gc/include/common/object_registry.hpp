@@ -10,7 +10,7 @@ using FactoryFunc = std::shared_ptr<Interface>(*)(ConstructionArgs...);
 
 
 template <typename Interface, typename... ConstructionArgs>
-using ObjectRegstry =
+using ObjectRegistry =
     ValueRegistry<FactoryFunc<Interface, ConstructionArgs...>>;
 
 } // namespace common
