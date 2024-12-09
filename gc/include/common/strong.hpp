@@ -186,6 +186,21 @@ auto operator<<(std::ostream& s, const T& x)
     -> std::ostream&
 { return s << x.v; }
 
+// ---
+
+template <typename T>
+requires (!StrongType<T>)
+constexpr auto raw(T& x) noexcept -> T&
+{ return x; }
+
+template <StrongType T>
+constexpr auto raw(T& x) noexcept -> typename T::Weak&
+{ return x.v; }
+
+template <StrongType T>
+constexpr auto raw(const T& x) noexcept -> const typename T::Weak&
+{ return x.v; }
+
 } // namespace common
 
 
