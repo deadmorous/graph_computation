@@ -1,5 +1,6 @@
 #include "agc_app/linspace.hpp"
 
+#include "gc/algorithm.hpp"
 #include "gc/activation_node.hpp"
 
 #include "gc/expect_n_node_args.hpp"
@@ -20,7 +21,10 @@ class LinSpace final :
 public:
     auto input_names() const
         -> gc::InputNames override
-    { return gc::node_input_names<LinSpace>( "first"sv, "last"sv, "count"sv ); }
+    {
+        return gc::node_input_names<LinSpace>(
+            "first"sv, "last"sv, "count"sv, "trigger"sv );
+    }
 
     auto output_names() const
         -> gc::OutputNames override
@@ -29,19 +33,33 @@ public:
     auto default_inputs(gc::InputValues result) const
         -> void override
     {
-        assert(result.size() == 3_gc_ic);
+        assert(result.size() == 4_gc_ic);
         result[0_gc_i] = 0.;
         result[1_gc_i] = 1.;
         result[2_gc_i] = 11;
     }
 
-    auto activation_algorithms(std::span<gc::PortActivationAlgorithm> result,
-                               gc::AlgorithmStorage& alg_storage) const
+    auto activation_algorithms(gc::ActivationAlgorithmsResult result,
+                               gc::alg::AlgorithmStorage& alg_storage) const
         -> void override
     {
-        assert(result.size() == 1);
-        auto& result0 = result[0];
-        // result0.required_inputs = gc::Ports{0u, 1u, 2u};
+        assert(result.size() == 1_gc_ic);
+
+        auto lib = alg_storage(gc::alg::Lib{ .name = "agc_app" });
+        auto header =
+            alg_storage(gc::alg::HeaderFile{ .name = "alg/linspace.hpp" });
+        auto context_type =
+            alg_storage(gc::alg::Type{ .name = "LinspaceState",
+                                       .header_file = header });
+        auto context = alg_storage(gc::alg::Var{ .type = context_type });
+
+        result[0_gc_i] =
+        {
+            .required_inputs = {},
+            // .activate = save_port(0_gc_i),
+            .context = context
+        };
+//        result0.required_inputs = gc::InputPorts{0_gc_i, 1_gc_i, 2_gc_i};
     }
 };
 
