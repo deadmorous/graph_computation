@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/any_of.hpp"
+#include "common/detail/index_like.hpp"
 #include "common/strong_fwd.hpp"
 #include "common/type.hpp"
 #include "common/zero.hpp"
@@ -12,13 +13,6 @@
 namespace common {
 
 namespace detail {
-
-template <typename T>
-concept IndexLikeType =
-    std::integral<T> || StrongIndexType<T>;
-
-template <IndexLikeType T>
-using IndexDiffType = decltype(std::declval<T>() - std::declval<T>());
 
 template <IndexLikeType T>
 struct IndexTraits final
