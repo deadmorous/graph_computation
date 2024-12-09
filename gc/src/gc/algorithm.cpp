@@ -2,7 +2,7 @@
 
 #include <unordered_map>
 
-namespace gc {
+namespace gc::alg {
 
 struct Hash
 {
@@ -20,16 +20,21 @@ struct AlgorithmStorage::Impl
         -> size_t
     { return next_id++; }
 
-    std::unordered_map<id::Vars, Vars, Hash> vars;
-    std::unordered_map<id::Func, Func, Hash> func;
-    std::unordered_map<id::InputBinding, InputBinding, Hash> input_binding;
-    std::unordered_map<id::FuncInvocation, FuncInvocation, Hash> func_invocation;
-    std::unordered_map<id::If, If, Hash> if_;
-    std::unordered_map<id::For, For, Hash> for_;
-    std::unordered_map<id::While, While, Hash> while_;
+    std::unordered_map<id::Block, Block, Hash> block_;
     std::unordered_map<id::Do, Do, Hash> do_;
-    std::unordered_map<id::Block, Block, Hash> block;
-    std::unordered_map<id::Statement, Statement, Hash> statement;
+    std::unordered_map<id::For, For, Hash> for_;
+    std::unordered_map<id::FuncInvocation, FuncInvocation, Hash> func_invocation_;
+    std::unordered_map<id::HeaderFile, HeaderFile, Hash> header_file_;
+    std::unordered_map<id::If, If, Hash> if_;
+    std::unordered_map<id::InputBinding, InputBinding, Hash> input_binding_;
+    std::unordered_map<id::Lib, Lib, Hash> lib_;
+    std::unordered_map<id::OutputActivation, OutputActivation, Hash> output_activation_;
+    std::unordered_map<id::Statement, Statement, Hash> statement_;
+    std::unordered_map<id::Symbol, Symbol, Hash> symbol_;
+    std::unordered_map<id::Type, Type, Hash> type_;
+    std::unordered_map<id::Var, Var, Hash> var_;
+    std::unordered_map<id::Vars, Vars, Hash> vars_;
+    std::unordered_map<id::While, While, Hash> while_;
 };
 
 AlgorithmStorage::AlgorithmStorage() :
@@ -38,129 +43,34 @@ AlgorithmStorage::AlgorithmStorage() :
 
 AlgorithmStorage::~AlgorithmStorage() = default;
 
-auto AlgorithmStorage::new_var()
-    -> id::Var
-{ return id::Var{ impl_->new_id() }; }
+#define IMPL_ALGORITHM_STORAGE_METHODS(Type, map_)                          \
+    auto AlgorithmStorage::operator()(Type spec)                            \
+        -> id::Type                                                         \
+    {                                                                       \
+        auto key = id::Type{ impl_->new_id() };                             \
+        impl_->map_.emplace( key, std::move(spec) );                        \
+        return key;                                                         \
+    }                                                                       \
+                                                                            \
+    auto AlgorithmStorage::operator()(id::Type spec_id)                     \
+        -> const Type&                                                      \
+    { return impl_->map_.at(spec_id); }                                     \
+    static_assert(true)
 
-auto AlgorithmStorage::operator()(Vars vars)
-    -> id::Vars
-{
-    auto key = id::Vars{ impl_->new_id() };
-    impl_->vars.emplace( key, std::move(vars) );
-    return key;
-}
+IMPL_ALGORITHM_STORAGE_METHODS(Block, block_);
+IMPL_ALGORITHM_STORAGE_METHODS(Do, do_);
+IMPL_ALGORITHM_STORAGE_METHODS(For, for_);
+IMPL_ALGORITHM_STORAGE_METHODS(FuncInvocation, func_invocation_);
+IMPL_ALGORITHM_STORAGE_METHODS(HeaderFile, header_file_);
+IMPL_ALGORITHM_STORAGE_METHODS(If, if_);
+IMPL_ALGORITHM_STORAGE_METHODS(InputBinding, input_binding_);
+IMPL_ALGORITHM_STORAGE_METHODS(Lib, lib_);
+IMPL_ALGORITHM_STORAGE_METHODS(OutputActivation, output_activation_);
+IMPL_ALGORITHM_STORAGE_METHODS(Statement, statement_);
+IMPL_ALGORITHM_STORAGE_METHODS(Symbol, symbol_);
+IMPL_ALGORITHM_STORAGE_METHODS(Type, type_);
+IMPL_ALGORITHM_STORAGE_METHODS(Var, var_);
+IMPL_ALGORITHM_STORAGE_METHODS(Vars, vars_);
+IMPL_ALGORITHM_STORAGE_METHODS(While, while_);
 
-auto AlgorithmStorage::operator()(Func func)
-    -> id::Func
-{
-    auto key = id::Func{ impl_->new_id() };
-    impl_->func.emplace( key, std::move(func) );
-    return key;
-}
-
-auto AlgorithmStorage::operator()(InputBinding input_binding)
-    -> id::InputBinding
-{
-    auto key = id::InputBinding{ impl_->new_id() };
-    impl_->input_binding.emplace( key, std::move(input_binding) );
-    return key;
-}
-
-auto AlgorithmStorage::operator()(FuncInvocation func_invocation)
-    -> id::FuncInvocation
-{
-    auto key = id::FuncInvocation{ impl_->new_id() };
-    impl_->func_invocation.emplace( key, std::move(func_invocation) );
-    return key;
-}
-
-auto AlgorithmStorage::operator()(If if_)
-    -> id::If
-{
-    auto key = id::If{ impl_->new_id() };
-    impl_->if_.emplace( key, std::move(if_) );
-    return key;
-}
-
-auto AlgorithmStorage::operator()(For for_)
-    -> id::For
-{
-    auto key = id::For{ impl_->new_id() };
-    impl_->for_.emplace( key, std::move(for_) );
-    return key;
-}
-
-auto AlgorithmStorage::operator()(While while_)
-    -> id::While
-{
-    auto key = id::While{ impl_->new_id() };
-    impl_->while_.emplace( key, std::move(while_) );
-    return key;
-}
-
-auto AlgorithmStorage::operator()(Do do_)
-    -> id::Do
-{
-    auto key = id::Do{ impl_->new_id() };
-    impl_->do_.emplace( key, std::move(do_) );
-    return key;
-}
-
-auto AlgorithmStorage::operator()(Block block)
-    -> id::Block
-{
-    auto key = id::Block{ impl_->new_id() };
-    impl_->block.emplace( key, std::move(block) );
-    return key;
-}
-
-auto AlgorithmStorage::operator()(Statement statement)
-    -> id::Statement
-{
-    auto key = id::Statement{ impl_->new_id() };
-    impl_->statement.emplace( key, std::move(statement) );
-    return key;
-}
-
-auto AlgorithmStorage::operator()(id::Vars vars)
-    -> const Vars&
-{ return impl_->vars.at(vars); }
-
-auto AlgorithmStorage::operator()(id::Func func)
-    -> const Func&
-{ return impl_->func.at(func); }
-
-auto AlgorithmStorage::operator()(id::InputBinding input_binding)
-    -> const InputBinding&
-{ return impl_->input_binding.at(input_binding); }
-
-auto AlgorithmStorage::operator()(id::FuncInvocation func_invocation)
-    -> const FuncInvocation&
-{ return impl_->func_invocation.at(func_invocation); }
-
-auto AlgorithmStorage::operator()(id::If if_)
-    -> const If&
-{ return impl_->if_.at(if_); }
-
-auto AlgorithmStorage::operator()(id::For for_)
-    -> const For&
-{ return impl_->for_.at(for_); }
-
-auto AlgorithmStorage::operator()(id::While while_)
-    -> const While&
-{ return impl_->while_.at(while_); }
-
-auto AlgorithmStorage::operator()(id::Do do_)
-    -> const Do&
-{ return impl_->do_.at(do_); }
-
-auto AlgorithmStorage::operator()(id::Block block)
-    -> const Block&
-{ return impl_->block.at(block); }
-
-auto AlgorithmStorage::operator()(id::Statement statement)
-    -> const Statement&
-{ return impl_->statement.at(statement); }
-
-
-} // namespace gc
+} // namespace gc::alg

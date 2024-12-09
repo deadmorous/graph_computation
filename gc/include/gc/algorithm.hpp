@@ -2,54 +2,26 @@
 
 #include "gc/algorithm_fwd.hpp"
 #include "gc/port.hpp"
-#include "gc/type_fwd.hpp"
 
 #include <memory>
 #include <variant>
 #include <vector>
+#include <string>
 
 
-namespace gc {
+namespace gc::alg {
 
-using Vars = std::vector<id::Var>;
-
-struct FuncArgSpec final
+struct Block
 {
-    const gc::Type* type;
-    bool ref;
+    id::Vars vars;
+    std::vector<id::Statement> statements;
 };
 
-struct FuncSignature final
-{
-    const gc::Type* ret;
-    std::vector<FuncArgSpec> args;
-};
-
-struct Func final
-{
-    std::string name;
-    FuncSignature signature;
-};
-
-struct InputBinding
-{
-    gc::InputPort port;
-    id::Var var;
-};
-
-struct FuncInvocation final
-{
-    id::Func func;
-    id::Var result;
-    id::Vars args;
-};
-
-struct If final
+struct Do final
 {
     id::Vars vars;
     id::FuncInvocation condition;
-    id::Statement then_clause;
-    id::Statement else_clause;
+    id::Statement body;
 };
 
 struct For final
@@ -61,24 +33,42 @@ struct For final
     id::Statement body;
 };
 
-struct While final
+struct FuncInvocation final
+{
+    id::Symbol func;
+    id::Var result;
+    id::Vars args;
+};
+
+struct HeaderFile final
+{
+    std::string name;
+    id::Lib lib;
+};
+
+struct If final
 {
     id::Vars vars;
     id::FuncInvocation condition;
-    id::Statement body;
+    id::Statement then_clause;
+    id::Statement else_clause;
 };
 
-struct Do final
+struct InputBinding
 {
-    id::Vars vars;
-    id::FuncInvocation condition;
-    id::Statement body;
+    gc::InputPort port;
+    id::Var var;
 };
 
-struct Block
+struct Lib final
 {
-    id::Vars vars;
-    std::vector<id::Statement> statements;
+    std::string name;
+};
+
+struct OutputActivation
+{
+    gc::OutputPort port;
+    id::Var var;
 };
 
 using Statement = std::variant<
@@ -90,38 +80,74 @@ using Statement = std::variant<
     id::Do,
     id::Block>;
 
+struct Symbol final
+{
+    std::string name;
+    HeaderFile header_file;
+};
+
+struct Type final
+{
+    std::string name;
+    id::HeaderFile header_file;
+};
+
+struct Var final
+{
+    id::Type type;
+};
+
+using Vars = std::vector<id::Var>;
+
+struct While final
+{
+    id::Vars vars;
+    id::FuncInvocation condition;
+    id::Statement body;
+};
+
+
 class AlgorithmStorage
 {
 public:
     AlgorithmStorage();
     ~AlgorithmStorage();
 
-    auto new_var() -> id::Var;
-    auto operator()(Vars) -> id::Vars;
-    auto operator()(Func) -> id::Func;
-    auto operator()(InputBinding) -> id::InputBinding;
-    auto operator()(FuncInvocation) -> id::FuncInvocation;
-    auto operator()(If) -> id::If;
-    auto operator()(For) -> id::For;
-    auto operator()(While) -> id::While;
-    auto operator()(Do) -> id::Do;
     auto operator()(Block) -> id::Block;
+    auto operator()(Do) -> id::Do;
+    auto operator()(For) -> id::For;
+    auto operator()(FuncInvocation) -> id::FuncInvocation;
+    auto operator()(HeaderFile) -> id::HeaderFile;
+    auto operator()(If) -> id::If;
+    auto operator()(InputBinding) -> id::InputBinding;
+    auto operator()(Lib) -> id::Lib;
+    auto operator()(OutputActivation) -> id::OutputActivation;
     auto operator()(Statement) -> id::Statement;
+    auto operator()(Symbol) -> id::Symbol;
+    auto operator()(Type) -> id::Type;
+    auto operator()(Var) -> id::Var;
+    auto operator()(Vars) -> id::Vars;
+    auto operator()(While) -> id::While;
 
-    auto operator()(id::Vars) -> const Vars&;
-    auto operator()(id::Func) -> const Func&;
-    auto operator()(id::InputBinding) -> const InputBinding&;
-    auto operator()(id::FuncInvocation) -> const FuncInvocation&;
-    auto operator()(id::If) -> const If&;
-    auto operator()(id::For) -> const For&;
-    auto operator()(id::While) -> const While&;
-    auto operator()(id::Do) -> const Do&;
     auto operator()(id::Block) -> const Block&;
+    auto operator()(id::Do) -> const Do&;
+    auto operator()(id::For) -> const For&;
+    auto operator()(id::FuncInvocation) -> const FuncInvocation&;
+    auto operator()(id::HeaderFile) -> const HeaderFile&;
+    auto operator()(id::If) -> const If&;
+    auto operator()(id::InputBinding) -> const InputBinding&;
+    auto operator()(id::Lib) -> const Lib&;
+    auto operator()(id::OutputActivation) -> const OutputActivation&;
     auto operator()(id::Statement) -> const Statement&;
+    auto operator()(id::Symbol) -> const Symbol&;
+    auto operator()(id::Type) -> const Type&;
+    auto operator()(id::Var) -> const Var&;
+    auto operator()(id::Vars) -> const Vars&;
+    auto operator()(id::While) -> const While&;
 
 private:
     struct Impl;
     std::unique_ptr<Impl> impl_;
 };
 
-} // namespace gc
+} // namespace gc::alg
