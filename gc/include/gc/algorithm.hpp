@@ -84,7 +84,7 @@ using Statement = std::variant<
 struct Symbol final
 {
     std::string name;
-    HeaderFile header_file;
+    id::HeaderFile header_file;
 };
 
 struct Type final
