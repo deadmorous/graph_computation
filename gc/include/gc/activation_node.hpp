@@ -9,7 +9,7 @@
 #include "common/index_set.hpp"
 
 #include <cassert>
-#include <bitset>
+#include <vector>
 
 namespace gc {
 
@@ -23,11 +23,14 @@ struct PortActivationAlgorithm final
 {
     InputPorts required_inputs;
     alg::id::Statement activate;
-    alg::id::Var context;
+    alg::id::Vars context;
 };
 
-using ActivationAlgorithmsResult =
-    common::StrongSpan<PortActivationAlgorithm, InputPort>;
+struct ActivationAlgorithmsResult
+{
+    std::vector<alg::id::InputBinding> input_bindings;
+    common::StrongSpan<PortActivationAlgorithm, InputPort> algorithms;
+};
 
 struct ActivationNode
 {
