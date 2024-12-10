@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.5)
 project(agc_app-lib LANGUAGES CXX)
 
 add_library(agc_app-lib STATIC
-    linspace.cpp)
+    nodes/linspace.cpp)
 
 add_library(agc_app::lib ALIAS agc_app-lib)
 

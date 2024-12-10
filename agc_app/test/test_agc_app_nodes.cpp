@@ -1,4 +1,4 @@
-#include "agc_app/linspace.hpp"
+#include "agc_app/nodes/linspace.hpp"
 
 #include "gc/activation_node.hpp"
 
