@@ -1,5 +1,10 @@
 #pragma once
 #include "common/macro.hpp"
+#include "common/type.hpp"
+
+#include <array>
+#include <string_view>
+#include <tuple>
 
 #define GCLIB_STRUCT_TYPE_FIELD_OF(x, field) \
     x.field
