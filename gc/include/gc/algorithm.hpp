@@ -43,6 +43,7 @@ struct FuncInvocation final
 struct HeaderFile final
 {
     std::string name;
+    bool system{};
     id::Lib lib;
 };
 
