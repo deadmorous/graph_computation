@@ -3,10 +3,9 @@
 #include "gc/activation_node_fwd.hpp"
 #include "gc/algorithm_fwd.hpp"
 #include "gc/port_values.hpp"
-#include "gc/value_fwd.hpp"
 
-#include "common/const_name_span.hpp"
 #include "common/index_set.hpp"
+#include "common/strong_vector.hpp"
 
 #include <cassert>
 #include <vector>
@@ -26,11 +25,20 @@ struct PortActivationAlgorithm final
     alg::id::Vars context;
 };
 
-struct ActivationAlgorithmsResult
+struct NodeActivationAlgorithms
 {
     std::vector<alg::id::InputBinding> input_bindings;
-    common::StrongSpan<PortActivationAlgorithm, InputPort> algorithms;
+    common::StrongVector<PortActivationAlgorithm, InputPort> algorithms;
 };
+
+struct PrintableNodeActivationAlgorithms
+{
+    const NodeActivationAlgorithms& algs;
+    const alg::AlgorithmStorage& alg_storage;
+};
+
+auto operator<<(std::ostream&, const PrintableNodeActivationAlgorithms&)
+    -> std::ostream&;
 
 struct ActivationNode
 {
@@ -42,9 +50,8 @@ struct ActivationNode
 
     virtual auto default_inputs(gc::InputValues result) const -> void = 0;
 
-    virtual auto activation_algorithms(ActivationAlgorithmsResult,
-                                       alg::AlgorithmStorage&) const
-        -> void = 0;
+    virtual auto activation_algorithms(alg::AlgorithmStorage&) const
+        -> NodeActivationAlgorithms = 0;
 
     auto input_count() const -> InputPortCount
     { return input_names().size(); }
