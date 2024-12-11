@@ -1,7 +1,10 @@
 #pragma once
 
 #include "common/detail/index_like.hpp"
+#include "common/index_range.hpp"
 #include "common/pow2.hpp"
+#include "common/strong.hpp"
+#include "common/unsafe.hpp"
 
 #include <cassert>
 #include <cstddef>
@@ -35,9 +38,91 @@ public:
 
     using Storage = detail::uint_of_size_t<common::ceil2(raw_count)>;
 
+    class const_iterator final
+    {
+    public:
+        using Traits = detail::IndexTraits<Index>;
+
+        using iterator_category = std::bidirectional_iterator_tag;
+        using difference_type   = std::ptrdiff_t;
+        using index_type        = typename Traits::index_type;
+        using value_type        = typename Traits::value_type;
+        using pointer           = typename Traits::pointer;
+        using reference         = typename Traits::reference;
+
+        const_iterator() noexcept = default;
+
+        explicit const_iterator(Storage data, index_type v) noexcept :
+            data_{data},
+            v_{v}
+        {}
+
+        auto operator*() const noexcept
+            -> reference
+        { return v_; }
+
+        auto operator->() const noexcept
+            -> pointer
+        { return &v_; }
+
+        auto operator++() noexcept -> const_iterator&
+        {
+            do
+                ++v_;
+            while (raw(v_) < raw(count) && !at_element());
+            return *this;
+        }
+
+        auto operator--() noexcept -> const_iterator&
+        {
+            assert(v_ != Zero);
+            do
+                --v_;
+            while (v_ != Zero && !at_element());
+            assert(at_element());
+            return *this;
+        }
+
+        auto operator++(int) noexcept -> const_iterator
+        { auto tmp = *this; ++(*this); return tmp; }
+
+        auto operator--(int) noexcept -> const_iterator
+        { auto tmp = *this; --(*this); return tmp; }
+
+        friend auto operator<=>(const const_iterator& a,
+                                const const_iterator& b) noexcept
+            -> std::strong_ordering
+        {
+            assert (a.data_ == b.data_);
+            return a.v_ <=> b.v_;
+        }
+
+        friend auto operator==(const const_iterator& a,
+                               const const_iterator& b) noexcept
+            -> bool
+        {
+            assert (a.data_ == b.data_);
+            return a.v_ == b.v_;
+        }
+
+    private:
+        auto at_element() const noexcept
+            -> bool
+        {
+            assert(raw(v_) < raw(count));
+            return (data_ & (one_ << raw(v_))) != 0;
+        }
+
+        Storage data_{};
+        index_type v_;
+    };
+
+    using iterator = const_iterator;
+
+
     constexpr IndexSet() noexcept = default;
 
-    explicit IndexSet(Count n) :
+    constexpr explicit IndexSet(Count n) :
         data_( (Storage{1u} << raw(n)) - 1u )
     { assert(n <= count); }
 
@@ -54,8 +139,8 @@ public:
     auto set(Index index) noexcept
         -> void
     {
-        assert(index < count);
-        data_ |= 1 << raw(index);
+        assert(raw(index) < raw(count));
+        data_ |= one_ << raw(index);
     }
 
     auto clear(std::initializer_list<Index> indices) noexcept
@@ -68,8 +153,8 @@ public:
     auto clear(Index index) noexcept
         -> void
     {
-        assert(index < count);
-        data_ &= ~(1 << index);
+        assert(raw(index) < raw(count));
+        data_ &= ~(one_ << raw(index));
     }
 
     auto toggle(std::initializer_list<Index> indices) noexcept
@@ -82,21 +167,62 @@ public:
     auto toggle(Index index) noexcept
         -> void
     {
-        assert(index < count);
-        data_ ^= 1 << index;
+        assert(raw(index) < raw(count));
+        data_ ^= one_ << raw(index);
     }
 
-    auto is_set(Index index) noexcept
+    constexpr auto contains(Index index) const noexcept
         -> bool
+    { return raw(index) < raw(count) && (data_ & (one_ << raw(index))) != 0; }
+
+    constexpr auto empty() const noexcept
+        -> bool
+    { return data_ == 0; }
+
+    static constexpr auto all() noexcept
+        -> IndexSet
+    { return { Unsafe, (one_ << raw(count)) - one_ }; }
+
+    constexpr auto size() const noexcept
+        -> size_t
     {
-        assert(index < count);
-        return (data_ & (1 << count)) != 0;
+        auto result = size_t{};
+        for (auto d=data_; d!=0; d>>=1)
+            result += d & one_;
+        return result;
     }
+
+    auto begin() const noexcept
+        -> iterator
+    {
+        auto result = iterator{ data_, Index{0} };
+        if (!contains(Index{0}))
+            ++result;
+        return result;
+    }
+
+    auto end() const noexcept
+        -> iterator
+    { return iterator{ data_, count+Index{0} }; }
+
+    // TODO
+    auto operator|(const IndexSet&) const noexcept -> IndexSet;
+    auto operator&(const IndexSet&) const noexcept -> IndexSet;
+    auto operator^(const IndexSet&) const noexcept -> IndexSet;
+    auto operator|=(const IndexSet&) noexcept -> IndexSet&;
+    auto operator&=(const IndexSet&) noexcept -> IndexSet&;
+    auto operator^=(const IndexSet&) noexcept -> IndexSet&;
 
     constexpr auto data() const noexcept
     { return data_; }
 
 private:
+    IndexSet(Unsafe_Tag, Storage data):
+        data_{ data }
+    {}
+
+    static constexpr auto one_ = Storage{1};
+
     Storage data_{};
 };
 
