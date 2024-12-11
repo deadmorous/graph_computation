@@ -52,7 +52,7 @@ AlgorithmStorage::~AlgorithmStorage() = default;
         return key;                                                         \
     }                                                                       \
                                                                             \
-    auto AlgorithmStorage::operator()(id::Type spec_id)                     \
+    auto AlgorithmStorage::operator()(id::Type spec_id) const               \
         -> const Type&                                                      \
     { return impl_->map_.at(spec_id); }                                     \
     static_assert(true)

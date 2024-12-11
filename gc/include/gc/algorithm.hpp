@@ -130,21 +130,21 @@ public:
     auto operator()(Vars) -> id::Vars;
     auto operator()(While) -> id::While;
 
-    auto operator()(id::Block) -> const Block&;
-    auto operator()(id::Do) -> const Do&;
-    auto operator()(id::For) -> const For&;
-    auto operator()(id::FuncInvocation) -> const FuncInvocation&;
-    auto operator()(id::HeaderFile) -> const HeaderFile&;
-    auto operator()(id::If) -> const If&;
-    auto operator()(id::InputBinding) -> const InputBinding&;
-    auto operator()(id::Lib) -> const Lib&;
-    auto operator()(id::OutputActivation) -> const OutputActivation&;
-    auto operator()(id::Statement) -> const Statement&;
-    auto operator()(id::Symbol) -> const Symbol&;
-    auto operator()(id::Type) -> const Type&;
-    auto operator()(id::Var) -> const Var&;
-    auto operator()(id::Vars) -> const Vars&;
-    auto operator()(id::While) -> const While&;
+    auto operator()(id::Block) const -> const Block&;
+    auto operator()(id::Do) const -> const Do&;
+    auto operator()(id::For) const -> const For&;
+    auto operator()(id::FuncInvocation) const -> const FuncInvocation&;
+    auto operator()(id::HeaderFile) const -> const HeaderFile&;
+    auto operator()(id::If) const -> const If&;
+    auto operator()(id::InputBinding) const -> const InputBinding&;
+    auto operator()(id::Lib) const -> const Lib&;
+    auto operator()(id::OutputActivation) const -> const OutputActivation&;
+    auto operator()(id::Statement) const -> const Statement&;
+    auto operator()(id::Symbol)const -> const Symbol&;
+    auto operator()(id::Type) const -> const Type&;
+    auto operator()(id::Var) const -> const Var&;
+    auto operator()(id::Vars) const -> const Vars&;
+    auto operator()(id::While) const -> const While&;
 
 private:
     struct Impl;
