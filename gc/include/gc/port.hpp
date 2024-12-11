@@ -5,6 +5,8 @@
 
 #include "common/strong.hpp"
 
+#include <ostream>
+
 
 namespace gc {
 
@@ -62,5 +64,13 @@ constexpr inline auto operator<=>(const OutputPortCount& a,
                                   const OutputPort& b) noexcept
     -> std::strong_ordering
 { return a.v <=> b.v; }
+
+inline auto operator<<(std::ostream& s, InputPort p)
+    -> std::ostream&
+{ return s << "in_" << static_cast<uint32_t>(p.v); }
+
+inline auto operator<<(std::ostream& s, OutputPort p)
+    -> std::ostream&
+{ return s << "out_" << static_cast<uint32_t>(p.v); }
 
 } // namespace gc
