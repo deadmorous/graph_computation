@@ -9,6 +9,7 @@
 #include <cassert>
 #include <iostream>
 #include <limits>
+#include <type_traits>
 #include <utility>
 
 
@@ -70,11 +71,11 @@ struct Strong final
     template <StrongType Index>
         requires is_adjacent_index<Index>
     auto operator+(Index that) const -> Index
-    { return Index{ v + that.v }; }
+    { return Index{ static_cast<Weak>(v + that.v) }; }
 
     auto operator-(Self that) const -> Self
         requires is_count
-    { return Self{ v - that.v }; }
+    { return Self{ static_cast<Weak>(v - that.v) }; }
 
     auto operator+=(Self that) -> Self&
         requires is_count
@@ -189,8 +190,13 @@ auto operator<<(std::ostream& s, const T& x)
 // ---
 
 template <typename T>
-requires (!StrongType<T>)
+requires (!StrongType<T> && !std::is_const_v<T>)
 constexpr auto raw(T& x) noexcept -> T&
+{ return x; }
+
+template <typename T>
+requires (!StrongType<T>)
+constexpr auto raw(const T& x) noexcept -> const T&
 { return x; }
 
 template <StrongType T>
