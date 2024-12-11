@@ -37,13 +37,12 @@ public:
         result[0_gc_i] = LinSpaceSpec{};
     }
 
-    auto activation_algorithms(gc::ActivationAlgorithmsResult result,
-                               gc::alg::AlgorithmStorage& s) const
-        -> void override
+    auto activation_algorithms(gc::alg::AlgorithmStorage& s) const
+        -> gc::NodeActivationAlgorithms override
     {
         namespace a = gc::alg;
 
-        assert(result.algorithms.size() == 1_gc_ic);
+        auto result = gc::NodeActivationAlgorithms{};
 
         // Declare types
 
@@ -137,12 +136,13 @@ public:
                     }) })
                 } }) });
 
-        result.algorithms[0_gc_i] =
-        {
+        result.algorithms.emplace_back(gc::PortActivationAlgorithm{
             .required_inputs = {0_gc_i},
             .activate = activate_statement,
             .context = {}   // No context is required, node is stateless
-        };
+        });
+
+        return result;
     }
 };
 
