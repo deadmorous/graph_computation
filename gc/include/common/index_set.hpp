@@ -205,13 +205,27 @@ public:
         -> iterator
     { return iterator{ data_, count+Index{0} }; }
 
-    // TODO
-    auto operator|(const IndexSet&) const noexcept -> IndexSet;
-    auto operator&(const IndexSet&) const noexcept -> IndexSet;
-    auto operator^(const IndexSet&) const noexcept -> IndexSet;
-    auto operator|=(const IndexSet&) noexcept -> IndexSet&;
-    auto operator&=(const IndexSet&) noexcept -> IndexSet&;
-    auto operator^=(const IndexSet&) noexcept -> IndexSet&;
+
+    auto operator|(const IndexSet& that) const noexcept -> IndexSet
+    { return { Unsafe, static_cast<Storage>(data_ | that.data_) }; }
+
+    auto operator&(const IndexSet& that) const noexcept -> IndexSet
+    { return { Unsafe, static_cast<Storage>(data_ & that.data_) }; }
+
+    auto operator^(const IndexSet& that) const noexcept -> IndexSet
+    { return { Unsafe, static_cast<Storage>(data_ ^ that.data_) }; }
+
+    auto operator|=(const IndexSet& that) noexcept -> IndexSet&
+    { data_ |= that.data_;   return *this; }
+
+    auto operator&=(const IndexSet& that) noexcept -> IndexSet&
+    { data_ &= that.data_;   return *this; }
+
+    auto operator^=(const IndexSet& that) noexcept -> IndexSet&
+    { data_ ^= that.data_;   return *this; }
+
+    auto operator~() const noexcept -> IndexSet
+    { return *this ^ all(); }
 
     constexpr auto data() const noexcept
     { return data_; }

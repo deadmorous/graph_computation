@@ -57,9 +57,20 @@ TEST(Common_IndexSet, Weak)
     s.set(2);
     s.toggle(7);
     s.clear(8);
-    EXPECT_EQ(s.size(), 1);
+    s.set({5, 6});
+    EXPECT_EQ(s.size(), 3);
     EXPECT_FALSE(s.empty());
-    check_values(s, {2});
+    check_values(s, {2, 5, 6});
+
+    auto s1 = S{ 0, 1, 2, 3, 4 };
+    check_values(~s1, {5, 6, 7, 8, 9});
+    check_values(s | s1, {0, 1, 2, 3, 4, 5, 6});
+    check_values(s & s1, {2});
+    check_values(s ^ s1, {0, 1, 3, 4, 5, 6});
+
+    s1 ^= s1;
+    ASSERT_TRUE(s1.empty());
+    check_values(s1, {});
 }
 
 
@@ -106,9 +117,20 @@ TEST(Common_IndexSet, Strong)
     s.set(2_i);
     s.toggle(7_i);
     s.clear(8_i);
-    EXPECT_EQ(s.size(), 1);
+    s.set({5_i, 6_i});
+    EXPECT_EQ(s.size(), 3);
     EXPECT_FALSE(s.empty());
-    check_values(s, {2_i});
+    check_values(s, {2_i, 5_i, 6_i});
+
+    auto s1 = S{ 0_i, 1_i, 2_i, 3_i, 4_i };
+    check_values(~s1, {5_i, 6_i, 7_i, 8_i, 9_i});
+    check_values(s | s1, {0_i, 1_i, 2_i, 3_i, 4_i, 5_i, 6_i});
+    check_values(s & s1, {2_i});
+    check_values(s ^ s1, {0_i, 1_i, 3_i, 4_i, 5_i, 6_i});
+
+    s1 ^= s1;
+    ASSERT_TRUE(s1.empty());
+    check_values(s1, {});
 
     auto str =
         common::format_seq(
