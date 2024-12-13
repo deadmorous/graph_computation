@@ -330,7 +330,7 @@ public:
                     Ind ind = {}) const
         -> void
     {
-        s << ind << "Input bindings\n";
+        s << ind << "input bindings\n";
         auto next_ind = next(ind);
         for (auto id : bindings)
             (*this)(s, id, next_ind);
@@ -351,11 +351,14 @@ public:
         }
     }
 
-
-    // template <typename T>
-    // auto operator()(std::ostream& s, const T& value) const
-    //     -> void
-    // { s << value; }
+    auto operator()(std::ostream& s,
+                    const NodeActivationAlgorithms& algs,
+                    Ind ind = {}) const
+        -> void
+    {
+        (*this)(s, algs.input_bindings, ind);
+        (*this)(s, algs.algorithms, ind);
+    }
 
 private:
     const alg::AlgorithmStorage& storage_;
@@ -371,23 +374,11 @@ public:
         helper_{ storage }
     {}
 
-    // template <typename Seq>
-    // auto seq(const Seq& seq, std::string_view delim = ", ") const
-    //     -> std::string
-    // { return common::format_seq(seq, delim, helper_); }
-
     template <typename T>
     auto operator<<(const T& value) const
         -> const AlgPrinter&
     {
         helper_(s_, value);
-        return *this;
-    }
-
-    auto operator<<(std::ostream& (*manip)(std::ostream&)) const
-        -> const AlgPrinter&
-    {
-        s_ << manip;
         return *this;
     }
 
@@ -402,18 +393,9 @@ private:
 auto operator<<(std::ostream& s, const PrintableNodeActivationAlgorithms& a)
     -> std::ostream&
 {
-    auto printer = AlgPrinter{ s, a.alg_storage };
-    const auto& alg = a.algs;
-
-    printer << alg.input_bindings;
-    printer << alg.algorithms;
-
-    // for (auto port : alg.algorithms.index_range())
-    // {
-    //     printer << "Activation algorithm for port "<< port << std::endl;
-    //     printer << alg.algorithms[port];
-    // }
-
+    const auto& [algs, storage] = a;
+    auto printer = AlgPrinter{ s, storage };
+    printer << algs;
     return s;
 }
 
