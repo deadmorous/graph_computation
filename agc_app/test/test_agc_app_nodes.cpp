@@ -12,7 +12,7 @@ using namespace gc::literals;
 using namespace std::string_view_literals;
 
 
-TEST(GcApp_Node, LinSpace)
+TEST(AgcApp_Node, LinSpace)
 {
     auto node = make_linspace({});
     EXPECT_EQ(node->input_count(), 1_gc_ic);
@@ -27,7 +27,7 @@ TEST(GcApp_Node, LinSpace)
         << std::endl;
 }
 
-TEST(GcApp_Node, Printer)
+TEST(AgcApp_Node, Printer)
 {
     auto node = make_printer({});
     EXPECT_EQ(node->input_count(), 1_gc_ic);

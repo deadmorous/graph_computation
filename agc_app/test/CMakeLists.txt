@@ -7,6 +7,7 @@ enable_testing()
 add_executable(
     agc-app-test
     main.cpp
+    test_agc_app_graph.cpp
     test_agc_app_nodes.cpp)
 
 target_link_libraries(
