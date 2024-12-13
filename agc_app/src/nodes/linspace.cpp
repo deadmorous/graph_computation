@@ -64,11 +64,6 @@ public:
                 .name = "gc_app::LinSpaceSpec",
                 .header_file = linspace_spec_header });
 
-        auto iter_state_type =
-            s(a::Type{
-                .name = "gc_app::LinSpaceIterState",
-                .header_file = linspace_alg_header });
-
         auto double_type =
             s(a::Type{ .name = "double" });
 
@@ -100,34 +95,37 @@ public:
 
         // Define ativation algorithm
 
+        auto iter_state_init =
+            s(a::FuncInvocation{
+                .func = iter_init_func,
+                .args = s(a::Vars{spec}) });
+
         auto iter_state =
-            s(a::Var{ iter_state_type });
+            s(a::Var{ iter_state_init });
+
 
         auto iter_state_args =
             s(a::Vars{iter_state});
 
+        auto output_port_value_init =
+            s(a::FuncInvocation{
+                .func = iter_deref_func,
+                .args = iter_state_args });
+
         auto output_port_value =
-            s(a::Var{ double_type });
+            s(a::Var{ output_port_value_init });
 
         auto activate_statement =
             s(a::Statement{ s(a::Block{
                 .vars = s(a::Vars{iter_state}),
                 .statements = {
-                    s(a::Statement{ s(a::FuncInvocation{
-                        .func = iter_init_func,
-                        .result = iter_state,
-                        .args = s(a::Vars{spec}) }) }),
                     s(a::Statement{ s(a::While{
                         .condition = s(a::FuncInvocation{
                             .func = iter_next_func,
                             .args = iter_state_args }),
                         .body = s(a::Statement{ s(a::Block{
+                            .vars = s(a::Vars{ output_port_value }),
                             .statements = {
-                                s(a::Statement{ s(a::FuncInvocation{
-                                    .func = iter_deref_func,
-                                    .result = output_port_value,
-                                    .args = iter_state_args
-                                }) }),
                                 s(a::Statement{ s(a::OutputActivation{
                                     .port = 0_gc_o,
                                     .var = output_port_value
