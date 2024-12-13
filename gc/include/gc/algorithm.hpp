@@ -95,7 +95,8 @@ struct Type final
 
 using Var = std::variant<
     id::FuncInvocation,
-    id::Type>;
+    id::Type,
+    id::TypeFromBinding>;
 
 using Vars = std::vector<id::Var>;
 

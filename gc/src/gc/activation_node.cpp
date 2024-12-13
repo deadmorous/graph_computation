@@ -264,6 +264,12 @@ public:
           << '\n';
     }
 
+    auto operator()(std::ostream& s,
+                    alg::id::TypeFromBinding id,
+                    Ind ind = {}) const
+        -> void
+    { s << ind << "type from binding\n"; }
+
     auto operator()(std::ostream& s, alg::id::Var id, Ind ind = {}) const
         -> void
     {

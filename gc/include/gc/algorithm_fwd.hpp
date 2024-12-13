@@ -20,6 +20,7 @@ GCLIB_STRONG_TYPE(OutputActivation, size_t);
 GCLIB_STRONG_TYPE(Statement, size_t);
 GCLIB_STRONG_TYPE(Symbol, size_t);
 GCLIB_STRONG_TYPE(Type, size_t);
+GCLIB_STRONG_TYPE(TypeFromBinding, size_t);
 GCLIB_STRONG_TYPE(Var, size_t);
 GCLIB_STRONG_TYPE(Vars, size_t);
 GCLIB_STRONG_TYPE(While, size_t);
