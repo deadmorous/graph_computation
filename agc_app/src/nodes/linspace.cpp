@@ -75,7 +75,7 @@ public:
         // Bind input
 
         auto spec =
-            s(a::Var{ .type = spec_type });
+            s(a::Var{ spec_type });
 
         result.input_bindings = {
             s(a::InputBinding{ .port = 0_gc_i, .var = spec })
@@ -101,13 +101,13 @@ public:
         // Define ativation algorithm
 
         auto iter_state =
-            s(a::Var{ .type = iter_state_type });
+            s(a::Var{ iter_state_type });
 
         auto iter_state_args =
             s(a::Vars{iter_state});
 
         auto output_port_value =
-            s(a::Var{ .type = double_type });
+            s(a::Var{ double_type });
 
         auto activate_statement =
             s(a::Statement{ s(a::Block{

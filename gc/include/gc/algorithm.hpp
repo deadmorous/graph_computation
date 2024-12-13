@@ -93,10 +93,9 @@ struct Type final
     id::HeaderFile header_file;
 };
 
-struct Var final
-{
-    id::Type type;
-};
+using Var = std::variant<
+    id::FuncInvocation,
+    id::Type>;
 
 using Vars = std::vector<id::Var>;
 
