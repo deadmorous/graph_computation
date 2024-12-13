@@ -5,6 +5,7 @@ project(gc-lib LANGUAGES CXX)
 add_library(gc-lib STATIC
     detail/parse_node_port.cpp
     expect_n_node_args.cpp
+    gc/activation_graph.cpp
     gc/activation_node.cpp
     gc/algorithm.cpp
     gc/computation_node_registry.cpp
