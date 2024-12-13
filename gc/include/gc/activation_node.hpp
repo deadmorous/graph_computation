@@ -25,10 +25,16 @@ struct PortActivationAlgorithm final
     alg::id::Vars context;
 };
 
+using InputBindingVec =
+    std::vector<alg::id::InputBinding>;
+
+using PortActivationAlgorithmVec =
+    common::StrongVector<PortActivationAlgorithm, InputPort>;
+
 struct NodeActivationAlgorithms
 {
-    std::vector<alg::id::InputBinding> input_bindings;
-    common::StrongVector<PortActivationAlgorithm, InputPort> algorithms;
+    InputBindingVec input_bindings;
+    PortActivationAlgorithmVec algorithms;
 };
 
 struct PrintableNodeActivationAlgorithms
