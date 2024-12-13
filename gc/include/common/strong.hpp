@@ -66,7 +66,7 @@ struct Strong final
 
     auto operator+(Self that) const -> Self
         requires is_count
-    { return Self{ v + that.v }; }
+    { return Self{ static_cast<Weak>(v + that.v) }; }
 
     template <StrongType Index>
         requires is_adjacent_index<Index>
