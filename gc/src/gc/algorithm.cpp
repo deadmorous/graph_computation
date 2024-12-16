@@ -32,6 +32,7 @@ struct AlgorithmStorage::Impl
     std::unordered_map<id::Statement, Statement, Hash> statement_;
     std::unordered_map<id::Symbol, Symbol, Hash> symbol_;
     std::unordered_map<id::Type, Type, Hash> type_;
+    std::unordered_map<id::TypeFromBinding, TypeFromBinding, Hash> type_from_binding_;
     std::unordered_map<id::Var, Var, Hash> var_;
     std::unordered_map<id::Vars, Vars, Hash> vars_;
     std::unordered_map<id::While, While, Hash> while_;
@@ -69,6 +70,7 @@ IMPL_ALGORITHM_STORAGE_METHODS(OutputActivation, output_activation_);
 IMPL_ALGORITHM_STORAGE_METHODS(Statement, statement_);
 IMPL_ALGORITHM_STORAGE_METHODS(Symbol, symbol_);
 IMPL_ALGORITHM_STORAGE_METHODS(Type, type_);
+IMPL_ALGORITHM_STORAGE_METHODS(TypeFromBinding, type_from_binding_);
 IMPL_ALGORITHM_STORAGE_METHODS(Var, var_);
 IMPL_ALGORITHM_STORAGE_METHODS(Vars, vars_);
 IMPL_ALGORITHM_STORAGE_METHODS(While, while_);

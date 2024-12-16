@@ -93,6 +93,10 @@ struct Type final
     id::HeaderFile header_file;
 };
 
+struct TypeFromBinding final
+{
+};
+
 using Var = std::variant<
     id::FuncInvocation,
     id::Type,
@@ -126,6 +130,7 @@ public:
     auto operator()(Statement) -> id::Statement;
     auto operator()(Symbol) -> id::Symbol;
     auto operator()(Type) -> id::Type;
+    auto operator()(TypeFromBinding) -> id::TypeFromBinding;
     auto operator()(Var) -> id::Var;
     auto operator()(Vars) -> id::Vars;
     auto operator()(While) -> id::While;
@@ -142,6 +147,7 @@ public:
     auto operator()(id::Statement) const -> const Statement&;
     auto operator()(id::Symbol)const -> const Symbol&;
     auto operator()(id::Type) const -> const Type&;
+    auto operator()(id::TypeFromBinding) const -> const TypeFromBinding&;
     auto operator()(id::Var) const -> const Var&;
     auto operator()(id::Vars) const -> const Vars&;
     auto operator()(id::While) const -> const While&;
@@ -150,5 +156,13 @@ private:
     struct Impl;
     std::unique_ptr<Impl> impl_;
 };
+
+template <typename T>
+concept AlgorithmIdType =
+    requires(T id, const AlgorithmStorage& s)
+    {
+        requires std::same_as<T, std::decay_t<T>>;
+        s(id);
+    };
 
 } // namespace gc::alg
