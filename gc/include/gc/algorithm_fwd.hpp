@@ -6,24 +6,26 @@
 
 namespace gc::alg {
 
+using WeakId = size_t;
+
 namespace id {
 
-GCLIB_STRONG_TYPE(Block, size_t);
-GCLIB_STRONG_TYPE(Do, size_t);
-GCLIB_STRONG_TYPE(For, size_t);
-GCLIB_STRONG_TYPE(FuncInvocation, size_t);
-GCLIB_STRONG_TYPE(HeaderFile, size_t);
-GCLIB_STRONG_TYPE(If, size_t);
-GCLIB_STRONG_TYPE(InputBinding, size_t);
-GCLIB_STRONG_TYPE(Lib, size_t);
-GCLIB_STRONG_TYPE(OutputActivation, size_t);
-GCLIB_STRONG_TYPE(Statement, size_t);
-GCLIB_STRONG_TYPE(Symbol, size_t);
-GCLIB_STRONG_TYPE(Type, size_t);
-GCLIB_STRONG_TYPE(TypeFromBinding, size_t);
-GCLIB_STRONG_TYPE(Var, size_t);
-GCLIB_STRONG_TYPE(Vars, size_t);
-GCLIB_STRONG_TYPE(While, size_t);
+GCLIB_STRONG_TYPE(Block, WeakId);
+GCLIB_STRONG_TYPE(Do, WeakId);
+GCLIB_STRONG_TYPE(For, WeakId);
+GCLIB_STRONG_TYPE(FuncInvocation, WeakId);
+GCLIB_STRONG_TYPE(HeaderFile, WeakId);
+GCLIB_STRONG_TYPE(If, WeakId);
+GCLIB_STRONG_TYPE(InputBinding, WeakId);
+GCLIB_STRONG_TYPE(Lib, WeakId);
+GCLIB_STRONG_TYPE(OutputActivation, WeakId);
+GCLIB_STRONG_TYPE(Statement, WeakId);
+GCLIB_STRONG_TYPE(Symbol, WeakId);
+GCLIB_STRONG_TYPE(Type, WeakId);
+GCLIB_STRONG_TYPE(TypeFromBinding, WeakId);
+GCLIB_STRONG_TYPE(Var, WeakId);
+GCLIB_STRONG_TYPE(Vars, WeakId);
+GCLIB_STRONG_TYPE(While, WeakId);
 
 } // namespace id
 
