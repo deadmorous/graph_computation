@@ -23,16 +23,22 @@ struct AlgorithmStorage::Impl
     std::unordered_map<id::Block, Block, Hash> block_;
     std::unordered_map<id::Do, Do, Hash> do_;
     std::unordered_map<id::For, For, Hash> for_;
-    std::unordered_map<id::FuncInvocation, FuncInvocation, Hash> func_invocation_;
+    std::unordered_map<id::FuncInvocation, FuncInvocation, Hash>
+        func_invocation_;
     std::unordered_map<id::HeaderFile, HeaderFile, Hash> header_file_;
     std::unordered_map<id::If, If, Hash> if_;
     std::unordered_map<id::InputBinding, InputBinding, Hash> input_binding_;
     std::unordered_map<id::Lib, Lib, Hash> lib_;
-    std::unordered_map<id::OutputActivation, OutputActivation, Hash> output_activation_;
+    std::unordered_map<id::OutputActivation, OutputActivation, Hash>
+        output_activation_;
+    std::unordered_map<id::OutputBinding, OutputBinding, Hash> output_binding_;
+    std::unordered_map<id::ReturnOutputActivation, ReturnOutputActivation, Hash>
+        return_output_activation_;
     std::unordered_map<id::Statement, Statement, Hash> statement_;
     std::unordered_map<id::Symbol, Symbol, Hash> symbol_;
     std::unordered_map<id::Type, Type, Hash> type_;
-    std::unordered_map<id::TypeFromBinding, TypeFromBinding, Hash> type_from_binding_;
+    std::unordered_map<id::TypeFromBinding, TypeFromBinding, Hash>
+        type_from_binding_;
     std::unordered_map<id::Var, Var, Hash> var_;
     std::unordered_map<id::Vars, Vars, Hash> vars_;
     std::unordered_map<id::While, While, Hash> while_;
@@ -67,6 +73,9 @@ IMPL_ALGORITHM_STORAGE_METHODS(If, if_);
 IMPL_ALGORITHM_STORAGE_METHODS(InputBinding, input_binding_);
 IMPL_ALGORITHM_STORAGE_METHODS(Lib, lib_);
 IMPL_ALGORITHM_STORAGE_METHODS(OutputActivation, output_activation_);
+IMPL_ALGORITHM_STORAGE_METHODS(OutputBinding, output_binding_);
+IMPL_ALGORITHM_STORAGE_METHODS(ReturnOutputActivation,
+                               return_output_activation_);
 IMPL_ALGORITHM_STORAGE_METHODS(Statement, statement_);
 IMPL_ALGORITHM_STORAGE_METHODS(Symbol, symbol_);
 IMPL_ALGORITHM_STORAGE_METHODS(Type, type_);

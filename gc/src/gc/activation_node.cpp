@@ -209,7 +209,7 @@ public:
         -> void
     {
         const auto& spec = storage_(id);
-        s << ind << "@module " << spec.name;
+        s << ind << "@module " << spec.name << '\n';
     }
 
     auto operator()(std::ostream& s,
@@ -218,7 +218,25 @@ public:
         -> void
     {
         const auto& spec = storage_(id);
-        s << ind << Prefixed{spec.var} << " => " << spec.port;
+        s << ind << Prefixed{spec.var} << " => " << spec.port << '\n';
+    }
+
+    auto operator()(std::ostream& s,
+                    alg::id::OutputBinding id,
+                    Ind ind = {}) const
+        -> void
+    {
+        const auto& spec = storage_(id);
+        s << ind << Prefixed{spec.var} << " => " << spec.port << '\n';
+    }
+
+    auto operator()(std::ostream& s,
+                    alg::id::ReturnOutputActivation id,
+                    Ind ind = {}) const
+        -> void
+    {
+        const auto& spec = storage_(id);
+        s << ind << "=> " << spec.port << '\n';
     }
 
     auto operator()(std::ostream& s,
@@ -319,8 +337,6 @@ public:
         s << ind << "Required inputs: {"
           << common::format_seq(a.required_inputs)
           << "}\n";
-        s << ind << "context\n";
-        (*this)(s, a.context, next(ind));
         s << ind << "activate\n";
         (*this)(s, a.activate, next(ind));
     }
@@ -331,6 +347,17 @@ public:
         -> void
     {
         s << ind << "input bindings\n";
+        auto next_ind = next(ind);
+        for (auto id : bindings)
+            (*this)(s, id, next_ind);
+    }
+
+    auto operator()(std::ostream& s,
+                    const OutputBindingVec& bindings,
+                    Ind ind = {}) const
+        -> void
+    {
+        s << ind << "output bindings\n";
         auto next_ind = next(ind);
         for (auto id : bindings)
             (*this)(s, id, next_ind);
@@ -357,7 +384,10 @@ public:
         -> void
     {
         (*this)(s, algs.input_bindings, ind);
+        (*this)(s, algs.output_bindings, ind);
         (*this)(s, algs.algorithms, ind);
+        s << ind << "context\n";
+        (*this)(s, algs.context, next(ind));
     }
 
 private:

@@ -11,7 +11,7 @@
 
 namespace gc::alg {
 
-struct Block
+struct Block final
 {
     id::Vars vars;
     std::vector<id::Statement> statements;
@@ -55,7 +55,7 @@ struct If final
     id::Statement else_clause;
 };
 
-struct InputBinding
+struct InputBinding final
 {
     gc::InputPort port;
     id::Var var;
@@ -66,10 +66,21 @@ struct Lib final
     std::string name;
 };
 
-struct OutputActivation
+struct OutputActivation final
 {
     gc::OutputPort port;
     id::Var var;
+};
+
+struct OutputBinding final
+{
+    gc::OutputPort port;
+    id::Var var;
+};
+
+struct ReturnOutputActivation final
+{
+    gc::OutputPort port;
 };
 
 using Statement = std::variant<
@@ -127,6 +138,8 @@ public:
     auto operator()(InputBinding) -> id::InputBinding;
     auto operator()(Lib) -> id::Lib;
     auto operator()(OutputActivation) -> id::OutputActivation;
+    auto operator()(OutputBinding) -> id::OutputBinding;
+    auto operator()(ReturnOutputActivation) -> id::ReturnOutputActivation;
     auto operator()(Statement) -> id::Statement;
     auto operator()(Symbol) -> id::Symbol;
     auto operator()(Type) -> id::Type;
@@ -144,6 +157,9 @@ public:
     auto operator()(id::InputBinding) const -> const InputBinding&;
     auto operator()(id::Lib) const -> const Lib&;
     auto operator()(id::OutputActivation) const -> const OutputActivation&;
+    auto operator()(id::OutputBinding) const -> const OutputBinding&;
+    auto operator()(id::ReturnOutputActivation) const
+        -> const ReturnOutputActivation&;
     auto operator()(id::Statement) const -> const Statement&;
     auto operator()(id::Symbol)const -> const Symbol&;
     auto operator()(id::Type) const -> const Type&;
