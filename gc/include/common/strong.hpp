@@ -64,6 +64,10 @@ struct Strong final
         return *this;
     }
 
+    static constexpr auto max() noexcept -> Self
+    requires arithmetic
+    { return Self{ std::numeric_limits<Weak>::max() }; }
+
     auto operator+(Self that) const -> Self
         requires is_count
     { return Self{ static_cast<Weak>(v + that.v) }; }
