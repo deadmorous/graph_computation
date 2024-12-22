@@ -80,8 +80,10 @@ public:
         result.algorithms.emplace_back(gc::PortActivationAlgorithm{
             .required_inputs = {0_gc_i},
             .activate = activate_statement,
-            .context = {}   // No context is required, node is stateless
         });
+
+        // No context is required, node is stateless -
+        // not setting `result.context`.
 
         return result;
     }
