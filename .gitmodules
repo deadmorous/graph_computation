@@ -10,3 +10,6 @@
 [submodule "3p/yaml-cpp"]
 	path = 3p/yaml-cpp
 	url = https://github.com/jbeder/yaml-cpp.git
+[submodule "3p/benchmark"]
+	path = 3p/benchmark
+	url = https://github.com/google/benchmark.git
