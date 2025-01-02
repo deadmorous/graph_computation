@@ -26,6 +26,16 @@ GCLIB_STRONG_TYPE(MyIndex, uint32_t);
 } // anonymous namespace
 
 
+TEST(Gc, ActuallyEqualityComparable)
+{
+    using Vs = std::vector<MyStruct>;
+    using Vi = std::vector<int>;
+    static_assert(!gc::detail::actually_equality_comparable<MyStruct>);
+    static_assert(!gc::detail::actually_equality_comparable<Vs>);
+    static_assert(gc::detail::actually_equality_comparable<Vi>);
+    static_assert(gc::detail::actually_equality_comparable<int>);
+}
+
 TEST(Gc, Type)
 {
     const auto* t_int = gc::Type::of<int>();

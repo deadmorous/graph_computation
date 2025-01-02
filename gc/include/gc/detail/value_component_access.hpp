@@ -18,6 +18,33 @@
 
 namespace gc::detail {
 
+template <typename T>
+constexpr inline auto actually_equality_comparable_v =
+    std::equality_comparable<T>;
+
+template <typename T>
+    requires requires(const T& v)
+    { std::begin(v); }
+constexpr inline auto actually_equality_comparable_v<T> =
+    actually_equality_comparable_v<decltype(*std::begin(std::declval<T>()))>;
+
+template <typename... Ts>
+constexpr inline auto actually_equality_comparable_v<std::tuple<Ts...>> =
+    (actually_equality_comparable_v<Ts> && ...);
+
+template <typename T0, typename T1>
+constexpr inline auto actually_equality_comparable_v<std::pair<T0, T1>> =
+    actually_equality_comparable_v<T0> && actually_equality_comparable_v<T1>;
+
+// NOTE: The reason to introduce `actually_equality_comparable` is that
+// `std::equality_comparable` is always `true` for standard containers, which
+// leads to compilation errors when comparing a container of `T` elements with
+// `std::equality_comparable<T>` == false.
+template <typename T>
+concept actually_equality_comparable = actually_equality_comparable_v<T>;
+
+// ---
+
 template <typename Type>
 struct ValueComponentAccess
 {
@@ -178,7 +205,7 @@ struct ValueComponentAccessImpl final : ValueComponentAccess<Type>
     auto equal(const std::any& lhs, const std::any& rhs) const
         -> bool override
     {
-        if constexpr (std::equality_comparable<T>)
+        if constexpr (actually_equality_comparable<T>)
             return unpack<T>(lhs) == unpack<T>(rhs);
         else
         {
