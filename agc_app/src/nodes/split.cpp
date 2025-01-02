@@ -1,4 +1,4 @@
-#include "agc_app/nodes/printer.hpp"
+#include "agc_app/nodes/split.hpp"
 
 #include "gc/algorithm.hpp"
 #include "gc/activation_node.hpp"
@@ -7,8 +7,6 @@
 #include "gc/node_port_names.hpp"
 #include "gc/value.hpp"
 
-#include <cassert>
-
 
 using namespace gc::literals;
 using namespace std::string_view_literals;
@@ -16,19 +14,23 @@ using namespace std::string_view_literals;
 namespace agc_app {
 namespace {
 
-class Printer final :
+class Split final :
     public gc::ActivationNode
 {
 public:
+    explicit Split(gc::OutputPortCount output_port_count):
+        output_port_names_{ output_port_count }
+    {}
+
     auto input_names() const
         -> gc::InputNames override
     {
-        return gc::node_input_names<Printer>("value"sv);
+        return gc::node_input_names<Split>("in"sv);
     }
 
     auto output_names() const
         -> gc::OutputNames override
-    { return gc::node_output_names<Printer>(); }
+    { return output_port_names_(); }
 
     auto default_inputs(gc::InputValues result) const
         -> void override
@@ -44,42 +46,30 @@ public:
 
         auto result = gc::NodeActivationAlgorithms{};
 
-        // Declare types
-
-        auto lib =
-            s(a::Lib{ .name = "agc_app" });
-
-        auto printer_alg_header =
-            s(a::HeaderFile{
-                .name = "agc_app/alg/printer.hpp",
-                .lib = lib });
-
         // Bind input
 
-        auto value =
-            s(a::Var{ gc::alg::id::TypeFromBinding{} });
+        auto input = s(a::Var{ a::id::TypeFromBinding{} });
 
         result.input_bindings = {
-            s(a::InputBinding{ .port = 0_gc_i, .var = value })
+            s(a::InputBinding{ .port = 0_gc_i, .var = input })
         };
 
-        // Declare functions
-
-        auto print_func =
-            s(a::Symbol{
-                .name = "gc_app::print",
-                .header_file = printer_alg_header });
-
         // Define activation algorithm
+        auto activation_seq = a::Block{};
+        for (auto port : output_port_names_().index_range())
+        {
+            activation_seq.statements.push_back(
+                s(a::Statement{ s(a::OutputActivation{
+                    .port = port,
+                    .var = input
+                }) }));
+        }
 
         auto activate_statement =
-            s(a::Statement{ s(a::FuncInvocation{
-                .func = print_func,
-                .args = s(a::Vars{value}) }) });
+            s(a::Statement{ s(activation_seq) });
 
         result.algorithms.emplace_back(gc::PortActivationAlgorithm{
-            .required_inputs = {0_gc_i},
-            .activate = activate_statement,
+            .activate = activate_statement
         });
 
         // No context is required, node is stateless -
@@ -87,16 +77,20 @@ public:
 
         return result;
     }
+
+private:
+    gc::DynamicOutputNames output_port_names_;
 };
 
 } // anonymous namespace
 
 
-auto make_printer(gc::ConstValueSpan args)
+auto make_split(gc::ConstValueSpan args)
     -> std::shared_ptr<gc::ActivationNode>
 {
-    gc::expect_no_node_args("Printer", args);
-    return std::make_shared<Printer>();
+    gc::expect_n_node_args("Split", args, 1);
+    auto port_count = args[0].convert_to<gc::WeakPort>();
+    return std::make_shared<Split>(gc::OutputPortCount{port_count});
 }
 
 } // namespace agc_app

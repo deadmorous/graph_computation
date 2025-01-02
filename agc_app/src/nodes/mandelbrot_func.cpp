@@ -1,0 +1,130 @@
+#include "agc_app/nodes/mandelbrot_func.hpp"
+
+#include "gc/algorithm.hpp"
+#include "gc/activation_node.hpp"
+
+#include "gc/expect_n_node_args.hpp"
+#include "gc/node_port_names.hpp"
+#include "gc/value.hpp"
+
+
+using namespace gc::literals;
+using namespace std::string_view_literals;
+
+namespace agc_app {
+namespace {
+
+class MandelbrotFunc final :
+    public gc::ActivationNode
+{
+public:
+    auto input_names() const
+        -> gc::InputNames override
+    { return gc::node_input_names<MandelbrotFunc>("c"sv, "z"sv); }
+
+    auto output_names() const
+        -> gc::OutputNames override
+    { return gc::node_output_names<MandelbrotFunc>("value"sv); }
+
+    auto default_inputs(gc::InputValues result) const
+        -> void override
+    {
+        assert(result.size() == 2_gc_ic);
+        result[0_gc_i] = std::array<double, 2>{ 0.1, 0.2 };
+        result[1_gc_i] = std::array<double, 2>{ 0, 0 };
+    }
+
+    auto activation_algorithms(gc::alg::AlgorithmStorage& s) const
+        -> gc::NodeActivationAlgorithms override
+    {
+        namespace a = gc::alg;
+
+        auto result = gc::NodeActivationAlgorithms{};
+
+        // Declare types and symbols
+
+        auto lib =
+            s(a::Lib{ .name = "agc_app" });
+
+        auto std_array_header =
+            s(a::HeaderFile{
+                .name = "array",
+                .system = true });
+
+        auto mag2_alg_header =
+            s(a::HeaderFile{
+                .name = "agc_app/alg/mandelbrot_func.hpp",
+                .lib = lib });
+
+        auto arg_type =
+            s(a::Type{
+                .name = "std::array<double, 2>",
+                .header_file = std_array_header });
+
+        auto mandelbrot_func =
+            s(a::Symbol{
+                .name = "gc_app::mandelbrot_func",
+                .header_file = mag2_alg_header });
+
+        // Bind input
+
+        auto c = s(a::Var{ arg_type });
+        auto z = s(a::Var{ arg_type });
+
+        result.input_bindings = {
+            s(a::InputBinding{ .port = 0_gc_i, .var = c }),
+            s(a::InputBinding{ .port = 1_gc_i, .var = c })
+        };
+
+        // Define activation algorithm
+
+        auto activate_c_statement =
+            s(a::Statement{ s(a::Block{}) });
+
+        result.algorithms.emplace_back(gc::PortActivationAlgorithm{
+            .activate = activate_c_statement,
+        });
+
+        auto mandelbrot_func_args =
+            s(a::Vars{c, z});
+
+        auto output_port_value_init =
+            s(a::FuncInvocation{
+                .func = mandelbrot_func,
+                .args = mandelbrot_func_args });
+
+        auto output_port_value =
+            s(a::Var{ output_port_value_init });
+
+        auto activate_z_statement =
+            s(a::Statement{ s(a::Block{
+                .vars = s(a::Vars{output_port_value}),
+                .statements = {
+                    s(a::Statement{ s(a::OutputActivation{
+                        .port = 0_gc_o,
+                        .var = output_port_value }) }),
+                } }) });
+
+        result.algorithms.emplace_back(gc::PortActivationAlgorithm{
+            .required_inputs = {0_gc_i},
+            .activate = activate_z_statement,
+        });
+
+        // No context is required, node is stateless -
+        // not setting `result.context`.
+
+        return result;
+    }
+};
+
+} // anonymous namespace
+
+
+auto make_mandelbrot_func(gc::ConstValueSpan args)
+    -> std::shared_ptr<gc::ActivationNode>
+{
+    gc::expect_no_node_args("MandelbrotFunc", args);
+    return std::make_shared<MandelbrotFunc>();
+}
+
+} // namespace agc_app

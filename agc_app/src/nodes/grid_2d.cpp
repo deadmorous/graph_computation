@@ -1,5 +1,5 @@
-#include "agc_app/nodes/linspace.hpp"
-#include "agc_app/types/linspace_spec.hpp"
+#include "agc_app/nodes/grid_2d.hpp"
+#include "agc_app/types/grid_2d_spec.hpp"
 
 #include "gc/algorithm.hpp"
 #include "gc/activation_node.hpp"
@@ -8,8 +8,6 @@
 #include "gc/node_port_names.hpp"
 #include "gc/value.hpp"
 
-#include <cassert>
-
 
 using namespace gc::literals;
 using namespace std::string_view_literals;
@@ -17,25 +15,30 @@ using namespace std::string_view_literals;
 namespace agc_app {
 namespace {
 
-class LinSpace final :
+class Grid2d final :
     public gc::ActivationNode
 {
 public:
     auto input_names() const
         -> gc::InputNames override
     {
-        return gc::node_input_names<LinSpace>("spec"sv);
+        return gc::node_input_names<Grid2d>("spec"sv);
     }
 
     auto output_names() const
         -> gc::OutputNames override
-    { return gc::node_output_names<LinSpace>("sequence"sv); }
+    { return gc::node_output_names<Grid2d>("grid_size"sv, "point"sv); }
 
     auto default_inputs(gc::InputValues result) const
         -> void override
     {
         assert(result.size() == 1_gc_ic);
-        result[0_gc_i] = LinSpaceSpec{};
+        result[0_gc_i] = Grid2dSpec{
+            .rect = {
+                Range<double>{ -2.1, 0.7 },
+                Range<double>{ -1.2, 1.2 } },
+            .resolution = { 0.01, 0.01 }
+        };
     }
 
     auto activation_algorithms(gc::alg::AlgorithmStorage& s) const
@@ -45,69 +48,77 @@ public:
 
         auto result = gc::NodeActivationAlgorithms{};
 
-        // Declare types
+        // Declare types and symbols
 
         auto lib =
             s(a::Lib{ .name = "agc_app" });
 
-        auto linspace_spec_header =
+        auto grid_2d_spec_header =
             s(a::HeaderFile{
-                .name = "agc_app/types/linspace_spec.hpp",
+                .name = "agc_app/types/grid_2d_spec.hpp",
                 .lib = lib });
 
-        auto linspace_alg_header =
+        auto grid_2d_alg_header =
             s(a::HeaderFile{
-                .name = "agc_app/alg/linspace.hpp",
+                .name = "agc_app/alg/grid_2d.hpp",
                 .lib = lib });
 
         auto spec_type =
             s(a::Type{
-                .name = "gc_app::LinSpaceSpec",
-                .header_file = linspace_spec_header });
+                .name = "agc_app::Grid2dSpec",
+                .header_file = grid_2d_spec_header });
 
-        // TODO: Remove
-        // auto double_type =
-        //     s(a::Type{ .name = "double" });
+        auto grid_size_func =
+            s(a::Symbol{
+                .name = "gc_app::grid_2d_size",
+                .header_file = grid_2d_alg_header });
+
+        auto iter_init_func =
+            s(a::Symbol{
+                .name = "gc_app::grid_2d_init_iter",
+                .header_file = grid_2d_alg_header });
+
+        auto iter_next_func =
+            s(a::Symbol{
+                .name = "gc_app::grid_2d_next_iter",
+                .header_file = grid_2d_alg_header });
+
+        auto iter_deref_func =
+            s(a::Symbol{
+                .name = "grid_2d_deref_iter",
+                .header_file = grid_2d_alg_header });
 
         // Bind input
 
-        auto spec =
-            s(a::Var{ spec_type });
+        auto spec = s(a::Var{ spec_type });
 
         result.input_bindings = {
             s(a::InputBinding{ .port = 0_gc_i, .var = spec })
         };
 
-        // Declare functions
-
-        auto iter_init_func =
-            s(a::Symbol{
-                .name = "gc_app::LinSpaceInitIter",
-                .header_file = linspace_alg_header });
-
-        auto iter_next_func =
-            s(a::Symbol{
-                .name = "gc_app::LinSpaceNextIter",
-                .header_file = linspace_alg_header });
-
-        auto iter_deref_func =
-            s(a::Symbol{
-                .name = "gc_app::LinSpaceDerefIter",
-                .header_file = linspace_alg_header });
-
         // Define activation algorithm
+
+        auto spec_args =
+            s(a::Vars{spec});
 
         auto iter_state_init =
             s(a::FuncInvocation{
                 .func = iter_init_func,
-                .args = s(a::Vars{spec}) });
+                .args = spec_args });
 
         auto iter_state =
             s(a::Var{ iter_state_init });
 
-
         auto iter_state_args =
             s(a::Vars{iter_state});
+
+        auto grid_size_init =
+            s(a::FuncInvocation{
+                .func = grid_size_func,
+                .args = spec_args });
+
+        auto grid_size =
+            s(a::Var{ grid_size_init });
 
         auto output_port_value_init =
             s(a::FuncInvocation{
@@ -119,8 +130,11 @@ public:
 
         auto activate_statement =
             s(a::Statement{ s(a::Block{
-                .vars = s(a::Vars{iter_state}),
+                .vars = s(a::Vars{grid_size, iter_state}),
                 .statements = {
+                    s(a::Statement{ s(a::OutputActivation{
+                        .port = 0_gc_o,
+                        .var = grid_size }) }),
                     s(a::Statement{ s(a::While{
                         .condition = s(a::FuncInvocation{
                             .func = iter_next_func,
@@ -129,7 +143,7 @@ public:
                             .vars = s(a::Vars{ output_port_value }),
                             .statements = {
                                 s(a::Statement{ s(a::OutputActivation{
-                                    .port = 0_gc_o,
+                                    .port = 1_gc_o,
                                     .var = output_port_value
                                 }) })
                             } }) })
@@ -151,11 +165,11 @@ public:
 } // anonymous namespace
 
 
-auto make_linspace(gc::ConstValueSpan args)
+auto make_grid_2d(gc::ConstValueSpan args)
     -> std::shared_ptr<gc::ActivationNode>
 {
-    gc::expect_no_node_args("LinSpace", args);
-    return std::make_shared<LinSpace>();
+    gc::expect_no_node_args("Grid2d", args);
+    return std::make_shared<Grid2d>();
 }
 
 } // namespace agc_app

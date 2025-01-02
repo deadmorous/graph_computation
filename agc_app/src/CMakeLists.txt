@@ -3,8 +3,18 @@ cmake_minimum_required(VERSION 3.5)
 project(agc_app-lib LANGUAGES CXX)
 
 add_library(agc_app-lib STATIC
+    nodes/canvas.cpp
+    nodes/counter.cpp
+    nodes/func_iterator.cpp
+    nodes/grid_2d.cpp
     nodes/linspace.cpp
-    nodes/printer.cpp)
+    nodes/mag2.cpp
+    nodes/mandelbrot_func.cpp
+    nodes/printer.cpp
+    nodes/replicate.cpp
+    nodes/scale.cpp
+    nodes/split.cpp
+    nodes/threshold.cpp)
 
 add_library(agc_app::lib ALIAS agc_app-lib)
 
