@@ -18,6 +18,20 @@ public:
     operator TypeComponentVec() &&
     { return std::move(result_); }
 
+    auto operator()(const gc::ArrayT& t)
+        -> void
+    {
+        const auto* element_type = t.element_type();
+        auto n = t.element_count();
+        auto root = std::move(current_path_);
+        for (uint8_t i=0; i<n; ++i)
+        {
+            current_path_ = root / i;
+            visit(element_type, *this);
+        }
+        current_path_ = std::move(root);
+    }
+
     auto operator()(const gc::CustomT& t)
         -> void
     {
