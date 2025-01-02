@@ -47,6 +47,14 @@ struct AggregatePrinter final
         s{s}
     {}
 
+    auto operator()(const ArrayT& t)
+        -> void
+    {
+        s << "Array<" << static_cast<size_t>(t.element_count()) << ">[";
+        print_type(s, t.element_type());
+        s << ']';
+    }
+
     auto operator()(const CustomT& t)
         -> void
     {
@@ -194,6 +202,26 @@ auto Type::intern(
 }
 
 // ---
+
+ArrayT::ArrayT(const Type* type) noexcept :
+    type_{ type }
+{ assert(agg_type(type_) == AggregateType::Array); }
+
+auto ArrayT::type() const noexcept
+    -> const Type*
+{ return type_; }
+
+auto ArrayT::element_count() const noexcept
+    -> uint8_t
+{ return static_cast<uint8_t>(type_->storage()[2]); }
+
+auto ArrayT::element_type() const noexcept
+    -> const Type*
+{
+    return get_pointer<const Type>(
+        type_->storage().data() + ptr_align_index(3));
+}
+
 
 CustomT::CustomT(const Type* type) noexcept :
     type_{ type }

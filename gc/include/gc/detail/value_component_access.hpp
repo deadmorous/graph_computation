@@ -272,6 +272,24 @@ struct ValueComponents<Type, std::vector<T>>
     }
 };
 
+template <typename Type, typename T, size_t N>
+struct ValueComponents<Type, std::array<T, N>>
+{
+    using V = std::array<T, N>;
+
+    template <common::MaybeConst<V> U, typename F>
+    static auto dispatch(ValuePathView path, U& data, F&& f)
+    {
+        if(path.empty())
+            return std::invoke(std::forward<F>(f), data, common::Type<V>);
+
+        auto index = path[0].index();
+        auto& element = data.at(index);
+        return ValueComponents<Type, T>::dispatch(
+            path.subspan(1), element, std::forward<F>(f));
+    }
+};
+
 template <typename Type, typename... Ts>
 struct ValueComponents<Type, std::tuple<Ts...>>
 {

@@ -49,6 +49,10 @@ public:
         result_{ value.type() ? visit(value.type(), *this, value) : "<empty>" }
     {}
 
+    auto operator()(const gc::ArrayT& t, const Value& value) const
+        -> std::string
+    { return format_seq( t, value, value.size(), '[', ']' ); }
+
     auto operator()(const gc::CustomT& t, const Value& value) const
         -> std::string
     { return "custom"; }
@@ -94,40 +98,35 @@ public:
 
     auto operator()(const gc::TupleT& t, const Value& value) const
         -> std::string
-    {
-        auto n = t.element_count();
-        std::ostringstream s;
-        s << '{';
-        auto delim = "";
-        for (uint8_t i=0; i<n; ++i, delim=",")
-        {
-            auto field = value.get(ValuePath{i});
-            s << delim << std::string{ ValueFormatter{ field } };
-        }
-        s << '}';
-        return s.str();
-    }
+    { return format_seq( t, value, t.element_count(), '{', '}' ); }
 
     auto operator()(const gc::VectorT& t, const Value& value) const
         -> std::string
-    {
-        auto n = value.size();
-        std::ostringstream s;
-        s << '[';
-        auto delim = "";
-        for (size_t i=0; i<n; ++i, delim=",")
-        {
-            auto element = value.get(ValuePath{i});
-            s << delim << std::string{ ValueFormatter{ element } };
-        }
-        s << ']';
-        return s.str();
-    }
+    { return format_seq( t, value, value.size(), '[', ']' ); }
 
     operator std::string() && noexcept
     { return result_; }
 
 private:
+    template <typename SecT>
+    auto format_seq(const SecT& t,
+                    const Value& value,
+                    size_t size,
+                    char open_brace,
+                    char close_brace) const
+        -> std::string
+    {
+        std::ostringstream s;
+        s << open_brace;
+        auto delim = "";
+        for (size_t i=0; i<size; ++i, delim=",")
+        {
+            auto element = value.get(ValuePath{i});
+            s << delim << std::string{ ValueFormatter{ element } };
+        }
+        s << close_brace;
+        return s.str();
+    }
 
     std::string result_;
 };

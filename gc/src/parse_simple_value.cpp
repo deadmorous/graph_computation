@@ -79,6 +79,14 @@ struct ScalarParser final
 
 struct SimpleValueParser final
 {
+    auto operator()(const ArrayT& t, std::string_view text) const
+        -> Value
+    {
+        common::throw_(
+            "SimpleValueParser: Failed to parse value of type ", t.type(),
+            " because array types are not supported");
+    }
+
     auto operator()(const CustomT& t, std::string_view text) const
         -> Value
     {

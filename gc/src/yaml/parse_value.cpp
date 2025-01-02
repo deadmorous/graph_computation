@@ -18,6 +18,30 @@ namespace {
 
 struct YamlValueParser final
 {
+    auto operator()(const ArrayT& t, Value& value, const YAML::Node& node) const
+        -> void
+    {
+        if (value.size() != node.size())
+            common::throw_(
+                "YamlValueParser: Failed to parse value of type ", t.type(),
+                " because actual array size ", node.size(), " differs from "
+                "expected size ", value.size());
+
+        for (const auto& key: value.keys())
+        {
+            auto element_value_node = node[key.index()];
+
+            auto path = ValuePath{} / key;
+            auto element_value = value.get(path);
+            visit(element_value.type(),
+                  YamlValueParser{},
+                  element_value,
+                  element_value_node);
+
+            value.set(path, element_value);
+        }
+    }
+
     auto operator()(const CustomT& t, Value& value, const YAML::Node& node) const
         -> void
     {

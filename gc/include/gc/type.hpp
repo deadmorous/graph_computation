@@ -159,6 +159,17 @@ public:
             {of<T>()});
     }
 
+    template <typename T, size_t N>
+    static auto of(common::Type_Tag<std::array<T, N>> tag)
+        -> const Type*
+    {
+        static_assert(N <= std::numeric_limits<uint8_t>::max());
+        return intern(
+            detail::value_components_access_factory(this_tag, tag),
+            {AggregateType::Array, N},
+            {of<T>()});
+    }
+
     template <typename... Ts>
     static auto of(common::Type_Tag<std::tuple<Ts...>> tag)
         -> const Type*
@@ -244,6 +255,20 @@ auto type_of(common::Type_Tag<T> tag = {})
     -> const Type*
 { return Type::of(tag); }
 
+
+class ArrayT final
+{
+public:
+    ArrayT(const Type*) noexcept;
+    auto type() const noexcept -> const Type*;
+    auto element_count() const noexcept
+        -> uint8_t;
+    auto element_type() const noexcept
+        -> const Type*;
+
+private:
+    const Type* type_;
+};
 
 class CustomT final
 {
@@ -430,8 +455,8 @@ auto visit(const Type* type, F&& f, Args&&... args)
     switch(type->aggregate_type())
     {
         case AggregateType::Array:
-            assert(false); // TODO
-            // Fallthrough
+            return std::invoke(
+                std::forward<F>(f), ArrayT(type), std::forward<Args>(args)...);
         case AggregateType::Custom:
             return std::invoke(
                 std::forward<F>(f), CustomT(type), std::forward<Args>(args)...);
