@@ -96,6 +96,16 @@ public:
         storage_{ storage }
     {}
 
+    auto operator()(std::ostream& s, alg::id::Assign id, Ind ind = {}) const
+        -> void
+    {
+        const auto& spec = storage_(id);
+        s << ind << "assign\n";
+        auto next_ind = next(ind);
+        (*this)(s, spec.dst, next_ind);
+        std::visit([&](auto id){ (*this)(s, id, next_ind); }, spec.src);
+    }
+
     auto operator()(std::ostream& s, alg::id::Block id, Ind ind = {}) const
         -> void
     {

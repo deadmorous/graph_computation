@@ -47,6 +47,13 @@ struct AlgorithmInspector
     }
 
 
+    auto operator()(const alg::Assign& spec)
+        -> void
+    {
+        (*this)(spec.dst);
+        std::visit(*this, spec.src);
+    }
+
     auto operator()(const alg::Block& spec)
         -> void
     {

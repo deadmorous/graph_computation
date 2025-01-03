@@ -11,6 +11,16 @@
 
 namespace gc::alg {
 
+using AssignRhs = std::variant<
+    id::FuncInvocation,
+    id::Var>;
+
+struct Assign final
+{
+    id::Var dst;
+    AssignRhs src;
+};
+
 struct Block final
 {
     id::Vars vars;
@@ -84,6 +94,7 @@ struct ReturnOutputActivation final
 };
 
 using Statement = std::variant<
+    id::Assign,
     id::FuncInvocation,
     id::OutputActivation,
     id::If,
@@ -129,6 +140,7 @@ public:
     AlgorithmStorage();
     ~AlgorithmStorage();
 
+    auto operator()(Assign) -> id::Assign;
     auto operator()(Block) -> id::Block;
     auto operator()(Do) -> id::Do;
     auto operator()(For) -> id::For;
@@ -148,6 +160,7 @@ public:
     auto operator()(Vars) -> id::Vars;
     auto operator()(While) -> id::While;
 
+    auto operator()(id::Assign) const -> const Assign&;
     auto operator()(id::Block) const -> const Block&;
     auto operator()(id::Do) const -> const Do&;
     auto operator()(id::For) const -> const For&;

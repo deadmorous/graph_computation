@@ -10,6 +10,7 @@ using WeakId = size_t;
 
 namespace id {
 
+GCLIB_STRONG_TYPE(Assign, WeakId);
 GCLIB_STRONG_TYPE(Block, WeakId);
 GCLIB_STRONG_TYPE(Do, WeakId);
 GCLIB_STRONG_TYPE(For, WeakId);

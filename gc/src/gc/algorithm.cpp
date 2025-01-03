@@ -20,6 +20,7 @@ struct AlgorithmStorage::Impl
         -> size_t
     { return next_id++; }
 
+    std::unordered_map<id::Assign, Assign, Hash> assign_;
     std::unordered_map<id::Block, Block, Hash> block_;
     std::unordered_map<id::Do, Do, Hash> do_;
     std::unordered_map<id::For, For, Hash> for_;
@@ -64,6 +65,7 @@ AlgorithmStorage::~AlgorithmStorage() = default;
     { return impl_->map_.at(spec_id); }                                     \
     static_assert(true)
 
+IMPL_ALGORITHM_STORAGE_METHODS(Assign, assign_);
 IMPL_ALGORITHM_STORAGE_METHODS(Block, block_);
 IMPL_ALGORITHM_STORAGE_METHODS(Do, do_);
 IMPL_ALGORITHM_STORAGE_METHODS(For, for_);
