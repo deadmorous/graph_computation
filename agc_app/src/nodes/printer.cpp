@@ -44,7 +44,7 @@ public:
 
         auto result = gc::NodeActivationAlgorithms{};
 
-        // Declare types
+        // Declare types and symbols
 
         auto lib =
             s(a::Lib{ .name = "agc_app" });
@@ -54,21 +54,19 @@ public:
                 .name = "agc_app/alg/printer.hpp",
                 .lib = lib });
 
-        // Bind input
-
-        auto value =
-            s(a::Var{ gc::alg::id::TypeFromBinding{} });
-
-        result.input_bindings = {
-            s(a::InputBinding{ .port = 0_gc_i, .var = value })
-        };
-
-        // Declare functions
-
         auto print_func =
             s(a::Symbol{
                 .name = "gc_app::print",
                 .header_file = printer_alg_header });
+
+        // Bind input
+
+        auto value =
+            s(a::Var{ a::id::TypeFromBinding{} });
+
+        result.input_bindings = {
+            s(a::InputBinding{ .port = 0_gc_i, .var = value })
+        };
 
         // Define activation algorithm
 

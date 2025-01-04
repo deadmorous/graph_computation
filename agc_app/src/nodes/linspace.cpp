@@ -45,7 +45,7 @@ public:
 
         auto result = gc::NodeActivationAlgorithms{};
 
-        // Declare types
+        // Declare types and symbols
 
         auto lib =
             s(a::Lib{ .name = "agc_app" });
@@ -65,21 +65,6 @@ public:
                 .name = "gc_app::LinSpaceSpec",
                 .header_file = linspace_spec_header });
 
-        // TODO: Remove
-        // auto double_type =
-        //     s(a::Type{ .name = "double" });
-
-        // Bind input
-
-        auto spec =
-            s(a::Var{ spec_type });
-
-        result.input_bindings = {
-            s(a::InputBinding{ .port = 0_gc_i, .var = spec })
-        };
-
-        // Declare functions
-
         auto iter_init_func =
             s(a::Symbol{
                 .name = "gc_app::LinSpaceInitIter",
@@ -94,6 +79,15 @@ public:
             s(a::Symbol{
                 .name = "gc_app::LinSpaceDerefIter",
                 .header_file = linspace_alg_header });
+
+        // Bind input
+
+        auto spec =
+            s(a::Var{ spec_type });
+
+        result.input_bindings = {
+            s(a::InputBinding{ .port = 0_gc_i, .var = spec })
+        };
 
         // Define activation algorithm
 
