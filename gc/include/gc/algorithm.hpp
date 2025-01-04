@@ -46,7 +46,6 @@ struct For final
 struct FuncInvocation final
 {
     id::Symbol func;
-    id::Var result;
     id::Vars args;
 };
 

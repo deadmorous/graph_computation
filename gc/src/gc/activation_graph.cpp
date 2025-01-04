@@ -84,7 +84,6 @@ struct AlgorithmInspector
         -> void
     {
         (*this)(spec.func);
-        (*this)(spec.result);
         (*this)(spec.args);
     }
 

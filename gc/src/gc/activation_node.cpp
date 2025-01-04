@@ -159,8 +159,6 @@ public:
         auto func = storage_(spec.func);
         auto args = storage_(spec.args);
         s << ind;
-        if (spec.result != common::Zero)
-            s << Prefixed{spec.result} << " <- ";
         s << func.name << '('
           << common::format_seq(args, ", ", alg_id_printer_helper)
           << ")\n";
