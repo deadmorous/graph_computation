@@ -69,8 +69,8 @@ class DynamicInputNames final :
     public DynamicNames
 {
 public:
-    explicit DynamicInputNames(WeakPort count = 0) :
-        DynamicNames{ "in_", count }
+    explicit DynamicInputNames(InputPortCount count = common::Zero) :
+        DynamicNames{ "in_", count.v }
     {}
 
     auto operator()() const
@@ -82,8 +82,8 @@ class DynamicOutputNames final :
     public DynamicNames
 {
 public:
-    explicit DynamicOutputNames(WeakPort count = 0) :
-        DynamicNames{ "out_", count }
+    explicit DynamicOutputNames(OutputPortCount count = common::Zero) :
+        DynamicNames{ "out_", count.v }
     {}
 
     auto operator()() const
