@@ -20,7 +20,7 @@ auto DynamicNames::resize(WeakPort count)
 
     else
         for (WeakPort i=names_.size(); i<count; ++i)
-            names_.push_back(common::format(prefix_, i));
+            names_.push_back(common::format(prefix_, int(i)));
 
     name_views_.clear();
     for (const auto& name : names_)
