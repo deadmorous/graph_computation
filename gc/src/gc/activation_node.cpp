@@ -102,8 +102,11 @@ public:
         const auto& spec = storage_(id);
         s << ind << "assign\n";
         auto next_ind = next(ind);
-        (*this)(s, spec.dst, next_ind);
-        std::visit([&](auto id){ (*this)(s, id, next_ind); }, spec.src);
+        auto next2_ind = next(next_ind);
+        s << next_ind << "to\n";
+        (*this)(s, spec.dst, next2_ind);
+        s << next_ind << "from\n";
+        std::visit([&](auto id){ (*this)(s, id, next2_ind); }, spec.src);
     }
 
     auto operator()(std::ostream& s, alg::id::Block id, Ind ind = {}) const
@@ -187,7 +190,7 @@ public:
         auto next2_ind = next(next_ind);
         (*this)(s, spec.vars, next_ind);
         s << next_ind << "condition\n";
-        (*this)(s, spec.condition);
+        (*this)(s, spec.condition, next2_ind);
         s << next_ind << "then\n";
         (*this)(s, spec.then_clause, next2_ind);
         if (spec.else_clause != common::Zero)
@@ -273,9 +276,12 @@ public:
         const auto& spec = storage_(id);
         s << ind
           << "symbol "
-          << spec.name
-          << " defined in header "
-          << storage_(spec.header_file).name;
+          << spec.name;
+        if (spec.header_file != common::Zero)
+            s
+              << " defined in header "
+              << storage_(spec.header_file).name;
+        s << '\n';
     }
 
     auto operator()(std::ostream& s, alg::id::Type id, Ind ind = {}) const
@@ -284,10 +290,12 @@ public:
         const auto& spec = storage_(id);
         s << ind
           << "type "
-          << spec.name
-          << " defined in header "
-          << storage_(spec.header_file).name
-          << '\n';
+          << spec.name;
+        if (spec.header_file != common::Zero)
+            s
+              << " defined in header "
+              << storage_(spec.header_file).name;
+        s << '\n';
     }
 
     auto operator()(std::ostream& s,
