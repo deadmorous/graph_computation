@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <set>
+#include <unordered_map>
 #include <unordered_set>
 
 
@@ -318,8 +319,39 @@ auto render_includes(std::ostream& s,
 
 // ---
 
+using DeducedVariableTypes =
+    std::unordered_map<gc::alg::id::Var, gc::alg::id::Var, Hash>;
+
+auto resolve_variable_types(const ActivationGraph& g,
+                            const ActivationGraphSourceTypes& source_types,
+                            const GraphAlgos& algos,
+                            const gc::alg::AlgorithmStorage& alg_storage)
+    -> DeducedVariableTypes
+{
+    auto result = DeducedVariableTypes{};
+    for (const auto& e : g.edges)
+    {
+        const auto& dst_algos = algos.at(e.to.node);
+        for (auto input_binding_id : dst_algos.input_bindings)
+        {
+            const auto& input_binding = alg_storage(input_binding_id);
+            if (input_binding.port != e.to.port)
+                continue;
+            const auto& var = alg_storage(input_binding.var);
+            if (!std::holds_alternative<gc::alg::id::TypeFromBinding>(var))
+                continue;
+            // Find activations of e.from
+        }
+    }
+    // TODO
+    return result;
+}
+
+// ---
+
 auto generate_nodes(std::ostream& s,
                     const ActivationGraph& g,
+                    const ActivationGraphSourceTypes& source_types,
                     const GraphAlgos& algos,
                     const gc::alg::AlgorithmStorage& alg_storage)
     -> void
@@ -356,7 +388,8 @@ auto generate_nodes(std::ostream& s,
 } // anonymous namespace
 
 
-auto generate_source(const ActivationGraph& g)
+auto generate_source(const ActivationGraph& g,
+                     const ActivationGraphSourceTypes& source_types)
     -> void
 {
     auto& s = std::cout; // TODO
@@ -371,7 +404,7 @@ auto generate_source(const ActivationGraph& g)
     render_includes(s, g, algos, alg_storage);
 
     // Generate code for graph nodes
-    generate_nodes(s, g, algos, alg_storage);
+    generate_nodes(s, g, source_types, algos, alg_storage);
 
     // Generate entry point
 
