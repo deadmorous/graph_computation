@@ -54,6 +54,8 @@ struct HeaderFile final
     std::string name;
     bool system{};
     id::Lib lib;
+
+    auto operator==(const HeaderFile&) const noexcept -> bool = default;
 };
 
 struct If final
@@ -68,28 +70,39 @@ struct InputBinding final
 {
     gc::InputPort port;
     id::Var var;
+
+    auto operator==(const InputBinding&) const noexcept -> bool = default;
 };
 
 struct Lib final
 {
     std::string name;
+
+    auto operator==(const Lib&) const noexcept -> bool = default;
 };
 
 struct OutputActivation final
 {
     gc::OutputPort port;
     id::Var var;
+
+    auto operator==(const OutputActivation&) const noexcept -> bool = default;
 };
 
 struct OutputBinding final
 {
     gc::OutputPort port;
     id::Var var;
+
+    auto operator==(const OutputBinding&) const noexcept -> bool = default;
 };
 
 struct ReturnOutputActivation final
 {
     gc::OutputPort port;
+
+    auto operator==(const ReturnOutputActivation&) const noexcept
+        -> bool = default;
 };
 
 using Statement = std::variant<
@@ -106,12 +119,16 @@ struct Symbol final
 {
     std::string name;
     id::HeaderFile header_file;
+
+    auto operator==(const Symbol&) const noexcept -> bool = default;
 };
 
 struct Type final
 {
     std::string name;
     id::HeaderFile header_file;
+
+    auto operator==(const Type&) const noexcept -> bool = default;
 };
 
 struct TypeFromBinding final

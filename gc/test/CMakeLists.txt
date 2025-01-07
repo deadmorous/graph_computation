@@ -13,7 +13,8 @@ add_executable(
     test_gc_type_value.cpp
     test_index_set.cpp
     test_pow2.cpp
-    test_strong.cpp)
+    test_strong.cpp
+    test_algorithm.cpp)
 
 target_link_libraries(
     gc-lib-test

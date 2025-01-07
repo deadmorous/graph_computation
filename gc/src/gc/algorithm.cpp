@@ -4,45 +4,150 @@
 
 namespace gc::alg {
 
+namespace {
+
+template <common::StrongType T>
+auto hash(const T& v) noexcept
+    -> size_t
+{ return std::hash<typename T::Weak>{}(v.v); }
+
+template <std::integral T>
+auto hash(const T& v) noexcept
+    -> size_t
+{ return std::hash<T>{}(v); }
+
+auto hash(const std::string& v) noexcept
+    -> size_t
+{ return std::hash<std::string>{}(v); }
+
+template<size_t... I, typename... Ts>
+auto hash_impl(std::index_sequence<I...>, const Ts&... vs) noexcept
+    -> size_t
+{ return ((hash(vs) << I) ^ ...); }
+
+template<typename T0, typename T1, typename... Ts>
+auto hash(const T0& v0, const T1& v1, const Ts&... vs) noexcept
+    -> size_t
+{ return hash_impl(std::index_sequence_for<T0, T1, Ts...>(), v0, v1, vs...); }
+
+
 struct Hash
 {
     template <common::StrongType T>
-    auto operator()(const T& key) const noexcept
+    auto operator()(const T& v) const noexcept
         -> size_t
-    { return std::hash<typename T::Weak>{}( key.v ); }
+    { return hash(v); }
+
+    auto operator()(const HeaderFile& v) const noexcept
+        -> size_t
+    { return hash(v.name, v.system, v.lib); }
+
+    auto operator()(const InputBinding& v) const noexcept
+        -> size_t
+    { return hash(v.port, v.var); }
+
+    auto operator()(const Lib& v) const noexcept
+        -> size_t
+    { return hash(v.name); }
+
+    auto operator()(const OutputActivation& v) const noexcept
+        -> size_t
+    { return hash(v.port, v.var); }
+
+    auto operator()(const OutputBinding& v) const noexcept
+        -> size_t
+    { return hash(v.port, v.var); }
+
+    auto operator()(const ReturnOutputActivation& v) const noexcept
+        -> size_t
+    { return hash(v.port); }
+
+    auto operator()(const Symbol& v) const noexcept
+        -> size_t
+    { return hash(v.name, v.header_file); }
+
+    auto operator()(const Type& v) const noexcept
+        -> size_t
+    { return hash(v.name, v.header_file); }
+
+    auto operator()(const Vars& v) const noexcept
+        -> size_t
+    {
+        auto result = size_t{};
+        for (auto id : v)
+            result = (result << 1) ^ hash(id);
+        return result;
+    }
 };
+
+template <typename K, typename V>
+using SimpleMap = std::unordered_map<K, V, Hash>;
+
+template <typename K, typename V>
+auto store(size_t& next_id, SimpleMap<K, V>& m, V v)
+    -> K
+{
+    auto k = K{ next_id++ };
+    m.emplace(k, std::move(v));
+    return k;
+}
+
+template <typename K, typename V>
+auto lookup(const SimpleMap<K, V>& m, const K& k)
+    -> const V&
+{ return m.at(k); }
+
+template <typename K, typename V>
+struct InternedMap
+{
+    std::unordered_map<K, V, Hash> k2v;
+    std::unordered_map<V, K, Hash> v2k;
+};
+
+template <typename K, typename V>
+auto store(size_t& next_id, InternedMap<K, V>& m, V v)
+    -> K
+{
+    if (auto it = m.v2k.find(v); it != m.v2k.end())
+        return it->second;
+    auto k = K{ next_id++ };
+    m.v2k.emplace(v, k);
+    m.k2v.emplace(k, std::move(v));
+    return k;
+}
+
+template <typename K, typename V>
+auto lookup(const InternedMap<K, V>& m, const K& k)
+    -> const V&
+{ return m.k2v.at(k); }
+
+} // anonymous namespace
+
 
 struct AlgorithmStorage::Impl
 {
-    size_t next_id{1};
+    WeakId next_id_{1};
 
-    auto new_id() noexcept
-        -> size_t
-    { return next_id++; }
-
-    std::unordered_map<id::Assign, Assign, Hash> assign_;
-    std::unordered_map<id::Block, Block, Hash> block_;
-    std::unordered_map<id::Do, Do, Hash> do_;
-    std::unordered_map<id::For, For, Hash> for_;
-    std::unordered_map<id::FuncInvocation, FuncInvocation, Hash>
-        func_invocation_;
-    std::unordered_map<id::HeaderFile, HeaderFile, Hash> header_file_;
-    std::unordered_map<id::If, If, Hash> if_;
-    std::unordered_map<id::InputBinding, InputBinding, Hash> input_binding_;
-    std::unordered_map<id::Lib, Lib, Hash> lib_;
-    std::unordered_map<id::OutputActivation, OutputActivation, Hash>
-        output_activation_;
-    std::unordered_map<id::OutputBinding, OutputBinding, Hash> output_binding_;
-    std::unordered_map<id::ReturnOutputActivation, ReturnOutputActivation, Hash>
+    SimpleMap<id::Assign, Assign> assign_;
+    SimpleMap<id::Block, Block> block_;
+    SimpleMap<id::Do, Do> do_;
+    SimpleMap<id::For, For> for_;
+    SimpleMap<id::FuncInvocation, FuncInvocation> func_invocation_;
+    InternedMap<id::HeaderFile, HeaderFile> header_file_;
+    SimpleMap<id::If, If> if_;
+    InternedMap<id::InputBinding, InputBinding> input_binding_;
+    InternedMap<id::Lib, Lib> lib_;
+    InternedMap<id::OutputActivation, OutputActivation> output_activation_;
+    InternedMap<id::OutputBinding, OutputBinding> output_binding_;
+    InternedMap<id::ReturnOutputActivation, ReturnOutputActivation>
         return_output_activation_;
-    std::unordered_map<id::Statement, Statement, Hash> statement_;
-    std::unordered_map<id::Symbol, Symbol, Hash> symbol_;
-    std::unordered_map<id::Type, Type, Hash> type_;
-    std::unordered_map<id::TypeFromBinding, TypeFromBinding, Hash>
-        type_from_binding_;
-    std::unordered_map<id::Var, Var, Hash> var_;
-    std::unordered_map<id::Vars, Vars, Hash> vars_;
-    std::unordered_map<id::While, While, Hash> while_;
+    SimpleMap<id::Statement, Statement> statement_;
+    InternedMap<id::Symbol, Symbol> symbol_;
+    InternedMap<id::Type, Type> type_;
+    SimpleMap<id::TypeFromBinding, TypeFromBinding> type_from_binding_;
+    SimpleMap<id::Var, Var> var_;
+    InternedMap<id::Vars, Vars> vars_;
+    SimpleMap<id::While, While> while_;
 };
 
 AlgorithmStorage::AlgorithmStorage() :
@@ -54,15 +159,11 @@ AlgorithmStorage::~AlgorithmStorage() = default;
 #define IMPL_ALGORITHM_STORAGE_METHODS(Type, map_)                          \
     auto AlgorithmStorage::operator()(Type spec)                            \
         -> id::Type                                                         \
-    {                                                                       \
-        auto key = id::Type{ impl_->new_id() };                             \
-        impl_->map_.emplace( key, std::move(spec) );                        \
-        return key;                                                         \
-    }                                                                       \
+    { return store(impl_->next_id_, impl_->map_, std::move(spec)); }        \
                                                                             \
     auto AlgorithmStorage::operator()(id::Type spec_id) const               \
         -> const Type&                                                      \
-    { return impl_->map_.at(spec_id); }                                     \
+    { return lookup(impl_->map_, spec_id); }                                \
     static_assert(true)
 
 IMPL_ALGORITHM_STORAGE_METHODS(Assign, assign_);
