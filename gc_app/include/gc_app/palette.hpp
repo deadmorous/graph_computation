@@ -2,8 +2,7 @@
 
 #include "gc_app/color.hpp"
 
-#include "gc/struct_type_macro.hpp"
-
+#include "common/struct_type_macro.hpp"
 #include "common/type.hpp"
 
 #include <array>

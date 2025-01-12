@@ -1,7 +1,7 @@
-#include "gc/struct_type_macro.hpp"
 #include "gc/value.hpp"
 
 #include "common/format.hpp"
+#include "common/struct_type_macro.hpp"
 
 #include <gtest/gtest.h>
 

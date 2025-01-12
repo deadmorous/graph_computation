@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/type.hpp"
+#include "common/struct_type.hpp"
 
 #include <concepts>
 #include <cstddef>
@@ -74,16 +75,6 @@ template <typename T>
 concept StringType =
     std::same_as<T, std::string> || std::same_as<T, std::string_view>;
 
-
-template <typename T>
-concept StructType =
-    requires(T t, const T ct)
-{
-    fields_of(t);
-    fields_of(ct);
-    tuple_tag_of(common::Type<T>);
-    field_names_of(common::Type<T>);
-};
 
 template <typename> struct CustomTypeToId;
 template <uint8_t> struct IdToCustomType;

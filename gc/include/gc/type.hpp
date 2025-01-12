@@ -180,7 +180,7 @@ public:
             {of<Ts>()...});
     }
 
-    template <StructType T>
+    template <common::StructType T>
     static auto of(common::Type_Tag<T> tag)
         -> const Type*
     {

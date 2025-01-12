@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gc/struct_type_macro.hpp"
+#include "common/struct_type_macro.hpp"
 
 #include <cstdint>
 

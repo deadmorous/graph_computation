@@ -137,7 +137,7 @@ struct ValueComponentAccessImpl final : ValueComponentAccess<Type>
             };
         constexpr auto tag = common::Type<T>;
         const auto& v = unpack(data, tag);
-        if constexpr (StructType<T>)
+        if constexpr (common::StructType<T>)
         {
             constexpr auto fields = field_names_of(tag);
             return std::vector<ValuePathItem>( fields.begin(), fields.end() );
@@ -316,7 +316,7 @@ struct ValueComponents<Type, std::tuple<Ts...>>
     }
 };
 
-template <typename Type, StructType T>
+template <typename Type, common::StructType T>
 struct ValueComponents<Type, T>
 {
     template <common::MaybeConst<T> U, typename F>

@@ -3,7 +3,8 @@
 #include "gc_app/color.hpp"
 #include "gc_app/types.hpp"
 
-#include "gc/struct_type_macro.hpp"
+#include "common/struct_type_macro.hpp"
+
 
 namespace gc_app {
 
