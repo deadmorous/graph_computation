@@ -1,84 +1,14 @@
 #include "gc/algorithm.hpp"
 
+#include "common/detail/hash.hpp"
+
 #include <unordered_map>
 
 namespace gc::alg {
 
 namespace {
 
-template <common::StrongType T>
-auto hash(const T& v) noexcept
-    -> size_t
-{ return std::hash<typename T::Weak>{}(v.v); }
-
-template <std::integral T>
-auto hash(const T& v) noexcept
-    -> size_t
-{ return std::hash<T>{}(v); }
-
-auto hash(const std::string& v) noexcept
-    -> size_t
-{ return std::hash<std::string>{}(v); }
-
-template<size_t... I, typename... Ts>
-auto hash_impl(std::index_sequence<I...>, const Ts&... vs) noexcept
-    -> size_t
-{ return ((hash(vs) << I) ^ ...); }
-
-template<typename T0, typename T1, typename... Ts>
-auto hash(const T0& v0, const T1& v1, const Ts&... vs) noexcept
-    -> size_t
-{ return hash_impl(std::index_sequence_for<T0, T1, Ts...>(), v0, v1, vs...); }
-
-
-struct Hash
-{
-    template <common::StrongType T>
-    auto operator()(const T& v) const noexcept
-        -> size_t
-    { return hash(v); }
-
-    auto operator()(const HeaderFile& v) const noexcept
-        -> size_t
-    { return hash(v.name, v.system, v.lib); }
-
-    auto operator()(const InputBinding& v) const noexcept
-        -> size_t
-    { return hash(v.port, v.var); }
-
-    auto operator()(const Lib& v) const noexcept
-        -> size_t
-    { return hash(v.name); }
-
-    auto operator()(const OutputActivation& v) const noexcept
-        -> size_t
-    { return hash(v.port, v.var); }
-
-    auto operator()(const OutputBinding& v) const noexcept
-        -> size_t
-    { return hash(v.port, v.var); }
-
-    auto operator()(const ReturnOutputActivation& v) const noexcept
-        -> size_t
-    { return hash(v.port); }
-
-    auto operator()(const Symbol& v) const noexcept
-        -> size_t
-    { return hash(v.name, v.header_file); }
-
-    auto operator()(const Type& v) const noexcept
-        -> size_t
-    { return hash(v.name, v.header_file); }
-
-    auto operator()(const Vars& v) const noexcept
-        -> size_t
-    {
-        auto result = size_t{};
-        for (auto id : v)
-            result = (result << 1) ^ hash(id);
-        return result;
-    }
-};
+using common::detail::Hash;
 
 template <typename K, typename V>
 using SimpleMap = std::unordered_map<K, V, Hash>;

@@ -3,6 +3,8 @@
 #include "gc/algorithm_fwd.hpp"
 #include "gc/port.hpp"
 
+#include "common/struct_type_macro.hpp"
+
 #include <memory>
 #include <variant>
 #include <vector>
@@ -57,6 +59,7 @@ struct HeaderFile final
 
     auto operator==(const HeaderFile&) const noexcept -> bool = default;
 };
+GCLIB_STRUCT_TYPE(HeaderFile, name, system, lib);
 
 struct If final
 {
@@ -73,6 +76,7 @@ struct InputBinding final
 
     auto operator==(const InputBinding&) const noexcept -> bool = default;
 };
+GCLIB_STRUCT_TYPE(InputBinding, port, var);
 
 struct Lib final
 {
@@ -80,6 +84,7 @@ struct Lib final
 
     auto operator==(const Lib&) const noexcept -> bool = default;
 };
+GCLIB_STRUCT_TYPE(Lib, name);
 
 struct OutputActivation final
 {
@@ -88,6 +93,7 @@ struct OutputActivation final
 
     auto operator==(const OutputActivation&) const noexcept -> bool = default;
 };
+GCLIB_STRUCT_TYPE(OutputActivation, port, var);
 
 struct OutputBinding final
 {
@@ -96,6 +102,7 @@ struct OutputBinding final
 
     auto operator==(const OutputBinding&) const noexcept -> bool = default;
 };
+GCLIB_STRUCT_TYPE(OutputBinding, port, var);
 
 struct ReturnOutputActivation final
 {
@@ -104,6 +111,7 @@ struct ReturnOutputActivation final
     auto operator==(const ReturnOutputActivation&) const noexcept
         -> bool = default;
 };
+GCLIB_STRUCT_TYPE(ReturnOutputActivation, port);
 
 using Statement = std::variant<
     id::Assign,
@@ -122,6 +130,7 @@ struct Symbol final
 
     auto operator==(const Symbol&) const noexcept -> bool = default;
 };
+GCLIB_STRUCT_TYPE(Symbol, name, header_file);
 
 struct Type final
 {
@@ -130,6 +139,7 @@ struct Type final
 
     auto operator==(const Type&) const noexcept -> bool = default;
 };
+GCLIB_STRUCT_TYPE(Type, name, header_file);
 
 struct TypeFromBinding final
 {
