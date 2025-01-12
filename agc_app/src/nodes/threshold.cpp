@@ -66,9 +66,16 @@ public:
             s(a::InputBinding{ .port = 1_gc_i, .var = value })
         };
 
-        // Define activation algorithm
+        // Define activation algorithms
 
-        auto activate_statement =
+        auto activate_threshold_statement =
+            s(a::Statement{ s(a::Block{}) });
+
+        result.algorithms.emplace_back(gc::PortActivationAlgorithm{
+            .activate = activate_threshold_statement,
+        });
+
+        auto activate_value_statement =
             s(a::Statement{ s(a::If{
                 .condition = s(a::FuncInvocation{
                     .func = threshold_func,
@@ -83,7 +90,7 @@ public:
 
         result.algorithms.emplace_back(gc::PortActivationAlgorithm{
             .required_inputs = {0_gc_i},
-            .activate = activate_statement,
+            .activate = activate_value_statement,
         });
 
         // `threshold` constitutes node state, no need to specify additional

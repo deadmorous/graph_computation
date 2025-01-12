@@ -49,7 +49,7 @@ public:
             s(a::InputBinding{ .port = 0_gc_i, .var = value })
         };
 
-        // Define activation algorithm
+        // Define activation algorithms
 
         auto activate_value_statement =
             s(a::Statement{ s(a::Block{}) });

@@ -60,7 +60,7 @@ public:
             s(a::InputBinding{ .port = 1_gc_i, .var = value })
         };
 
-        // Define activation algorithm
+        // Define activation algorithms
 
         auto activate_init_statement =
             s(a::Statement{ s(a::Assign{

@@ -66,7 +66,7 @@ public:
             s(a::InputBinding{ .port = 1_gc_i, .var = value })
         };
 
-        // Define activation algorithm
+        // Define activation algorithms
 
         auto scale_args =
             s(a::Vars{factor, value});

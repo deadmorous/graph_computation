@@ -78,7 +78,7 @@ public:
         auto count =
             s(a::Var{ uint64_t_type });
 
-        // Define activation algorithm
+        // Define activation algorithms
 
         auto counter_func_args =
             s(a::Vars{count});

@@ -73,10 +73,10 @@ public:
 
         result.input_bindings = {
             s(a::InputBinding{ .port = 0_gc_i, .var = c }),
-            s(a::InputBinding{ .port = 1_gc_i, .var = c })
+            s(a::InputBinding{ .port = 1_gc_i, .var = z })
         };
 
-        // Define activation algorithm
+        // Define activation algorithms
 
         auto activate_c_statement =
             s(a::Statement{ s(a::Block{}) });

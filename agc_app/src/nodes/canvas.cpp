@@ -137,7 +137,7 @@ public:
             s(a::InputBinding{ .port = 2_gc_i, .var = next_value })
         };
 
-        // Define activation algorithm
+        // Define activation algorithms
 
         auto activate_size_statement =
             s(a::Statement{ s(a::FuncInvocation{
