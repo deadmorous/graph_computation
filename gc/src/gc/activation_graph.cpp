@@ -1,7 +1,9 @@
 #include "gc/activation_graph.hpp"
 #include "gc/activation_node.hpp"
 #include "gc/algorithm.hpp"
+#include "gc/algorithm_inspector.hpp"
 
+#include "common/detail/hash.hpp"
 #include "common/format.hpp"
 #include "common/throw.hpp"
 
@@ -17,196 +19,50 @@ namespace gc {
 
 namespace {
 
-template <typename Visitor>
-struct AlgorithmInspector
-{
-    Visitor& visitor;
-    bool visit_once;
-    const gc::alg::AlgorithmStorage& storage;
-    std::unordered_set<alg::WeakId> visited;
-
-    explicit AlgorithmInspector(Visitor& visitor,
-                                bool visit_once,
-                                const gc::alg::AlgorithmStorage& storage):
-        visitor{ visitor },
-        visit_once{ visit_once },
-        storage{ storage }
-    {}
-
-    template <alg::AlgorithmIdType Id>
-    auto operator()(Id id)
-        -> void
-    {
-        if (id == common::Zero)
-            return;
-        if (visit_once && !visited.insert(id.v).second)
-            return;
-        const auto& spec = storage(id);
-        if (!visitor(id, spec))
-            return;
-        (*this)(spec);
-    }
-
-
-    auto operator()(const alg::Assign& spec)
-        -> void
-    {
-        (*this)(spec.dst);
-        std::visit(*this, spec.src);
-    }
-
-    auto operator()(const alg::Block& spec)
-        -> void
-    {
-        (*this)(spec.vars);
-        for (auto statement_id : spec.statements)
-            (*this)(statement_id);
-    }
-
-    auto operator()(const alg::Do& spec)
-        -> void
-    {
-        (*this)(spec.vars);
-        (*this)(spec.condition);
-        (*this)(spec.body);
-    }
-
-    auto operator()(const alg::For& spec)
-        -> void
-    {
-        (*this)(spec.vars);
-        (*this)(spec.init);
-        (*this)(spec.condition);
-        (*this)(spec.increment);
-        (*this)(spec.body);
-    }
-
-    auto operator()(const alg::FuncInvocation& spec)
-        -> void
-    {
-        (*this)(spec.func);
-        (*this)(spec.args);
-    }
-
-    auto operator()(const alg::HeaderFile& spec)
-        -> void
-    {
-        (*this)(spec.lib);
-    }
-
-    auto operator()(const alg::If& spec)
-        -> void
-    {
-        (*this)(spec.vars);
-        (*this)(spec.condition);
-        (*this)(spec.then_clause);
-        (*this)(spec.else_clause);
-    }
-
-    auto operator()(const alg::InputBinding& spec)
-        -> void
-    {
-        (*this)(spec.var);
-    }
-
-    auto operator()(const alg::Lib& spec)
-        -> void
-    {}
-
-    auto operator()(const alg::OutputActivation& spec)
-        -> void
-    {
-        (*this)(spec.var);
-    }
-
-    auto operator()(const alg::Statement& spec)
-        -> void
-    {
-        std::visit(
-            [this]<typename Id>(Id id){
-                (*this)(id);
-            },
-            spec);
-        // std::visit(*this, spec);
-    }
-
-    auto operator()(const alg::Symbol& spec)
-        -> void
-    {
-        (*this)(spec.header_file);
-    }
-
-    auto operator()(const alg::Type& spec)
-        -> void
-    {
-        (*this)(spec.header_file);
-    }
-
-    auto operator()(const alg::TypeFromBinding& spec)
-        -> void
-    {}
-
-    auto operator()(const alg::Var& spec)
-        -> void
-    {
-        std::visit(
-            [this](auto id){ (*this)(id); },
-            spec);
-    }
-
-    auto operator()(const alg::Vars& spec)
-        -> void
-    {
-        for (auto id : spec)
-            (*this)(id);
-    }
-
-    auto operator()(const alg::While& spec)
-        -> void
-    {
-        (*this)(spec.vars);
-        (*this)(spec.condition);
-        (*this)(spec.body);
-    }
-
-};
-
-template <typename Visitor>
-AlgorithmInspector(Visitor&, const alg::AlgorithmStorage&)
-    -> AlgorithmInspector<Visitor>;
-
-
-// TODO: Move to a header file
-struct Hash
-{
-    template <common::StrongType T>
-    auto operator()(const T& key) const noexcept
-        -> size_t
-    { return std::hash<typename T::Weak>{}( key.v ); }
-};
+using common::detail::Hash;
 
 struct HeaderFileExtractor
 {
+    const gc::alg::AlgorithmStorage& storage;
+
     std::set<std::string_view> headers;
     std::set<std::string_view> system_headers;
     std::set<std::string_view> libs;
 
-    template <alg::AlgorithmIdType Id, typename Spec>
-    auto operator()(Id, const Spec&)
+    explicit HeaderFileExtractor(const gc::alg::AlgorithmStorage& storage):
+        storage{ storage }
+    {}
+
+    auto operator()(alg::StepIn_Tag) const noexcept
+        -> void
+    {}
+
+    auto operator()(alg::StepOut_Tag) const noexcept
+        -> void
+    {}
+
+    template <alg::AlgorithmIdType Id>
+    auto operator()(Id)
         -> bool
     { return true; }
 
-    auto operator()(alg::id::HeaderFile, const alg::HeaderFile& h)
+    auto operator()(alg::id::HeaderFile id)
         -> bool
     {
-        (h.system? system_headers: headers).insert(h.name);
+        if (id == common::Zero)
+            return true;
+        const auto& spec = storage(id);
+        (spec.system? system_headers: headers).insert(spec.name);
         return true;
     }
 
-    auto operator()(alg::id::Lib, const alg::Lib& lib)
+    auto operator()(alg::id::Lib id)
         -> bool
     {
-        libs.insert(lib.name);
+        if (id == common::Zero)
+            return true;
+        const auto& spec = storage(id);
+        libs.insert(spec.name);
         return true;
     }
 };
@@ -283,8 +139,8 @@ auto render_includes(std::ostream& s,
                        const gc::alg::AlgorithmStorage& alg_storage)
     -> void
 {
-    auto visitor = HeaderFileExtractor{};
-    auto inspector = AlgorithmInspector{ visitor, true, alg_storage };
+    auto visitor = HeaderFileExtractor{ alg_storage };
+    auto inspector = alg::AlgorithmInspector{ visitor, true, alg_storage };
     for (const auto& node_alg : algos)
     {
         for (const auto& port_alg : node_alg.algorithms)
@@ -340,6 +196,8 @@ auto resolve_variable_types(const ActivationGraph& g,
             const auto& var = alg_storage(input_binding.var);
             if (!std::holds_alternative<gc::alg::id::TypeFromBinding>(var))
                 continue;
+
+
             // Find activations of e.from
         }
     }
