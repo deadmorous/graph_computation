@@ -103,7 +103,6 @@ public:
         -> const AlgPrinter&
     {
         print(algs.input_bindings);
-        print(algs.output_bindings);
         print(algs.algorithms);
         if (algs.context != common::Zero)
             visitor_.nested("context", algs.context);
@@ -241,19 +240,11 @@ private:
             return false;
         }
 
-        auto operator()(alg::id::OutputBinding id)
-            -> bool
-        {
-            const auto& spec = storage_(id);
-            print("bind ", Prefixed{spec.var}, " => ", spec.port);
-            return false;
-        }
-
         auto operator()(alg::id::ReturnOutputActivation id)
             -> bool
         {
             const auto& spec = storage_(id);
-            print("return activation => ", spec.port);
+            nested("return output activation", spec.activation);
             return false;
         }
 
@@ -369,15 +360,6 @@ private:
         -> void
     {
         visitor_.nested("input bndings", [&]{
-            for (auto id : bindings)
-                inspector_(id);
-        });
-    }
-
-    auto print(const OutputBindingVec& bindings)
-        -> void
-    {
-        visitor_.nested("output bndings", [&]{
             for (auto id : bindings)
                 inspector_(id);
         });

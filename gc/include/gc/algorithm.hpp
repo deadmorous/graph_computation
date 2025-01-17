@@ -95,23 +95,14 @@ struct OutputActivation final
 };
 GCLIB_STRUCT_TYPE(OutputActivation, port, var);
 
-struct OutputBinding final
-{
-    gc::OutputPort port;
-    id::Var var;
-
-    auto operator==(const OutputBinding&) const noexcept -> bool = default;
-};
-GCLIB_STRUCT_TYPE(OutputBinding, port, var);
-
 struct ReturnOutputActivation final
 {
-    gc::OutputPort port;
+    id::OutputActivation activation;
 
     auto operator==(const ReturnOutputActivation&) const noexcept
         -> bool = default;
 };
-GCLIB_STRUCT_TYPE(ReturnOutputActivation, port);
+GCLIB_STRUCT_TYPE(ReturnOutputActivation, activation);
 
 using Statement = std::variant<
     id::Assign,
@@ -176,7 +167,6 @@ public:
     auto operator()(InputBinding) -> id::InputBinding;
     auto operator()(Lib) -> id::Lib;
     auto operator()(OutputActivation) -> id::OutputActivation;
-    auto operator()(OutputBinding) -> id::OutputBinding;
     auto operator()(ReturnOutputActivation) -> id::ReturnOutputActivation;
     auto operator()(Statement) -> id::Statement;
     auto operator()(Symbol) -> id::Symbol;
@@ -196,7 +186,6 @@ public:
     auto operator()(id::InputBinding) const -> const InputBinding&;
     auto operator()(id::Lib) const -> const Lib&;
     auto operator()(id::OutputActivation) const -> const OutputActivation&;
-    auto operator()(id::OutputBinding) const -> const OutputBinding&;
     auto operator()(id::ReturnOutputActivation) const
         -> const ReturnOutputActivation&;
     auto operator()(id::Statement) const -> const Statement&;

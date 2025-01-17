@@ -20,7 +20,6 @@ GCLIB_STRONG_TYPE(If, WeakId);
 GCLIB_STRONG_TYPE(InputBinding, WeakId);
 GCLIB_STRONG_TYPE(Lib, WeakId);
 GCLIB_STRONG_TYPE(OutputActivation, WeakId);
-GCLIB_STRONG_TYPE(OutputBinding, WeakId);
 GCLIB_STRONG_TYPE(ReturnOutputActivation, WeakId);
 GCLIB_STRONG_TYPE(Statement, WeakId);
 GCLIB_STRONG_TYPE(Symbol, WeakId);

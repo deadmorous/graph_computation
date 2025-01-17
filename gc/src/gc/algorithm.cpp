@@ -68,7 +68,6 @@ struct AlgorithmStorage::Impl
     InternedMap<id::InputBinding, InputBinding> input_binding_;
     InternedMap<id::Lib, Lib> lib_;
     InternedMap<id::OutputActivation, OutputActivation> output_activation_;
-    InternedMap<id::OutputBinding, OutputBinding> output_binding_;
     InternedMap<id::ReturnOutputActivation, ReturnOutputActivation>
         return_output_activation_;
     SimpleMap<id::Statement, Statement> statement_;
@@ -106,7 +105,6 @@ IMPL_ALGORITHM_STORAGE_METHODS(If, if_);
 IMPL_ALGORITHM_STORAGE_METHODS(InputBinding, input_binding_);
 IMPL_ALGORITHM_STORAGE_METHODS(Lib, lib_);
 IMPL_ALGORITHM_STORAGE_METHODS(OutputActivation, output_activation_);
-IMPL_ALGORITHM_STORAGE_METHODS(OutputBinding, output_binding_);
 IMPL_ALGORITHM_STORAGE_METHODS(ReturnOutputActivation,
                                return_output_activation_);
 IMPL_ALGORITHM_STORAGE_METHODS(Statement, statement_);

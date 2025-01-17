@@ -112,10 +112,6 @@ struct AlgorithmInspector final
         -> void
     { (*this)(spec.var); }
 
-    auto operator()(const OutputBinding& spec)
-        -> void
-    { (*this)(spec.var); }
-
     auto operator()(const Statement& spec)
         -> void
     { std::visit(*this, spec); }

@@ -27,16 +27,12 @@ struct PortActivationAlgorithm final
 using InputBindingVec =
     std::vector<alg::id::InputBinding>;
 
-using OutputBindingVec =
-    std::vector<alg::id::OutputBinding>;
-
 using PortActivationAlgorithmVec =
     common::StrongVector<PortActivationAlgorithm, InputPort>;
 
 struct NodeActivationAlgorithms
 {
     InputBindingVec input_bindings;
-    OutputBindingVec output_bindings;
     PortActivationAlgorithmVec algorithms;
     alg::id::Vars context;
 };
