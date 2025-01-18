@@ -1,5 +1,6 @@
 #include "gc/graph_computation.hpp"
 #include "gc/computation_node.hpp"
+#include "gc/strong_index.hpp"
 
 #include "common/func_ref.hpp"
 #include "common/index_range.hpp"
@@ -20,9 +21,6 @@
 using namespace std::string_view_literals;
 
 namespace gc {
-
-GCLIB_STRONG_TYPE(Count, uint32_t, 0, common::StrongCountFeatures);
-GCLIB_STRONG_TYPE(Index, uint32_t, 0, common::StrongIndexFeatures<Count>);
 
 struct ComputationInstructions final
 {
