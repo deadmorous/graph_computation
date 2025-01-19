@@ -94,6 +94,8 @@ public:
 
         return result;
     }
+
+    GCLIB_DECL_ACTIVATION_NODE_META(FuncIterator);
 };
 
 } // anonymous namespace
@@ -102,7 +104,7 @@ public:
 auto make_func_iterator(gc::ConstValueSpan args)
     -> std::shared_ptr<gc::ActivationNode>
 {
-    gc::expect_no_node_args("FuncIterator", args);
+    gc::expect_no_node_args(FuncIterator::static_meta().type_name, args);
     return std::make_shared<FuncIterator>();
 }
 

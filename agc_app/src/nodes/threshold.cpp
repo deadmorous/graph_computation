@@ -98,6 +98,8 @@ public:
 
         return result;
     }
+
+    GCLIB_DECL_ACTIVATION_NODE_META(Threshold);
 };
 
 } // anonymous namespace
@@ -106,7 +108,7 @@ public:
 auto make_threshold(gc::ConstValueSpan args)
     -> std::shared_ptr<gc::ActivationNode>
 {
-    gc::expect_no_node_args("Threshold", args);
+    gc::expect_no_node_args(Threshold::static_meta().type_name, args);
     return std::make_shared<Threshold>();
 }
 

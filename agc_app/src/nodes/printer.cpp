@@ -85,6 +85,8 @@ public:
 
         return result;
     }
+
+    GCLIB_DECL_ACTIVATION_NODE_META(Printer);
 };
 
 } // anonymous namespace
@@ -93,7 +95,7 @@ public:
 auto make_printer(gc::ConstValueSpan args)
     -> std::shared_ptr<gc::ActivationNode>
 {
-    gc::expect_no_node_args("Printer", args);
+    gc::expect_no_node_args(Printer::static_meta().type_name, args);
     return std::make_shared<Printer>();
 }
 

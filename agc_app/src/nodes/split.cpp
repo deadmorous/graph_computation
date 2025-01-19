@@ -78,6 +78,8 @@ public:
         return result;
     }
 
+    GCLIB_DECL_ACTIVATION_NODE_META(Split, true);
+
 private:
     gc::DynamicOutputNames output_port_names_;
 };
@@ -88,7 +90,7 @@ private:
 auto make_split(gc::ConstValueSpan args)
     -> std::shared_ptr<gc::ActivationNode>
 {
-    gc::expect_n_node_args("Split", args, 1);
+    gc::expect_n_node_args(Split::static_meta().type_name, args, 1);
     auto port_count = args[0].convert_to<gc::WeakPort>();
     return std::make_shared<Split>(gc::OutputPortCount{port_count});
 }

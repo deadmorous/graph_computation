@@ -48,6 +48,12 @@ auto operator<<(std::ostream&, const PrintableNodeActivationAlgorithms&)
 
 struct ActivationNode
 {
+    struct Meta
+    {
+        std::string_view type_name;
+        bool dynamic_algorithm = false;
+    };
+
     virtual ~ActivationNode() = default;
 
     virtual auto input_names() const -> InputNames = 0;
@@ -59,12 +65,41 @@ struct ActivationNode
     virtual auto activation_algorithms(alg::AlgorithmStorage&) const
         -> NodeActivationAlgorithms = 0;
 
+    virtual auto meta() const noexcept
+        -> const Meta& = 0;
+
     auto input_count() const -> InputPortCount
     { return input_names().size(); }
 
     auto output_count() const -> OutputPortCount
     { return output_names().size(); }
 
+    auto type_name() const noexcept
+        -> std::string_view
+    { return meta().type_name; }
+
+    auto dynamic_algorithm() const noexcept
+        -> bool
+    { return meta().dynamic_algorithm; }
+
 };
 
 } // namespace gc
+
+
+// Use inside class declaration, after `public:`.
+#define GCLIB_DECL_ACTIVATION_NODE_META(TypeName, ...)                      \
+    static auto static_meta() noexcept                                      \
+        -> const Meta&                                                      \
+    {                                                                       \
+        static auto meta = Meta{                                            \
+            .type_name = #TypeName,                                         \
+            .dynamic_algorithm = GCLIB_DEFAULT_A0_TO(false, ##__VA_ARGS__)  \
+        };                                                                  \
+        return meta;                                                        \
+    }                                                                       \
+                                                                            \
+    auto meta() const noexcept                                              \
+        -> const Meta& override                                             \
+    { return static_meta(); }                                               \
+    static_assert(true)

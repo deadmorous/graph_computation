@@ -140,6 +140,8 @@ public:
 
         return result;
     }
+
+    GCLIB_DECL_ACTIVATION_NODE_META(LinSpace);
 };
 
 } // anonymous namespace
@@ -148,7 +150,7 @@ public:
 auto make_linspace(gc::ConstValueSpan args)
     -> std::shared_ptr<gc::ActivationNode>
 {
-    gc::expect_no_node_args("LinSpace", args);
+    gc::expect_no_node_args(LinSpace::static_meta().type_name, args);
     return std::make_shared<LinSpace>();
 }
 

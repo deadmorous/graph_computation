@@ -115,6 +115,8 @@ public:
 
         return result;
     }
+
+    GCLIB_DECL_ACTIVATION_NODE_META(MandelbrotFunc);
 };
 
 } // anonymous namespace
@@ -123,7 +125,7 @@ public:
 auto make_mandelbrot_func(gc::ConstValueSpan args)
     -> std::shared_ptr<gc::ActivationNode>
 {
-    gc::expect_no_node_args("MandelbrotFunc", args);
+    gc::expect_no_node_args(MandelbrotFunc::static_meta().type_name, args);
     return std::make_shared<MandelbrotFunc>();
 }
 

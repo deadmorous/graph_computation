@@ -160,6 +160,8 @@ public:
 
         return result;
     }
+
+    GCLIB_DECL_ACTIVATION_NODE_META(Grid2d);
 };
 
 } // anonymous namespace
@@ -168,7 +170,7 @@ public:
 auto make_grid_2d(gc::ConstValueSpan args)
     -> std::shared_ptr<gc::ActivationNode>
 {
-    gc::expect_no_node_args("Grid2d", args);
+    gc::expect_no_node_args(Grid2d::static_meta().type_name, args);
     return std::make_shared<Grid2d>();
 }
 
