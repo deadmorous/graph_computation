@@ -2,6 +2,7 @@
 #include "gc/algorithm.hpp"
 #include "gc/algorithm_inspector.hpp"
 
+#include "common/detail/ind.hpp"
 #include "common/format.hpp"
 
 
@@ -11,26 +12,7 @@ namespace gc {
 
 namespace {
 
-// --- Indentation
-
-GCLIB_STRONG_TYPE(Ind, uint16_t, 0, common::StrongCountFeatures);
-
-constexpr size_t tab_size = 2;
-
-auto operator<<(std::ostream& s, Ind ind)
-    -> std::ostream&
-{
-    for (Ind::Weak i=0, n=tab_size*ind.v; i<n; ++i)
-        s << ' ';
-    return s;
-}
-
-auto next(Ind ind)
-    -> Ind
-{ return ind + Ind{1u}; }
-
-
-// ---
+using common::detail::Ind;
 
 constexpr auto none = "<none>"sv;
 

@@ -3,8 +3,9 @@ cmake_minimum_required(VERSION 3.5)
 project(gc-lib LANGUAGES CXX)
 
 add_library(gc-lib STATIC
-    detail/parse_node_port.cpp
+    common/detail/ind.cpp
     expect_n_node_args.cpp
+    gc/detail/parse_node_port.cpp
     gc/activation_graph.cpp
     gc/activation_node.cpp
     gc/algorithm.cpp
