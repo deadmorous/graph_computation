@@ -104,6 +104,13 @@ struct AlgorithmInspector final
         -> void
     { (*this)(spec.var); }
 
+    auto operator()(const std::vector<id::InputBinding>& vec)
+        -> void
+    {
+        for (auto id : vec)
+            (*this)(id);
+    }
+
     auto operator()(const Lib& spec)
         -> void
     {}
