@@ -53,7 +53,7 @@ public:
 
         auto threshold_func =
             s(a::Symbol{
-                .name = "gc_app::threshold",
+                .name = "agc_app::threshold",
                 .header_file = threshold_alg_header });
 
         // Bind input

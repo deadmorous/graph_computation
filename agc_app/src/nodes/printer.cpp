@@ -56,7 +56,7 @@ public:
 
         auto print_func =
             s(a::Symbol{
-                .name = "gc_app::print",
+                .name = "agc_app::print",
                 .header_file = printer_alg_header });
 
         // Bind input

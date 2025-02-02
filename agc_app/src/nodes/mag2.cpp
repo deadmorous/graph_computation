@@ -62,7 +62,7 @@ public:
 
         auto mag2_func =
             s(a::Symbol{
-                .name = "gc_app::mag2",
+                .name = "agc_app::mag2",
                 .header_file = mag2_alg_header });
 
         // Bind input

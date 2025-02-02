@@ -62,22 +62,22 @@ public:
 
         auto spec_type =
             s(a::Type{
-                .name = "gc_app::LinSpaceSpec",
+                .name = "agc_app::LinSpaceSpec",
                 .header_file = linspace_spec_header });
 
         auto iter_init_func =
             s(a::Symbol{
-                .name = "gc_app::LinSpaceInitIter",
+                .name = "agc_app::LinSpaceInitIter",
                 .header_file = linspace_alg_header });
 
         auto iter_next_func =
             s(a::Symbol{
-                .name = "gc_app::LinSpaceNextIter",
+                .name = "agc_app::LinSpaceNextIter",
                 .header_file = linspace_alg_header });
 
         auto iter_deref_func =
             s(a::Symbol{
-                .name = "gc_app::LinSpaceDerefIter",
+                .name = "agc_app::LinSpaceDerefIter",
                 .header_file = linspace_alg_header });
 
         // Bind input

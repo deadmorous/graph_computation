@@ -94,22 +94,22 @@ public:
 
         auto resize_canvas_func =
             s(a::Symbol{
-                .name = "gc_app::resize_canvas",
+                .name = "agc_app::resize_canvas",
                 .header_file = canvas_alg_header });
 
         auto clear_canvas_func =
             s(a::Symbol{
-                .name = "gc_app::clear_canvas",
+                .name = "agc_app::clear_canvas",
                 .header_file = canvas_alg_header });
 
         auto set_canvas_pixel_func =
             s(a::Symbol{
-                .name = "gc_app::set_canvas_pixel",
+                .name = "agc_app::set_canvas_pixel",
                 .header_file = canvas_alg_header });
 
         auto set_next_canvas_pixel_func =
             s(a::Symbol{
-                .name = "gc_app::set_next_canvas_pixel",
+                .name = "agc_app::set_next_canvas_pixel",
                 .header_file = canvas_alg_header });
 
         // Define context variables

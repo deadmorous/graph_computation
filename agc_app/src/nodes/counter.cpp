@@ -65,12 +65,12 @@ public:
 
         auto reset_counter_func =
             s(a::Symbol{
-                .name = "gc_app::reset_counter",
+                .name = "agc_app::reset_counter",
                 .header_file = counter_alg_header });
 
         auto next_counter_func =
             s(a::Symbol{
-                .name = "gc_app::next_counter",
+                .name = "agc_app::next_counter",
                 .header_file = counter_alg_header });
 
         // Define context variables

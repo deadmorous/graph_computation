@@ -53,7 +53,7 @@ public:
 
         auto scale_func =
             s(a::Symbol{
-                .name = "gc_app::scale",
+                .name = "agc_app::scale",
                 .header_file = scale_alg_header });
 
         // Bind inputs

@@ -70,22 +70,22 @@ public:
 
         auto grid_size_func =
             s(a::Symbol{
-                .name = "gc_app::grid_2d_size",
+                .name = "agc_app::grid_2d_size",
                 .header_file = grid_2d_alg_header });
 
         auto iter_init_func =
             s(a::Symbol{
-                .name = "gc_app::grid_2d_init_iter",
+                .name = "agc_app::grid_2d_init_iter",
                 .header_file = grid_2d_alg_header });
 
         auto iter_next_func =
             s(a::Symbol{
-                .name = "gc_app::grid_2d_next_iter",
+                .name = "agc_app::grid_2d_next_iter",
                 .header_file = grid_2d_alg_header });
 
         auto iter_deref_func =
             s(a::Symbol{
-                .name = "grid_2d_deref_iter",
+                .name = "agc_app::grid_2d_deref_iter",
                 .header_file = grid_2d_alg_header });
 
         // Bind input

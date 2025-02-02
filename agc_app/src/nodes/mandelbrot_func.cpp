@@ -63,7 +63,7 @@ public:
 
         auto mandelbrot_func =
             s(a::Symbol{
-                .name = "gc_app::mandelbrot_func",
+                .name = "agc_app::mandelbrot_func",
                 .header_file = mag2_alg_header });
 
         // Bind input
