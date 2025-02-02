@@ -21,4 +21,14 @@ auto operator<<(std::ostream& s, Ind ind)
 auto next(Ind ind)
     -> Ind;
 
+class ScopedInd final
+{
+public:
+    ScopedInd(Ind& ind);
+    ~ScopedInd();
+
+private:
+    Ind& ind_;
+};
+
 } // namespace common::detail

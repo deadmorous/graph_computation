@@ -14,4 +14,15 @@ auto next(Ind ind)
     -> Ind
 { return ind + Ind{1u}; }
 
+ScopedInd::ScopedInd(Ind& ind):
+    ind_{ ind }
+{
+    ++ind_.v;
+}
+
+ScopedInd::~ScopedInd()
+{
+    --ind_.v;
+}
+
 } // namespace common::detail
