@@ -4,9 +4,11 @@
 
 #include "gc/computation_node_fwd.hpp"
 
+#include <memory>
+
 
 namespace gc {
 
-using ComputationGraph = Graph<ComputationNode>;
+using ComputationGraph = Graph<std::shared_ptr<ComputationNode>>;
 
 } // namespace gc

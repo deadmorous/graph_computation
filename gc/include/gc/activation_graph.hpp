@@ -4,9 +4,12 @@
 
 #include "common/grouped.hpp"
 
+#include <memory>
+
+
 namespace gc {
 
-using ActivationGraph = Graph<ActivationNode>;
+using ActivationGraph = Graph<std::shared_ptr<ActivationNode>>;
 
 struct ActivationGraphSourceTypes final
 {
