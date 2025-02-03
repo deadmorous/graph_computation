@@ -634,9 +634,18 @@ private:
         auto operator()(alg::id::Do id)
             -> bool
         {
-            // const auto& spec = storage_(id);
-            print("// do");
-            return true;
+            const auto& spec = storage_(id);
+            auto sc =
+                OptionalScope{ *this, ind_.v > 1 && spec.vars != common::Zero };
+            print("do");
+            decl_vars(spec.vars);
+            std::optional<ScopedInd> scoped_ind;
+            if (!is_block(spec.body))
+                scoped_ind.emplace(ind_);
+            (*this)(spec.body);
+            scoped_ind.reset();
+            print("while (", fmt_(spec.condition), ");");
+            return false;
         }
 
         auto operator()(alg::id::For id)
@@ -770,7 +779,6 @@ private:
                 OptionalScope{ *this, ind_.v > 1 && spec.vars != common::Zero };
             decl_vars(spec.vars);
             print("while (", fmt_(spec.condition), ")");
-            // TODO: Fix `is_block` for statements that can contain scoped vars
             std::optional<ScopedInd> scoped_ind;
             if (!is_block(spec.body))
                 scoped_ind.emplace(ind_);
@@ -787,6 +795,7 @@ private:
               << '\n';
         }
 
+        // TODO: Fix `is_block` for statements that can contain scoped vars
         auto is_block(alg::id::Statement id) const
             -> bool
         { return std::holds_alternative<alg::id::Block>(storage_(id)); }
