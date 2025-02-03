@@ -1,4 +1,7 @@
-#if 0
+#include <gtest/gtest.h>
+
+// -------- GENERATED CODE BEGIN --------
+
 #include "agc_app/alg/linspace.hpp"
 #include "agc_app/alg/printer.hpp"
 #include "agc_app/types/linspace_spec.hpp"
@@ -46,13 +49,14 @@ auto activate_node_0_in_0(Context& ctx)
     -> void
 {
   auto var_12 = agc_app::LinSpaceInitIter(ctx.var_8);
-  while (agc_app::LinSpaceNextIter(var_12))
+  do
   {
     auto var_15 = agc_app::LinSpaceDerefIter(var_12);
     // Activate [O(0,0)->I(1,0)]
     ctx.var_28 = var_15;
     activate_node_1_in_0(ctx);
   }
+  while (agc_app::LinSpaceNextIter(var_12));
 }
 
 // Node 1 (Printer)
@@ -63,4 +67,17 @@ auto activate_node_1_in_0(Context& ctx)
   agc_app::print(ctx.var_28);
 }
 
-#endif // 0
+// -------- GENERATED CODE END --------
+
+TEST(AgcApp_GenTest, Hello)
+{
+    auto ctx = Context {
+        .var_8 = agc_app::LinSpaceSpec{
+            .first = 10,
+            .last = 20,
+            .count = 21
+        }
+    };
+
+    activate_node_0_in_0(ctx);
+}
