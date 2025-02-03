@@ -6,7 +6,11 @@
 namespace agc_app {
 
 struct LinSpaceIter
-{};
+{
+    double v;
+    double h;
+    size_t n;
+};
 
 auto LinSpaceInitIter(const LinSpaceSpec&)
     -> LinSpaceIter;

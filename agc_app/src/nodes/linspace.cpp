@@ -115,7 +115,7 @@ public:
             s(a::Statement{ s(a::Block{
                 .vars = s(a::Vars{iter_state}),
                 .statements = {
-                    s(a::Statement{ s(a::While{
+                    s(a::Statement{ s(a::Do{
                         .condition = s(a::FuncInvocation{
                             .func = iter_next_func,
                             .args = iter_state_args }),
