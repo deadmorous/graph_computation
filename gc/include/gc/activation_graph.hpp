@@ -4,6 +4,7 @@
 
 #include "common/grouped.hpp"
 
+#include <iostream>
 #include <memory>
 
 
@@ -23,7 +24,8 @@ struct ActivationGraphSourceTypes final
 auto operator<<(std::ostream& s, const ActivationGraphSourceTypes& source_types)
     -> std::ostream&;
 
-auto generate_source(const ActivationGraph& g,
+auto generate_source(std::ostream& s,
+                     const ActivationGraph& g,
                      const ActivationGraphSourceTypes& source_types = {})
     -> void;
 

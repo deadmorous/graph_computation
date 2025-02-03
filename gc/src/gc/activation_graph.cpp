@@ -167,6 +167,7 @@ auto visit_all_vars(F f,
         alg::AlgorithmInspector{ var_visitor, true, alg_storage };
     for (const auto& node_algos : algos)
     {
+        var_inspector(node_algos.context);
         var_inspector(node_algos.input_bindings);
         for (const auto& alg : node_algos.algorithms)
             var_inspector(alg.activate);
@@ -699,6 +700,8 @@ private:
         auto operator()(alg::id::OutputActivation id)
             -> bool
         {
+            auto sc = OptionalScope{ *this, ind_.v == 0 };
+
             const auto& spec = storage_(id);
 
             for (auto to : group(activations_, spec.port))
@@ -963,25 +966,24 @@ auto generate_nodes(std::ostream& s,
 } // anonymous namespace
 
 
-auto generate_source(const ActivationGraph& g,
+auto generate_source(std::ostream& s,
+                     const ActivationGraph& g,
                      const ActivationGraphSourceTypes& source_types)
     -> void
 {
-    auto& s = std::cout; // TODO
-
     // Find external inputs
 
     // Determine external input activation sequence
     auto alg_storage = alg::AlgorithmStorage{};
     auto algos = graph_algos(g, alg_storage);
 
-    // deBUG, TODO: Remove
-    std::cout << "==== GRAPH ALGORITHMS ====\n";
-    for (const auto& node_algos : algos)
-        std::cout
-            << PrintableNodeActivationAlgorithms{node_algos, alg_storage}
-            << std::endl;
-    std::cout << "========\n\n";
+    // // deBUG, TODO: Remove
+    // std::cout << "==== GRAPH ALGORITHMS ====\n";
+    // for (const auto& node_algos : algos)
+    //     std::cout
+    //         << PrintableNodeActivationAlgorithms{node_algos, alg_storage}
+    //         << std::endl;
+    // std::cout << "========\n\n";
 
     // Generate #includes
     render_includes(s, g, algos, alg_storage);
