@@ -27,5 +27,5 @@ TEST(AgcApp_Graph, GenerateSource)
                     .node = 1_gc_n,
                     .port = 0_gc_i } } } };
 
-    generate_source(g);
+    generate_source(std::cout, g);
 }

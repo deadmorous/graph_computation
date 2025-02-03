@@ -11,6 +11,7 @@
 #include "agc_app/nodes/split.hpp"
 #include "agc_app/nodes/threshold.hpp"
 
+#include "gc/activation_graph.hpp"
 #include "gc/activation_node.hpp"
 #include "gc/algorithm.hpp"
 #include "gc/value.hpp"
@@ -40,6 +41,12 @@ TEST(AgcApp_Node, Canvas)
     std::cout
         << gc::PrintableNodeActivationAlgorithms{algs, alg_storage}
         << std::endl;
+    std::cout << "=====\n";
+    gc::generate_source(
+        std::cout,
+        gc::ActivationGraph{
+            .nodes = { node }
+        });
 }
 
 TEST(AgcApp_Node, Counter)
