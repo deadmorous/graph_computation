@@ -335,6 +335,7 @@ auto resolve_variable_types(const ActivationGraph& g,
         auto source_type = source_types.types[index];
         for (const auto& to : group(source_types.destinations, index))
         {
+            auto used = false;
             visit_input_bindings_for(
                 to,
                 [&](const alg::InputBinding& input_binding)
@@ -344,7 +345,11 @@ auto resolve_variable_types(const ActivationGraph& g,
                             "Input ", to,
                             " has source type specified more than once");
                     var_source_types.emplace(input_binding.var, source_type);
+                    used = true;
                 });
+            if (!used)
+                common::throw_(
+                    "Destination ", to, " for source type was not used");
         }
     }
 
@@ -382,18 +387,24 @@ auto resolve_variable_types(const ActivationGraph& g,
             result.emplace(k, spec);
     }
 
-    // Check that all variables of type `TypeFromBinding` are bound
-    auto check_var = [&]( alg::id::Var id )
+    // Make sure that all variables of type `TypeFromBinding` are bound,
+    // using var_source_types for any remaining unbound vars
+    auto complete_binding = [&]( alg::id::Var id )
     {
         const auto& spec = alg_storage(id);
         if (!holds_alternative<alg::id::TypeFromBinding>(spec))
             return false;
-        if (!result.contains(id))
-            common::throw_(
-                "Variable ", id, " of type `TypeFromBinding` is unbound");
-        return false;
+        if (result.contains(id))
+            return false;
+        if (auto it = var_source_types.find(id); it != var_source_types.end())
+        {
+            result.emplace(id, it->second);
+            return false;
+        }
+        common::throw_(
+            "Variable ", id, " of type `TypeFromBinding` is unbound");
     };
-    visit_all_vars(check_var, algos, alg_storage);
+    visit_all_vars(complete_binding, algos, alg_storage);
 
     return result;
 }
@@ -604,6 +615,7 @@ private:
         auto operator()(alg::id::Assign id)
             -> bool
         {
+            auto sc = OptionalScope{ *this, ind_ == common::Zero };
             const auto& spec = storage_(id);
             print(fmt_(spec.dst), " = ", fmt_(spec.src));
             return false;
@@ -612,6 +624,7 @@ private:
         auto operator()(alg::id::Block id)
             -> bool
         {
+            auto relax = Relax{ relaxed_, true };
             auto sc = OptionalScope{ *this, true };
             const auto& spec = storage_(id);
             decl_vars(spec.vars);
@@ -636,11 +649,13 @@ private:
             -> bool
         {
             const auto& spec = storage_(id);
-            auto sc =
-                OptionalScope{ *this, ind_.v > 1 && spec.vars != common::Zero };
-            print("do");
+            auto sc = OptionalScope{ *this, ind_.v < 1 ||
+                                     spec.vars != common::Zero  ||
+                                     !is_relaxed() };
             decl_vars(spec.vars);
+            print("do");
             std::optional<ScopedInd> scoped_ind;
+            auto relax = Relax{ relaxed_, false };
             if (!is_block(spec.body))
                 scoped_ind.emplace(ind_);
             (*this)(spec.body);
@@ -652,9 +667,22 @@ private:
         auto operator()(alg::id::For id)
             -> bool
         {
-            // const auto& spec = storage_(id);
-            print("// for");
-            return true;
+            const auto& spec = storage_(id);
+            auto sc = OptionalScope{ *this, ind_.v < 1 ||
+                                     spec.vars != common::Zero
+                                     || !is_relaxed() };
+            decl_vars(spec.vars);
+            print("for (",
+                  fmt_(spec.init), "; ",
+                  fmt_(spec.condition), "; ",
+                  fmt_(spec.increment),
+                  ")");
+            std::optional<ScopedInd> scoped_ind;
+            auto relax = Relax{ relaxed_, false };
+            if (!is_block(spec.body))
+                scoped_ind.emplace(ind_);
+            (*this)(spec.body);
+            return false;
         }
 
         auto operator()(alg::id::FuncInvocation id)
@@ -676,9 +704,30 @@ private:
         auto operator()(alg::id::If id)
             -> bool
         {
-            // const auto& spec = storage_(id);
-            print("// if");
-            return true;
+            const auto& spec = storage_(id);
+            auto sc =
+                OptionalScope{ *this, ind_.v < 1
+                               || spec.vars != common::Zero
+                               || !is_relaxed() };
+            decl_vars(spec.vars);
+            auto relax = Relax{ relaxed_, false };
+            print("if (", fmt_(spec.condition), ")");
+            {
+                std::optional<ScopedInd> scoped_ind;
+                if (!is_block(spec.then_clause))
+                    scoped_ind.emplace(ind_);
+                (*this)(spec.then_clause);
+            }
+            if (spec.else_clause != common::Zero)
+            {
+                print("else");
+                std::optional<ScopedInd> scoped_ind;
+                if (!is_block(spec.else_clause))
+                    scoped_ind.emplace(ind_);
+                (*this)(spec.else_clause);
+
+            }
+            return false;
         }
 
         auto operator()(alg::id::InputBinding id)
@@ -700,10 +749,12 @@ private:
         auto operator()(alg::id::OutputActivation id)
             -> bool
         {
-            auto sc = OptionalScope{ *this, ind_.v == 0 };
+            auto sc =
+                OptionalScope{ *this, ind_ == common::Zero || !is_relaxed() };
 
             const auto& spec = storage_(id);
 
+            print("// Activate output port ", spec.port);
             for (auto to : group(activations_, spec.port))
             {
                 const auto& bindings = algos_.at(to.node).input_bindings;
@@ -779,10 +830,13 @@ private:
         {
             const auto& spec = storage_(id);
             auto sc =
-                OptionalScope{ *this, ind_.v > 1 && spec.vars != common::Zero };
+                OptionalScope{ *this, ind_.v < 1 ||
+                               spec.vars != common::Zero ||
+                               !is_relaxed() };
             decl_vars(spec.vars);
             print("while (", fmt_(spec.condition), ")");
             std::optional<ScopedInd> scoped_ind;
+            auto relax = Relax{ relaxed_, false };
             if (!is_block(spec.body))
                 scoped_ind.emplace(ind_);
             (*this)(spec.body);
@@ -798,10 +852,33 @@ private:
               << '\n';
         }
 
-        // TODO: Fix `is_block` for statements that can contain scoped vars
         auto is_block(alg::id::Statement id) const
             -> bool
-        { return std::holds_alternative<alg::id::Block>(storage_(id)); }
+        {
+            const auto& spec = storage_(id);
+            return visit(IsBlock{is_relaxed()}, spec);
+        }
+
+        struct IsBlock final
+        {
+            bool relaxed;
+            auto operator()(alg::id::Assign) const noexcept -> bool
+            { return false; }
+            auto operator()(alg::id::FuncInvocation) const noexcept -> bool
+            { return false; }
+            auto operator()(alg::id::OutputActivation) const noexcept -> bool
+            { return !relaxed; }
+            auto operator()(alg::id::If) const noexcept -> bool
+            { return !relaxed; }
+            auto operator()(alg::id::For) const noexcept -> bool
+            { return !relaxed; }
+            auto operator()(alg::id::While) const noexcept -> bool
+            { return !relaxed; }
+            auto operator()(alg::id::Do) const noexcept -> bool
+            { return !relaxed; }
+            auto operator()(alg::id::Block) const noexcept -> bool
+            { return true; }
+        };
 
         struct Formatter final
         {
@@ -887,6 +964,20 @@ private:
         Formatter fmt_;
 
         common::StrongGrouped<EdgeInputEnd, OutputPort, Index> activations_;
+
+
+        struct Relax final
+        {
+            std::vector<bool>& relaxed_;
+            explicit Relax(std::vector<bool>& relaxed, bool relax)
+                : relaxed_{ relaxed }
+            { relaxed_.push_back(relax); }
+            ~Relax()
+            { relaxed_.pop_back(); }
+        };
+        auto is_relaxed() const -> bool
+        { return relaxed_.back(); }
+        std::vector<bool> relaxed_;
     };
 
     Visitor visitor_;
@@ -968,13 +1059,13 @@ auto generate_nodes(std::ostream& s,
 
 auto generate_source(std::ostream& s,
                      const ActivationGraph& g,
+                     alg::AlgorithmStorage& alg_storage,
                      const ActivationGraphSourceTypes& source_types)
     -> void
 {
     // Find external inputs
 
     // Determine external input activation sequence
-    auto alg_storage = alg::AlgorithmStorage{};
     auto algos = graph_algos(g, alg_storage);
 
     // // deBUG, TODO: Remove
@@ -994,6 +1085,14 @@ auto generate_source(std::ostream& s,
     // Generate entry point
 
     std::cout << "TODO\n";
+}
+
+auto generate_source(std::ostream& s,
+                     const ActivationGraph& g)
+    -> void
+{
+    auto alg_storage = alg::AlgorithmStorage{};
+    generate_source(s, g, alg_storage);
 }
 
 } // namespace gc

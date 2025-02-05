@@ -23,6 +23,53 @@ using namespace agc_app;
 using namespace gc::literals;
 using namespace std::string_view_literals;
 
+namespace {
+
+auto print_node_algos(const gc::ActivationNode* node)
+    -> void
+{
+    auto alg_storage = gc::alg::AlgorithmStorage{};
+    auto algos = node->activation_algorithms(alg_storage);
+    std::cout
+        << gc::PrintableNodeActivationAlgorithms{algos, alg_storage}
+        << "\n=====\n";
+}
+
+template <std::same_as<std::string_view>... Ts>
+auto make_source_types(gc::alg::AlgorithmStorage& alg_storage, Ts...types)
+    -> gc::ActivationGraphSourceTypes
+{
+    auto result = gc::ActivationGraphSourceTypes{};
+
+    auto port = gc::InputPort{0};
+    ([&](std::string_view type)
+    {
+        result.types.push_back(
+            alg_storage(gc::alg::Type{ .name = std::string(type) }));
+        add_to_last_group(result.destinations,
+                          gc::EdgeInputEnd{ 0_gc_n, port });
+        next_group(result.destinations);
+        ++port;
+    }(types), ...);
+
+    return result;
+}
+
+template <std::same_as<std::string_view>... Ts>
+auto print_node_source_code(gc::ActivationNodePtr node, Ts...types)
+    -> void
+{
+    auto alg_storage = gc::alg::AlgorithmStorage{};
+    auto source_types = make_source_types(alg_storage, types...);
+
+    gc::generate_source(
+        std::cout,
+        gc::ActivationGraph{ .nodes = { node } },
+        alg_storage,
+        source_types);
+}
+
+} // anonymous namespace
 
 TEST(AgcApp_Node, Canvas)
 {
@@ -36,17 +83,8 @@ TEST(AgcApp_Node, Canvas)
     EXPECT_EQ(node->output_count(), 1_gc_oc);
     EXPECT_EQ(node->output_names()[0_gc_o], "canvas"sv);
 
-    auto alg_storage = gc::alg::AlgorithmStorage{};
-    auto algs = node->activation_algorithms(alg_storage);
-    std::cout
-        << gc::PrintableNodeActivationAlgorithms{algs, alg_storage}
-        << std::endl;
-    std::cout << "=====\n";
-    gc::generate_source(
-        std::cout,
-        gc::ActivationGraph{
-            .nodes = { node }
-        });
+    print_node_algos(node.get());
+    print_node_source_code(node);
 }
 
 TEST(AgcApp_Node, Counter)
@@ -58,11 +96,8 @@ TEST(AgcApp_Node, Counter)
     EXPECT_EQ(node->output_count(), 1_gc_oc);
     EXPECT_EQ(node->output_names()[0_gc_o], "count"sv);
 
-    auto alg_storage = gc::alg::AlgorithmStorage{};
-    auto algs = node->activation_algorithms(alg_storage);
-    std::cout
-        << gc::PrintableNodeActivationAlgorithms{algs, alg_storage}
-        << std::endl;
+    print_node_algos(node.get());
+    print_node_source_code(node);
 }
 
 TEST(AgcApp_Node, FuncIterator)
@@ -76,11 +111,8 @@ TEST(AgcApp_Node, FuncIterator)
     EXPECT_EQ(node->output_names()[0_gc_o], "arg"sv);
     EXPECT_EQ(node->output_names()[1_gc_o], "value"sv);
 
-    auto alg_storage = gc::alg::AlgorithmStorage{};
-    auto algs = node->activation_algorithms(alg_storage);
-    std::cout
-        << gc::PrintableNodeActivationAlgorithms{algs, alg_storage}
-        << std::endl;
+    print_node_algos(node.get());
+    print_node_source_code(node, "double"sv, "double"sv);
 }
 
 TEST(AgcApp_Node, Grid2d)
@@ -92,11 +124,8 @@ TEST(AgcApp_Node, Grid2d)
     EXPECT_EQ(node->output_names()[0_gc_o], "grid_size"sv);
     EXPECT_EQ(node->output_names()[1_gc_o], "point"sv);
 
-    auto alg_storage = gc::alg::AlgorithmStorage{};
-    auto algs = node->activation_algorithms(alg_storage);
-    std::cout
-        << gc::PrintableNodeActivationAlgorithms{algs, alg_storage}
-        << std::endl;
+    print_node_algos(node.get());
+    print_node_source_code(node);
 }
 
 TEST(AgcApp_Node, LinSpace)
@@ -107,11 +136,8 @@ TEST(AgcApp_Node, LinSpace)
     EXPECT_EQ(node->output_count(), 1_gc_oc);
     EXPECT_EQ(node->output_names()[0_gc_o], "sequence"sv);
 
-    auto alg_storage = gc::alg::AlgorithmStorage{};
-    auto algs = node->activation_algorithms(alg_storage);
-    std::cout
-        << gc::PrintableNodeActivationAlgorithms{algs, alg_storage}
-        << std::endl;
+    print_node_algos(node.get());
+    print_node_source_code(node);
 }
 
 TEST(AgcApp_Node, Mag2)
@@ -122,11 +148,8 @@ TEST(AgcApp_Node, Mag2)
     EXPECT_EQ(node->output_count(), 1_gc_oc);
     EXPECT_EQ(node->output_names()[0_gc_o], "mag2"sv);
 
-    auto alg_storage = gc::alg::AlgorithmStorage{};
-    auto algs = node->activation_algorithms(alg_storage);
-    std::cout
-        << gc::PrintableNodeActivationAlgorithms{algs, alg_storage}
-        << std::endl;
+    print_node_algos(node.get());
+    print_node_source_code(node);
 }
 
 TEST(AgcApp_Node, MandelbrotFunc)
@@ -138,11 +161,8 @@ TEST(AgcApp_Node, MandelbrotFunc)
     EXPECT_EQ(node->output_count(), 1_gc_oc);
     EXPECT_EQ(node->output_names()[0_gc_o], "value"sv);
 
-    auto alg_storage = gc::alg::AlgorithmStorage{};
-    auto algs = node->activation_algorithms(alg_storage);
-    std::cout
-        << gc::PrintableNodeActivationAlgorithms{algs, alg_storage}
-        << std::endl;
+    print_node_algos(node.get());
+    print_node_source_code(node);
 }
 
 TEST(AgcApp_Node, Printer)
@@ -152,11 +172,8 @@ TEST(AgcApp_Node, Printer)
     EXPECT_EQ(node->input_names()[0_gc_i], "value"sv);
     EXPECT_EQ(node->output_count(), common::Zero);
 
-    auto alg_storage = gc::alg::AlgorithmStorage{};
-    auto algs = node->activation_algorithms(alg_storage);
-    std::cout
-        << gc::PrintableNodeActivationAlgorithms{algs, alg_storage}
-        << std::endl;
+    print_node_algos(node.get());
+    print_node_source_code(node, "int"sv);
 }
 
 TEST(AgcApp_Node, Replicate)
@@ -168,11 +185,8 @@ TEST(AgcApp_Node, Replicate)
     EXPECT_EQ(node->output_count(), 1_gc_oc);
     EXPECT_EQ(node->output_names()[0_gc_o], "value"sv);
 
-    auto alg_storage = gc::alg::AlgorithmStorage{};
-    auto algs = node->activation_algorithms(alg_storage);
-    std::cout
-        << gc::PrintableNodeActivationAlgorithms{algs, alg_storage}
-        << std::endl;
+    print_node_algos(node.get());
+    print_node_source_code(node, "float"sv);
 }
 
 TEST(AgcApp_Node, Scale)
@@ -184,11 +198,8 @@ TEST(AgcApp_Node, Scale)
     EXPECT_EQ(node->output_count(), 1_gc_oc);
     EXPECT_EQ(node->output_names()[0_gc_o], "scaled"sv);
 
-    auto alg_storage = gc::alg::AlgorithmStorage{};
-    auto algs = node->activation_algorithms(alg_storage);
-    std::cout
-        << gc::PrintableNodeActivationAlgorithms{algs, alg_storage}
-        << std::endl;
+    print_node_algos(node.get());
+    print_node_source_code(node, "double"sv, "int"sv);
 }
 
 TEST(AgcApp_Node, Split)
@@ -202,11 +213,8 @@ TEST(AgcApp_Node, Split)
     EXPECT_EQ(node->output_names()[1_gc_o], "out_1"sv);
     EXPECT_EQ(node->output_names()[2_gc_o], "out_2"sv);
 
-    auto alg_storage = gc::alg::AlgorithmStorage{};
-    auto algs = node->activation_algorithms(alg_storage);
-    std::cout
-        << gc::PrintableNodeActivationAlgorithms{algs, alg_storage}
-        << std::endl;
+    print_node_algos(node.get());
+    print_node_source_code(node, "int"sv);
 }
 
 TEST(AgcApp_Node, Threshold)
@@ -219,9 +227,6 @@ TEST(AgcApp_Node, Threshold)
     EXPECT_EQ(node->output_names()[0_gc_o], "pass"sv);
     EXPECT_EQ(node->output_names()[1_gc_o], "fail"sv);
 
-    auto alg_storage = gc::alg::AlgorithmStorage{};
-    auto algs = node->activation_algorithms(alg_storage);
-    std::cout
-        << gc::PrintableNodeActivationAlgorithms{algs, alg_storage}
-        << std::endl;
+    print_node_algos(node.get());
+    print_node_source_code(node, "double"sv, "double"sv);
 }

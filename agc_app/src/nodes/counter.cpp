@@ -84,12 +84,17 @@ public:
             s(a::Vars{count});
 
         auto activate_next_statement =
-            s(a::Statement{ s(a::FuncInvocation{
-                .func = next_counter_func,
-                .args = counter_func_args }) });
+            s(a::Statement{ s(a::Block{
+                .statements = {
+                    s(a::Statement{ s(a::FuncInvocation{
+                        .func = next_counter_func,
+                        .args = counter_func_args }) }),
+                    s(a::Statement{ s(a::OutputActivation{
+                        .port = 0_gc_o,
+                        .var = count }) }) }}) });
 
         result.algorithms.emplace_back(gc::PortActivationAlgorithm{
-            .activate = activate_next_statement,
+            .activate = activate_next_statement
         });
 
         auto activate_reset_statement =

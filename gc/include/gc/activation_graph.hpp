@@ -26,7 +26,12 @@ auto operator<<(std::ostream& s, const ActivationGraphSourceTypes& source_types)
 
 auto generate_source(std::ostream& s,
                      const ActivationGraph& g,
+                     alg::AlgorithmStorage& alg_storage,
                      const ActivationGraphSourceTypes& source_types = {})
+    -> void;
+
+auto generate_source(std::ostream& s,
+                     const ActivationGraph& g)
     -> void;
 
 } // namespace gc

@@ -89,8 +89,8 @@ public:
             .activate = activate_next_statement,
         });
 
-        // A context is required, set `result.context`.
-        result.context = s(a::Vars{value});
+        // A context is required, containing `value`; however, since
+        // `value` is bound, it's in the context already, no need to specify.
 
         return result;
     }
