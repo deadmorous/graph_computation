@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.5)
 project(agc_app-lib LANGUAGES CXX)
 
 add_library(agc_app-lib STATIC
+    activation_node_registry.cpp
     alg/linspace.cpp
     nodes/canvas.cpp
     nodes/counter.cpp
