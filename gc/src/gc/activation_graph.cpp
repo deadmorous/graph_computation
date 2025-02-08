@@ -308,7 +308,7 @@ auto resolve_variable_types(const ActivationGraph& g,
 
     // Resolve `TypeFromBinding` from upstream activation data
     using Var2Var =
-        std::unordered_map<alg::id::Var, alg::id::Var, Hash>;
+        std::unordered_multimap<alg::id::Var, alg::id::Var, Hash>;
     auto up_vars = Var2Var{};
     auto up_act = upstream_activations(g, algos, alg_storage);
     for (const auto& [to, upstream] : up_act)
@@ -317,12 +317,6 @@ auto resolve_variable_types(const ActivationGraph& g,
             to,
             [&](const alg::InputBinding& input_binding)
             {
-                if (up_vars.contains(input_binding.var))
-                    // TODO: Handle this case later
-                    common::throw_(
-                        "Input ", to,
-                        " has more than one activation, we are not yet able"
-                        " to deduce the type in this case");
                 auto upstream_var = alg_storage(upstream.activation).var;
                 up_vars.emplace(input_binding.var, upstream_var);
             });
@@ -359,32 +353,57 @@ auto resolve_variable_types(const ActivationGraph& g,
     auto n_up_vars = up_vars.size();
     for (const auto& [k, v] : up_vars)
     {
-        // Find the root ancestor of `k`
+        // Find all root ancestors of `k`
         decltype(n_up_vars) i_up_var = 0;
-        auto v_ = v;
+        auto current_v = std::vector<alg::id::Var>{ v };
+        auto next_v = std::vector<alg::id::Var>{};
         for (; i_up_var<n_up_vars; ++i_up_var)
         {
-            auto it = up_vars.find(v_);
-            if (it == up_vars.end())
+            auto advanced = false;
+            next_v.clear();
+            for (auto v_ : current_v)
+            {
+                auto it = up_vars.find(v_);
+                if (it == up_vars.end())
+                    next_v.push_back(v_);
+                else
+                {
+                    next_v.push_back(it->second);
+                    advanced = true;
+                }
+            }
+            if (!advanced)
                 break;
-            v_ = it->second;
+            std::swap(current_v, next_v);
         }
         if (i_up_var == n_up_vars)
             common::throw_(
                 "Circular loop in upstream acivations, starting at var ", k);
 
-        const auto& spec = alg_storage(v_);
-        if (holds_alternative<alg::id::TypeFromBinding>(spec))
+        auto spec = std::optional<alg::Var>{};
+        for (auto v_ : current_v)
         {
-            // Type must be in `var_source_types`
-            if (auto it = var_source_types.find(v_); it!=var_source_types.end())
-                result.emplace(k, it->second);
+            auto v_spec = alg_storage(v_);
+            if (holds_alternative<alg::id::TypeFromBinding>(v_spec))
+            {
+                // Type must be in `var_source_types`
+                auto it = var_source_types.find(v_);
+                if (it == var_source_types.end())
+                    common::throw_(
+                        "Variable ", v_,
+                        " of type `TypeFromBinding` is unbound");
+                v_spec = it->second;
+            }
+            if (!spec.has_value())
+                spec = v_spec;
             else
                 common::throw_(
-                    "Variable ", v_, " of type `TypeFromBinding` is unbound");
+                    "Variable ", k, " has ancestors (",
+                    common::format_seq(current_v),
+                    ") some of which have different types");
         }
-        else
-            result.emplace(k, spec);
+        assert(spec.has_value());
+        result.emplace(k, *spec);
     }
 
     // Make sure that all variables of type `TypeFromBinding` are bound,
@@ -1068,13 +1087,21 @@ auto generate_source(std::ostream& s,
     // Determine external input activation sequence
     auto algos = graph_algos(g, alg_storage);
 
-    // // deBUG, TODO: Remove
-    // std::cout << "==== GRAPH ALGORITHMS ====\n";
-    // for (const auto& node_algos : algos)
-    //     std::cout
-    //         << PrintableNodeActivationAlgorithms{node_algos, alg_storage}
-    //         << std::endl;
-    // std::cout << "========\n\n";
+    // deBUG, TODO: Remove
+    std::cout << "==== GRAPH ALGORITHMS ====\n";
+    for (auto inode : g.nodes.index_range())
+    {
+        const auto* node = g.nodes[inode].get();
+        std::cout << "---- Node " << inode
+                  << " - " << node->meta().type_name
+                  << " [" << common::format_seq(node->input_names()) << " / "
+                  << common::format_seq(node->output_names()) << ']'
+                  << " ---- \n";
+        std::cout
+            << PrintableNodeActivationAlgorithms{algos.at(inode), alg_storage}
+            << '\n';
+    }
+    std::cout << "========\n\n";
 
     // Generate #includes
     render_includes(s, g, algos, alg_storage);
