@@ -2,6 +2,7 @@
 
 #include "gc/activation_graph.hpp"
 #include "gc/activation_node.hpp"
+#include "gc/algorithm.hpp"
 #include "gc/value.hpp"
 
 #include "common/strong_span.hpp"
@@ -223,8 +224,47 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
     std::cout << "====\n";
 
     // TODO: Need source types defined in node algos
-    //auto source_types = gc::ActivationGraphSourceTypes{};
-    //source_types.types.push_back()
+    auto alg_storage = gc::alg::AlgorithmStorage{};
+    auto point_type = alg_storage(gc::alg::Type {
+        .name = "std::array<double, 2>",
+        .header_file = alg_storage(gc::alg::HeaderFile{
+            .name = "array"
+        })
+    });
+    auto count_type = alg_storage(gc::alg::Type {
+        .name = "uint64_t",
+        .header_file = alg_storage(gc::alg::HeaderFile{
+            .name = "cstdint"
+        })
+    });
+    auto double_type = alg_storage(gc::alg::Type {
+        .name = "double"
+    });
+    auto source_types = gc::ActivationGraphSourceTypes{};
+    source_types.types.push_back(point_type);
+    add_to_last_group(
+        source_types.destinations,
+        gc::EdgeInputEnd{ 3_gc_n, 0_gc_i });
+    next_group(source_types.destinations);
 
-    generate_source(std::cout, g);
+    source_types.types.push_back(count_type);
+    add_to_last_group(
+        source_types.destinations,
+        gc::EdgeInputEnd{ 8_gc_n, 0_gc_i });
+    next_group(source_types.destinations);
+
+
+    source_types.types.push_back(double_type);
+    add_to_last_group(
+        source_types.destinations,
+        gc::EdgeInputEnd{ 10_gc_n, 0_gc_i });
+    next_group(source_types.destinations);
+
+    source_types.types.push_back(double_type);
+    add_to_last_group(
+        source_types.destinations,
+        gc::EdgeInputEnd{ 13_gc_n, 0_gc_i });
+    next_group(source_types.destinations);
+
+    generate_source(std::cout, g, alg_storage, source_types);
 }
