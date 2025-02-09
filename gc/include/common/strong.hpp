@@ -21,6 +21,7 @@ struct Strong final
     using Traits = Traits_;
     using Self = Strong<Traits>;
     using Weak = typename Traits::Weak;
+    using View = StrongView<Self>;
 
     using StrongDiff = typename Traits::Features::StrongDiff;
     using Comparison = typename Traits::Features::Comparison;
@@ -47,6 +48,16 @@ struct Strong final
         : v{ std::move(v) }
     {}
 
+    template <typename View>
+    requires requires{
+        typename Traits::Features::View;
+        requires std::same_as<std::remove_cvref_t<View>,
+                              typename Traits::Features::View>;
+    }
+    constexpr Strong(View view)
+        : v{ view.v }
+    {}
+
     constexpr /* implicit */ Strong(Zero_Tag)
     requires std::default_initializable<Weak>
         : v{}
@@ -63,6 +74,10 @@ struct Strong final
         v = Weak{};
         return *this;
     }
+
+    auto view() const
+        -> View
+    { return View{ typename View::Weak{v} }; }
 
     static constexpr auto max() noexcept -> Self
     requires arithmetic
@@ -155,6 +170,23 @@ struct Strong final
         -> typename Traits::Features::Comparison
     requires (!std::same_as<typename Traits::Features::Comparison, void>)
         = default;
+
+    auto operator<=>(const View& that) const noexcept
+        -> typename Traits::Features::Comparison
+    requires (!std::same_as<typename Traits::Features::Comparison, void>) &&
+                 HasViewType<typename Traits::Features>
+    { return view() <=> that; }
+
+    auto operator==(const Self& that) const noexcept
+        -> bool
+    requires (!std::same_as<typename Traits::Features::Comparison, void>)
+        = default;
+
+    auto operator==(const View& that) const noexcept
+        -> bool
+    requires (!std::same_as<typename Traits::Features::Comparison, void>) &&
+              HasViewType<typename Traits::Features>
+    { return view() == that; }
 };
 
 // ---
@@ -182,6 +214,16 @@ struct StrongIndexFeatures final
     using Comparison = std::strong_ordering;
 
     static constexpr bool arithmetic = true;
+};
+
+template <StrongType View_>
+struct StrongStringFeatures final
+{
+    using StrongDiff = Nil_Tag;
+    using View = View_;
+    using Comparison = std::strong_ordering;
+
+    static constexpr bool arithmetic = false;
 };
 
 // ---
@@ -232,3 +274,11 @@ constexpr auto raw(const T& x) noexcept -> const typename T::Weak&
         return Name{static_cast<Name::Weak>(value)};                        \
     }                                                                       \
     static_assert(true)
+
+#define GCLIB_STRONG_STRING_VIEW(Name)                                      \
+    GCLIB_STRONG_TYPE(Name, std::string_view)
+
+#define GCLIB_STRONG_STRING(Name)                                           \
+    GCLIB_STRONG_STRING_VIEW(Name##View);                                   \
+    GCLIB_STRONG_TYPE(Str, std::string, {},                                 \
+                      common::StrongStringFeatures<Name##View>)

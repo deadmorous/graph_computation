@@ -5,6 +5,9 @@
 #include "common/strong_vector.hpp"
 
 #include <gtest/gtest.h>
+#include <unordered_set>
+
+#include "common/detail/hash.hpp"
 
 
 using namespace std::literals;
@@ -29,6 +32,10 @@ concept CanAdd = requires(Lhs lhs, Rhs rhs)
 template <typename Lhs, typename Rhs>
 concept CanSub = requires(Lhs lhs, Rhs rhs)
 { lhs - rhs; };
+
+// GCLIB_STRONG_TYPE(StrV, std::string_view);
+// GCLIB_STRONG_TYPE(Str, std::string, {}, common::StrongStringFeatures<StrV>);
+GCLIB_STRONG_STRING(Str);
 
 } // anonymous namespace
 
@@ -327,4 +334,46 @@ TEST(Common_Strong, Grouped)
     EXPECT_EQ(cg0[Index2{0}], 1);
     EXPECT_EQ(cg0[Index2{1}], 8);
     EXPECT_EQ(cg0[Index2{2}], 3);
+}
+
+TEST(Common_Strong, String)
+{
+    static_assert(std::same_as<StrView, Str::View>);
+
+    auto strv = StrView{"asd"};
+    EXPECT_EQ(strv.v, common::format(strv));
+    auto s1 = std::string{strv.v};
+
+    auto str = Str{"qwe"};
+    EXPECT_EQ(str.v, common::format(str));
+    auto s2 = std::string{str.v};
+
+    auto str_from_v = Str{ strv };
+    static_assert(std::same_as<decltype(str_from_v), Str>);
+
+    auto v_from_str = str_from_v.view();
+    ASSERT_EQ(v_from_str, strv);
+    static_assert(std::same_as<decltype(v_from_str), StrView>);
+
+    // All these should not create a string from a view (TODO: Check it)
+    [[maybe_unused]] auto s_v = str <=> v_from_str;
+    [[maybe_unused]] auto v_s = v_from_str <=> str;
+    [[maybe_unused]] auto s_eq_v = str == v_from_str;
+    [[maybe_unused]] auto v_eq_s = v_from_str == str;
+    [[maybe_unused]] auto s_neq_v = str != v_from_str;
+    [[maybe_unused]] auto v_neq_s = v_from_str != str;
+
+    EXPECT_FALSE(v_from_str == str);
+    EXPECT_FALSE(str == v_from_str);
+    EXPECT_TRUE(v_from_str == strv);
+
+    using S = std::unordered_set<StrView, common::detail::Hash>;
+    S s;
+    s.emplace(strv);
+    s.emplace(StrView{"wow"});
+    s.emplace(str.view());
+    EXPECT_TRUE(s.contains(Str::View{"wow"}));
+    EXPECT_TRUE(s.contains(strv));
+    EXPECT_TRUE(s.contains(str.view()));
+    EXPECT_FALSE(s.contains(StrView{"one"}));
 }
