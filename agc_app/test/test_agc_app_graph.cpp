@@ -1,8 +1,13 @@
 #include "agc_app/activation_node_registry.hpp"
 
+#include "agc_app/nodes/counter.hpp"
+#include "agc_app/nodes/grid_2d.hpp"
+#include "agc_app/nodes/mandelbrot_func.hpp"
+
 #include "gc/activation_graph.hpp"
 #include "gc/activation_node.hpp"
 #include "gc/algorithm.hpp"
+#include "gc/alg_known_types.hpp"
 #include "gc/value.hpp"
 
 #include "common/strong_span.hpp"
@@ -223,24 +228,28 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
     print_dot(std::cout, g, node_labels);
     std::cout << "====\n";
 
-    // TODO: Need source types defined in node algos
-    auto alg_storage = gc::alg::AlgorithmStorage{};
-    auto point_type = alg_storage(gc::alg::Type {
-        .name = "std::array<double, 2>",
-        .header_file = alg_storage(gc::alg::HeaderFile{
-            .name = "array"
-        })
-    });
-    auto count_type = alg_storage(gc::alg::Type {
-        .name = "uint64_t",
-        .header_file = alg_storage(gc::alg::HeaderFile{
-            .name = "cstdint"
-        })
-    });
-    auto double_type = alg_storage(gc::alg::Type {
-        .name = "double"
-    });
-    auto source_types = gc::ActivationGraphSourceTypes{};
+    auto alg_storage =
+        gc::alg::AlgorithmStorage{};
+
+    auto grid_spec_type =
+        grid->exported_types(alg_storage).at(agc_app::grid_2d_spec_type);
+    auto point_type =
+        f->exported_types(alg_storage).at(agc_app::mandelbrot_point_type);
+    auto count_type =
+        iter_count->exported_types(alg_storage).at(agc_app::counter_type);
+    auto double_type =
+        gc::alg::well_known_type(gc::alg::double_type, alg_storage);
+
+
+    auto source_types =
+        gc::ActivationGraphSourceTypes{};
+
+    source_types.types.push_back(grid_spec_type);
+    add_to_last_group(
+        source_types.destinations,
+        gc::EdgeInputEnd{ 0_gc_n, 0_gc_i });
+    next_group(source_types.destinations);
+
     source_types.types.push_back(point_type);
     add_to_last_group(
         source_types.destinations,
