@@ -5,11 +5,12 @@ project(gc-lib LANGUAGES CXX)
 add_library(gc-lib STATIC
     common/detail/ind.cpp
     expect_n_node_args.cpp
-    gc/detail/parse_node_port.cpp
     gc/activation_graph.cpp
     gc/activation_node.cpp
     gc/algorithm.cpp
+    gc/alg_known_types.cpp
     gc/computation_node_registry.cpp
+    gc/detail/parse_node_port.cpp
     gc/edge.cpp
     gc/graph_computation.cpp
     gc/simple_graph_util.cpp
