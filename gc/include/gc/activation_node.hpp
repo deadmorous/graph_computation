@@ -3,11 +3,14 @@
 #include "gc/activation_node_fwd.hpp"
 #include "gc/algorithm_fwd.hpp"
 #include "gc/port_values.hpp"
+#include "gc/alg_type_literal.hpp"
 
+#include "common/detail/hash.hpp"
 #include "common/index_set.hpp"
 #include "common/strong_vector.hpp"
 
 #include <cassert>
+#include <unordered_map>
 #include <vector>
 
 namespace gc {
@@ -46,6 +49,9 @@ struct PrintableNodeActivationAlgorithms
 auto operator<<(std::ostream&, const PrintableNodeActivationAlgorithms&)
     -> std::ostream&;
 
+using ExportedTypes =
+    std::unordered_map<alg::TypeLiteral, alg::id::Type, common::detail::Hash>;
+
 struct ActivationNode
 {
     struct Meta
@@ -61,6 +67,10 @@ struct ActivationNode
     virtual auto output_names() const -> OutputNames = 0;
 
     virtual auto default_inputs(gc::InputValues result) const -> void = 0;
+
+    virtual auto exported_types(ExportedTypes&, alg::AlgorithmStorage&) const
+        -> void
+    {}
 
     virtual auto activation_algorithms(alg::AlgorithmStorage&) const
         -> NodeActivationAlgorithms = 0;
@@ -82,6 +92,13 @@ struct ActivationNode
         -> bool
     { return meta().dynamic_algorithm; }
 
+    auto exported_types(alg::AlgorithmStorage& alg_storage) const
+        -> ExportedTypes
+    {
+        auto result = ExportedTypes{};
+        exported_types(result, alg_storage);
+        return result;
+    }
 };
 
 } // namespace gc
