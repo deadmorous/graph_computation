@@ -5,6 +5,7 @@ project(agc_app-lib LANGUAGES CXX)
 add_library(agc_app-lib STATIC
     activation_node_registry.cpp
     alg/linspace.cpp
+    alg_lib.cpp
     nodes/canvas.cpp
     nodes/counter.cpp
     nodes/func_iterator.cpp

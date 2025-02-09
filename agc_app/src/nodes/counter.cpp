@@ -1,8 +1,10 @@
 #include "agc_app/nodes/counter.hpp"
 
-#include "gc/algorithm.hpp"
-#include "gc/activation_node.hpp"
+#include "agc_app/alg_lib.hpp"
 
+#include "gc/algorithm.hpp"
+#include "gc/alg_known_types.hpp"
+#include "gc/activation_node.hpp"
 #include "gc/expect_n_node_args.hpp"
 #include "gc/node_port_names.hpp"
 #include "gc/value.hpp"
@@ -36,6 +38,15 @@ public:
         result[1_gc_i] = 0;
     }
 
+    auto exported_types(gc::ExportedTypes& xt,
+                        gc::alg::AlgorithmStorage& s) const
+        -> void override
+    {
+        // Declare exported types
+        namespace a = gc::alg;
+        xt[counter_type] = a::well_known_type(a::uint64_t_type, s);
+    }
+
     auto activation_algorithms(gc::alg::AlgorithmStorage& s) const
         -> gc::NodeActivationAlgorithms override
     {
@@ -45,23 +56,16 @@ public:
 
         // Declare types and symbols
 
-        auto lib =
-            s(a::Lib{ .name = "agc_app" });
+        const auto xt = ActivationNode::exported_types(s);
+
+        auto lib = alg_lib(s);
 
         auto counter_alg_header =
             s(a::HeaderFile{
                 .name = "agc_app/alg/counter.hpp",
                 .lib = lib });
 
-        auto uint64_t_header =
-            s(a::HeaderFile{
-                .name = "cstdint",
-                .system = true });
-
-        auto uint64_t_type =
-            s(a::Type{
-                .name = "uint64_t",
-                .header_file = uint64_t_header });
+        auto c_type = xt.at(counter_type);
 
         auto reset_counter_func =
             s(a::Symbol{
@@ -76,7 +80,7 @@ public:
         // Define context variables
 
         auto count =
-            s(a::Var{ uint64_t_type });
+            s(a::Var{ c_type });
 
         // Define activation algorithms
 

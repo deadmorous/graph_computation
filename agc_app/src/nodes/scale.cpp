@@ -1,5 +1,7 @@
 #include "agc_app/nodes/scale.hpp"
 
+#include "agc_app/alg_lib.hpp"
+
 #include "gc/algorithm.hpp"
 #include "gc/activation_node.hpp"
 
@@ -43,8 +45,7 @@ public:
 
         // Declare types and symbols
 
-        auto lib =
-            s(a::Lib{ .name = "agc_app" });
+        auto lib = alg_lib(s);
 
         auto scale_alg_header =
             s(a::HeaderFile{

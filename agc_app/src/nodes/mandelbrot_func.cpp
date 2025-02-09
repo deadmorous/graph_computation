@@ -1,5 +1,7 @@
 #include "agc_app/nodes/mandelbrot_func.hpp"
 
+#include "agc_app/alg_lib.hpp"
+
 #include "gc/algorithm.hpp"
 #include "gc/activation_node.hpp"
 
@@ -34,6 +36,27 @@ public:
         result[1_gc_i] = std::array<double, 2>{ 0, 0 };
     }
 
+    auto exported_types(gc::ExportedTypes& xt,
+                        gc::alg::AlgorithmStorage& s) const
+        -> void override
+    {
+        // Declare exported types
+
+        namespace a = gc::alg;
+
+        auto lib = alg_lib(s);
+
+        auto std_array_header =
+            s(a::HeaderFile{
+                .name = "array",
+                .system = true });
+
+        xt[mandelbrot_point_type] =
+            s(a::Type{
+                .name = "std::array<double, 2>",
+                .header_file = std_array_header });
+    }
+
     auto activation_algorithms(gc::alg::AlgorithmStorage& s) const
         -> gc::NodeActivationAlgorithms override
     {
@@ -43,23 +66,15 @@ public:
 
         // Declare types and symbols
 
-        auto lib =
-            s(a::Lib{ .name = "agc_app" });
-
-        auto std_array_header =
-            s(a::HeaderFile{
-                .name = "array",
-                .system = true });
+        const auto xt = ActivationNode::exported_types(s);
+        auto lib = alg_lib(s);
 
         auto mag2_alg_header =
             s(a::HeaderFile{
                 .name = "agc_app/alg/mandelbrot_func.hpp",
                 .lib = lib });
 
-        auto arg_type =
-            s(a::Type{
-                .name = "std::array<double, 2>",
-                .header_file = std_array_header });
+        auto arg_type = xt.at(mandelbrot_point_type);
 
         auto mandelbrot_func =
             s(a::Symbol{

@@ -1,9 +1,11 @@
 #include "agc_app/nodes/canvas.hpp"
+
+#include "agc_app/alg_lib.hpp"
 #include "agc_app/types/canvas.hpp"
 
 #include "gc/algorithm.hpp"
+#include "gc/alg_known_types.hpp"
 #include "gc/activation_node.hpp"
-
 #include "gc/expect_n_node_args.hpp"
 #include "gc/node_port_names.hpp"
 #include "gc/value.hpp"
@@ -41,6 +43,38 @@ public:
         result[4_gc_i] = 0;
     }
 
+    auto exported_types(gc::ExportedTypes& xt,
+                        gc::alg::AlgorithmStorage& s) const
+        -> void override
+    {
+        // Declare exported types
+
+        namespace a = gc::alg;
+
+        auto lib = alg_lib(s);
+
+        auto canvas_type_header =
+            s(a::HeaderFile{
+                .name = "agc_app/types/canvas.hpp",
+                .lib = lib });
+
+        xt[canvas_type] =
+            s(a::Type{
+                .name = "agc_app::Canvas<double>",
+                .header_file = canvas_type_header });
+
+        xt[canvas_pixel_type] =
+            s(a::Type{
+                .name = "agc_app::CanvasPixel<double>",
+                .header_file = canvas_type_header });
+
+        xt[canvas_size_type] =
+            s(a::Type{
+                .name = "std::array<uint32_t, 2>",
+                .header_file = canvas_type_header });
+
+    }
+
     auto activation_algorithms(gc::alg::AlgorithmStorage& s) const
         -> gc::NodeActivationAlgorithms override
     {
@@ -50,47 +84,17 @@ public:
 
         // Declare types and symbols
 
-        auto lib =
-            s(a::Lib{ .name = "agc_app" });
+        const auto xt = ActivationNode::exported_types(s);
 
-        auto canvas_type_header =
-            s(a::HeaderFile{
-                .name = "agc_app/types/canvas.hpp",
-                .lib = lib });
+        auto lib = alg_lib(s);
 
         auto canvas_alg_header =
             s(a::HeaderFile{
                 .name = "agc_app/alg/canvas.hpp",
                 .lib = lib });
 
-        auto size_t_header =
-            s(a::HeaderFile{
-                .name = "cstddef",
-                .system = true });
-
-        auto canvas_type =
-            s(a::Type{
-                .name = "agc_app::Canvas<double>",
-                .header_file = canvas_type_header });
-
-        auto canvas_pixel_type =
-            s(a::Type{
-                .name = "agc_app::CanvasPixel<double>",
-                .header_file = canvas_type_header });
-
-        auto size_t_type =
-            s(a::Type{
-                .name = "size_t",
-                .header_file = size_t_header });
-
-        auto canvas_size_type =
-            s(a::Type{
-                .name = "std::array<uint32_t, 2>",
-                .header_file = canvas_type_header });
-
-        auto double_type =
-            s(a::Type{ .name = "double" });
-
+        auto size_t_type = a::well_known_type(a::size_t_type, s);
+        auto double_type = a::well_known_type(a::double_type, s);
 
         auto resize_canvas_func =
             s(a::Symbol{
@@ -115,7 +119,7 @@ public:
         // Define context variables
 
         auto canvas =
-            s(a::Var{ canvas_type });
+            s(a::Var{ xt.at(canvas_type) });
 
         auto pixel_index =
             s(a::Var{ size_t_type });
@@ -123,10 +127,10 @@ public:
         // Bind input
 
         auto canvas_size =
-            s(a::Var{ canvas_size_type });
+            s(a::Var{ xt.at(canvas_size_type) });
 
         auto pixel =
-            s(a::Var{ canvas_pixel_type });
+            s(a::Var{ xt.at(canvas_pixel_type) });
 
         auto next_value =
             s(a::Var{ double_type });

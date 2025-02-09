@@ -1,6 +1,9 @@
 #include "agc_app/nodes/mag2.hpp"
 
+#include "agc_app/alg_lib.hpp"
+
 #include "gc/algorithm.hpp"
+#include "gc/alg_known_types.hpp"
 #include "gc/activation_node.hpp"
 
 #include "gc/expect_n_node_args.hpp"
@@ -33,6 +36,29 @@ public:
         result[0_gc_i] = std::array<double, 2>{ 1, 2 };
     }
 
+    auto exported_types(gc::ExportedTypes& xt,
+                        gc::alg::AlgorithmStorage& s) const
+        -> void override
+    {
+        // Declare exported types
+
+        namespace a = gc::alg;
+
+        auto lib = alg_lib(s);
+
+        auto std_array_header =
+            s(a::HeaderFile{
+                .name = "array",
+                .system = true });
+
+        xt[mag2_input_type] =
+            s(a::Type{
+                .name = "std::array<double, 2>",
+                .header_file = std_array_header });
+
+        xt[mag2_output_type] = a::well_known_type(a::double_type, s);
+    }
+
     auto activation_algorithms(gc::alg::AlgorithmStorage& s) const
         -> gc::NodeActivationAlgorithms override
     {
@@ -42,23 +68,14 @@ public:
 
         // Declare types and symbols
 
-        auto lib =
-            s(a::Lib{ .name = "agc_app" });
+        const auto xt = ActivationNode::exported_types(s);
 
-        auto std_array_header =
-            s(a::HeaderFile{
-                .name = "array",
-                .system = true });
+        auto lib = alg_lib(s);
 
         auto mag2_alg_header =
             s(a::HeaderFile{
                 .name = "agc_app/alg/mag2.hpp",
                 .lib = lib });
-
-        auto value_type =
-            s(a::Type{
-                .name = "std::array<double, 2>",
-                .header_file = std_array_header });
 
         auto mag2_func =
             s(a::Symbol{
@@ -67,7 +84,7 @@ public:
 
         // Bind input
 
-        auto value = s(a::Var{ value_type });
+        auto value = s(a::Var{ xt.at(mag2_input_type) });
 
         result.input_bindings = {
             s(a::InputBinding{ .port = 0_gc_i, .var = value })

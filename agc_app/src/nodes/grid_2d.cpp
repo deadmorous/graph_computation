@@ -1,4 +1,6 @@
 #include "agc_app/nodes/grid_2d.hpp"
+
+#include "agc_app/alg_lib.hpp"
 #include "agc_app/types/grid_2d_spec.hpp"
 
 #include "gc/algorithm.hpp"
@@ -41,6 +43,27 @@ public:
         };
     }
 
+    auto exported_types(gc::ExportedTypes& xt,
+                        gc::alg::AlgorithmStorage& s) const
+        -> void override
+    {
+        // Declare exported types
+
+        namespace a = gc::alg;
+
+        auto lib = alg_lib(s);
+
+        auto grid_2d_spec_header =
+            s(a::HeaderFile{
+                .name = "agc_app/types/grid_2d_spec.hpp",
+                .lib = lib });
+
+        xt[grid_2d_spec_type] =
+            s(a::Type{
+                .name = "agc_app::Grid2dSpec",
+                .header_file = grid_2d_spec_header });
+    }
+
     auto activation_algorithms(gc::alg::AlgorithmStorage& s) const
         -> gc::NodeActivationAlgorithms override
     {
@@ -50,23 +73,16 @@ public:
 
         // Declare types and symbols
 
-        auto lib =
-            s(a::Lib{ .name = "agc_app" });
+        const auto xt = ActivationNode::exported_types(s);
 
-        auto grid_2d_spec_header =
-            s(a::HeaderFile{
-                .name = "agc_app/types/grid_2d_spec.hpp",
-                .lib = lib });
+        auto lib = alg_lib(s);
 
         auto grid_2d_alg_header =
             s(a::HeaderFile{
                 .name = "agc_app/alg/grid_2d.hpp",
                 .lib = lib });
 
-        auto spec_type =
-            s(a::Type{
-                .name = "agc_app::Grid2dSpec",
-                .header_file = grid_2d_spec_header });
+        auto spec_type = xt.at(grid_2d_spec_type);
 
         auto grid_size_func =
             s(a::Symbol{

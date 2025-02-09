@@ -1,4 +1,6 @@
 #include "agc_app/nodes/linspace.hpp"
+
+#include "agc_app/alg_lib.hpp"
 #include "agc_app/types/linspace_spec.hpp"
 
 #include "gc/algorithm.hpp"
@@ -38,6 +40,27 @@ public:
         result[0_gc_i] = LinSpaceSpec{};
     }
 
+    auto exported_types(gc::ExportedTypes& xt,
+                        gc::alg::AlgorithmStorage& s) const
+        -> void override
+    {
+        // Declare exported types
+
+        namespace a = gc::alg;
+
+        auto lib = alg_lib(s);
+
+        auto linspace_spec_header =
+            s(a::HeaderFile{
+                .name = "agc_app/types/linspace_spec.hpp",
+                .lib = lib });
+
+        xt[linspace_spec_type] =
+            s(a::Type{
+                .name = "agc_app::LinSpaceSpec",
+                .header_file = linspace_spec_header });
+    }
+
     auto activation_algorithms(gc::alg::AlgorithmStorage& s) const
         -> gc::NodeActivationAlgorithms override
     {
@@ -47,23 +70,14 @@ public:
 
         // Declare types and symbols
 
-        auto lib =
-            s(a::Lib{ .name = "agc_app" });
+        const auto xt = ActivationNode::exported_types(s);
 
-        auto linspace_spec_header =
-            s(a::HeaderFile{
-                .name = "agc_app/types/linspace_spec.hpp",
-                .lib = lib });
+        auto lib = alg_lib(s);
 
         auto linspace_alg_header =
             s(a::HeaderFile{
                 .name = "agc_app/alg/linspace.hpp",
                 .lib = lib });
-
-        auto spec_type =
-            s(a::Type{
-                .name = "agc_app::LinSpaceSpec",
-                .header_file = linspace_spec_header });
 
         auto iter_init_func =
             s(a::Symbol{
@@ -83,7 +97,7 @@ public:
         // Bind input
 
         auto spec =
-            s(a::Var{ spec_type });
+            s(a::Var{ xt.at(linspace_spec_type) });
 
         result.input_bindings = {
             s(a::InputBinding{ .port = 0_gc_i, .var = spec })
