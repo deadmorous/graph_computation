@@ -2,6 +2,7 @@
 #include "gc/activation_node.hpp"
 #include "gc/algorithm.hpp"
 #include "gc/algorithm_inspector.hpp"
+#include "gc/detail/nested_seq.hpp"
 #include "gc/simple_graph_util.hpp"
 #include "gc/strong_index.hpp"
 
@@ -26,7 +27,7 @@ using common::detail::Hash;
 using common::detail::Ind;
 using common::detail::ScopedInd;
 
-struct HeaderFileExtractor
+struct HeaderFileExtractor final
 {
     const alg::AlgorithmStorage& storage;
 
@@ -72,7 +73,7 @@ struct HeaderFileExtractor
     }
 };
 
-struct OutputActivationExtractor
+struct OutputActivationExtractor final
 {
     const alg::AlgorithmStorage& storage;
 
@@ -113,7 +114,7 @@ struct OutputActivationExtractor
 };
 
 template <typename F>
-struct VarVisitor
+struct VarVisitor final
 {
     F f;
 
@@ -300,9 +301,9 @@ auto resolve_variable_types(const ActivationGraph& g,
             if (input_binding.port != to.port)
                 continue;
             const auto& var = alg_storage(input_binding.var);
-            if (!holds_alternative<alg::id::TypeFromBinding>(var))
-                continue;
-            f(input_binding);
+            auto var_type_from_binding =
+                holds_alternative<alg::id::TypeFromBinding>(var);
+            f(input_binding, var_type_from_binding);
         }
     };
 
@@ -315,8 +316,11 @@ auto resolve_variable_types(const ActivationGraph& g,
     {
         visit_input_bindings_for(
             to,
-            [&](const alg::InputBinding& input_binding)
+            [&](const alg::InputBinding& input_binding,
+                bool var_type_from_binding)
             {
+                if (!var_type_from_binding)
+                    return;
                 auto upstream_var = alg_storage(upstream.activation).var;
                 up_vars.emplace(input_binding.var, upstream_var);
             });
@@ -332,14 +336,17 @@ auto resolve_variable_types(const ActivationGraph& g,
             auto used = false;
             visit_input_bindings_for(
                 to,
-                [&](const alg::InputBinding& input_binding)
+                [&](const alg::InputBinding& input_binding,
+                    bool var_type_from_binding)
                 {
+                    used = true;
+                    if (!var_type_from_binding)
+                        return;
                     if (var_source_types.contains(input_binding.var))
                         common::throw_(
                             "Input ", to,
                             " has source type specified more than once");
                     var_source_types.emplace(input_binding.var, source_type);
-                    used = true;
                 });
             if (!used)
                 common::throw_(
@@ -572,7 +579,7 @@ public:
                       NodeIndex node_index,
                       const alg::AlgorithmStorage& storage,
                       const alg::Vars& context_vars):
-        visitor_{ s, g, algos, node_index, inspector_, storage, context_vars },
+        visitor_{ s, g, algos, node_index, storage, context_vars },
         inspector_{ visitor_, false, storage }
     {}
 
@@ -591,14 +598,12 @@ private:
             const ActivationGraph& g,
             const GraphAlgos& algos,
             NodeIndex node_index,
-            Inspector& inspector,
             const alg::AlgorithmStorage& storage,
             const alg::Vars& context_vars):
                 s_{ s },
                 g_{ g },
                 algos_{ algos },
                 node_index_{ node_index },
-                inspector_{ inspector },
                 storage_{ storage },
                 context_vars_{ context_vars.begin(), context_vars.end() },
                 fmt_{ *this }
@@ -974,7 +979,6 @@ private:
         const ActivationGraph& g_;
         const GraphAlgos& algos_;
         NodeIndex node_index_;
-        Inspector& inspector_;
         const alg::AlgorithmStorage& storage_;
         std::unordered_set<alg::id::Var, Hash> context_vars_;
         Ind ind_{};
@@ -1073,6 +1077,278 @@ auto generate_nodes(std::ostream& s,
     }
 }
 
+
+// Graph activation analysis
+
+using RequiredInputs = std::unordered_map<EdgeInputEnd, InputPorts, Hash>;
+using ActivationSeq = detail::NestedSequence<EdgeInputEnd>;
+using InputActivations = std::unordered_map<EdgeInputEnd, ActivationSeq, Hash>;
+
+struct GraphActivation final
+{
+    RequiredInputs required_inputs;
+    InputActivations input_activations;
+};
+
+class GraphActivationBuilder final
+{
+public:
+    static auto build(const ActivationGraph& g,
+                      const ActivationGraphSourceTypes& src_types,
+                      const GraphAlgos& algos,
+                      const alg::AlgorithmStorage& alg_storage)
+        -> GraphActivation
+    {
+        auto emap = EdgeMap{};
+
+        auto required_inputs = RequiredInputs{};
+        auto node_activations = InputActivations{};
+
+        // build edge map
+        for (const auto& edge : g.edges)
+            emap.emplace(edge.from, edge.to);
+
+        // Extract activation sequences for all input ports of all nodes
+        for (auto inode : algos.index_range())
+        {
+            const auto& node_algos = algos[inode];
+            for (auto port : node_algos.algorithms.index_range())
+            {
+                auto input = EdgeInputEnd{ inode, port };
+                const auto& port_algo = node_algos.algorithms[port];
+                required_inputs.emplace(input, port_algo.required_inputs);
+                auto visitor = Visitor{ inode, emap, alg_storage };
+                visitor(port_algo.activate);
+                node_activations.emplace(
+                    input, std::move(visitor).activation_seq());
+            }
+        }
+
+        // Build source input activations by extending `node_activations`
+        auto input_activations = InputActivations{};
+        assert(group_count(src_types.destinations) == src_types.types.size());
+        for (auto source_group : group_indices(src_types.destinations))
+            for (const auto& to : group(src_types.destinations, source_group))
+            {
+                auto passed_inputs = InputSet{};
+                auto& seq = input_activations[to];
+                auto sc = ScopedSeq{ seq, AllInOrder };
+                seq.push_back(to);
+                extend_activation(seq,
+                                  passed_inputs,
+                                  node_activations, to);
+            }
+
+        return { std::move(required_inputs), std::move(input_activations) };
+    }
+
+private:
+    using EdgeMap = std::unordered_multimap<EdgeOutputEnd, EdgeInputEnd, Hash>;
+    using ScopedSeq = gc::detail::ScopedNestedSequence<EdgeInputEnd>;
+    static constexpr auto AllInOrder = gc::detail::SeqType::AllInOrder;
+    static constexpr auto Every = gc::detail::SeqType::Every;
+    using InputSet = std::unordered_set<EdgeInputEnd, Hash>;
+
+    class Visitor final
+    {
+    public:
+        Visitor(NodeIndex inode,
+                const EdgeMap& emap,
+                const alg::AlgorithmStorage& alg_storage):
+            inode_{ inode },
+            emap_{ emap },
+            s_{ alg_storage }
+        {}
+
+        auto operator()(alg::id::Statement id)
+            -> void
+        {
+            auto sc = ScopedSeq{seq_, AllInOrder};
+            std::visit(*this, s_(id));
+        }
+
+        auto operator()(alg::id::Assign id)
+            -> void
+        {}
+
+        auto operator()(alg::id::Block id)
+            -> void
+        {
+            auto sc = ScopedSeq{seq_, AllInOrder};
+            const auto& spec = s_(id);
+            for (auto statement_id : spec.statements)
+                (*this)(statement_id);
+        }
+
+        auto operator()(alg::id::FuncInvocation id)
+            -> void
+        {}
+
+        auto operator()(alg::id::OutputActivation id)
+            -> void
+        {
+            const auto& spec = s_(id);
+            auto r = emap_.equal_range({inode_, spec.port});
+            for (auto it=r.first; it!=r.second; ++it)
+                seq_.push_back(it->second);
+        }
+
+        auto operator()(alg::id::If id)
+            -> void
+        {
+            const auto& spec = s_(id);
+            assert(spec.then_clause != common::Zero);
+            if (spec.else_clause == common::Zero)
+                (*this)(spec.then_clause);
+            else
+            {
+                auto sc = ScopedSeq{seq_, Every};
+                (*this)(spec.then_clause);
+                (*this)(spec.else_clause);
+            }
+        }
+
+        auto operator()(alg::id::For id)
+            -> void
+        {
+            const auto& spec = s_(id);
+            (*this)(spec.body);
+        }
+
+        auto operator()(alg::id::While id)
+            -> void
+        {
+            const auto& spec = s_(id);
+            (*this)(spec.body);
+        }
+
+        auto operator()(alg::id::Do id)
+            -> void
+        {
+            const auto& spec = s_(id);
+            (*this)(spec.body);
+        }
+
+        auto activation_seq() && noexcept -> ActivationSeq
+        { return std::move(seq_); }
+
+    private:
+        NodeIndex inode_;
+        const EdgeMap& emap_;
+        const alg::AlgorithmStorage& s_;
+        ActivationSeq seq_;
+    };
+
+    static auto extend_activation(ActivationSeq& result,
+                                  InputSet& passed_inputs,
+                                  const InputActivations& node_activations,
+                                  const EdgeInputEnd& e)
+        -> void
+    {
+        assert(!passed_inputs.contains(e));
+        passed_inputs.emplace(e);
+        const auto& activation_seq = node_activations.at(e);
+        for (const auto& item : activation_seq)
+        {
+            if (!std::holds_alternative<EdgeInputEnd>(item))
+            {
+                result.push_back(item);
+                continue;
+            }
+            const auto& next_e = std::get<EdgeInputEnd>(item);
+            if (passed_inputs.contains(next_e))
+                continue;
+            result.push_back(next_e);
+            extend_activation(result, passed_inputs, node_activations, next_e);
+        }
+    }
+};
+
+auto graph_activation(const ActivationGraph& g,
+                      const ActivationGraphSourceTypes& src_types,
+                      const GraphAlgos& algos,
+                      const alg::AlgorithmStorage& alg_storage)
+    -> GraphActivation
+{ return GraphActivationBuilder::build(g, src_types, algos, alg_storage); }
+
+auto generate_entry_point(std::ostream& s,
+                          const ActivationGraph& g,
+                          const ActivationGraphSourceTypes& source_types,
+                          const GraphAlgos& algos,
+                          const alg::AlgorithmStorage& alg_storage)
+    -> void
+{
+    auto ga = graph_activation(g, source_types, algos, alg_storage);
+
+    using InputState = std::unordered_map<EdgeInputEnd, bool, Hash>;
+    class P final
+    {
+    public:
+        explicit P(const GraphActivation& ga):
+            ga_{ &ga }
+        {
+            for (const auto& [e, _] : ga.required_inputs)
+                s_[e] = false;
+        }
+
+        auto operator()(const EdgeInputEnd& e)
+            -> bool
+        {
+            const auto& rq = ga_->required_inputs.at(e);
+            for (auto port : rq)
+            {
+                if (port == e.port)
+                    // Activation will deliver this input
+                    continue;
+
+                if (!s_.at({e.node, port}))
+                    // Required input is missing
+                    return false;
+            }
+            s_.at(e) = true;
+            return true;
+        }
+
+    private:
+        const GraphActivation* ga_;
+        InputState s_;
+    };
+
+    auto activation_order = std::vector<EdgeInputEnd>{};
+    activation_order.reserve(ga.input_activations.size());
+    auto passed_inputs = std::unordered_set<EdgeInputEnd, Hash>{};
+    auto p = P{ ga };
+    while (activation_order.size() != ga.input_activations.size())
+    {
+        auto progress = false;
+        for (const auto& [input, seq] : ga.input_activations)
+        {
+            if (passed_inputs.contains(input))
+                continue;
+
+            if (detail::test_sequence(seq, p, p))
+            {
+                passed_inputs.insert(input);
+                activation_order.push_back(input);
+                progress = true;
+            }
+        }
+        if (!progress)
+            common::throw_("Failed to order graph inputs"); // TODO: More details
+    }
+
+    s << "auto entry_point( Context& ctx )\n"
+         "    -> void\n"
+         "{\n";
+
+    // Activate inputs according to `activation_order`
+    for (const auto& e : activation_order)
+        s << "  " << activation_func_name(e) << "(ctx);\n";
+
+    s <<
+         "}\n";
+}
+
 } // anonymous namespace
 
 
@@ -1110,8 +1386,7 @@ auto generate_source(std::ostream& s,
     generate_nodes(s, g, source_types, algos, alg_storage);
 
     // Generate entry point
-
-    std::cout << "TODO\n";
+    generate_entry_point(s, g, source_types, algos, alg_storage);
 }
 
 auto generate_source(std::ostream& s,
