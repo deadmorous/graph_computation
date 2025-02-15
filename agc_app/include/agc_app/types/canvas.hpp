@@ -1,5 +1,7 @@
 #pragma once
 
+#include "agc_app/types/point_2d.hpp"
+
 #include "common/struct_type_macro.hpp"
 
 #include <ostream>
@@ -8,10 +10,13 @@
 
 namespace agc_app {
 
+using CanvasSize =
+    Point2d_u32;
+
 template <typename T>
 struct Canvas
 {
-    std::array<uint32_t, 2> size;
+    CanvasSize size;
     std::vector<T> pixels;
 };
 
@@ -21,7 +26,7 @@ GCLIB_STRUCT_TYPE(Canvas<double>, size, pixels);
 template <typename T>
 struct CanvasPixel
 {
-    std::array<uint32_t, 2> pos;
+    Point2d_u32 pos;
     T value;
 };
 

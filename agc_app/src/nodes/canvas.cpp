@@ -70,7 +70,7 @@ public:
 
         xt[canvas_size_type] =
             s(a::Type{
-                .name = "std::array<uint32_t, 2>",
+                .name = "agc_app::CanvasSize",
                 .header_file = canvas_type_header });
 
     }
@@ -146,7 +146,7 @@ public:
         auto activate_size_statement =
             s(a::Statement{ s(a::FuncInvocation{
                 .func = resize_canvas_func,
-                .args = s(a::Vars{canvas_size}) }) });
+                .args = s(a::Vars{canvas, canvas_size}) }) });
 
         result.algorithms.emplace_back(gc::PortActivationAlgorithm{
             .activate = activate_size_statement,
