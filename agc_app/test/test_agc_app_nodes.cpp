@@ -120,9 +120,10 @@ TEST(AgcApp_Node, Grid2d)
     auto node = make_grid_2d({});
     EXPECT_EQ(node->input_count(), 1_gc_ic);
     EXPECT_EQ(node->input_names()[0_gc_i], "spec"sv);
-    EXPECT_EQ(node->output_count(), 2_gc_oc);
+    EXPECT_EQ(node->output_count(), 3_gc_oc);
     EXPECT_EQ(node->output_names()[0_gc_o], "grid_size"sv);
     EXPECT_EQ(node->output_names()[1_gc_o], "point"sv);
+    EXPECT_EQ(node->output_names()[2_gc_o], "end"sv);
 
     print_node_algos(node.get());
     print_node_source_code(node);

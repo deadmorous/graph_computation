@@ -29,7 +29,7 @@ public:
 
     auto output_names() const
         -> gc::OutputNames override
-    { return gc::node_output_names<Grid2d>("grid_size"sv, "point"sv); }
+    { return gc::node_output_names<Grid2d>("grid_size"sv, "point"sv, "end"sv); }
 
     auto default_inputs(gc::InputValues result) const
         -> void override
@@ -163,7 +163,8 @@ public:
                                     .var = output_port_value
                                 }) })
                             } }) })
-                    }) })
+                    }) }),
+                    s(a::Statement{ s(a::OutputActivation{ .port = 2_gc_o }) })
                 } }) });
 
         result.algorithms.emplace_back(gc::PortActivationAlgorithm{
