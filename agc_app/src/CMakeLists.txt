@@ -17,7 +17,8 @@ add_library(agc_app-lib STATIC
     nodes/replicate.cpp
     nodes/scale.cpp
     nodes/split.cpp
-    nodes/threshold.cpp)
+    nodes/threshold.cpp
+    types/canvas.cpp)
 
 add_library(agc_app::lib ALIAS agc_app-lib)
 

@@ -2,8 +2,7 @@
 
 #include "common/struct_type_macro.hpp"
 
-#include <array>
-#include <cstdint>
+#include <ostream>
 #include <vector>
 
 
@@ -27,5 +26,8 @@ struct CanvasPixel
 };
 
 GCLIB_STRUCT_TYPE(CanvasPixel<double>, pos, value);
+
+auto operator<<(std::ostream& s, const Canvas<double>& canvas)
+    -> std::ostream&;
 
 } // namespace agc_app
