@@ -641,7 +641,7 @@ private:
         {
             auto sc = OptionalScope{ *this, ind_ == common::Zero };
             const auto& spec = storage_(id);
-            print(fmt_(spec.dst), " = ", fmt_(spec.src));
+            print(fmt_(spec.dst), " = ", fmt_(spec.src), ';');
             return false;
         }
 
