@@ -18,9 +18,10 @@ struct Canvas
 {
     CanvasSize size;
     std::vector<T> pixels;
+    size_t pos{};
 };
 
-GCLIB_STRUCT_TYPE(Canvas<double>, size, pixels);
+GCLIB_STRUCT_TYPE(Canvas<double>, size, pixels, pos);
 
 
 template <typename T>
