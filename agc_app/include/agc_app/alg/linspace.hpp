@@ -5,7 +5,7 @@
 
 namespace agc_app {
 
-struct LinSpaceIter
+struct LinSpaceIter final
 {
     double v;
     double h;
