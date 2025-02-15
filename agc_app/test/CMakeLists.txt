@@ -7,6 +7,7 @@ enable_testing()
 add_executable(
     agc-app-test
     generated_example.cpp
+    generated_mandelbrot.cpp
     main.cpp
     test_agc_app_graph.cpp
     test_agc_app_nodes.cpp)
