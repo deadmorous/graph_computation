@@ -112,6 +112,7 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
     auto repl_iter_count = node_registry.at("replicate")({});
     auto result_scale = node_registry.at("scale")({});
     auto canvas = node_registry.at("canvas")({});
+    auto printer = node_registry.at("printer")({});
 
     auto g = gc::ActivationGraph{
         .nodes = {
@@ -129,7 +130,8 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
             split_iter_count,           // 11
             repl_iter_count,            // 12
             result_scale,               // 13
-            canvas                      // 14
+            canvas,                     // 14
+            printer                     // 15
         },
 
         .edges = {
@@ -138,6 +140,9 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
 
             // grid.point -> split_grid.in
             { { 0_gc_n, 1_gc_o }, { 1_gc_n, 0_gc_i } },
+
+            // grid.end -> canvas.flush
+            { { 0_gc_n, 2_gc_o }, { 14_gc_n, 3_gc_i } },
 
             // split_grid.out[0] -> iter_count.reset
             { { 1_gc_n, 0_gc_o }, { 2_gc_n, 1_gc_i } },
@@ -201,12 +206,16 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
 
             // result_scale.scaled -> canvas.set_next
             { { 13_gc_n, 0_gc_o }, { 14_gc_n, 2_gc_i } },
+
+            // canvas.canvas -> printer.value
+            { { 14_gc_n, 0_gc_o }, { 15_gc_n, 0_gc_i } },
+
         }
     };
 
     std::cout << "====\n";
 
-    auto node_labels = std::array<std::string_view, 15>{
+    auto node_labels = std::array<std::string_view, 16>{
         "grid",
         "split_grid",
         "iter_count",
@@ -221,7 +230,8 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
         "split_iter_count",
         "repl_iter_count",
         "result_scale",
-        "canvas"
+        "canvas",
+        "printer"
     };
 
 

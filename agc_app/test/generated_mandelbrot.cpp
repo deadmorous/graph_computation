@@ -1,5 +1,4 @@
 #include <gtest/gtest.h>
-
 // -------- GENERATED CODE BEGIN --------
 
 #include "agc_app/alg/canvas.hpp"
@@ -7,6 +6,7 @@
 #include "agc_app/alg/grid_2d.hpp"
 #include "agc_app/alg/mag2.hpp"
 #include "agc_app/alg/mandelbrot_func.hpp"
+#include "agc_app/alg/printer.hpp"
 #include "agc_app/alg/scale.hpp"
 #include "agc_app/alg/threshold.hpp"
 #include "agc_app/types/canvas.hpp"
@@ -27,59 +27,62 @@ namespace { // INSERTED MANUALLY
 using T14 =
     agc_app::Grid2dSpec;
 
-using T52 =
+using T54 =
     uint64_t;
 
-using T62 =
+using T64 =
     std::array<double, 2>;
 
-using T70 =
+using T72 =
     std::array<double, 2>;
 
-using T71 =
+using T73 =
     std::array<double, 2>;
 
-using T85 =
+using T87 =
     std::array<double, 2>;
 
-using T112 =
+using T114 =
     uint64_t;
 
-using T113 =
+using T115 =
     uint64_t;
 
-using T128 =
+using T130 =
     std::array<double, 2>;
 
-using T138 =
+using T140 =
     double;
 
-using T152 =
+using T154 =
     uint64_t;
 
-using T160 =
+using T162 =
     uint64_t;
 
-using T168 =
+using T170 =
     double;
 
-using T169 =
+using T171 =
     uint64_t;
-
-using T193 =
-    agc_app::Canvas<double>;
-
-using T194 =
-    double;
 
 using T195 =
-    agc_app::CanvasSize;
+    agc_app::Canvas<double>;
 
 using T196 =
-    agc_app::CanvasPixel<double>;
+    double;
 
 using T197 =
+    agc_app::CanvasSize;
+
+using T198 =
+    agc_app::CanvasPixel<double>;
+
+using T199 =
     double;
+
+using T220 =
+    agc_app::Canvas<double>;
 
 using T21 =
     std::decay_t<decltype(agc_app::grid_2d_size(std::declval<T14>()))>;
@@ -87,31 +90,31 @@ using T21 =
 using T18 =
     std::decay_t<decltype(agc_app::grid_2d_init_iter(std::declval<T14>()))>;
 
-using T78 =
-    std::decay_t<decltype(agc_app::mandelbrot_func(std::declval<T70>(), std::declval<T71>()))>;
+using T80 =
+    std::decay_t<decltype(agc_app::mandelbrot_func(std::declval<T72>(), std::declval<T73>()))>;
 
-using T104 =
-    std::decay_t<decltype(agc_app::mandelbrot_func(std::declval<T70>(), std::declval<T71>()))>;
+using T106 =
+    std::decay_t<decltype(agc_app::mandelbrot_func(std::declval<T72>(), std::declval<T73>()))>;
 
-using T94 =
-    std::decay_t<decltype(agc_app::mandelbrot_func(std::declval<T70>(), std::declval<T71>()))>;
+using T96 =
+    std::decay_t<decltype(agc_app::mandelbrot_func(std::declval<T72>(), std::declval<T73>()))>;
 
-using T84 =
-    std::decay_t<decltype(agc_app::mandelbrot_func(std::declval<T70>(), std::declval<T71>()))>;
+using T86 =
+    std::decay_t<decltype(agc_app::mandelbrot_func(std::declval<T72>(), std::declval<T73>()))>;
 
-using T132 =
-    std::decay_t<decltype(agc_app::mag2(std::declval<T128>()))>;
+using T134 =
+    std::decay_t<decltype(agc_app::mag2(std::declval<T130>()))>;
 
-using T139 =
-    std::decay_t<decltype(agc_app::mag2(std::declval<T128>()))>;
+using T141 =
+    std::decay_t<decltype(agc_app::mag2(std::declval<T130>()))>;
 
-using T174 =
-    std::decay_t<decltype(agc_app::scale(std::declval<T168>(), std::declval<T169>()))>;
+using T176 =
+    std::decay_t<decltype(agc_app::scale(std::declval<T170>(), std::declval<T171>()))>;
 
 using T23 =
     std::decay_t<decltype(agc_app::grid_2d_deref_iter(std::declval<T18>()))>;
 
-using T37 =
+using T39 =
     std::decay_t<decltype(agc_app::grid_2d_deref_iter(std::declval<T18>()))>;
 
 
@@ -122,55 +125,58 @@ struct Context final
     T14 var_14;
 
     // Node 1 (Split)
-    T37 var_37;
+    T39 var_39;
 
     // Node 2 (Counter)
-    T52 var_52;
+    T54 var_54;
 
     // Node 3 (Replicate)
-    T62 var_62;
+    T64 var_64;
 
     // Node 4 (MandelbrotFunc)
-    T70 var_70;
-    T71 var_71;
+    T72 var_72;
+    T73 var_73;
 
     // Node 5 (FuncIterator)
-    T85 var_85;
-    T84 var_84;
+    T87 var_87;
+    T86 var_86;
 
     // Node 6 (Split)
-    T94 var_94;
+    T96 var_96;
 
     // Node 7 (Replicate)
-    T104 var_104;
+    T106 var_106;
 
     // Node 8 (Threshold)
-    T112 var_112;
-    T113 var_113;
+    T114 var_114;
+    T115 var_115;
 
     // Node 9 (Mag2)
-    T128 var_128;
+    T130 var_130;
 
     // Node 10 (Threshold)
-    T138 var_138;
-    T139 var_139;
+    T140 var_140;
+    T141 var_141;
 
     // Node 11 (Split)
-    T152 var_152;
+    T154 var_154;
 
     // Node 12 (Replicate)
-    T160 var_160;
+    T162 var_162;
 
     // Node 13 (Scale)
-    T168 var_168;
-    T169 var_169;
+    T170 var_170;
+    T171 var_171;
 
     // Node 14 (Canvas)
+    T197 var_197;
+    T198 var_198;
+    T199 var_199;
     T195 var_195;
     T196 var_196;
-    T197 var_197;
-    T193 var_193;
-    T194 var_194;
+
+    // Node 15 (Printer)
+    T220 var_220;
 };
 
 
@@ -234,6 +240,8 @@ auto activate_node_14_in_3(Context& ctx)
     -> void;
 auto activate_node_14_in_4(Context& ctx)
     -> void;
+auto activate_node_15_in_0(Context& ctx)
+    -> void;
 
 // Node 0 (Grid2d)
 
@@ -244,17 +252,20 @@ auto activate_node_0_in_0(Context& ctx)
   auto var_18 = agc_app::grid_2d_init_iter(ctx.var_14);
   // Activate output port out_0
   // Activate [O(0,0)->I(14,0)]
-  ctx.var_195 = var_21;
+  ctx.var_197 = var_21;
   activate_node_14_in_0(ctx);
   do
   {
     auto var_23 = agc_app::grid_2d_deref_iter(var_18);
     // Activate output port out_1
     // Activate [O(0,1)->I(1,0)]
-    ctx.var_37 = var_23;
+    ctx.var_39 = var_23;
     activate_node_1_in_0(ctx);
   }
   while (agc_app::grid_2d_next_iter(var_18));
+  // Activate output port out_2
+  // Activate [O(0,2)->I(14,3)]
+  activate_node_14_in_3(ctx);
 }
 
 // Node 1 (Split)
@@ -270,7 +281,7 @@ auto activate_node_1_in_0(Context& ctx)
   activate_node_3_in_1(ctx);
   // Activate output port out_2
   // Activate [O(1,2)->I(4,0)]
-  ctx.var_70 = ctx.var_37;
+  ctx.var_72 = ctx.var_39;
   activate_node_4_in_0(ctx);
   // Activate output port out_3
   // Activate [O(1,3)->I(5,2)]
@@ -282,17 +293,17 @@ auto activate_node_1_in_0(Context& ctx)
 auto activate_node_2_in_0(Context& ctx)
     -> void
 {
-  agc_app::next_counter(ctx.var_52);
+  agc_app::next_counter(ctx.var_54);
   // Activate output port out_0
   // Activate [O(2,0)->I(11,0)]
-  ctx.var_152 = ctx.var_52;
+  ctx.var_154 = ctx.var_54;
   activate_node_11_in_0(ctx);
 }
 
 auto activate_node_2_in_1(Context& ctx)
     -> void
 {
-  agc_app::reset_counter(ctx.var_52);
+  agc_app::reset_counter(ctx.var_54);
 }
 
 // Node 3 (Replicate)
@@ -307,7 +318,7 @@ auto activate_node_3_in_1(Context& ctx)
 {
   // Activate output port out_0
   // Activate [O(3,0)->I(5,0)]
-  ctx.var_85 = ctx.var_62;
+  ctx.var_87 = ctx.var_64;
   activate_node_5_in_0(ctx);
 }
 
@@ -321,10 +332,10 @@ auto activate_node_4_in_0(Context& ctx)
 auto activate_node_4_in_1(Context& ctx)
     -> void
 {
-  auto var_78 = agc_app::mandelbrot_func(ctx.var_70, ctx.var_71);
+  auto var_80 = agc_app::mandelbrot_func(ctx.var_72, ctx.var_73);
   // Activate output port out_0
   // Activate [O(4,0)->I(5,1)]
-  ctx.var_84 = var_78;
+  ctx.var_86 = var_80;
   activate_node_5_in_1(ctx);
 }
 
@@ -333,7 +344,7 @@ auto activate_node_4_in_1(Context& ctx)
 auto activate_node_5_in_0(Context& ctx)
     -> void
 {
-  ctx.var_84 = ctx.var_85;
+  ctx.var_86 = ctx.var_87;
 }
 
 auto activate_node_5_in_1(Context& ctx)
@@ -341,7 +352,7 @@ auto activate_node_5_in_1(Context& ctx)
 {
   // Activate output port out_1
   // Activate [O(5,1)->I(6,0)]
-  ctx.var_94 = ctx.var_84;
+  ctx.var_96 = ctx.var_86;
   activate_node_6_in_0(ctx);
 }
 
@@ -350,7 +361,7 @@ auto activate_node_5_in_2(Context& ctx)
 {
   // Activate output port out_0
   // Activate [O(5,0)->I(4,1)]
-  ctx.var_71 = ctx.var_84;
+  ctx.var_73 = ctx.var_86;
   activate_node_4_in_1(ctx);
 }
 
@@ -361,7 +372,7 @@ auto activate_node_6_in_0(Context& ctx)
 {
   // Activate output port out_0
   // Activate [O(6,0)->I(7,0)]
-  ctx.var_104 = ctx.var_94;
+  ctx.var_106 = ctx.var_96;
   activate_node_7_in_0(ctx);
   // Activate output port out_1
   // Activate [O(6,1)->I(2,0)]
@@ -381,7 +392,7 @@ auto activate_node_7_in_1(Context& ctx)
 {
   // Activate output port out_0
   // Activate [O(7,0)->I(9,0)]
-  ctx.var_128 = ctx.var_104;
+  ctx.var_130 = ctx.var_106;
   activate_node_9_in_0(ctx);
 }
 
@@ -395,7 +406,7 @@ auto activate_node_8_in_0(Context& ctx)
 auto activate_node_8_in_1(Context& ctx)
     -> void
 {
-  if (agc_app::threshold(ctx.var_113, ctx.var_112))
+  if (agc_app::threshold(ctx.var_115, ctx.var_114))
   {
     // Activate output port out_0
     // Activate [O(8,0)->I(7,1)]
@@ -405,7 +416,7 @@ auto activate_node_8_in_1(Context& ctx)
   {
     // Activate output port out_1
     // Activate [O(8,1)->I(13,1)]
-    ctx.var_169 = ctx.var_113;
+    ctx.var_171 = ctx.var_115;
     activate_node_13_in_1(ctx);
   }
 }
@@ -415,10 +426,10 @@ auto activate_node_8_in_1(Context& ctx)
 auto activate_node_9_in_0(Context& ctx)
     -> void
 {
-  auto var_132 = agc_app::mag2(ctx.var_128);
+  auto var_134 = agc_app::mag2(ctx.var_130);
   // Activate output port out_0
   // Activate [O(9,0)->I(10,1)]
-  ctx.var_139 = var_132;
+  ctx.var_141 = var_134;
   activate_node_10_in_1(ctx);
 }
 
@@ -432,7 +443,7 @@ auto activate_node_10_in_0(Context& ctx)
 auto activate_node_10_in_1(Context& ctx)
     -> void
 {
-  if (agc_app::threshold(ctx.var_139, ctx.var_138))
+  if (agc_app::threshold(ctx.var_141, ctx.var_140))
   {
     // Activate output port out_0
     // Activate [O(10,0)->I(5,2)]
@@ -453,11 +464,11 @@ auto activate_node_11_in_0(Context& ctx)
 {
   // Activate output port out_0
   // Activate [O(11,0)->I(12,0)]
-  ctx.var_160 = ctx.var_152;
+  ctx.var_162 = ctx.var_154;
   activate_node_12_in_0(ctx);
   // Activate output port out_1
   // Activate [O(11,1)->I(8,1)]
-  ctx.var_113 = ctx.var_152;
+  ctx.var_115 = ctx.var_154;
   activate_node_8_in_1(ctx);
 }
 
@@ -473,7 +484,7 @@ auto activate_node_12_in_1(Context& ctx)
 {
   // Activate output port out_0
   // Activate [O(12,0)->I(13,1)]
-  ctx.var_169 = ctx.var_160;
+  ctx.var_171 = ctx.var_162;
   activate_node_13_in_1(ctx);
 }
 
@@ -487,10 +498,10 @@ auto activate_node_13_in_0(Context& ctx)
 auto activate_node_13_in_1(Context& ctx)
     -> void
 {
-  auto var_174 = agc_app::scale(ctx.var_168, ctx.var_169);
+  auto var_176 = agc_app::scale(ctx.var_170, ctx.var_171);
   // Activate output port out_0
   // Activate [O(13,0)->I(14,2)]
-  ctx.var_197 = var_174;
+  ctx.var_199 = var_176;
   activate_node_14_in_2(ctx);
 }
 
@@ -499,31 +510,42 @@ auto activate_node_13_in_1(Context& ctx)
 auto activate_node_14_in_0(Context& ctx)
     -> void
 {
-  agc_app::resize_canvas(ctx.var_193, ctx.var_195);
+  agc_app::resize_canvas(ctx.var_195, ctx.var_197);
 }
 
 auto activate_node_14_in_1(Context& ctx)
     -> void
 {
-  agc_app::set_canvas_pixel(ctx.var_193, ctx.var_196);
+  agc_app::set_canvas_pixel(ctx.var_195, ctx.var_198);
 }
 
 auto activate_node_14_in_2(Context& ctx)
     -> void
 {
-  agc_app::set_next_canvas_pixel(ctx.var_193, ctx.var_197);
+  agc_app::set_next_canvas_pixel(ctx.var_195, ctx.var_199);
 }
 
 auto activate_node_14_in_3(Context& ctx)
     -> void
 {
   // Activate output port out_0
+  // Activate [O(14,0)->I(15,0)]
+  ctx.var_220 = ctx.var_195;
+  activate_node_15_in_0(ctx);
 }
 
 auto activate_node_14_in_4(Context& ctx)
     -> void
 {
-  agc_app::clear_canvas(ctx.var_193);
+  agc_app::clear_canvas(ctx.var_195);
+}
+
+// Node 15 (Printer)
+
+auto activate_node_15_in_0(Context& ctx)
+    -> void
+{
+  agc_app::print(ctx.var_220);
 }
 
 auto entry_point( Context& ctx )
@@ -553,16 +575,16 @@ TEST(AgcApp_GenTest, Mandelbrot)
             .resolution = { 0.1, 0.2 } },
 
         // z0 for iterations
-        .var_62 = { 0., 0. },
+        .var_64 = { 0., 0. },
 
         // Iteration count
-        .var_112 = iter_count,
+        .var_114 = iter_count,
 
         // Mag2 threshold (to detect iterations divergence)
-        .var_138 = 1000.,
+        .var_140 = 1000.,
 
         // Scale factor for final magnitude of iterated value
-        .var_168 = 1. / iter_count
+        .var_170 = 1. / iter_count
     };
 
     entry_point(ctx);
@@ -583,5 +605,5 @@ TEST(AgcApp_GenTest, Mandelbrot)
 @@@@@@@@@@@@@@%%%%%%%+%%%@@@
 )"sv;
 
-    EXPECT_EQ(common::format(ctx.var_193), expected);
+    EXPECT_EQ(common::format(ctx.var_195), expected);
 }
