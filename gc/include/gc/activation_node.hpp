@@ -66,8 +66,6 @@ struct ActivationNode
 
     virtual auto output_names() const -> OutputNames = 0;
 
-    virtual auto default_inputs(gc::InputValues result) const -> void = 0;
-
     virtual auto exported_types(ExportedTypes&, alg::AlgorithmStorage&) const
         -> void
     {}

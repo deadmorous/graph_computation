@@ -31,18 +31,6 @@ public:
         -> gc::OutputNames override
     { return gc::node_output_names<Grid2d>("grid_size"sv, "point"sv, "end"sv); }
 
-    auto default_inputs(gc::InputValues result) const
-        -> void override
-    {
-        assert(result.size() == 1_gc_ic);
-        result[0_gc_i] = Grid2dSpec{
-            .rect = {
-                Range<double>{ -2.1, 0.7 },
-                Range<double>{ -1.2, 1.2 } },
-            .resolution = { 0.01, 0.01 }
-        };
-    }
-
     auto exported_types(gc::ExportedTypes& xt,
                         gc::alg::AlgorithmStorage& s) const
         -> void override

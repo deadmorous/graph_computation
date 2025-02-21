@@ -30,14 +30,6 @@ public:
         -> gc::OutputNames override
     { return gc::node_output_names<Counter>("count"sv); }
 
-    auto default_inputs(gc::InputValues result) const
-        -> void override
-    {
-        assert(result.size() == 2_gc_ic);
-        result[0_gc_i] = 0;
-        result[1_gc_i] = 0;
-    }
-
     auto exported_types(gc::ExportedTypes& xt,
                         gc::alg::AlgorithmStorage& s) const
         -> void override

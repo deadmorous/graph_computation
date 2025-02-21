@@ -28,14 +28,6 @@ public:
         -> gc::OutputNames override
     { return gc::node_output_names<Scale>("scaled"sv); }
 
-    auto default_inputs(gc::InputValues result) const
-        -> void override
-    {
-        assert(result.size() == 2_gc_ic);
-        result[0_gc_i] = 10.0;
-        result[1_gc_i] = 1.23;
-    }
-
     auto activation_algorithms(gc::alg::AlgorithmStorage& s) const
         -> gc::NodeActivationAlgorithms override
     {

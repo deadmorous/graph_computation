@@ -29,15 +29,6 @@ public:
         -> gc::OutputNames override
     { return gc::node_output_names<FuncIterator>("arg"sv, "value"sv); }
 
-    auto default_inputs(gc::InputValues result) const
-        -> void override
-    {
-        assert(result.size() == 2_gc_ic);
-        result[0_gc_i] = std::array<double, 2>{0, 0};
-        result[1_gc_i] = std::array<double, 2>{1, 0};
-        result[2_gc_i] = 0;
-    }
-
     auto activation_algorithms(gc::alg::AlgorithmStorage& s) const
         -> gc::NodeActivationAlgorithms override
     {

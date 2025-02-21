@@ -32,17 +32,6 @@ public:
         -> gc::OutputNames override
     { return gc::node_output_names<CanvasNode>("canvas"sv); }
 
-    auto default_inputs(gc::InputValues result) const
-        -> void override
-    {
-        assert(result.size() == 4_gc_ic);
-        result[0_gc_i] = std::array<uint32_t, 2>{ 320, 200 };
-        result[1_gc_i] = CanvasPixel<double>{ {0, 0}, 0.5 };
-        result[2_gc_i] = 0.5;
-        result[3_gc_i] = 0;
-        result[4_gc_i] = 0;
-    }
-
     auto exported_types(gc::ExportedTypes& xt,
                         gc::alg::AlgorithmStorage& s) const
         -> void override

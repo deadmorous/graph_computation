@@ -33,13 +33,6 @@ public:
         -> gc::OutputNames override
     { return gc::node_output_names<LinSpace>("sequence"sv); }
 
-    auto default_inputs(gc::InputValues result) const
-        -> void override
-    {
-        assert(result.size() == 1_gc_ic);
-        result[0_gc_i] = LinSpaceSpec{};
-    }
-
     auto exported_types(gc::ExportedTypes& xt,
                         gc::alg::AlgorithmStorage& s) const
         -> void override
