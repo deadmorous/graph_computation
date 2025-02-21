@@ -8,66 +8,14 @@
 #include "gc/activation_node.hpp"
 #include "gc/algorithm.hpp"
 #include "gc/alg_known_types.hpp"
+#include "gc/generate_dot.hpp"
 #include "gc/value.hpp"
-
-#include "common/strong_span.hpp"
 
 #include <gtest/gtest.h>
 
 
 using namespace gc::literals;
 using namespace std::string_view_literals;
-
-namespace {
-
-using NodeLabels = common::StrongSpan<std::string_view, gc::NodeIndex>;
-
-auto print_dot(std::ostream& s,
-               const gc::ActivationGraph& g,
-               NodeLabels node_labels)
-    -> void
-{
-    s << "digraph g {\n";
-
-    assert(node_labels.size() == g.nodes.size());
-    for (auto inode : g.nodes.index_range())
-    {
-        auto* node = g.nodes[inode].get();
-        auto label = node_labels[inode];
-        s << "  N" << inode
-          << " [label=\"" << inode << ": " << label
-          << "\\n(" << node->meta().type_name << ")\"]\n";
-    }
-
-    s << '\n';
-
-    for (const auto& e : g.edges)
-    {
-        auto from_port_names = g.nodes.at(e.from.node)->output_names();
-        if (!from_port_names.index_range().contains(e.from.port))
-            common::throw_("Invalid 'from' port in edge ", e,
-                           " - must be less than ",
-                           int(from_port_names.size().v));
-        auto from_port_name = from_port_names[e.from.port];
-
-        auto to_port_names = g.nodes.at(e.to.node)->input_names();
-        if (!to_port_names.index_range().contains(e.to.port))
-            common::throw_("Invalid 'to' port in edge ", e,
-                           " - must be less than ",
-                           int(to_port_names.size().v));
-        auto to_port_name = to_port_names[e.to.port];
-
-        s << "  N" << e.from.node << " -> N" << e.to.node
-          << " [taillabel=\" " << int(e.from.port.v) << ':' << from_port_name
-          << " \" headlabel=\" " << int(e.to.port.v) << ':' << to_port_name
-          << " \"]\n";
-    }
-
-    s << "}\n";
-}
-
-} // anonymous namespace
-
 
 TEST(AgcApp_Graph, GenerateSource)
 {
@@ -235,7 +183,7 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
     };
 
 
-    print_dot(std::cout, g, node_labels);
+    gc::generate_dot(std::cout, g, node_labels);
     std::cout << "====\n";
 
     auto alg_storage =

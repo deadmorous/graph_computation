@@ -12,6 +12,7 @@ add_library(gc-lib STATIC
     gc/computation_node_registry.cpp
     gc/detail/parse_node_port.cpp
     gc/edge.cpp
+    gc/generate_dot.cpp
     gc/graph_computation.cpp
     gc/simple_graph_util.cpp
     gc/source_inputs.cpp
