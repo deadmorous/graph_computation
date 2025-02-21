@@ -1,3 +1,5 @@
+#pragma once
+
 #include "gc/activation_node_fwd.hpp"
 #include "gc/algorithm_fwd.hpp"
 #include "gc/graph.hpp"
