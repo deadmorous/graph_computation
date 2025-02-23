@@ -7,8 +7,8 @@
 
 namespace {
 
-GCLIB_STRONG_TYPE(Count, uint8_t, 0, common::StrongCountFeatures);
-GCLIB_STRONG_TYPE(Index, uint8_t, 0, common::StrongIndexFeatures<Count>);
+GCLIB_STRONG_TYPE(Count, uint8_t, common::StrongCountFeatures);
+GCLIB_STRONG_TYPE(Index, uint8_t, common::StrongIndexFeatures<Count>);
 
 GCLIB_STRONG_LITERAL_SUFFIX(Index, _i);
 

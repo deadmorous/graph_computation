@@ -14,16 +14,16 @@ using namespace std::literals;
 
 namespace {
 
-GCLIB_STRONG_TYPE(IntCountDefaultedTo33,
-                  int,
-                  33,
-                  common::StrongCountFeatures);
+GCLIB_STRONG_TYPE_WITH_DEFAULT(IntCountDefaultedTo33,
+                               int,
+                               33,
+                               common::StrongCountFeatures);
 
-GCLIB_STRONG_TYPE(Count, ptrdiff_t, 0, common::StrongCountFeatures);
-GCLIB_STRONG_TYPE(Index, ptrdiff_t, 0, common::StrongIndexFeatures<Count>);
+GCLIB_STRONG_TYPE(Count, ptrdiff_t, common::StrongCountFeatures);
+GCLIB_STRONG_TYPE(Index, ptrdiff_t, common::StrongIndexFeatures<Count>);
 
-GCLIB_STRONG_TYPE(Count2, ptrdiff_t, 0, common::StrongCountFeatures);
-GCLIB_STRONG_TYPE(Index2, ptrdiff_t, 0, common::StrongIndexFeatures<Count2>);
+GCLIB_STRONG_TYPE(Count2, ptrdiff_t, common::StrongCountFeatures);
+GCLIB_STRONG_TYPE(Index2, ptrdiff_t, common::StrongIndexFeatures<Count2>);
 
 template <typename Lhs, typename Rhs>
 concept CanAdd = requires(Lhs lhs, Rhs rhs)

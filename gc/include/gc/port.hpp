@@ -10,15 +10,15 @@
 
 namespace gc {
 
-GCLIB_STRONG_TYPE(InputPortCount, WeakPort, 0, common::StrongCountFeatures);
+GCLIB_STRONG_TYPE(InputPortCount, WeakPort, common::StrongCountFeatures);
 
-GCLIB_STRONG_TYPE(OutputPortCount, WeakPort, 0, common::StrongCountFeatures);
-
-GCLIB_STRONG_TYPE(
-    InputPort, WeakPort, 0, common::StrongIndexFeatures<InputPortCount>);
+GCLIB_STRONG_TYPE(OutputPortCount, WeakPort, common::StrongCountFeatures);
 
 GCLIB_STRONG_TYPE(
-    OutputPort, WeakPort, 0, common::StrongIndexFeatures<OutputPortCount>);
+    InputPort, WeakPort, common::StrongIndexFeatures<InputPortCount>);
+
+GCLIB_STRONG_TYPE(
+    OutputPort, WeakPort, common::StrongIndexFeatures<OutputPortCount>);
 
 namespace literals {
 GCLIB_STRONG_LITERAL_SUFFIX(InputPortCount, _gc_ic);

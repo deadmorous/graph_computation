@@ -260,6 +260,16 @@ constexpr auto raw(const T& x) noexcept -> const typename T::Weak&
     struct Name##_StrongTraits final                                        \
     {                                                                       \
         using Weak = Weak_;                                                 \
+        static constexpr Weak default_value{};                              \
+        using Features =                                                    \
+            GCLIB_DEFAULT_A0_TO(::common::StrongIdFeatures, ##__VA_ARGS__); \
+    };                                                                      \
+    using Name = ::common::Strong<Name##_StrongTraits>
+
+#define GCLIB_STRONG_TYPE_WITH_DEFAULT(Name, Weak_, ...)                    \
+    struct Name##_StrongTraits final                                        \
+    {                                                                       \
+        using Weak = Weak_;                                                 \
         static constexpr Weak default_value =                               \
             GCLIB_DEFAULT_A0_TO({}, ##__VA_ARGS__);                         \
         using Features =                                                    \
@@ -280,5 +290,5 @@ constexpr auto raw(const T& x) noexcept -> const typename T::Weak&
 
 #define GCLIB_STRONG_STRING(Name)                                           \
     GCLIB_STRONG_STRING_VIEW(Name##View);                                   \
-    GCLIB_STRONG_TYPE(Str, std::string, {},                                 \
+    GCLIB_STRONG_TYPE(Str, std::string,                                     \
                       common::StrongStringFeatures<Name##View>)

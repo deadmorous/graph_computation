@@ -10,7 +10,7 @@ namespace gc_app {
 
 GCLIB_STRONG_TYPE(ColorComponent, uint8_t);
 
-GCLIB_STRONG_TYPE(Color, uint32_t, 0xff000000);
+GCLIB_STRONG_TYPE_WITH_DEFAULT(Color, uint32_t, 0xff000000);
 
 inline constexpr auto rgba(ColorComponent r,
                            ColorComponent g,

@@ -11,7 +11,7 @@ namespace common::detail {
 
 // --- Indentation
 
-GCLIB_STRONG_TYPE(Ind, uint16_t, 0, common::StrongCountFeatures);
+GCLIB_STRONG_TYPE(Ind, uint16_t, common::StrongCountFeatures);
 
 constexpr inline size_t tab_size = 2;
 
