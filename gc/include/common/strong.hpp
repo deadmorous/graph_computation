@@ -40,7 +40,7 @@ struct Strong final
         Index::is_index &&
         std::same_as<typename Index::StrongDiff, Self>;
 
-    Weak v = Traits::default_value;
+    Weak v = Traits::default_value();
 
     constexpr Strong() = default;
 
@@ -191,6 +191,28 @@ struct Strong final
 
 // ---
 
+template <typename Weak_, typename Features_>
+struct StrongTraits
+{
+    using Weak = Weak_;
+    static constexpr auto default_value() -> Weak
+    { return {}; }
+    using Features =
+        Features_;
+};
+
+template <typename Weak_, typename Features_, Weak_ default_value_>
+struct StrongWithDefaultTraits
+{
+    using Weak = Weak_;
+    static constexpr auto default_value() -> Weak
+    { return default_value_; }
+    using Features =
+        Features_;
+};
+
+// ---
+
 struct StrongIdFeatures final
 {
     using StrongDiff = Nil_Tag;
@@ -257,24 +279,20 @@ constexpr auto raw(const T& x) noexcept -> const typename T::Weak&
 
 
 #define GCLIB_STRONG_TYPE(Name, Weak_, ...)                                 \
-    struct Name##_StrongTraits final                                        \
-    {                                                                       \
-        using Weak = Weak_;                                                 \
-        static constexpr Weak default_value{};                              \
-        using Features =                                                    \
-            GCLIB_DEFAULT_A0_TO(::common::StrongIdFeatures, ##__VA_ARGS__); \
-    };                                                                      \
+    struct Name##_StrongTraits final :                                      \
+        common::StrongTraits<                                               \
+            Weak_,                                                          \
+            GCLIB_DEFAULT_A0_TO(::common::StrongIdFeatures, ##__VA_ARGS__)> \
+    {};                                                                     \
     using Name = ::common::Strong<Name##_StrongTraits>
 
-#define GCLIB_STRONG_TYPE_WITH_DEFAULT(Name, Weak_, ...)                    \
-    struct Name##_StrongTraits final                                        \
-    {                                                                       \
-        using Weak = Weak_;                                                 \
-        static constexpr Weak default_value =                               \
-            GCLIB_DEFAULT_A0_TO({}, ##__VA_ARGS__);                         \
-        using Features =                                                    \
-            GCLIB_DEFAULT_A1_TO(::common::StrongIdFeatures, ##__VA_ARGS__); \
-    };                                                                      \
+#define GCLIB_STRONG_TYPE_WITH_DEFAULT(Name, Weak_, Default, ...)           \
+    struct Name##_StrongTraits final :                                      \
+        common::StrongWithDefaultTraits<                                    \
+            Weak_,                                                          \
+            GCLIB_DEFAULT_A0_TO(::common::StrongIdFeatures, ##__VA_ARGS__), \
+            Default>                                                        \
+    {};                                                                     \
     using Name = ::common::Strong<Name##_StrongTraits>
 
 #define GCLIB_STRONG_LITERAL_SUFFIX(Name, suffix)                           \

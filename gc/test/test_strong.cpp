@@ -34,7 +34,7 @@ concept CanSub = requires(Lhs lhs, Rhs rhs)
 { lhs - rhs; };
 
 // GCLIB_STRONG_TYPE(StrV, std::string_view);
-// GCLIB_STRONG_TYPE(Str, std::string, {}, common::StrongStringFeatures<StrV>);
+// GCLIB_STRONG_TYPE(Str, std::string, common::StrongStringFeatures<StrV>);
 GCLIB_STRONG_STRING(Str);
 
 } // anonymous namespace
