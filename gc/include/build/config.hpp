@@ -10,7 +10,7 @@
 
 namespace build {
 
-struct Paths
+struct Paths final
 {
     std::string cxx_compiler_executable;
     std::string linker_executable;
@@ -19,7 +19,7 @@ struct Paths
 GCLIB_STRUCT_TYPE(Paths, cxx_compiler_executable, linker_executable);
 
 
-struct CompileFlags
+struct CompileFlags final
 {
     std::string common;
     std::string debug;
@@ -29,7 +29,7 @@ struct CompileFlags
 GCLIB_STRUCT_TYPE(CompileFlags, common, debug, release);
 
 
-struct LinkFlags
+struct LinkFlags final
 {
     std::string common;
     std::string shared;
@@ -38,7 +38,7 @@ struct LinkFlags
 GCLIB_STRUCT_TYPE(LinkFlags, common, shared);
 
 
-struct Config
+struct Config final
 {
     Paths paths;
     CompileFlags compile_flags;

@@ -35,6 +35,7 @@ add_library(gc-lib STATIC
     build/config.cpp
     build/parse_config.cpp
     common/detail/ind.cpp
+    dlib/module.cpp
     expect_n_node_args.cpp
     gc/activation_graph.cpp
     gc/activation_node.cpp
