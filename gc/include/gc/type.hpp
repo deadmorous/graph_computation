@@ -5,6 +5,7 @@
 #include "gc/detail/value_component_access.hpp"
 #include "gc/value_path.hpp"
 
+#include "common/impl_tag.hpp"
 #include "common/strong.hpp"
 #include "common/type.hpp"
 
@@ -37,11 +38,6 @@
     };                                                                      \
     }                                                                       \
     static_assert(true)
-
-
-namespace common {
-constexpr inline struct Impl_Tag final {} Impl;
-} // namespace common
 
 
 namespace gc {
