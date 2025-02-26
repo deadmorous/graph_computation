@@ -308,5 +308,5 @@ constexpr auto raw(const T& x) noexcept -> const typename T::Weak&
 
 #define GCLIB_STRONG_STRING(Name)                                           \
     GCLIB_STRONG_STRING_VIEW(Name##View);                                   \
-    GCLIB_STRONG_TYPE(Str, std::string,                                     \
+    GCLIB_STRONG_TYPE(Name, std::string,                                    \
                       common::StrongStringFeatures<Name##View>)
