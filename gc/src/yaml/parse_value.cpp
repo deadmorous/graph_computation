@@ -135,6 +135,17 @@ struct YamlValueParser final
 
 
 auto parse_value(const YAML::Node& node,
+                 const Type* type,
+                 const TypeRegistry& type_registry)
+    -> Value
+{
+    auto result = Value::make(type);
+    visit(type, YamlValueParser{}, result, node);
+
+    return result;
+}
+
+auto parse_value(const YAML::Node& node,
                  const TypeRegistry& type_registry)
     -> Value
 {
@@ -145,10 +156,7 @@ auto parse_value(const YAML::Node& node,
     if (!value_node)
         common::throw_("parse_value failed: Value is missing for node\n", node);
 
-    auto result = Value::make(type);
-    visit(type, YamlValueParser{}, result, value_node);
-
-    return result;
+    return parse_value(value_node, type, type_registry);
 }
 
 } // namespace gc::yaml

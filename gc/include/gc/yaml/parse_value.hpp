@@ -12,4 +12,9 @@ auto parse_value(const YAML::Node& node,
                  const TypeRegistry& type_registry)
     -> Value;
 
+auto parse_value(const YAML::Node& node,
+                 const Type* type,
+                 const TypeRegistry& type_registry)
+    -> Value;
+
 } // namespace gc::yaml
