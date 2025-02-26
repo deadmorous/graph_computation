@@ -6,7 +6,7 @@
 
 #include "gc/detail/parse_node_port.hpp"
 
-#include "yaml-cpp/yaml.h"
+#include <yaml-cpp/yaml.h>
 
 #include <QSlider>
 #include <QTextEdit>

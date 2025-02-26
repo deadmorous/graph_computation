@@ -6,7 +6,7 @@
 #include "gc/graph_computation.hpp"
 #include "gc/yaml/parse_graph.hpp"
 
-#include "yaml-cpp/yaml.h"
+#include <yaml-cpp/yaml.h>
 
 #include <gtest/gtest.h>
 

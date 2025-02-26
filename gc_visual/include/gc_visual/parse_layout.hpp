@@ -4,7 +4,7 @@
 
 #include "gc/detail/named_computation_nodes.hpp"
 
-#include "yaml-cpp/node/node.h"
+#include <yaml-cpp/node/node.h>
 
 #include <QWidget>
 

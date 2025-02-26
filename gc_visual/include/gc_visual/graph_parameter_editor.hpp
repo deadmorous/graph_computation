@@ -2,7 +2,7 @@
 
 #include "gc_visual/graph_broker.hpp"
 
-#include "yaml-cpp/node/node.h"
+#include <yaml-cpp/node/node.h>
 
 #include <QWidget>
 

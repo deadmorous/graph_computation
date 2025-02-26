@@ -2,7 +2,7 @@
 
 #include "gc/edge.hpp"
 
-#include "yaml-cpp/node/node.h"
+#include <yaml-cpp/node/node.h>
 
 #include <QWidget>
 

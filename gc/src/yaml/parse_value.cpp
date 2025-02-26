@@ -6,7 +6,7 @@
 
 #include "common/throw.hpp"
 
-#include "yaml-cpp/yaml.h"
+#include <yaml-cpp/yaml.h>
 
 #include <charconv>
 

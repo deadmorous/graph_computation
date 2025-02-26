@@ -3,7 +3,7 @@
 #include "gc/type_registry.hpp"
 #include "gc/value_fwd.hpp"
 
-#include "yaml-cpp/node/node.h"
+#include <yaml-cpp/node/node.h>
 
 
 namespace gc::yaml {

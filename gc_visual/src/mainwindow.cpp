@@ -9,7 +9,7 @@
 #include "gc/computation_node_registry.hpp"
 #include "gc/yaml/parse_graph.hpp"
 
-#include "yaml-cpp/yaml.h"
+#include <yaml-cpp/yaml.h>
 
 #include <QAction>
 #include <QDesktopServices>
