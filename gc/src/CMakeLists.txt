@@ -60,8 +60,7 @@ add_library(gc::lib ALIAS gc-lib)
 
 
 
-set(GRAPH_COM
-    build/config.cppPUTATION_LOG_ENGINE "GC_LOG_QUILL" CACHE STRING
+set(GRAPH_COMPUTATION_LOG_ENGINE "GC_LOG_QUILL" CACHE STRING
     "Logging engine")
 
 set_property(
