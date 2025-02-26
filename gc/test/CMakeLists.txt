@@ -15,7 +15,8 @@ add_executable(
     test_index_set.cpp
     test_nested_seq.cpp
     test_pow2.cpp
-    test_strong.cpp)
+    test_strong.cpp
+    test_build.cpp)
 
 target_link_libraries(
     gc-lib-test
