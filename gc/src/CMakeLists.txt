@@ -33,6 +33,7 @@ configure_file(
 add_library(gc-lib STATIC
     build/build.cpp
     build/config.cpp
+    build/parse_config.cpp
     common/detail/ind.cpp
     expect_n_node_args.cpp
     gc/activation_graph.cpp

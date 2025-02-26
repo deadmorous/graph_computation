@@ -1,9 +1,10 @@
 #pragma once
 
+#include "build/config_fwd.hpp"
+
 #include "common/struct_type_macro.hpp"
 
-#include "yaml-cpp/node/node.h"
-
+#include <ostream>
 #include <string>
 
 
@@ -48,9 +49,6 @@ GCLIB_STRUCT_TYPE(Config, paths, compile_flags, link_flags);
 
 
 auto default_config()
-    -> Config;
-
-auto from_yaml(const YAML::Node& node)
     -> Config;
 
 auto operator<<(std::ostream&, const Config&)

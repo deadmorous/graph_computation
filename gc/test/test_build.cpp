@@ -1,4 +1,5 @@
 #include "build/config.hpp"
+#include "build/parse_config.hpp"
 
 #include "common/format.hpp"
 
@@ -28,7 +29,7 @@ link_flags:
         "link_flags={common=-lm,shared=--shared}}";
 
     auto config_yaml = YAML::Load(config_text);
-    auto config = build::from_yaml(config_yaml);
+    auto config = build::parse_config(config_yaml);
 
     EXPECT_EQ(config.paths.cxx_compiler_executable, "g++");
     EXPECT_EQ(config.paths.linker_executable, "ld");
@@ -39,6 +40,4 @@ link_flags:
     EXPECT_EQ(config.link_flags.shared, "--shared");
 
     EXPECT_EQ(common::format(config), expected_config_str);
-
-    std::cout << config << std::endl;
 }
