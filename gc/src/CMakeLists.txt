@@ -34,6 +34,7 @@ add_library(gc-lib STATIC
     build/build.cpp
     build/config.cpp
     build/parse_config.cpp
+    build/scratch_dir.cpp
     common/detail/ind.cpp
     dlib/module.cpp
     expect_n_node_args.cpp
