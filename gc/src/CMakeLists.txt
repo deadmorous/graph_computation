@@ -2,33 +2,13 @@ cmake_minimum_required(VERSION 3.5)
 
 project(gc-lib LANGUAGES CXX)
 
-
-# Get the C++ compiler executable
-get_filename_component(CMAKE_CXX_COMPILER_PATH ${CMAKE_CXX_COMPILER} DIRECTORY)
-set(CXX_COMPILER_EXECUTABLE ${CMAKE_CXX_COMPILER})
-
-# Get the linker executable (usually the same as the compiler, but can be different)
-get_filename_component(CMAKE_LINKER_PATH ${CMAKE_LINKER} DIRECTORY)
-set(LINKER_EXECUTABLE ${CMAKE_LINKER})
-
-# Get compile flags (e.g., CMAKE_CXX_FLAGS, CMAKE_CXX_FLAGS_<CONFIG>)
-get_property(COMPILE_FLAGS GLOBAL PROPERTY CMAKE_CXX_FLAGS)
-get_property(COMPILE_FLAGS_DEBUG GLOBAL PROPERTY CMAKE_CXX_FLAGS_DEBUG)
-get_property(COMPILE_FLAGS_RELEASE GLOBAL PROPERTY CMAKE_CXX_FLAGS_RELEASE)
-
-# Get link flags (e.g., CMAKE_EXE_LINKER_FLAGS, CMAKE_SHARED_LINKER_FLAGS)
-get_property(LINK_FLAGS GLOBAL PROPERTY CMAKE_EXE_LINKER_FLAGS)
-get_property(LINK_FLAGS_SHARED GLOBAL PROPERTY CMAKE_SHARED_LINKER_FLAGS)
-
-# Create a configuration file with the extracted information
-configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/build/build_config.yaml.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/build_config.yaml")
-
+# Generate default build configuration C++ file
 configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/build/default_config.cpp.in"
     "${CMAKE_CURRENT_BINARY_DIR}/default_config.cpp")
 
+set(GENERATED_CONFIG_TYPE_FILE
+    "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/config_vars.cpp")
 
 add_library(gc-lib STATIC
     build/build.cpp
@@ -57,7 +37,8 @@ add_library(gc-lib STATIC
     value_path.cpp
     yaml/parse_graph.cpp
     yaml/parse_value.cpp
-    "${CMAKE_CURRENT_BINARY_DIR}/default_config.cpp")
+    "${CMAKE_CURRENT_BINARY_DIR}/default_config.cpp"
+    "${GENERATED_CONFIG_TYPE_FILE}")
 
 add_library(gc::lib ALIAS gc-lib)
 
@@ -98,5 +79,25 @@ if ("${GRAPH_COMPUTATION_LOG_ENGINE}" STREQUAL "GC_LOG_QUILL")
     target_link_libraries(gc-lib
         PUBLIC
             quill::quill
-            yaml-cpp::yaml-cpp)
+            yaml-cpp::yaml-cpp
+            dl)
 endif()
+
+set(GENERATED_CONFIG_TYPE_FILE_COMMAND
+    ${CMAKE_CURRENT_LIST_DIR}/build/generate_config_vars_file.sh
+    ${GENERATED_CONFIG_TYPE_FILE}
+    $<CONFIG>
+    $<TARGET_PROPERTY:gc-lib,INCLUDE_DIRECTORIES>
+    $<TARGET_PROPERTY:gc-lib,COMPILE_OPTIONS>)
+
+add_custom_command(
+    OUTPUT "${GENERATED_CONFIG_TYPE_FILE}"
+    COMMAND ${GENERATED_CONFIG_TYPE_FILE_COMMAND}
+    DEPENDS build/generate_config_vars_file.sh
+    VERBATIM)
+
+# Ensure the generated file is built before the library
+add_dependencies(gc-lib generate_config_vars_file)
+
+# Add a custom target to enforce dependency resolution
+add_custom_target(generate_config_vars_file DEPENDS ${GENERATED_FILE})

@@ -1,4 +1,5 @@
 #include "build/config.hpp"
+#include "build/config_vars.hpp"
 
 namespace build {
 
@@ -7,18 +8,28 @@ auto default_config()
 {
     return {
         .paths = {
-            .cxx_compiler_executable = "@CMAKE_CXX_COMPILER_PATH@",
-            .linker_executable = "@CXX_COMPILER_EXECUTABLE@"
+            .cxx_compiler_executable = "@CMAKE_CXX_COMPILER@",
+            .linker_executable = "@CMAKE_LINKER@"
         },
         .compile_flags = {
-            .common = "@COMPILE_FLAGS@",
-            .debug = "@COMPILE_FLAGS_DEBUG@",
-            .release = "@COMPILE_FLAGS_RELEASE@"
+            .common = "",
+            .shared = "@CMAKE_SHARED_LIBRARY_CXX_FLAGS@",
+            .debug = "@CMAKE_CXX_FLAGS_DEBUG@",
+            .release = "@CMAKE_CXX_FLAGS_RELEASE@",
+            .gclib = std::string{gclib_compile_options}
         },
         .link_flags = {
-            .common = "@LINK_FLAGS@",
-            .shared = "@LINK_FLAGS_SHARED@"
-        }
+            .common = "",
+            .shared = "@CMAKE_SHARED_LINKER_FLAGS@",
+            .shared_unwrapped = "@CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS@"
+        },
+        .flag_rules = {
+            .linker_wrapper_flag = "@CMAKE_CXX_LINKER_WRAPPER_FLAG@",
+            .linker_wrapper_flag_sep = "@CMAKE_CXX_LINKER_WRAPPER_FLAG_SEP@",
+            .include_flag = "@CMAKE_INCLUDE_FLAG_CXX@",
+            .include_system_flag = "@CMAKE_INCLUDE_SYSTEM_FLAG_CXX@"
+        },
+        .gclib_include_dirs = std::string{gclib_include_dirs}
     };
 }
 

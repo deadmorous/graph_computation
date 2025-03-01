@@ -15,10 +15,10 @@ struct Module::Impl
 
     Impl(std::filesystem::path path):
         path_{ std::move(path) },
-        handle{ dlopen(path.c_str(), flags_) }
+        handle{ dlopen(path_.c_str(), flags_) }
     {
         if (!handle)
-            common::throw_("Failed to load module '", path_, "': ", dlerror());
+            common::throw_("Failed to load module ", path_, ": ", dlerror());
     }
 
     Impl(const Impl&) = delete;
@@ -27,18 +27,20 @@ struct Module::Impl
     ~Impl()
     {
         if (dlclose(handle) != 0)
-            std::cerr << "WARNING: Error unloading module '"
-                      << path_ << "': " << dlerror() << std::endl;
+            std::cerr << "WARNING: Error unloading module "
+                      << path_ << ": " << dlerror() << std::endl;
     }
 
     auto symbol(SymbolName::View name) const
         -> Symbol
     {
         auto name_str = std::string{name.v};
+        dlerror();
         auto address = dlsym(handle, name_str.c_str());
         if (!address)
             common::throw_(
-                "Failed to find symbol '", name, "' in module '", path_, "'");
+                "Failed to find symbol '", name, "' in module ", path_, ": ",
+                dlerror());
         return { common::Impl, address };
     }
 

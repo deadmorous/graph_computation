@@ -22,20 +22,39 @@ GCLIB_STRUCT_TYPE(Paths, cxx_compiler_executable, linker_executable);
 struct CompileFlags final
 {
     std::string common;
+    std::string shared;
     std::string debug;
     std::string release;
+    std::string gclib;
 };
 
-GCLIB_STRUCT_TYPE(CompileFlags, common, debug, release);
+GCLIB_STRUCT_TYPE(CompileFlags, common, shared, debug, release, gclib);
 
 
 struct LinkFlags final
 {
     std::string common;
     std::string shared;
+    std::string shared_unwrapped;
 };
 
-GCLIB_STRUCT_TYPE(LinkFlags, common, shared);
+GCLIB_STRUCT_TYPE(LinkFlags, common, shared, shared_unwrapped);
+
+
+struct FlagRules final
+{
+    std::string linker_wrapper_flag;
+    std::string linker_wrapper_flag_sep;
+    std::string include_flag;
+    std::string include_system_flag;
+};
+
+GCLIB_STRUCT_TYPE(
+    FlagRules,
+    linker_wrapper_flag,
+    linker_wrapper_flag_sep,
+    include_flag,
+    include_system_flag);
 
 
 struct Config final
@@ -43,9 +62,12 @@ struct Config final
     Paths paths;
     CompileFlags compile_flags;
     LinkFlags link_flags;
+    FlagRules flag_rules;
+    std::string gclib_include_dirs;
 };
 
-GCLIB_STRUCT_TYPE(Config, paths, compile_flags, link_flags);
+GCLIB_STRUCT_TYPE(
+    Config, paths, compile_flags, link_flags, flag_rules, gclib_include_dirs);
 
 
 auto default_config()
