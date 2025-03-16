@@ -119,20 +119,6 @@ public:
 
 private:
 
-    template<typename Cls>
-    struct MethodPtrContext
-    {
-        Cls* cls;
-        R (Cls::*f)(A...) noexcept(NX);
-    };
-
-    template<typename Cls>
-    struct MethodPtrCapturedContext
-    {
-        Cls cls;
-        R (Cls::*f)(A...) noexcept(NX);
-    };
-
     Storage storage_;
 };
 
