@@ -1,3 +1,13 @@
+/** @file
+ * @brief TODO: Brief docstring.
+ *
+ * TODO: More documentation here
+ *
+ * Copyright (C) 2024-2025 MPK Software, St.-Petersburg, Russia
+ *
+ * @author Stepan Orlov <majorsteve@mail.ru>
+ */
+
 #include "common/strong.hpp"
 #include "common/index_range.hpp"
 #include "common/strong_grouped.hpp"

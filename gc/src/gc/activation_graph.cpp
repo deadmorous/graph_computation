@@ -1,3 +1,13 @@
+/** @file
+ * @brief TODO: Brief docstring.
+ *
+ * TODO: More documentation here
+ *
+ * Copyright (C) 2024-2025 MPK Software, St.-Petersburg, Russia
+ *
+ * @author Stepan Orlov <majorsteve@mail.ru>
+ */
+
 #include "gc/activation_graph.hpp"
 #include "gc/activation_node.hpp"
 #include "gc/algorithm.hpp"

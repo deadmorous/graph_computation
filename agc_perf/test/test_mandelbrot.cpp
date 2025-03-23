@@ -1,3 +1,13 @@
+/** @file
+ * @brief TODO: Brief docstring.
+ *
+ * TODO: More documentation here
+ *
+ * Copyright (C) 2024 MPK Software, St.-Petersburg, Russia
+ *
+ * @author Stepan Orlov <majorsteve@mail.ru>
+ */
+
 #include "agc_perf/canvas.hpp"
 #include "agc_perf/mandelbrot.hpp"
 #include "agc_perf/mandelbrot_param.hpp"

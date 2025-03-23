@@ -1,3 +1,13 @@
+/** @file
+ * @brief TODO: Brief docstring.
+ *
+ * TODO: More documentation here
+ *
+ * Copyright (C) 2025 MPK Software, St.-Petersburg, Russia
+ *
+ * @author Stepan Orlov <majorsteve@mail.ru>
+ */
+
 #include "agc_app/nodes/mandelbrot_func.hpp"
 
 #include "agc_app/alg_lib.hpp"

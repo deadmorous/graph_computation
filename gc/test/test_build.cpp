@@ -1,3 +1,13 @@
+/** @file
+ * @brief TODO: Brief docstring.
+ *
+ * TODO: More documentation here
+ *
+ * Copyright (C) 2025 MPK Software, St.-Petersburg, Russia
+ *
+ * @author Stepan Orlov <majorsteve@mail.ru>
+ */
+
 #include "build/build.hpp"
 #include "build/config.hpp"
 #include "build/parse_config.hpp"
