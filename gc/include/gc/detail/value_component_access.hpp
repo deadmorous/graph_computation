@@ -8,6 +8,7 @@
 #include "common/throw.hpp"
 #include "common/tuple_like.hpp"
 
+#include <algorithm>
 #include <any>
 #include <cassert>
 #include <functional>
