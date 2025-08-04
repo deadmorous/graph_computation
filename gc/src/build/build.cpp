@@ -2,6 +2,7 @@
 
 #include "build/config.hpp"
 #include "build/config_vars.hpp"
+#include "build/lib_config.hpp"
 #include "build/scratch_dir.hpp"
 
 #include "common/format.hpp"
@@ -13,7 +14,7 @@
 #include <cstdlib>
 #include <iostream>
 
-// #define GCLIB_LOG_BUILD_COMMANDS
+#define GCLIB_LOG_BUILD_COMMANDS
 
 
 namespace build {
@@ -59,6 +60,7 @@ auto build(const Config& config,
            const std::filesystem::path& output,
            const ScratchDir& scratch_dir,
            Inputs inputs,
+           Libs libs,
            const BuildOptions& options)
     -> void
 {
@@ -91,6 +93,10 @@ auto build(const Config& config,
                 ? config.compile_flags.debug
                 : config.compile_flags.release });
 
+    for (auto const& lib : libs)
+        for (auto const& include_dir : lib.include_dirs)
+            append_flag(compile_flags, "-I " + include_dir);
+
     if (options.output_type == OutputType::SharedObject)
         append_flag(compile_flags, config.compile_flags.shared);
 
@@ -112,6 +118,16 @@ auto build(const Config& config,
     {
         append_flag(link_flags, config.link_flags.shared_unwrapped);
         append_link_flag(link_flags, config.link_flags.shared);
+    }
+
+    if (!libs.empty())
+    {
+        if (options.output_type == OutputType::SharedObject)
+            append_link_flag(link_flags, "--whole-archive");
+        for (auto const& lib : libs)
+            append_link_flag(link_flags, lib.binary_path);
+        if (options.output_type == OutputType::SharedObject)
+            append_link_flag(link_flags, "--no-whole-archive");
     }
 
     auto link_cmdln = common::format(

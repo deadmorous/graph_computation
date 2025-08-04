@@ -6,6 +6,7 @@
 
 #include <ostream>
 #include <string>
+#include <vector>
 
 
 namespace build {
@@ -25,10 +26,9 @@ struct CompileFlags final
     std::string shared;
     std::string debug;
     std::string release;
-    std::string gclib;
 };
 
-GCLIB_STRUCT_TYPE(CompileFlags, common, shared, debug, release, gclib);
+GCLIB_STRUCT_TYPE(CompileFlags, common, shared, debug, release);
 
 
 struct LinkFlags final
@@ -63,11 +63,9 @@ struct Config final
     CompileFlags compile_flags;
     LinkFlags link_flags;
     FlagRules flag_rules;
-    std::string gclib_include_dirs;
 };
 
-GCLIB_STRUCT_TYPE(
-    Config, paths, compile_flags, link_flags, flag_rules, gclib_include_dirs);
+GCLIB_STRUCT_TYPE(Config, paths, compile_flags, link_flags, flag_rules);
 
 
 auto default_config()

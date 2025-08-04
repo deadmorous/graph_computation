@@ -13,6 +13,7 @@ set(GENERATED_CONFIG_TYPE_FILE
 add_library(gc-lib STATIC
     build/build.cpp
     build/config.cpp
+    build/lib_config.cpp
     build/parse_config.cpp
     build/scratch_dir.cpp
     common/detail/ind.cpp
@@ -86,9 +87,7 @@ endif()
 set(GENERATED_CONFIG_TYPE_FILE_COMMAND
     ${CMAKE_CURRENT_LIST_DIR}/build/generate_config_vars_file.sh
     ${GENERATED_CONFIG_TYPE_FILE}
-    $<CONFIG>
-    $<TARGET_PROPERTY:gc-lib,INCLUDE_DIRECTORIES>
-    $<TARGET_PROPERTY:gc-lib,COMPILE_OPTIONS>)
+    $<CONFIG>)
 
 add_custom_command(
     OUTPUT "${GENERATED_CONFIG_TYPE_FILE}"
@@ -101,3 +100,5 @@ add_dependencies(gc-lib generate_config_vars_file)
 
 # Add a custom target to enforce dependency resolution
 add_custom_target(generate_config_vars_file DEPENDS ${GENERATED_FILE})
+
+gc_build_lib_config(gc-lib)

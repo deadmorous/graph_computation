@@ -11,7 +11,18 @@
 #include "gc/generate_dot.hpp"
 #include "gc/value.hpp"
 
+#include "build/build.hpp"
+#include "build/config.hpp"
+#include "build/scratch_dir.hpp"
+
+#include "dlib/module.hpp"
+#include "dlib/symbol.hpp"
+
+#include "lib_config/lib_config.hpp"
+
 #include <gtest/gtest.h>
+
+#include <fstream>
 
 
 using namespace gc::literals;
@@ -233,5 +244,46 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
         gc::EdgeInputEnd{ 13_gc_n, 0_gc_i });
     next_group(source_types.destinations);
 
-    generate_source(std::cout, g, alg_storage, source_types);
+    auto scratch_dir = build::ScratchDir{};
+    auto source_path = scratch_dir.path() / "mandel.cpp";
+    {
+        std::ofstream s{source_path};
+        ASSERT_TRUE(s.is_open());
+        generate_source(s, g, alg_storage, source_types);
+    }
+    auto output = scratch_dir.path() / "mandel";
+    auto build_config = build::default_config();
+
+    auto libs = build::LibConfigVec{
+        build::lib_config("gc-lib"),
+        build::lib_config("agc_app-lib"),
+    };
+
+    // try
+    // {
+    auto path = scratch_dir.path();
+    // scratch_dir.detach();
+    std::cout << "BUILD DIRECTORY: " << path << std::endl;
+    build::build(
+        build_config,
+        output,
+        scratch_dir,
+        build::InputVec{source_path},
+        libs,
+        {
+            .output_type = build::OutputType::SharedObject
+        });
+
+    auto module = dlib::Module{ output };
+    auto symbol = module.symbol(dlib::SymbolNameView{"entry_point"});
+    std::ignore = symbol;
+    // auto f = symbol.as<void(Context&)>();
+    // EXPECT_EQ(add(2, 3), 5);
+
+    // }
+    // catch(std::exception&) {
+    //     scratch_dir.detach();
+    //     throw;
+    // }
+    // scratch_dir.detach();
 }

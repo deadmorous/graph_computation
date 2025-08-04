@@ -3,6 +3,31 @@
 
 namespace build {
 
+namespace {
+
+auto split_string(std::string_view s, char delimiter)
+    -> std::vector<std::string>
+{
+    auto result = std::vector<std::string>{};
+    if (s.empty())
+        return result;
+    auto start = std::string_view::size_type{};
+    const auto n = s.size();
+    while (true)
+    {
+        auto delim_pos = s.find_first_of(delimiter, start);
+        auto end = delim_pos == s.npos ? n : delim_pos;
+        if (end > start)
+            result.push_back(std::string{s.substr(start, end-start)});
+        if (delim_pos == s.npos)
+            break;
+        start = end + 1;
+    }
+    return result;
+}
+
+} // anonymous namespace
+
 auto default_config()
     -> Config
 {
@@ -15,8 +40,8 @@ auto default_config()
             .common = "",
             .shared = "@CMAKE_SHARED_LIBRARY_CXX_FLAGS@",
             .debug = "@CMAKE_CXX_FLAGS_DEBUG@",
-            .release = "@CMAKE_CXX_FLAGS_RELEASE@",
-            .gclib = std::string{gclib_compile_options}
+            .release = "@CMAKE_CXX_FLAGS_RELEASE@"//,
+            //.gclib = std::string{gclib_compile_options}
         },
         .link_flags = {
             .common = "",
@@ -28,8 +53,9 @@ auto default_config()
             .linker_wrapper_flag_sep = "@CMAKE_CXX_LINKER_WRAPPER_FLAG_SEP@",
             .include_flag = "@CMAKE_INCLUDE_FLAG_CXX@",
             .include_system_flag = "@CMAKE_INCLUDE_SYSTEM_FLAG_CXX@"
-        },
-        .gclib_include_dirs = std::string{gclib_include_dirs}
+        }//,
+        // .gclib_include_dirs = split_string(gclib_include_dirs, ';'),
+        // .gclib_path = std::string{gclib_path}
     };
 }
 

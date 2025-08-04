@@ -12,6 +12,10 @@ set(GRAPH_COMPUTATION_CXX_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 option(GRAPH_COMPUTATION_SANITIZE_ADDRESS "Enable address sanitizer" OFF)
 
+add_subdirectory(lib_config)
+
+include(cmake/gc_build_lib_config.cmake)
+
 add_subdirectory(gc)
 add_subdirectory(agc_app)
 add_subdirectory(agc_perf)
