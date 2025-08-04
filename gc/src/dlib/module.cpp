@@ -45,7 +45,6 @@ struct Module::Impl
         -> Symbol
     {
         auto name_str = std::string{name.v};
-        dlerror();
         auto address = dlsym(handle, name_str.c_str());
         if (!address)
             common::throw_(

@@ -50,3 +50,4 @@ if ("${GRAPH_COMPUTATION_LOG_ENGINE}" STREQUAL "GC_LOG_QUILL")
             quill::quill)
 endif()
 
+gc_build_lib_config(agc_app-lib)

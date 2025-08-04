@@ -17,6 +17,7 @@ target_link_libraries(
     PRIVATE
         GTest::gtest_main
         agc_app::lib
+        lib_config
 )
 
 if (GRAPH_COMPUTATION_SANITIZE_ADDRESS)
