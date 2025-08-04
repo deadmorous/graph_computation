@@ -85,7 +85,7 @@ auto ValuePathItem::from_string(std::string_view s)
 {
     size_t index;
     auto fcres = std::from_chars(s.begin(), s.end(), index);
-    if (fcres.ec == std::error_code{} || fcres.ptr != s.end())
+    if (fcres.ec != std::error_code{} || fcres.ptr != s.end())
         return { std::string{ s } };
     else
         return { index };
