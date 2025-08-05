@@ -84,6 +84,8 @@ if ("${GRAPH_COMPUTATION_LOG_ENGINE}" STREQUAL "GC_LOG_QUILL")
             dl)
 endif()
 
+set_target_properties(gc-lib PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
 set(GENERATED_CONFIG_TYPE_FILE_COMMAND
     ${CMAKE_CURRENT_LIST_DIR}/build/generate_config_vars_file.sh
     ${GENERATED_CONFIG_TYPE_FILE}
