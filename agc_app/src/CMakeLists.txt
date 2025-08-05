@@ -50,4 +50,6 @@ if ("${GRAPH_COMPUTATION_LOG_ENGINE}" STREQUAL "GC_LOG_QUILL")
             quill::quill)
 endif()
 
+set_target_properties(agc_app-lib PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
 gc_build_lib_config(agc_app-lib)
