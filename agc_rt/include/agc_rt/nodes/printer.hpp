@@ -10,14 +10,14 @@
 
 #pragma once
 
-#include <type_traits>
+#include <iostream>
 
 
-namespace agc_app {
+namespace agc_rt {
 
-template <typename Value, typename Threshold>
-auto threshold(Value v, Threshold t) noexcept
-    -> bool
-{ return v < t; }
+template <typename T>
+auto print(const T& value)
+    -> void
+{ std::cout << value << std::endl; }
 
-} // namespace agc_app
+} // namespace agc_rt

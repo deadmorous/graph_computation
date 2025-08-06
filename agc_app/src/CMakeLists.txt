@@ -4,7 +4,6 @@ project(agc_app-lib LANGUAGES CXX)
 
 add_library(agc_app-lib STATIC
     activation_node_registry.cpp
-    alg/linspace.cpp
     alg_lib.cpp
     nodes/canvas.cpp
     nodes/counter.cpp
@@ -17,8 +16,7 @@ add_library(agc_app-lib STATIC
     nodes/replicate.cpp
     nodes/scale.cpp
     nodes/split.cpp
-    nodes/threshold.cpp
-    types/canvas.cpp)
+    nodes/threshold.cpp)
 
 add_library(agc_app::lib ALIAS agc_app-lib)
 
@@ -37,7 +35,9 @@ endif()
 
 target_link_libraries(agc_app-lib
     PUBLIC
-        gc::lib)
+        gc::lib
+    #    agc_rt::lib
+    )
 
 target_include_directories(agc_app-lib
 	PUBLIC
@@ -49,7 +49,3 @@ if ("${GRAPH_COMPUTATION_LOG_ENGINE}" STREQUAL "GC_LOG_QUILL")
         PUBLIC
             quill::quill)
 endif()
-
-set_target_properties(agc_app-lib PROPERTIES POSITION_INDEPENDENT_CODE ON)
-
-gc_build_lib_config(agc_app-lib)

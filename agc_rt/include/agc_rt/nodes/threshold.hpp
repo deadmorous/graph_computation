@@ -10,13 +10,14 @@
 
 #pragma once
 
-#include "agc_app/types/point_2d.hpp"
+#include <type_traits>
 
 
-namespace agc_app {
+namespace agc_rt {
 
-inline auto mag2(const Point2d_d& v) noexcept
-    -> double
-{ return v[0]*v[0] + v[1]*v[1]; }
+template <typename Value, typename Threshold>
+auto threshold(Value v, Threshold t) noexcept
+    -> bool
+{ return v < t; }
 
-} // namespace agc_app
+} // namespace agc_rt

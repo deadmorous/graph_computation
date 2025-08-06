@@ -15,7 +15,7 @@
 #include <cstdint>
 
 
-namespace agc_app {
+namespace agc_rt {
 
 struct LinSpaceSpec final
 {
@@ -26,4 +26,4 @@ struct LinSpaceSpec final
 
 GCLIB_STRUCT_TYPE(LinSpaceSpec, first, last, count);
 
-} // namespace agc_app
+} // namespace agc_rt

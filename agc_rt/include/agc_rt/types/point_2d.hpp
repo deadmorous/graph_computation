@@ -10,14 +10,17 @@
 
 #pragma once
 
-#include <type_traits>
+#include <array>
+#include <cstdint>
 
 
-namespace agc_app {
+namespace agc_rt {
 
-template <typename Factor, typename Value>
-auto scale(Factor f, Value v) noexcept
-    -> std::common_type_t<Factor, Value>
-{ return f * v; }
+template <typename T>
+using Point2d = std::array<T, 2>;
 
-} // namespace agc_app
+using Point2d_u32 = Point2d<uint32_t>;
+
+using Point2d_d = Point2d<double>;
+
+} // namespace agc_rt

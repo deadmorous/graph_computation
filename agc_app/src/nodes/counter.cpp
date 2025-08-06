@@ -64,19 +64,19 @@ public:
 
         auto counter_alg_header =
             s(a::HeaderFile{
-                .name = "agc_app/alg/counter.hpp",
+                .name = "agc_rt/nodes/counter.hpp",
                 .lib = lib });
 
         auto c_type = xt.at(counter_type);
 
         auto reset_counter_func =
             s(a::Symbol{
-                .name = "agc_app::reset_counter",
+                .name = "agc_rt::reset_counter",
                 .header_file = counter_alg_header });
 
         auto next_counter_func =
             s(a::Symbol{
-                .name = "agc_app::next_counter",
+                .name = "agc_rt::next_counter",
                 .header_file = counter_alg_header });
 
         // Define context variables

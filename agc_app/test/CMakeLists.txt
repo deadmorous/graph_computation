@@ -17,6 +17,7 @@ target_link_libraries(
     PRIVATE
         GTest::gtest_main
         agc_app::lib
+        agc_rt::lib
         lib_config
 )
 

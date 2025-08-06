@@ -10,10 +10,10 @@
 
 #pragma once
 
-#include "agc_app/types/point_2d.hpp"
+#include "agc_rt/types/point_2d.hpp"
 
 
-namespace agc_app {
+namespace agc_rt {
 
 inline auto mandelbrot_func(const Point2d_d& c, const Point2d_d& z) noexcept
     -> Point2d_d
@@ -23,4 +23,4 @@ inline auto mandelbrot_func(const Point2d_d& c, const Point2d_d& z) noexcept
              2*z[0]*z[1] + c[1] };
 }
 
-} // namespace agc_app
+} // namespace agc_rt

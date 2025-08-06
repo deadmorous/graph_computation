@@ -13,7 +13,7 @@
 #include "common/struct_type_macro.hpp"
 
 
-namespace agc_app {
+namespace agc_rt {
 
 template <typename T>
 struct Range
@@ -28,4 +28,4 @@ struct Range
 GCLIB_STRUCT_TYPE(Range<double>, begin, end);
 GCLIB_STRUCT_TYPE(Range<float>, begin, end);
 
-} // namespace agc_app
+} // namespace agc_rt

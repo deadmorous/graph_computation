@@ -10,17 +10,17 @@
 
 #pragma once
 
-#include <array>
 #include <cstdint>
 
 
-namespace agc_app {
+namespace agc_rt {
 
-template <typename T>
-using Point2d = std::array<T, 2>;
+inline auto reset_counter(uint64_t& counter) noexcept
+    -> void
+{ counter = 0; }
 
-using Point2d_u32 = Point2d<uint32_t>;
+inline auto next_counter(uint64_t& counter) noexcept
+    -> void
+{ ++counter; }
 
-using Point2d_d = Point2d<double>;
-
-} // namespace agc_app
+} // namespace agc_rt

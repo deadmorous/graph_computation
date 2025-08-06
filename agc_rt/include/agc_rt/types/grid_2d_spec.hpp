@@ -10,17 +10,19 @@
 
 #pragma once
 
+#include "agc_rt/types/range.hpp"
+
 #include <cstdint>
 
 
-namespace agc_app {
+namespace agc_rt {
 
-inline auto reset_counter(uint64_t& counter) noexcept
-    -> void
-{ counter = 0; }
+struct Grid2dSpec final
+{
+    std::array<Range<double>, 2> rect;
+    std::array<double, 2> resolution;
+};
 
-inline auto next_counter(uint64_t& counter) noexcept
-    -> void
-{ ++counter; }
+GCLIB_STRUCT_TYPE(Grid2dSpec, rect, resolution);
 
-} // namespace agc_app
+} // namespace agc_rt

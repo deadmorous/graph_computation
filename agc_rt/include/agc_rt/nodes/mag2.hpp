@@ -10,14 +10,13 @@
 
 #pragma once
 
-#include <iostream>
+#include "agc_rt/types/point_2d.hpp"
 
 
-namespace agc_app {
+namespace agc_rt {
 
-template <typename T>
-auto print(const T& value)
-    -> void
-{ std::cout << value << std::endl; }
+inline auto mag2(const Point2d_d& v) noexcept
+    -> double
+{ return v[0]*v[0] + v[1]*v[1]; }
 
-} // namespace agc_app
+} // namespace agc_rt

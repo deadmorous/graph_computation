@@ -10,10 +10,10 @@
 
 #pragma once
 
-#include "agc_app/types/linspace_spec.hpp"
+#include "agc_rt/types/linspace_spec.hpp"
 
 
-namespace agc_app {
+namespace agc_rt {
 
 struct LinSpaceIter final
 {
@@ -31,4 +31,4 @@ auto LinSpaceDerefIter(const LinSpaceIter&)
 auto LinSpaceNextIter(LinSpaceIter&)
     -> bool;
 
-} // namespace agc_app
+} // namespace agc_rt
