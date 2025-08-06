@@ -2,27 +2,27 @@
 
 // -------- GENERATED CODE BEGIN --------
 
-#include "agc_app/alg/linspace.hpp"
-#include "agc_app/alg/printer.hpp"
-#include "agc_app/types/linspace_spec.hpp"
+#include "agc_rt/nodes/linspace.hpp"
+#include "agc_rt/nodes/printer.hpp"
+#include "agc_rt/types/linspace_spec.hpp"
 
 // Libraries
-// - agc_app
+// - agc_rt
 
 
 // Variable types
 
 using T8 =
-    agc_app::LinSpaceSpec;
+    agc_rt::LinSpaceSpec;
 
 using T12 =
-    std::decay_t<decltype(agc_app::LinSpaceInitIter(std::declval<T8>()))>;
+    std::decay_t<decltype(agc_rt::LinSpaceInitIter(std::declval<T8>()))>;
 
 using T15 =
-    std::decay_t<decltype(agc_app::LinSpaceDerefIter(std::declval<T12>()))>;
+    std::decay_t<decltype(agc_rt::LinSpaceDerefIter(std::declval<T12>()))>;
 
 using T28 =
-    std::decay_t<decltype(agc_app::LinSpaceDerefIter(std::declval<T12>()))>;
+    std::decay_t<decltype(agc_rt::LinSpaceDerefIter(std::declval<T12>()))>;
 
 
 // Context type
@@ -48,15 +48,15 @@ auto activate_node_1_in_0(Context& ctx)
 auto activate_node_0_in_0(Context& ctx)
     -> void
 {
-  auto var_12 = agc_app::LinSpaceInitIter(ctx.var_8);
+  auto var_12 = agc_rt::LinSpaceInitIter(ctx.var_8);
   do
   {
-    auto var_15 = agc_app::LinSpaceDerefIter(var_12);
+    auto var_15 = agc_rt::LinSpaceDerefIter(var_12);
     // Activate [O(0,0)->I(1,0)]
     ctx.var_28 = var_15;
     activate_node_1_in_0(ctx);
   }
-  while (agc_app::LinSpaceNextIter(var_12));
+  while (agc_rt::LinSpaceNextIter(var_12));
 }
 
 // Node 1 (Printer)
@@ -64,7 +64,7 @@ auto activate_node_0_in_0(Context& ctx)
 auto activate_node_1_in_0(Context& ctx)
     -> void
 {
-  agc_app::print(ctx.var_28);
+  agc_rt::print(ctx.var_28);
 }
 
 // -------- GENERATED CODE END --------
@@ -72,7 +72,7 @@ auto activate_node_1_in_0(Context& ctx)
 TEST(AgcApp_GenTest, Hello)
 {
     auto ctx = Context {
-        .var_8 = agc_app::LinSpaceSpec{
+        .var_8 = agc_rt::LinSpaceSpec{
             .first = 10,
             .last = 20,
             .count = 21

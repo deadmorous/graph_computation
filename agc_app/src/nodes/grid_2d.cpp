@@ -1,7 +1,6 @@
 #include "agc_app/nodes/grid_2d.hpp"
 
 #include "agc_app/alg_lib.hpp"
-#include "agc_app/types/grid_2d_spec.hpp"
 
 #include "gc/algorithm.hpp"
 #include "gc/activation_node.hpp"
@@ -43,12 +42,12 @@ public:
 
         auto grid_2d_spec_header =
             s(a::HeaderFile{
-                .name = "agc_app/types/grid_2d_spec.hpp",
+                .name = "agc_rt/types/grid_2d_spec.hpp",
                 .lib = lib });
 
         xt[grid_2d_spec_type] =
             s(a::Type{
-                .name = "agc_app::Grid2dSpec",
+                .name = "agc_rt::Grid2dSpec",
                 .header_file = grid_2d_spec_header });
     }
 
@@ -67,29 +66,29 @@ public:
 
         auto grid_2d_alg_header =
             s(a::HeaderFile{
-                .name = "agc_app/alg/grid_2d.hpp",
+                .name = "agc_rt/nodes/grid_2d.hpp",
                 .lib = lib });
 
         auto spec_type = xt.at(grid_2d_spec_type);
 
         auto grid_size_func =
             s(a::Symbol{
-                .name = "agc_app::grid_2d_size",
+                .name = "agc_rt::grid_2d_size",
                 .header_file = grid_2d_alg_header });
 
         auto iter_init_func =
             s(a::Symbol{
-                .name = "agc_app::grid_2d_init_iter",
+                .name = "agc_rt::grid_2d_init_iter",
                 .header_file = grid_2d_alg_header });
 
         auto iter_next_func =
             s(a::Symbol{
-                .name = "agc_app::grid_2d_next_iter",
+                .name = "agc_rt::grid_2d_next_iter",
                 .header_file = grid_2d_alg_header });
 
         auto iter_deref_func =
             s(a::Symbol{
-                .name = "agc_app::grid_2d_deref_iter",
+                .name = "agc_rt::grid_2d_deref_iter",
                 .header_file = grid_2d_alg_header });
 
         // Bind input

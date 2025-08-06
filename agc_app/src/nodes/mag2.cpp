@@ -67,12 +67,12 @@ public:
 
         auto mag2_alg_header =
             s(a::HeaderFile{
-                .name = "agc_app/alg/mag2.hpp",
+                .name = "agc_rt/nodes/mag2.hpp",
                 .lib = lib });
 
         auto mag2_func =
             s(a::Symbol{
-                .name = "agc_app::mag2",
+                .name = "agc_rt::mag2",
                 .header_file = mag2_alg_header });
 
         // Bind input

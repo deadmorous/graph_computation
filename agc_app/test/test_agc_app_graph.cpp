@@ -256,7 +256,7 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
 
     auto libs = build::LibConfigVec{
         build::lib_config("gc-lib"),
-        build::lib_config("agc_app-lib"),
+        build::lib_config("agc_rt-lib"),
     };
 
     // try

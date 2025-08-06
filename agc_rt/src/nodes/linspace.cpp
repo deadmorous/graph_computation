@@ -1,9 +1,9 @@
-#include "agc_app/alg/linspace.hpp"
+#include "agc_rt/nodes/linspace.hpp"
 
 #include <cassert>
 
 
-namespace agc_app {
+namespace agc_rt {
 
 auto LinSpaceInitIter(const LinSpaceSpec& spec)
     -> LinSpaceIter
@@ -34,4 +34,4 @@ auto LinSpaceNextIter(LinSpaceIter& it)
     return true;
 }
 
-} // namespace agc_app
+} // namespace agc_rt

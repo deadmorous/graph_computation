@@ -1,6 +1,6 @@
 #pragma once
 
-#include "agc_app/types/point_2d.hpp"
+#include "agc_rt/types/point_2d.hpp"
 
 #include "common/struct_type_macro.hpp"
 
@@ -8,7 +8,7 @@
 #include <vector>
 
 
-namespace agc_app {
+namespace agc_rt {
 
 using CanvasSize =
     Point2d_u32;
@@ -36,4 +36,4 @@ GCLIB_STRUCT_TYPE(CanvasPixel<double>, pos, value);
 auto operator<<(std::ostream& s, const Canvas<double>& canvas)
     -> std::ostream&;
 
-} // namespace agc_app
+} // namespace agc_rt

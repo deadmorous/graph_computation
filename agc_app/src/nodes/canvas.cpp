@@ -1,7 +1,6 @@
 #include "agc_app/nodes/canvas.hpp"
 
 #include "agc_app/alg_lib.hpp"
-#include "agc_app/types/canvas.hpp"
 
 #include "gc/algorithm.hpp"
 #include "gc/alg_known_types.hpp"
@@ -44,22 +43,22 @@ public:
 
         auto canvas_type_header =
             s(a::HeaderFile{
-                .name = "agc_app/types/canvas.hpp",
+                .name = "agc_rt/types/canvas.hpp",
                 .lib = lib });
 
         xt[canvas_type] =
             s(a::Type{
-                .name = "agc_app::Canvas<double>",
+                .name = "agc_rt::Canvas<double>",
                 .header_file = canvas_type_header });
 
         xt[canvas_pixel_type] =
             s(a::Type{
-                .name = "agc_app::CanvasPixel<double>",
+                .name = "agc_rt::CanvasPixel<double>",
                 .header_file = canvas_type_header });
 
         xt[canvas_size_type] =
             s(a::Type{
-                .name = "agc_app::CanvasSize",
+                .name = "agc_rt::CanvasSize",
                 .header_file = canvas_type_header });
 
     }
@@ -79,7 +78,7 @@ public:
 
         auto canvas_alg_header =
             s(a::HeaderFile{
-                .name = "agc_app/alg/canvas.hpp",
+                .name = "agc_rt/nodes/canvas.hpp",
                 .lib = lib });
 
         auto size_t_type = a::well_known_type(a::size_t_type, s);
@@ -87,22 +86,22 @@ public:
 
         auto resize_canvas_func =
             s(a::Symbol{
-                .name = "agc_app::resize_canvas",
+                .name = "agc_rt::resize_canvas",
                 .header_file = canvas_alg_header });
 
         auto clear_canvas_func =
             s(a::Symbol{
-                .name = "agc_app::clear_canvas",
+                .name = "agc_rt::clear_canvas",
                 .header_file = canvas_alg_header });
 
         auto set_canvas_pixel_func =
             s(a::Symbol{
-                .name = "agc_app::set_canvas_pixel",
+                .name = "agc_rt::set_canvas_pixel",
                 .header_file = canvas_alg_header });
 
         auto set_next_canvas_pixel_func =
             s(a::Symbol{
-                .name = "agc_app::set_next_canvas_pixel",
+                .name = "agc_rt::set_next_canvas_pixel",
                 .header_file = canvas_alg_header });
 
         // Define context variables
