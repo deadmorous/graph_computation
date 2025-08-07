@@ -31,6 +31,7 @@ target_include_directories(agc_rt-lib
         "${CMAKE_CURRENT_LIST_DIR}/../include"
         "${GRAPH_COMPUTATION_CXX_ROOT_DIR}/3p/magic_enum/include")
 
+# TODO: Remove once lib_config is static
 set_target_properties(agc_rt-lib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 gc_build_lib_config(agc_rt-lib)

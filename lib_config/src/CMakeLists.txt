@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 
 project(lib_config LANGUAGES CXX)
 
+# TODO: Make it static
 add_library(lib_config SHARED
     lib_config.cpp)
 
