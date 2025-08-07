@@ -49,6 +49,8 @@ TEST(AgcApp_Graph, GenerateSource)
 
 TEST(AgcApp_Graph, GenerateMandelbrot)
 {
+    // ======== Define example activation graph ========
+
     auto node_registry = agc_app::activation_node_registry();
     // Context_Source<Grid2dParam> grid_param;
     // Context_Source<Complex> z0;
@@ -244,25 +246,33 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
         gc::EdgeInputEnd{ 13_gc_n, 0_gc_i });
     next_group(source_types.destinations);
 
+
+    // ======== Allocate temporary scratch directory ========
+
     auto scratch_dir = build::ScratchDir{};
+
+
+    // ======== Generate source file implementing graph `g` ========
+
     auto source_path = scratch_dir.path() / "mandel.cpp";
     {
         std::ofstream s{source_path};
         ASSERT_TRUE(s.is_open());
         generate_source(s, g, alg_storage, source_types);
     }
+
+
+    // ======== Build shared object from the generated source file ========
+
     auto output = scratch_dir.path() / "mandel";
     auto build_config = build::default_config();
 
     auto libs = build::LibConfigVec{
-        build::lib_config("gc-lib"),
         build::lib_config("agc_rt-lib"),
     };
 
-    // try
-    // {
     auto path = scratch_dir.path();
-    // scratch_dir.detach();
+    // scratch_dir.detach();   // deBUG
     std::cout << "BUILD DIRECTORY: " << path << std::endl;
     build::build(
         build_config,
@@ -274,16 +284,13 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
             .output_type = build::OutputType::SharedObject
         });
 
+
+    // ======== Load generated shared object and find the entry point ========
+
     auto module = dlib::Module{ output };
     auto symbol = module.symbol(dlib::SymbolNameView{"entry_point"});
     std::ignore = symbol;
-    // auto f = symbol.as<void(Context&)>();
-    // EXPECT_EQ(add(2, 3), 5);
 
-    // }
-    // catch(std::exception&) {
-    //     scratch_dir.detach();
-    //     throw;
-    // }
-    // scratch_dir.detach();
+    // TODO: Call `entry_point`. We need to change its signature for that,
+    // since currently it has an argument of a type defined in generated file.
 }

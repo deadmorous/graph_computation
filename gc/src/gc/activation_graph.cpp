@@ -1337,7 +1337,7 @@ auto generate_entry_point(std::ostream& s,
             common::throw_("Failed to order graph inputs"); // TODO: More details
     }
 
-    s << "auto entry_point( Context& ctx )\n"
+    s << "extern \"C\" auto entry_point( Context& ctx )\n"
          "    -> void\n"
          "{\n";
 
