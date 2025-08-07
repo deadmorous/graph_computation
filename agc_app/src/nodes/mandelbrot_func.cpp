@@ -73,14 +73,14 @@ public:
 
         auto mag2_alg_header =
             s(a::HeaderFile{
-                .name = "agc_rt/nodes/mandelbrot_func.hpp",
+                .name = "agc_app_rt/nodes/mandelbrot_func.hpp",
                 .lib = lib });
 
         auto arg_type = xt.at(mandelbrot_point_type);
 
         auto mandelbrot_func =
             s(a::Symbol{
-                .name = "agc_rt::mandelbrot_func",
+                .name = "agc_app_rt::mandelbrot_func",
                 .header_file = mag2_alg_header });
 
         // Bind input

@@ -10,12 +10,12 @@
 
 #pragma once
 
-#include "agc_rt/types/range.hpp"
+#include "agc_app_rt/types/range.hpp"
 
 #include <cstdint>
 
 
-namespace agc_rt {
+namespace agc_app_rt {
 
 struct Grid2dSpec final
 {
@@ -25,4 +25,4 @@ struct Grid2dSpec final
 
 GCLIB_STRUCT_TYPE(Grid2dSpec, rect, resolution);
 
-} // namespace agc_rt
+} // namespace agc_app_rt

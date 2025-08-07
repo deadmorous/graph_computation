@@ -13,7 +13,7 @@
 #include <iterator>
 
 
-namespace agc_rt {
+namespace agc_app_rt {
 
 inline auto brightness_char_coarse(double brightness)
     -> char
@@ -47,4 +47,4 @@ inline auto brightness_char(double brightness)
     -> char
 { return brightness_char_coarse(brightness); }
 
-} // namespace agc_rt
+} // namespace agc_app_rt

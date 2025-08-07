@@ -8,12 +8,12 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "agc_rt/nodes/linspace.hpp"
+#include "agc_app_rt/nodes/linspace.hpp"
 
 #include <cassert>
 
 
-namespace agc_rt {
+namespace agc_app_rt {
 
 auto LinSpaceInitIter(const LinSpaceSpec& spec)
     -> LinSpaceIter
@@ -44,4 +44,4 @@ auto LinSpaceNextIter(LinSpaceIter& it)
     return true;
 }
 
-} // namespace agc_rt
+} // namespace agc_app_rt

@@ -11,16 +11,16 @@
 #include <gtest/gtest.h>
 // -------- GENERATED CODE BEGIN --------
 
-#include "agc_rt/nodes/canvas.hpp"
-#include "agc_rt/nodes/counter.hpp"
-#include "agc_rt/nodes/grid_2d.hpp"
-#include "agc_rt/nodes/mag2.hpp"
-#include "agc_rt/nodes/mandelbrot_func.hpp"
-#include "agc_rt/nodes/printer.hpp"
-#include "agc_rt/nodes/scale.hpp"
-#include "agc_rt/nodes/threshold.hpp"
-#include "agc_rt/types/canvas.hpp"
-#include "agc_rt/types/grid_2d_spec.hpp"
+#include "agc_app_rt/nodes/canvas.hpp"
+#include "agc_app_rt/nodes/counter.hpp"
+#include "agc_app_rt/nodes/grid_2d.hpp"
+#include "agc_app_rt/nodes/mag2.hpp"
+#include "agc_app_rt/nodes/mandelbrot_func.hpp"
+#include "agc_app_rt/nodes/printer.hpp"
+#include "agc_app_rt/nodes/scale.hpp"
+#include "agc_app_rt/nodes/threshold.hpp"
+#include "agc_app_rt/types/canvas.hpp"
+#include "agc_app_rt/types/grid_2d_spec.hpp"
 
 #include <array>
 #include <cstddef>
@@ -29,13 +29,13 @@
 namespace { // INSERTED MANUALLY
 
 // Libraries
-// - agc_rt
+// - agc_app_rt
 
 
 // Variable types
 
 using T14 =
-    agc_rt::Grid2dSpec;
+    agc_app_rt::Grid2dSpec;
 
 using T54 =
     uint64_t;
@@ -77,55 +77,55 @@ using T171 =
     uint64_t;
 
 using T195 =
-    agc_rt::Canvas<double>;
+    agc_app_rt::Canvas<double>;
 
 using T196 =
     double;
 
 using T197 =
-    agc_rt::CanvasSize;
+    agc_app_rt::CanvasSize;
 
 using T198 =
-    agc_rt::CanvasPixel<double>;
+    agc_app_rt::CanvasPixel<double>;
 
 using T199 =
     double;
 
 using T220 =
-    agc_rt::Canvas<double>;
+    agc_app_rt::Canvas<double>;
 
 using T21 =
-    std::decay_t<decltype(agc_rt::grid_2d_size(std::declval<T14>()))>;
+    std::decay_t<decltype(agc_app_rt::grid_2d_size(std::declval<T14>()))>;
 
 using T18 =
-    std::decay_t<decltype(agc_rt::grid_2d_init_iter(std::declval<T14>()))>;
+    std::decay_t<decltype(agc_app_rt::grid_2d_init_iter(std::declval<T14>()))>;
 
 using T80 =
-    std::decay_t<decltype(agc_rt::mandelbrot_func(std::declval<T72>(), std::declval<T73>()))>;
+    std::decay_t<decltype(agc_app_rt::mandelbrot_func(std::declval<T72>(), std::declval<T73>()))>;
 
 using T106 =
-    std::decay_t<decltype(agc_rt::mandelbrot_func(std::declval<T72>(), std::declval<T73>()))>;
+    std::decay_t<decltype(agc_app_rt::mandelbrot_func(std::declval<T72>(), std::declval<T73>()))>;
 
 using T96 =
-    std::decay_t<decltype(agc_rt::mandelbrot_func(std::declval<T72>(), std::declval<T73>()))>;
+    std::decay_t<decltype(agc_app_rt::mandelbrot_func(std::declval<T72>(), std::declval<T73>()))>;
 
 using T86 =
-    std::decay_t<decltype(agc_rt::mandelbrot_func(std::declval<T72>(), std::declval<T73>()))>;
+    std::decay_t<decltype(agc_app_rt::mandelbrot_func(std::declval<T72>(), std::declval<T73>()))>;
 
 using T134 =
-    std::decay_t<decltype(agc_rt::mag2(std::declval<T130>()))>;
+    std::decay_t<decltype(agc_app_rt::mag2(std::declval<T130>()))>;
 
 using T141 =
-    std::decay_t<decltype(agc_rt::mag2(std::declval<T130>()))>;
+    std::decay_t<decltype(agc_app_rt::mag2(std::declval<T130>()))>;
 
 using T176 =
-    std::decay_t<decltype(agc_rt::scale(std::declval<T170>(), std::declval<T171>()))>;
+    std::decay_t<decltype(agc_app_rt::scale(std::declval<T170>(), std::declval<T171>()))>;
 
 using T23 =
-    std::decay_t<decltype(agc_rt::grid_2d_deref_iter(std::declval<T18>()))>;
+    std::decay_t<decltype(agc_app_rt::grid_2d_deref_iter(std::declval<T18>()))>;
 
 using T39 =
-    std::decay_t<decltype(agc_rt::grid_2d_deref_iter(std::declval<T18>()))>;
+    std::decay_t<decltype(agc_app_rt::grid_2d_deref_iter(std::declval<T18>()))>;
 
 
 // Context type
@@ -258,21 +258,21 @@ auto activate_node_15_in_0(Context& ctx)
 auto activate_node_0_in_0(Context& ctx)
     -> void
 {
-  auto var_21 = agc_rt::grid_2d_size(ctx.var_14);
-  auto var_18 = agc_rt::grid_2d_init_iter(ctx.var_14);
+  auto var_21 = agc_app_rt::grid_2d_size(ctx.var_14);
+  auto var_18 = agc_app_rt::grid_2d_init_iter(ctx.var_14);
   // Activate output port out_0
   // Activate [O(0,0)->I(14,0)]
   ctx.var_197 = var_21;
   activate_node_14_in_0(ctx);
   do
   {
-    auto var_23 = agc_rt::grid_2d_deref_iter(var_18);
+    auto var_23 = agc_app_rt::grid_2d_deref_iter(var_18);
     // Activate output port out_1
     // Activate [O(0,1)->I(1,0)]
     ctx.var_39 = var_23;
     activate_node_1_in_0(ctx);
   }
-  while (agc_rt::grid_2d_next_iter(var_18));
+  while (agc_app_rt::grid_2d_next_iter(var_18));
   // Activate output port out_2
   // Activate [O(0,2)->I(14,3)]
   activate_node_14_in_3(ctx);
@@ -303,7 +303,7 @@ auto activate_node_1_in_0(Context& ctx)
 auto activate_node_2_in_0(Context& ctx)
     -> void
 {
-  agc_rt::next_counter(ctx.var_54);
+  agc_app_rt::next_counter(ctx.var_54);
   // Activate output port out_0
   // Activate [O(2,0)->I(11,0)]
   ctx.var_154 = ctx.var_54;
@@ -313,7 +313,7 @@ auto activate_node_2_in_0(Context& ctx)
 auto activate_node_2_in_1(Context& ctx)
     -> void
 {
-  agc_rt::reset_counter(ctx.var_54);
+  agc_app_rt::reset_counter(ctx.var_54);
 }
 
 // Node 3 (Replicate)
@@ -342,7 +342,7 @@ auto activate_node_4_in_0(Context& ctx)
 auto activate_node_4_in_1(Context& ctx)
     -> void
 {
-  auto var_80 = agc_rt::mandelbrot_func(ctx.var_72, ctx.var_73);
+  auto var_80 = agc_app_rt::mandelbrot_func(ctx.var_72, ctx.var_73);
   // Activate output port out_0
   // Activate [O(4,0)->I(5,1)]
   ctx.var_86 = var_80;
@@ -416,7 +416,7 @@ auto activate_node_8_in_0(Context& ctx)
 auto activate_node_8_in_1(Context& ctx)
     -> void
 {
-  if (agc_rt::threshold(ctx.var_115, ctx.var_114))
+  if (agc_app_rt::threshold(ctx.var_115, ctx.var_114))
   {
     // Activate output port out_0
     // Activate [O(8,0)->I(7,1)]
@@ -436,7 +436,7 @@ auto activate_node_8_in_1(Context& ctx)
 auto activate_node_9_in_0(Context& ctx)
     -> void
 {
-  auto var_134 = agc_rt::mag2(ctx.var_130);
+  auto var_134 = agc_app_rt::mag2(ctx.var_130);
   // Activate output port out_0
   // Activate [O(9,0)->I(10,1)]
   ctx.var_141 = var_134;
@@ -453,7 +453,7 @@ auto activate_node_10_in_0(Context& ctx)
 auto activate_node_10_in_1(Context& ctx)
     -> void
 {
-  if (agc_rt::threshold(ctx.var_141, ctx.var_140))
+  if (agc_app_rt::threshold(ctx.var_141, ctx.var_140))
   {
     // Activate output port out_0
     // Activate [O(10,0)->I(5,2)]
@@ -508,7 +508,7 @@ auto activate_node_13_in_0(Context& ctx)
 auto activate_node_13_in_1(Context& ctx)
     -> void
 {
-  auto var_176 = agc_rt::scale(ctx.var_170, ctx.var_171);
+  auto var_176 = agc_app_rt::scale(ctx.var_170, ctx.var_171);
   // Activate output port out_0
   // Activate [O(13,0)->I(14,2)]
   ctx.var_199 = var_176;
@@ -520,19 +520,19 @@ auto activate_node_13_in_1(Context& ctx)
 auto activate_node_14_in_0(Context& ctx)
     -> void
 {
-  agc_rt::resize_canvas(ctx.var_195, ctx.var_197);
+  agc_app_rt::resize_canvas(ctx.var_195, ctx.var_197);
 }
 
 auto activate_node_14_in_1(Context& ctx)
     -> void
 {
-  agc_rt::set_canvas_pixel(ctx.var_195, ctx.var_198);
+  agc_app_rt::set_canvas_pixel(ctx.var_195, ctx.var_198);
 }
 
 auto activate_node_14_in_2(Context& ctx)
     -> void
 {
-  agc_rt::set_next_canvas_pixel(ctx.var_195, ctx.var_199);
+  agc_app_rt::set_next_canvas_pixel(ctx.var_195, ctx.var_199);
 }
 
 auto activate_node_14_in_3(Context& ctx)
@@ -547,7 +547,7 @@ auto activate_node_14_in_3(Context& ctx)
 auto activate_node_14_in_4(Context& ctx)
     -> void
 {
-  agc_rt::clear_canvas(ctx.var_195);
+  agc_app_rt::clear_canvas(ctx.var_195);
 }
 
 // Node 15 (Printer)
@@ -555,7 +555,7 @@ auto activate_node_14_in_4(Context& ctx)
 auto activate_node_15_in_0(Context& ctx)
     -> void
 {
-  agc_rt::print(ctx.var_220);
+  agc_app_rt::print(ctx.var_220);
 }
 
 auto entry_point( Context& ctx )
@@ -575,7 +575,7 @@ auto entry_point( Context& ctx )
 
 TEST(AgcApp_GenTest, Mandelbrot)
 {
-    using namespace agc_rt;
+    using namespace agc_app_rt;
     uint64_t iter_count = 100;
     auto ctx = Context {
         // Grid

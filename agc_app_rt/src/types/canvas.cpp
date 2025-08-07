@@ -8,11 +8,11 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "agc_rt/types/canvas.hpp"
-#include "agc_rt/util/brightness_char.hpp"
+#include "agc_app_rt/types/canvas.hpp"
+#include "agc_app_rt/util/brightness_char.hpp"
 
 
-namespace agc_rt {
+namespace agc_app_rt {
 
 auto operator<<(std::ostream& s, const Canvas<double>& canvas)
     -> std::ostream&
@@ -27,4 +27,4 @@ auto operator<<(std::ostream& s, const Canvas<double>& canvas)
     return s;
 }
 
-} // namespace agc_rt
+} // namespace agc_app_rt

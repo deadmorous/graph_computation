@@ -55,12 +55,12 @@ public:
 
         auto printer_alg_header =
             s(a::HeaderFile{
-                .name = "agc_rt/nodes/printer.hpp",
+                .name = "agc_app_rt/nodes/printer.hpp",
                 .lib = lib });
 
         auto print_func =
             s(a::Symbol{
-                .name = "agc_rt::print",
+                .name = "agc_app_rt::print",
                 .header_file = printer_alg_header });
 
         // Bind input
