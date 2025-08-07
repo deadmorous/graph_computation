@@ -41,12 +41,12 @@ public:
 
         auto threshold_alg_header =
             s(a::HeaderFile{
-                .name = "agc_rt/nodes/threshold.hpp",
+                .name = "agc_app_rt/nodes/threshold.hpp",
                 .lib = lib });
 
         auto threshold_func =
             s(a::Symbol{
-                .name = "agc_rt::threshold",
+                .name = "agc_app_rt::threshold",
                 .header_file = threshold_alg_header });
 
         // Bind input

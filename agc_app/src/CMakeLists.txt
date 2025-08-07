@@ -36,7 +36,7 @@ endif()
 target_link_libraries(agc_app-lib
     PUBLIC
         gc::lib
-    #    agc_rt::lib
+    #    agc_app_rt::lib
     )
 
 target_include_directories(agc_app-lib

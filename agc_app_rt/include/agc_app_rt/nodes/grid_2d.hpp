@@ -1,14 +1,14 @@
 #pragma once
 
-#include "agc_rt/types/grid_2d_spec.hpp"
-#include "agc_rt/types/point_2d.hpp"
+#include "agc_app_rt/types/grid_2d_spec.hpp"
+#include "agc_app_rt/types/point_2d.hpp"
 
 #include "common/throw.hpp"
 
 #include <cmath>
 
 
-namespace agc_rt {
+namespace agc_app_rt {
 
 inline auto grid_2d_size(const Grid2dSpec& spec) noexcept
     -> Point2d_u32
@@ -70,4 +70,4 @@ auto grid_2d_deref_iter(const Grid2dIter& iter) noexcept
     -> Point2d_d
 { return iter.v; }
 
-} // namespace agc_rt
+} // namespace agc_app_rt

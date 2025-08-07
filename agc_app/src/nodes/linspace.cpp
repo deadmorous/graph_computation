@@ -44,12 +44,12 @@ public:
 
         auto linspace_spec_header =
             s(a::HeaderFile{
-                .name = "agc_rt/types/linspace_spec.hpp",
+                .name = "agc_app_rt/types/linspace_spec.hpp",
                 .lib = lib });
 
         xt[linspace_spec_type] =
             s(a::Type{
-                .name = "agc_rt::LinSpaceSpec",
+                .name = "agc_app_rt::LinSpaceSpec",
                 .header_file = linspace_spec_header });
     }
 
@@ -68,22 +68,22 @@ public:
 
         auto linspace_alg_header =
             s(a::HeaderFile{
-                .name = "agc_rt/alg/linspace.hpp",
+                .name = "agc_app_rt/alg/linspace.hpp",
                 .lib = lib });
 
         auto iter_init_func =
             s(a::Symbol{
-                .name = "agc_rt::LinSpaceInitIter",
+                .name = "agc_app_rt::LinSpaceInitIter",
                 .header_file = linspace_alg_header });
 
         auto iter_next_func =
             s(a::Symbol{
-                .name = "agc_rt::LinSpaceNextIter",
+                .name = "agc_app_rt::LinSpaceNextIter",
                 .header_file = linspace_alg_header });
 
         auto iter_deref_func =
             s(a::Symbol{
-                .name = "agc_rt::LinSpaceDerefIter",
+                .name = "agc_app_rt::LinSpaceDerefIter",
                 .header_file = linspace_alg_header });
 
         // Bind input

@@ -41,12 +41,12 @@ public:
 
         auto scale_alg_header =
             s(a::HeaderFile{
-                .name = "agc_rt/nodes/scale.hpp",
+                .name = "agc_app_rt/nodes/scale.hpp",
                 .lib = lib });
 
         auto scale_func =
             s(a::Symbol{
-                .name = "agc_rt::scale",
+                .name = "agc_app_rt::scale",
                 .header_file = scale_alg_header });
 
         // Bind inputs

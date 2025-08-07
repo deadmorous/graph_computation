@@ -268,7 +268,7 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
     auto build_config = build::default_config();
 
     auto libs = build::LibConfigVec{
-        build::lib_config("agc_rt-lib"),
+        build::lib_config("agc_app_rt-lib"),
     };
 
     auto path = scratch_dir.path();

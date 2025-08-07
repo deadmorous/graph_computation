@@ -1,11 +1,11 @@
 #pragma once
 
-#include "agc_rt/types/canvas.hpp"
+#include "agc_app_rt/types/canvas.hpp"
 
 #include <algorithm>
 
 
-namespace agc_rt {
+namespace agc_app_rt {
 
 inline auto clear_canvas(Canvas<double>& canvas) noexcept
     -> void
@@ -41,4 +41,4 @@ inline auto set_next_canvas_pixel(Canvas<double>& canvas,
         canvas.pixels[canvas.pos++] = value;
 }
 
-} // namespace agc_rt
+} // namespace agc_app_rt
