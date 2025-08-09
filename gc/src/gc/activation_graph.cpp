@@ -243,6 +243,80 @@ auto upstream_activations(const ActivationGraph& g,
 
 // ---
 
+auto check_source_inputs(const ActivationGraph& g,
+                         const GraphAlgos& algos,
+                         const alg::AlgorithmStorage& alg_storage,
+                         const ActivationGraphSourceTypes& source_types,
+                         EdgeInputEndSpan ignored_sources)
+    -> void
+{
+    // Collect connected inputs. Source inputs are all other inputs.
+    auto connected_inputs = std::unordered_set<EdgeInputEnd, Hash>{};
+    for (const auto& e : g.edges)
+        connected_inputs.emplace(e.to);
+
+    // Collect source inputs bound to variables.
+    auto bound_source_inputs = std::set<EdgeInputEnd>{};
+    for (auto inode : algos.index_range())
+    {
+        const auto& node_alg = algos[inode];
+        for (auto input_binding_id : node_alg.input_bindings)
+        {
+            const auto& input_binding = alg_storage(input_binding_id);
+            auto input = EdgeInputEnd{inode, input_binding.port};
+            if (!connected_inputs.contains(input))
+                bound_source_inputs.emplace(input);
+        }
+    }
+
+    // Cneck if any "extra" sources are specified; remove eligible specified
+    // sources from bound_source_inputs, so that it eventually only contains
+    // missing inputs.
+    auto extra_source_inputs = std::set<EdgeInputEnd>{};
+    for (const auto& to : source_types.destinations.values)
+    {
+        if (bound_source_inputs.contains(to))
+            bound_source_inputs.erase(to);
+        else
+            extra_source_inputs.insert(to);
+    }
+
+    // If some missing inputs should be ignored,
+    // these has to be specified in ignored_sources.
+    // Remove such inputs from bound_source_inputs
+    auto invalid_ignored_sources = std::set<EdgeInputEnd>{};
+    for (const auto& to : ignored_sources)
+    {
+        auto it = bound_source_inputs.find(to);
+        if (it == bound_source_inputs.end())
+            invalid_ignored_sources.insert(to);
+        else
+            bound_source_inputs.erase(it);
+    }
+
+    // At this point, bound_source_inputs contains missing source inputs only.
+    if (extra_source_inputs.empty() &&
+        bound_source_inputs.empty() &&
+        invalid_ignored_sources.empty())
+        // All fine
+        return;
+
+    auto s = std::ostringstream{};
+    s << "Source input check failed:";
+    if (!extra_source_inputs.empty())
+        s << "\n- there are extra inputs: "
+          << common::format_seq(extra_source_inputs);
+    if (!bound_source_inputs.empty())
+        s << "\n- there are missing inputs: "
+          << common::format_seq(bound_source_inputs);
+    if (!invalid_ignored_sources.empty())
+        s << "\n- some sources are not eligible to be ignored: "
+          << common::format_seq(invalid_ignored_sources);
+    common::throw_<std::invalid_argument>(s.str());
+}
+
+// ---
+
 auto template_param_name(size_t index)
     -> std::string
 { return common::format('T', index); }
@@ -1425,7 +1499,8 @@ auto generate_entry_point(std::ostream& s,
 auto generate_source(std::ostream& s,
                      const ActivationGraph& g,
                      alg::AlgorithmStorage& alg_storage,
-                     const ActivationGraphSourceTypes& source_types)
+                     const ActivationGraphSourceTypes& source_types,
+                     EdgeInputEndSpan ignored_sources)
     -> void
 {
     // Find external inputs
@@ -1448,6 +1523,10 @@ auto generate_source(std::ostream& s,
             << '\n';
     }
     std::cout << "========\n\n";
+
+    // Check that all source inputs bound to variables
+    // are present in source_types
+    check_source_inputs(g, algos, alg_storage, source_types, ignored_sources);
 
     // Generate #includes
     render_includes(s, g, algos, alg_storage);

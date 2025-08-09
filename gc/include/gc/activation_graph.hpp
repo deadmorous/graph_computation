@@ -18,6 +18,8 @@
 
 #include <iostream>
 #include <memory>
+#include <span>
+#include <vector>
 
 
 namespace gc {
@@ -33,13 +35,17 @@ struct ActivationGraphSourceTypes final
         -> bool = default;
 };
 
+using EdgeInputEndSpan = std::span<const EdgeInputEnd>;
+using EdgeInputEndVec = std::vector<EdgeInputEnd>;
+
 auto operator<<(std::ostream& s, const ActivationGraphSourceTypes& source_types)
     -> std::ostream&;
 
 auto generate_source(std::ostream& s,
                      const ActivationGraph& g,
                      alg::AlgorithmStorage& alg_storage,
-                     const ActivationGraphSourceTypes& source_types = {})
+                     const ActivationGraphSourceTypes& source_types = {},
+                     EdgeInputEndSpan ignored_sources = {})
     -> void;
 
 auto generate_source(std::ostream& s,
