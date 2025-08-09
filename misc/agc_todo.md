@@ -3,7 +3,7 @@ Activation graph TODO
 
 ## 09.08.2025
 
-- Check that input types specified by user in the `source_types` argument
++ Check that input types specified by user in the `source_types` argument
   to `gc::generate_source` are consistent with what node defines: if
   "from binding", a type is expected; otherwise, type must be either
   unspecified or coincide with what node defines.

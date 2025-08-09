@@ -212,8 +212,8 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
     auto alg_storage =
         gc::alg::AlgorithmStorage{};
 
-    auto grid_spec_type =
-        grid->exported_types(alg_storage).at(agc_app::grid_2d_spec_type);
+    // auto grid_spec_type =
+    //     grid->exported_types(alg_storage).at(agc_app::grid_2d_spec_type);
     auto point_type =
         f->exported_types(alg_storage).at(agc_app::mandelbrot_point_type);
     auto count_type =
@@ -225,7 +225,7 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
     auto source_types =
         gc::ActivationGraphSourceTypes{};
 
-    source_types.types.push_back(grid_spec_type);
+    source_types.types.push_back(common::Zero);
     add_to_last_group(
         source_types.destinations,
         gc::EdgeInputEnd{ 0_gc_n, 0_gc_i });

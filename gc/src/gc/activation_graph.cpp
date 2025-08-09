@@ -19,6 +19,7 @@
 #include "common/detail/hash.hpp"
 #include "common/detail/ind.hpp"
 #include "common/format.hpp"
+#include "common/overloads.hpp"
 #include "common/strong_grouped.hpp"
 #include "common/throw.hpp"
 
@@ -295,6 +296,77 @@ auto render_includes(std::ostream& s,
 using VarTypes =
     std::unordered_map<alg::id::Var, alg::Var, Hash>;
 
+auto is_type_from_binding(const alg::Var& var) -> bool
+{
+    return holds_alternative<alg::id::TypeFromBinding>(var);
+}
+
+class ValueTypeFromBindingResolver
+{
+public:
+    ValueTypeFromBindingResolver(bool& used,
+                                 VarTypes& var_source_types,
+                                 alg::id::Type source_type,
+                                 const EdgeInputEnd& to) :
+        used_{used},
+        var_source_types_{var_source_types},
+        source_type_{source_type},
+        to_{to}
+    {}
+
+    auto operator()(const alg::InputBinding& input_binding, const alg::Var& var)
+        -> void
+    {
+        used_ = true;
+
+        visit(
+            common::Overloads{
+                [&](const alg::id::FuncInvocation&)
+                {
+                    if (source_type_ != common::Zero)
+                        common::throw_(
+                            "Input ",
+                            to_,
+                            " has a source type specified, but its eligibility"
+                            " cannot be checked. Specify Zero here.");
+                },
+                [&](const alg::id::Type& original_type)
+                {
+                    if (source_type_ == common::Zero)
+                        return;
+                    if (source_type_ != original_type)
+                        common::throw_(
+                            "Input ",
+                            to_,
+                            " has a source type specified conflicting with"
+                            " node-defined tyoe. Specify Zero here.");
+                },
+                [&](const alg::id::TypeFromBinding&)
+                {
+                    if (source_type_ == common::Zero)
+                        common::throw_(
+                            "Input ",
+                            to_,
+                            " has no source type specified,"
+                            " but a type is required.");
+                    if (var_source_types_.contains(input_binding.var))
+                        common::throw_(
+                            "Input ",
+                            to_,
+                            " has source type specified more than once");
+                    var_source_types_.emplace(input_binding.var, source_type_);
+                },
+            },
+            var);
+    }
+
+private:
+    bool& used_;
+    VarTypes& var_source_types_;
+    alg::id::Type source_type_;
+    const EdgeInputEnd& to_;
+};
+
 auto resolve_variable_types(const ActivationGraph& g,
                             const ActivationGraphSourceTypes& source_types,
                             const GraphAlgos& algos,
@@ -311,9 +383,7 @@ auto resolve_variable_types(const ActivationGraph& g,
             if (input_binding.port != to.port)
                 continue;
             const auto& var = alg_storage(input_binding.var);
-            auto var_type_from_binding =
-                holds_alternative<alg::id::TypeFromBinding>(var);
-            f(input_binding, var_type_from_binding);
+            f(input_binding, var);
         }
     };
 
@@ -327,9 +397,9 @@ auto resolve_variable_types(const ActivationGraph& g,
         visit_input_bindings_for(
             to,
             [&](const alg::InputBinding& input_binding,
-                bool var_type_from_binding)
+                const alg::Var& var)
             {
-                if (!var_type_from_binding)
+                if (!is_type_from_binding(var))
                     return;
                 auto upstream_var = alg_storage(upstream.activation).var;
                 up_vars.emplace(input_binding.var, upstream_var);
@@ -344,20 +414,10 @@ auto resolve_variable_types(const ActivationGraph& g,
         for (const auto& to : group(source_types.destinations, index))
         {
             auto used = false;
-            visit_input_bindings_for(
-                to,
-                [&](const alg::InputBinding& input_binding,
-                    bool var_type_from_binding)
-                {
-                    used = true;
-                    if (!var_type_from_binding)
-                        return;
-                    if (var_source_types.contains(input_binding.var))
-                        common::throw_(
-                            "Input ", to,
-                            " has source type specified more than once");
-                    var_source_types.emplace(input_binding.var, source_type);
-                });
+            auto resolve_type_from_binding = ValueTypeFromBindingResolver{
+                used, var_source_types, source_type, to
+            };
+            visit_input_bindings_for(to, resolve_type_from_binding);
             if (!used)
                 common::throw_(
                     "Destination ", to, " for source type was not used");
