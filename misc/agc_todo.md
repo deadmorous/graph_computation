@@ -7,7 +7,7 @@ Activation graph TODO
   to `gc::generate_source` are consistent with what node defines: if
   "from binding", a type is expected; otherwise, type must be either
   unspecified or coincide with what node defines.
-- Check (maybe optionally?) that all external inputs are provided
++ Check (maybe optionally?) that all external inputs are provided
 - An API implementing graph reflection and context manipulation:
   - List ultimate external inputs and their types
   - Map external inputs to context members

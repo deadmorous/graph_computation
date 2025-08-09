@@ -246,6 +246,11 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
         gc::EdgeInputEnd{ 13_gc_n, 0_gc_i });
     next_group(source_types.destinations);
 
+    auto ignored_sources = gc::EdgeInputEndVec{
+        // canvas.set is not used - we are using canvas.set_next instead.
+        { 14_gc_n, 1_gc_i }
+    };
+
 
     // ======== Allocate temporary scratch directory ========
 
@@ -258,7 +263,7 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
     {
         std::ofstream s{source_path};
         ASSERT_TRUE(s.is_open());
-        generate_source(s, g, alg_storage, source_types);
+        generate_source(s, g, alg_storage, source_types, ignored_sources);
     }
 
 
