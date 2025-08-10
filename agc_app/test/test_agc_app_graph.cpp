@@ -14,6 +14,10 @@
 #include "agc_app/nodes/grid_2d.hpp"
 #include "agc_app/nodes/mandelbrot_func.hpp"
 
+#include "agc_rt/context_util.hpp"
+
+#include "agc_app_rt/types/grid_2d_spec.hpp"
+
 #include "gc/activation_graph.hpp"
 #include "gc/activation_node.hpp"
 #include "gc/algorithm.hpp"
@@ -37,6 +41,18 @@
 
 using namespace gc::literals;
 using namespace std::string_view_literals;
+
+namespace {
+
+template<typename Signature>
+auto module_func(const dlib::Module& module, std::string_view name)
+    -> Signature*
+{
+    auto symbol = module.symbol(dlib::SymbolNameView{name});
+    return symbol.as<Signature>();
+}
+
+} // anonymous namespace
 
 TEST(AgcApp_Graph, GenerateSource)
 {
@@ -304,9 +320,61 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
     // ======== Load generated shared object and find the entry point ========
 
     auto module = dlib::Module{ output };
-    auto symbol = module.symbol(dlib::SymbolNameView{"entry_point"});
-    std::ignore = symbol;
 
-    // TODO: Call `entry_point`. We need to change its signature for that,
-    // since currently it has an argument of a type defined in generated file.
+    auto create_context =
+        module_func<agc_rt::ContextHandle*()>(module, "create_context");
+
+    auto delete_context =
+        module_func<void(agc_rt::ContextHandle*)>(module, "delete_context");
+
+    auto entry_point =
+        module_func<void(agc_rt::ContextHandle*)>(module, "entry_point");
+
+    auto grid_var =
+        module_func<agc_app_rt::Grid2dSpec*(agc_rt::ContextHandle*)>(
+            module, "context_var_for_port_0_in_0");
+
+    auto z0_var =
+        module_func<std::array<double, 2>*(agc_rt::ContextHandle*)>(
+            module, "context_var_for_port_3_in_0");
+
+    auto iter_count_var =
+        module_func<uint64_t*(agc_rt::ContextHandle*)>(
+            module, "context_var_for_port_8_in_0");
+
+    auto mag2_threshold_var =
+        module_func<double*(agc_rt::ContextHandle*)>(
+            module, "context_var_for_port_10_in_0");
+
+    auto scale_var =
+        module_func<double*(agc_rt::ContextHandle*)>(
+            module, "context_var_for_port_13_in_0");
+
+
+    auto* context = create_context();
+
+    uint64_t iter_count_value = 100;
+
+    // Grid
+    *grid_var(context) = agc_app_rt::Grid2dSpec{
+        .rect = {agc_app_rt::Range<double>{ -2.1, 0.7 },
+                 agc_app_rt::Range<double>{ -1.2, 1.2 } },
+        .resolution = { 0.1, 0.2 } };
+
+    // z0 for iterations
+    *z0_var(context) = { 0., 0. };
+
+    // Iteration count
+    *iter_count_var(context) = iter_count_value;
+
+    // Mag2 threshold (to detect iterations divergence)
+    *mag2_threshold_var(context) = 1000.;
+
+    // Scale factor for final magnitude of iterated value
+    *scale_var(context) =1. / iter_count_value;
+
+    // Call `entry_point`
+    entry_point(context);
+
+    delete_context(context);
 }
