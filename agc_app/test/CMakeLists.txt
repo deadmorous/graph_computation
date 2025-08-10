@@ -18,6 +18,7 @@ target_link_libraries(
         GTest::gtest_main
         agc_app::lib
         agc_app_rt::lib
+        agc_rt::lib
         lib_config
 )
 
