@@ -10,12 +10,12 @@ Activation graph TODO
 + Check (maybe optionally?) that all external inputs are provided
 - An API implementing graph reflection and context manipulation:
   - List ultimate external inputs and their types
-  - Map external inputs to context members
-  - Map useful node states (e.g., canvas) to context members
-  - Create context instance
+  + Map external inputs to context members
+  + Map useful node states (e.g., canvas) to context members
+  + Create context instance
   - Set external input into context variable, perhaps converted to gc::Value
   - Read context variable, perhaps converted to gc::Value
-  - Pass context to entry point
+  + Pass context to entry point
 - Parse graph specification from YAML
 - GUI integration
   - Printer node: output stream specification
