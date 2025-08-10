@@ -316,9 +316,10 @@ auto activation_func_name(const EdgeInputEnd& input)
 { return common::format("activate_node_", input.node, "_", input.port); }
 
 auto render_includes(std::ostream& s,
-                       const ActivationGraph& g,
-                       const GraphAlgos& algos,
-                       const alg::AlgorithmStorage& alg_storage)
+                     const ActivationGraph& g,
+                     const GraphAlgos& algos,
+                     std::span<alg::id::HeaderFile> extra_headers,
+                     const alg::AlgorithmStorage& alg_storage)
     -> void
 {
     auto visitor = HeaderFileExtractor{ alg_storage };
@@ -329,6 +330,9 @@ auto render_includes(std::ostream& s,
             inspector(port_alg.activate);
         inspector(node_alg.context);
     }
+
+    for (auto extra_header : extra_headers)
+        inspector(extra_header);
 
     auto print_includes =
         [&s](const std::set<std::string_view>& headers,
@@ -1212,6 +1216,85 @@ auto generate_nodes(std::ostream& s,
 }
 
 
+// Context manipulation code generation
+
+auto generate_context_util(std::ostream& s,
+                           const ActivationGraph& g,
+                           const ActivationGraphSourceTypes& source_types,
+                           const GraphAlgos& algos,
+                           const alg::AlgorithmStorage& alg_storage) -> void
+{
+    s << R"(
+// Context manipulation
+
+using ContextManager = agc_rt::ContextManager<Context>;
+
+extern "C" {
+
+auto create_context() -> agc_rt::ContextHandle*
+{ return ContextManager::create_context(); }
+
+auto delete_context(agc_rt::ContextHandle* h) -> void
+{ ContextManager::delete_context(h); }
+
+
+)";
+
+
+    for (auto node_index : algos.index_range())
+    {
+        const auto* node = g.nodes[node_index].get();
+        const auto& node_alg = algos[node_index];
+
+        s << "// Context variables for node " << node_index
+          << " (" << node->type_name() << ")\n\n";
+
+        for (const auto& input_binding_id : node_alg.input_bindings)
+        {
+            const auto& input_binding = alg_storage(input_binding_id);
+            s << "auto context_var_for_port_"
+              << node_index << '_' << input_binding.port
+              << "(agc_rt::ContextHandle* h) -> T"
+              << input_binding.var
+              << R"(*
+{
+  auto& ctx = *ContextManager::context_from_handle(h);
+  return &ctx.var_)" << input_binding.var << R"(;
+}
+
+)";
+        }
+
+        if (node_alg.context != common::Zero)
+        {
+            const auto& context = alg_storage(node_alg.context);
+            for (auto var_index : common::index_range<size_t>(context.size()))
+            {
+                auto id = context[var_index];
+                s << "auto context_var_for_state_"
+                  << node_index << '_' << var_index
+                  << "(agc_rt::ContextHandle* h) -> T"
+                  << id
+                  << R"(*
+{
+  auto& ctx = *ContextManager::context_from_handle(h);
+  return &ctx.var_)" << id << R"(;
+}
+
+)";
+            }
+        }
+
+        if (algos.index_range().contains(node_index + NodeCount{1}))
+            s << "\n";
+    }
+
+    s << R"(
+} // extern "C"
+)";
+}
+
+
 // Graph activation analysis
 
 using RequiredInputs = std::unordered_map<EdgeInputEnd, InputPorts, Hash>;
@@ -1471,9 +1554,13 @@ auto generate_entry_point(std::ostream& s,
             common::throw_("Failed to order graph inputs"); // TODO: More details
     }
 
-    s << "extern \"C\" auto entry_point( Context& ctx )\n"
-         "    -> void\n"
-         "{\n";
+    s << R"(
+extern "C" auto entry_point(agc_rt::ContextHandle* h)
+    -> void
+{
+   auto& ctx = *ContextManager::context_from_handle(h);
+
+)";
 
     // Activate inputs according to `activation_order`
     for (const auto& e : activation_order)
@@ -1481,6 +1568,20 @@ auto generate_entry_point(std::ostream& s,
 
     s <<
          "}\n";
+}
+
+auto add_agc_rt_lib(std::vector<alg::id::HeaderFile>& extra_headers,
+                    alg::AlgorithmStorage& s) -> void
+{
+    auto lib = s(gc::alg::Lib{ .name = "agc_rt" });
+
+    auto add_header = [&](std::string name)
+    {
+        extra_headers.push_back(
+            s(alg::HeaderFile{ .name = name, .lib = lib }));
+    };
+
+    add_header("agc_rt/context_util.hpp");
 }
 
 } // anonymous namespace
@@ -1518,11 +1619,18 @@ auto generate_source(std::ostream& s,
     // are present in source_types
     check_source_inputs(g, algos, alg_storage, source_types, ignored_sources);
 
+    // Add the agc_rt library
+    auto extra_headers = std::vector<alg::id::HeaderFile>{};
+    add_agc_rt_lib(extra_headers, alg_storage);
+
     // Generate #includes
-    render_includes(s, g, algos, alg_storage);
+    render_includes(s, g, algos, extra_headers, alg_storage);
 
     // Generate code for graph nodes
     generate_nodes(s, g, source_types, algos, alg_storage);
+
+    // Generate context manipulation functions
+    generate_context_util(s, g, source_types, algos, alg_storage);
 
     // Generate entry point
     generate_entry_point(s, g, source_types, algos, alg_storage);
