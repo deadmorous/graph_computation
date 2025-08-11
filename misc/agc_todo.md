@@ -13,8 +13,8 @@ Activation graph TODO
   + Map external inputs to context members
   + Map useful node states (e.g., canvas) to context members
   + Create context instance
-  - Set external input into context variable, perhaps converted to gc::Value
-  - Read context variable, perhaps converted to gc::Value
+  + Set external input into context variable, perhaps converted to gc::Value
+  + Read context variable, perhaps converted to gc::Value
   + Pass context to entry point
 - Parse graph specification from YAML
 - GUI integration

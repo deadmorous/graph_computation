@@ -17,6 +17,9 @@ struct EdgeEnd final
 
     auto operator<=>(const EdgeEnd&) const noexcept
         -> std::strong_ordering = default;
+
+    constexpr auto compressed() -> uint64_t
+    { return uint64_t{node.v} << (8*sizeof(gc::WeakPort)) | port.v; }
 };
 
 using EdgeInputEnd = EdgeEnd<Input_Tag>;

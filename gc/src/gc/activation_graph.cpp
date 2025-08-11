@@ -1218,6 +1218,88 @@ auto generate_nodes(std::ostream& s,
 
 // Context manipulation code generation
 
+template <typename Cb>
+auto for_each_node(const ActivationGraph& g, const GraphAlgos& algos, Cb&& cb)
+    -> void
+{
+    for (auto node_index : algos.index_range())
+    {
+        const auto* node = g.nodes[node_index].get();
+        const auto& node_alg = algos[node_index];
+
+        cb(node_index, node, node_alg);
+    }
+}
+
+template <typename Cb>
+auto for_each_input_binding(
+    NodeIndex node_index,
+    const NodeActivationAlgorithms& node_alg,
+    const alg::AlgorithmStorage& alg_storage,
+    Cb&& cb) -> void
+{
+    for (const auto& input_binding_id : node_alg.input_bindings)
+    {
+        const auto& input_binding = alg_storage(input_binding_id);
+        auto input = EdgeInputEnd{node_index, input_binding.port};
+        cb(input, input_binding.var);
+    }
+}
+
+template <typename Cb>
+auto for_each_input_binding(
+    const ActivationGraph& g,
+    const GraphAlgos& algos,
+    const alg::AlgorithmStorage& alg_storage,
+    Cb&& cb) -> void
+{
+    for_each_node(
+        g,
+        algos,
+        [&](NodeIndex node_index,
+            const ActivationNode* node,
+            const NodeActivationAlgorithms& node_alg)
+        {
+            for_each_input_binding(node_index, node_alg, alg_storage, cb);
+        });
+}
+
+template <typename Cb>
+auto for_each_state_var(
+    NodeIndex node_index,
+    const NodeActivationAlgorithms& node_alg,
+    const alg::AlgorithmStorage& alg_storage,
+    Cb&& cb) -> void
+{
+    if (node_alg.context == common::Zero)
+        return;
+
+    const auto& context = alg_storage(node_alg.context);
+    for (auto var_index : common::index_range<size_t>(context.size()))
+    {
+        auto var = context[var_index];
+        cb(node_index, var_index, var);
+    }
+}
+
+template <typename Cb>
+auto for_each_state_var(
+    const ActivationGraph& g,
+    const GraphAlgos& algos,
+    const alg::AlgorithmStorage& alg_storage,
+    Cb&& cb) -> void
+{
+    for_each_node(
+        g,
+        algos,
+        [&](NodeIndex node_index,
+            const ActivationNode* node,
+            const NodeActivationAlgorithms& node_alg)
+        {
+            for_each_state_var(node_index, node_alg, alg_storage, cb);
+        });
+}
+
 auto generate_context_util(std::ostream& s,
                            const ActivationGraph& g,
                            const ActivationGraphSourceTypes& source_types,
@@ -1226,6 +1308,9 @@ auto generate_context_util(std::ostream& s,
 {
     s << R"(
 // Context manipulation
+
+constexpr auto combined_u32_and_u8(uint32_t node, uint8_t port) -> uint64_t
+{ return uint64_t{node} << 8 | port; }
 
 using ContextManager = agc_rt::ContextManager<Context>;
 
@@ -1240,56 +1325,197 @@ auto delete_context(agc_rt::ContextHandle* h) -> void
 
 )";
 
-
-    for (auto node_index : algos.index_range())
+    auto input_func_name = [](const EdgeInputEnd& input)
     {
-        const auto* node = g.nodes[node_index].get();
-        const auto& node_alg = algos[node_index];
+        return common::format(
+            "context_input_var_", input.node.v, '_', int{input.port.v});
+    };
 
-        s << "// Context variables for node " << node_index
-          << " (" << node->type_name() << ")\n\n";
+    auto compressed_edge_expr = [](const EdgeInputEnd& input)
+    {
+        return common::format(
+            "combined_u32_and_u8(", input.node.v, ", ", int{input.port.v}, ')');
+    };
 
-        for (const auto& input_binding_id : node_alg.input_bindings)
+    auto compressed_var_expr = [](NodeIndex node_index, size_t var_index)
+    {
+        return common::format(
+            "combined_u32_and_u8(", node_index.v, ", ", var_index, ')');
+    };
+
+    auto state_func_name = [](NodeIndex node_index, size_t state_index)
+    {
+        return common::format(
+            "context_state_var_", node_index.v, '_', state_index);
+    };
+
+    for_each_node(
+        g, algos,
+        [&](NodeIndex node_index,
+            const ActivationNode* node,
+            const NodeActivationAlgorithms& node_alg)
         {
-            const auto& input_binding = alg_storage(input_binding_id);
-            s << "auto context_var_for_port_"
-              << node_index << '_' << input_binding.port
-              << "(agc_rt::ContextHandle* h) -> T"
-              << input_binding.var
-              << R"(*
+            s << "// Context variables for node " << node_index
+              << " (" << node->type_name() << ")\n\n";
+
+            for_each_input_binding(
+                node_index,
+                node_alg,
+                alg_storage,
+                [&](const EdgeInputEnd& input, alg::id::Var var)
+                {
+                    s << "auto " << input_func_name(input)
+                      << "(agc_rt::ContextHandle* h) -> T"
+                      << var
+                      << R"(*
 {
   auto& ctx = *ContextManager::context_from_handle(h);
-  return &ctx.var_)" << input_binding.var << R"(;
+  return &ctx.var_)" << var << R"(;
 }
 
 )";
-        }
+                });
 
-        if (node_alg.context != common::Zero)
-        {
-            const auto& context = alg_storage(node_alg.context);
-            for (auto var_index : common::index_range<size_t>(context.size()))
+        for_each_state_var(
+            node_index,
+            node_alg,
+            alg_storage,
+            [&](NodeIndex node_index, size_t var_index, alg::id::Var var)
             {
-                auto id = context[var_index];
-                s << "auto context_var_for_state_"
-                  << node_index << '_' << var_index
+                s << "auto " << state_func_name(node_index, var_index)
                   << "(agc_rt::ContextHandle* h) -> T"
-                  << id
+                  << var
                   << R"(*
 {
   auto& ctx = *ContextManager::context_from_handle(h);
-  return &ctx.var_)" << id << R"(;
+  return &ctx.var_)" << var << R"(;
 }
 
 )";
-            }
-        }
+            });
 
-        if (algos.index_range().contains(node_index + NodeCount{1}))
-            s << "\n";
-    }
+        });
+
 
     s << R"(
+auto get_context_input_var(agc_rt::ContextHandle* h,
+                           uint64_t input_edge_end,
+                           std::any& value)
+    -> void
+{
+    switch (input_edge_end)
+    {
+)";
+
+    for_each_input_binding(
+        g,
+        algos,
+        alg_storage,
+        [&](const EdgeInputEnd& input_end, alg::id::Var var)
+        {
+            s << "    case " << compressed_edge_expr(input_end) << ":\n"
+              "        value = *" << input_func_name(input_end) << R"((h);
+        break;
+)";
+        });
+    s << R"(    default:
+        throw std::invalid_argument(
+            "get_context_var_for_port: Unknown input edge");
+    }
+}
+
+)";
+
+    s << R"(
+auto set_context_input_var(agc_rt::ContextHandle* h,
+                           uint64_t input_edge_end,
+                           const std::any& value)
+    -> void
+{
+    switch (input_edge_end)
+    {
+)";
+    for_each_input_binding(
+        g,
+        algos,
+        alg_storage,
+        [&](const EdgeInputEnd& input_end, alg::id::Var var)
+        {
+            s << "    case " << compressed_edge_expr(input_end) << ":\n"
+              "        *" << input_func_name(input_end)
+              << "(h) = std::any_cast<const T" << var << R"(&>(value);
+        break;
+)";
+        });
+    s << R"(    default:
+        throw std::invalid_argument(
+            "set_context_var_for_port: Unknown input edge");
+    }
+}
+
+)";
+
+    s << R"(
+auto get_context_state_var(agc_rt::ContextHandle* h,
+                           uint32_t node_index,
+                           uint8_t state_index,
+                           std::any& value)
+    -> void
+{
+    switch (combined_u32_and_u8(node_index, state_index))
+    {
+)";
+    for_each_state_var(
+        g,
+        algos,
+        alg_storage,
+        [&](NodeIndex node_index, size_t var_index, alg::id::Var var)
+        {
+            s << "    case " << compressed_var_expr(node_index, var_index)
+              << ":\n"
+              << "        value = *" <<
+             state_func_name(node_index, var_index) << R"((h);
+        break;
+)";
+        });
+
+    s << R"(    default:
+        throw std::invalid_argument(
+            "get_context_var_for_state: Unknown node and state index pair");
+    }
+}
+)";
+
+    s << R"(
+auto set_context_state_var(agc_rt::ContextHandle* h,
+                           uint32_t node_index,
+                           uint8_t state_index,
+                           const std::any& value)
+    -> void
+{
+    switch (combined_u32_and_u8(node_index, state_index))
+    {
+)";
+    for_each_state_var(
+        g,
+        algos,
+        alg_storage,
+        [&](NodeIndex node_index, size_t var_index, alg::id::Var var)
+        {
+            s << "    case " << compressed_var_expr(node_index, var_index)
+              << ":\n"
+              "        *" << state_func_name(node_index, var_index)
+              << "(h) = std::any_cast<const T" << var << R"(&>(value);
+        break;
+)";
+        });
+    s << R"(
+    default:
+        throw std::invalid_argument(
+            "set_context_var_for_state: Unknown node and state index pair");
+    }
+}
+
 } // extern "C"
 )";
 }
@@ -1584,6 +1810,20 @@ auto add_agc_rt_lib(std::vector<alg::id::HeaderFile>& extra_headers,
     add_header("agc_rt/context_util.hpp");
 }
 
+auto add_common_system_headers(std::vector<alg::id::HeaderFile>& extra_headers,
+                               alg::AlgorithmStorage& s) -> void
+{
+    auto add_header = [&](std::string name)
+    {
+        extra_headers.push_back(
+            s(alg::HeaderFile{ .name = name, .system = true }));
+    };
+
+    add_header("any");
+    add_header("cstdint");
+    add_header("stdexcept");
+}
+
 } // anonymous namespace
 
 
@@ -1622,6 +1862,9 @@ auto generate_source(std::ostream& s,
     // Add the agc_rt library
     auto extra_headers = std::vector<alg::id::HeaderFile>{};
     add_agc_rt_lib(extra_headers, alg_storage);
+
+    // Add headers used by context access API
+    add_common_system_headers(extra_headers, alg_storage);
 
     // Generate #includes
     render_includes(s, g, algos, extra_headers, alg_storage);
