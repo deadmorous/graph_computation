@@ -306,7 +306,7 @@ constexpr auto raw(const T& x) noexcept -> const typename T::Weak&
     using Name = ::common::Strong<Name##_StrongTraits>
 
 #define GCLIB_STRONG_LITERAL_SUFFIX(Name, suffix)                           \
-    inline Name operator"" suffix(unsigned long long value)                 \
+    constexpr inline Name operator"" suffix(unsigned long long value)       \
     {                                                                       \
         assert(value <= std::numeric_limits<Name::Weak>::max());            \
         return Name{static_cast<Name::Weak>(value)};                        \

@@ -330,36 +330,46 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
     auto entry_point =
         module_func<void(agc_rt::ContextHandle*)>(module, "entry_point");
 
-    auto grid_var =
-        module_func<agc_app_rt::Grid2dSpec*(agc_rt::ContextHandle*)>(
-            module, "context_var_for_port_0_in_0");
+    auto set_input_var =
+        module_func<void(agc_rt::ContextHandle*, uint64_t, const std::any&)>(
+            module, "set_context_input_var");
+
+    // auto grid_var =
+    //     module_func<agc_app_rt::Grid2dSpec*(agc_rt::ContextHandle*)>(
+    //         module, "context_input_var_0_0");
 
     auto z0_var =
         module_func<std::array<double, 2>*(agc_rt::ContextHandle*)>(
-            module, "context_var_for_port_3_in_0");
+            module, "context_input_var_3_0");
 
     auto iter_count_var =
         module_func<uint64_t*(agc_rt::ContextHandle*)>(
-            module, "context_var_for_port_8_in_0");
+            module, "context_input_var_8_0");
 
     auto mag2_threshold_var =
         module_func<double*(agc_rt::ContextHandle*)>(
-            module, "context_var_for_port_10_in_0");
+            module, "context_input_var_10_0");
 
     auto scale_var =
         module_func<double*(agc_rt::ContextHandle*)>(
-            module, "context_var_for_port_13_in_0");
-
+            module, "context_input_var_13_0");
 
     auto* context = create_context();
 
     uint64_t iter_count_value = 100;
 
     // Grid
-    *grid_var(context) = agc_app_rt::Grid2dSpec{
+    // *grid_var(context) = agc_app_rt::Grid2dSpec{
+    //     .rect = {agc_app_rt::Range<double>{ -2.1, 0.7 },
+    //              agc_app_rt::Range<double>{ -1.2, 1.2 } },
+    //     .resolution = { 0.1, 0.2 } };
+    set_input_var(
+        context,
+        gc::EdgeInputEnd{ 0_gc_n, 0_gc_i }.compressed(),
+        agc_app_rt::Grid2dSpec{
         .rect = {agc_app_rt::Range<double>{ -2.1, 0.7 },
                  agc_app_rt::Range<double>{ -1.2, 1.2 } },
-        .resolution = { 0.1, 0.2 } };
+        .resolution = { 0.1, 0.2 } });
 
     // z0 for iterations
     *z0_var(context) = { 0., 0. };
@@ -371,7 +381,7 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
     *mag2_threshold_var(context) = 1000.;
 
     // Scale factor for final magnitude of iterated value
-    *scale_var(context) =1. / iter_count_value;
+    *scale_var(context) = 1. / iter_count_value;
 
     // Call `entry_point`
     entry_point(context);
