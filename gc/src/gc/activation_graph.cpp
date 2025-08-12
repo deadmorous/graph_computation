@@ -407,7 +407,7 @@ public:
                             "Input ",
                             to_,
                             " has a source type specified conflicting with"
-                            " node-defined tyoe. Specify Zero here.");
+                            " node-defined type. Specify Zero here.");
                 },
                 [&](const alg::id::TypeFromBinding&)
                 {
