@@ -7,6 +7,7 @@
 #include "agc_rt/context_util.hpp"
 
 #include "agc_app_rt/types/grid_2d_spec.hpp"
+#include "agc_app_rt/types/linspace_spec.hpp"
 
 #include "gc/activation_graph.hpp"
 #include "gc/activation_node.hpp"
@@ -14,6 +15,7 @@
 #include "gc/alg_known_types.hpp"
 #include "gc/generate_dot.hpp"
 #include "gc/value.hpp"
+#include "gc/yaml/parse_graph.hpp"
 
 #include "build/build.hpp"
 #include "build/config.hpp"
@@ -23,6 +25,8 @@
 #include "dlib/symbol.hpp"
 
 #include "lib_config/lib_config.hpp"
+
+#include <yaml-cpp/yaml.h>
 
 #include <gtest/gtest.h>
 
@@ -61,6 +65,120 @@ TEST(AgcApp_Graph, GenerateSource)
                     .port = 0_gc_i } } } };
 
     generate_source(std::cout, g);
+}
+
+TEST(AgcApp_Graph, RunFromYaml)
+{
+    constexpr auto* example_graph_yaml = R"(
+nodes:
+  - name: linspace_1
+    type: linspace
+
+  - name: printer_1
+    type: printer
+
+edges:
+  - [linspace_1.sequence, printer_1.value]
+
+inputs:
+  - name: img_width
+    type: LinSpaceSpec
+    value:
+      first: 1
+      last: 10
+      count: 10
+    destinations: [linspace_1.spec]
+)";
+
+    auto node_registry = agc_app::activation_node_registry();
+
+    auto type_registry = gc::type_registry();
+
+    // TODO gc_app::populate_type_registry(type_registry);
+    type_registry.register_value(
+        "LinSpaceSpec", gc::type_of<agc_app_rt::LinSpaceSpec>());
+
+    // Parse YAML into a node object; parse graph from that node
+    auto config = YAML::Load(example_graph_yaml);
+    auto [g, provided_inputs, node_map, input_names] =
+        gc::yaml::parse_graph(config, node_registry, type_registry);
+
+    auto alg_storage = gc::alg::AlgorithmStorage{};
+
+    auto source_types =
+        gc::ActivationGraphSourceTypes{};
+
+    source_types.types.push_back(common::Zero);
+    add_to_last_group(
+        source_types.destinations,
+        gc::EdgeInputEnd{ 0_gc_n, 0_gc_i });
+    next_group(source_types.destinations);
+
+    // ---
+
+    auto scratch_dir = build::ScratchDir{};
+    auto path = scratch_dir.path();
+    // scratch_dir.detach();   // deBUG
+
+    auto source_path = path / "agc_example.cpp";
+    {
+        std::ofstream s{source_path};
+        ASSERT_TRUE(s.is_open());
+        generate_source(s, g, alg_storage, source_types);
+    }
+
+    auto output = path / "mandel";
+    auto build_config = build::default_config();
+
+    auto libs = build::LibConfigVec{
+        build::lib_config("agc_app_rt-lib"),
+        build::lib_config("agc_rt-lib"),
+    };
+
+    std::cout << "BUILD DIRECTORY: " << path << std::endl;
+    build::build(
+        build_config,
+        output,
+        scratch_dir,
+        build::InputVec{source_path},
+        libs,
+        {
+            .output_type = build::OutputType::SharedObject
+        });
+
+    // ---
+
+    auto module = dlib::Module{ output };
+
+    auto create_context =
+        module_func<agc_rt::ContextHandle*()>(module, "create_context");
+
+    auto delete_context =
+        module_func<void(agc_rt::ContextHandle*)>(module, "delete_context");
+
+    auto entry_point =
+        module_func<void(agc_rt::ContextHandle*)>(module, "entry_point");
+
+    auto set_input_var =
+        module_func<void(agc_rt::ContextHandle*, uint64_t, const std::any&)>(
+            module, "set_context_input_var");
+
+    auto* context = create_context();
+
+    const auto& destinations = provided_inputs.destinations;
+    for (auto index : common::group_indices(destinations))
+    {
+        const auto& value = provided_inputs.values.at(index);
+        for (const auto& to : common::group(destinations, index))
+            set_input_var(context, to.compressed(), value.data());
+    }
+
+    // ---
+
+    // Call `entry_point`
+    entry_point(context);
+
+    delete_context(context);
 }
 
 TEST(AgcApp_Graph, GenerateMandelbrot)
