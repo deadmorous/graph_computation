@@ -68,11 +68,6 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
     // ======== Define example activation graph ========
 
     auto node_registry = agc_app::activation_node_registry();
-    // Context_Source<Grid2dParam> grid_param;
-    // Context_Source<Complex> z0;
-    // Context_Source<uint64_t> max_iter_count;
-    // Context_Source<double> result_scale_factor;
-    // Context_Source<double> max_mag2;
 
     auto grid = node_registry.at("grid_2d")({});
     auto split_grid = node_registry.at("split")(std::vector<gc::Value>{4});
@@ -271,11 +266,12 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
     // ======== Allocate temporary scratch directory ========
 
     auto scratch_dir = build::ScratchDir{};
-
+    auto path = scratch_dir.path();
+    // scratch_dir.detach();   // deBUG
 
     // ======== Generate source file implementing graph `g` ========
 
-    auto source_path = scratch_dir.path() / "mandel.cpp";
+    auto source_path = path / "mandel.cpp";
     {
         std::ofstream s{source_path};
         ASSERT_TRUE(s.is_open());
@@ -285,7 +281,7 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
 
     // ======== Build shared object from the generated source file ========
 
-    auto output = scratch_dir.path() / "mandel";
+    auto output = path / "mandel";
     auto build_config = build::default_config();
 
     auto libs = build::LibConfigVec{
@@ -293,8 +289,6 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
         build::lib_config("agc_rt-lib"),
     };
 
-    auto path = scratch_dir.path();
-    // scratch_dir.detach();   // deBUG
     std::cout << "BUILD DIRECTORY: " << path << std::endl;
     build::build(
         build_config,
@@ -320,13 +314,9 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
     auto entry_point =
         module_func<void(agc_rt::ContextHandle*)>(module, "entry_point");
 
-    auto set_input_var =
-        module_func<void(agc_rt::ContextHandle*, uint64_t, const std::any&)>(
-            module, "set_context_input_var");
-
-    // auto grid_var =
-    //     module_func<agc_app_rt::Grid2dSpec*(agc_rt::ContextHandle*)>(
-    //         module, "context_input_var_0_0");
+    auto grid_var =
+        module_func<agc_app_rt::Grid2dSpec*(agc_rt::ContextHandle*)>(
+            module, "context_input_var_0_0");
 
     auto z0_var =
         module_func<std::array<double, 2>*(agc_rt::ContextHandle*)>(
@@ -349,17 +339,10 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
     uint64_t iter_count_value = 100;
 
     // Grid
-    // *grid_var(context) = agc_app_rt::Grid2dSpec{
-    //     .rect = {agc_app_rt::Range<double>{ -2.1, 0.7 },
-    //              agc_app_rt::Range<double>{ -1.2, 1.2 } },
-    //     .resolution = { 0.1, 0.2 } };
-    set_input_var(
-        context,
-        gc::EdgeInputEnd{ 0_gc_n, 0_gc_i }.compressed(),
-        agc_app_rt::Grid2dSpec{
+    *grid_var(context) = agc_app_rt::Grid2dSpec{
         .rect = {agc_app_rt::Range<double>{ -2.1, 0.7 },
                  agc_app_rt::Range<double>{ -1.2, 1.2 } },
-        .resolution = { 0.1, 0.2 } });
+        .resolution = { 0.1, 0.2 } };
 
     // z0 for iterations
     *z0_var(context) = { 0., 0. };
