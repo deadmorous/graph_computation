@@ -10,6 +10,7 @@
 
 #include "gc/yaml/parse_graph.hpp"
 
+#include "gc/activation_node_registry.hpp"
 #include "gc/computation_node_registry.hpp"
 #include "gc/detail/parse_node_port.hpp"
 #include "gc/value.hpp"
@@ -27,7 +28,7 @@ auto parse_graph(const YAML::Node& config,
                  const TypeRegistry& type_registry)
     -> ParseGraphResult<Node>
 {
-    auto g = ComputationGraph{};
+    auto g = Graph<std::shared_ptr<Node>>{};
     auto node_map = detail::NamedNodes<Node>{};
     auto node_indices = detail::NodeIndices<Node>{};
     for (auto node : config["nodes"])
@@ -90,5 +91,12 @@ auto parse_graph<ComputationNode>(
                 const ComputationNodeRegistry& node_registry,
                 const TypeRegistry& type_registry)
     -> ParseComputationGraphResult;
+
+template
+auto parse_graph<ActivationNode>(
+                const YAML::Node& config,
+                const ActivationNodeRegistry& node_registry,
+                const TypeRegistry& type_registry)
+    -> ParseActivationGraphResult;
 
 } // namespace gc::yaml
