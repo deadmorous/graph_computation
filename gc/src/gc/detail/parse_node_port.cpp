@@ -1,8 +1,11 @@
 #include "gc/detail/parse_node_port.hpp"
 
+#include "gc/activation_node.hpp"
 #include "gc/computation_node.hpp"
-#include "gc/detail/named_computation_nodes.hpp"
+#include "gc/detail/activation_node_indices.hpp"
 #include "gc/detail/computation_node_indices.hpp"
+#include "gc/detail/named_activation_nodes.hpp"
+#include "gc/detail/named_computation_nodes.hpp"
 
 #include "common/throw.hpp"
 
@@ -88,7 +91,7 @@ auto parse_node_port(std::string_view ee_str,
                      Input_Tag)
     -> EdgeInputEnd
 {
-    auto input_ports = [](const ComputationNode* node)
+    auto input_ports = [](const Node* node)
     { return node->input_names(); };
 
     return parse_node_port_impl(
@@ -102,7 +105,7 @@ auto parse_node_port(std::string_view ee_str,
                      Output_Tag)
     -> EdgeOutputEnd
 {
-    auto output_ports = [](const ComputationNode* node)
+    auto output_ports = [](const Node* node)
     { return node->output_names(); };
 
     return parse_node_port_impl(
@@ -121,6 +124,20 @@ template
 auto parse_node_port<ComputationNode>(std::string_view ee_str,
                      const NamedComputationNodes& node_map,
                      const ComputationNodeIndices& node_indices,
+                     Output_Tag)
+    -> EdgeOutputEnd;
+
+template
+auto parse_node_port<ActivationNode>(std::string_view ee_str,
+                     const NamedActivationNodes& node_map,
+                     const ActivationNodeIndices& node_indices,
+                     Input_Tag)
+    -> EdgeInputEnd;
+
+template
+auto parse_node_port<ActivationNode>(std::string_view ee_str,
+                     const NamedActivationNodes& node_map,
+                     const ActivationNodeIndices& node_indices,
                      Output_Tag)
     -> EdgeOutputEnd;
 
