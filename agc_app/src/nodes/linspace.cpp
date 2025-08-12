@@ -68,7 +68,7 @@ public:
 
         auto linspace_alg_header =
             s(a::HeaderFile{
-                .name = "agc_app_rt/alg/linspace.hpp",
+                .name = "agc_app_rt/nodes/linspace.hpp",
                 .lib = lib });
 
         auto iter_init_func =
