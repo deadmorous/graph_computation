@@ -1,0 +1,70 @@
+graph:
+  nodes:
+    - name: life
+      type: life
+    - name: view
+      type: rect_view
+  edges:
+    - [life.output,      view.sequence]
+  inputs:
+    - name: img_size
+      type: UintSize
+      value:
+        width: 300
+        height: 300
+      destinations: [view.size]
+    - name: palette
+      type: IndexedPalette
+      value:
+        color_map:
+          - 0xffffffff
+          - 0xff5953ff
+          - 0xff8adabf
+          - 0xffffc7f9
+          - 0xffffff7f
+          - 0xffd40004
+          - 0xff00aa00
+        overflow_color: 0xff000000
+      destinations: [view.palette]
+
+evolution:
+  state:
+    - name: state
+      source: life.output
+      sink: life.input
+      initializer:
+        type: random_ca_state
+        value:
+          min: 0
+          max: 1
+  controller:
+    - name: evolution
+      type: evolution
+
+layout:
+  type: horizontal_layout
+  items:
+    - type: vertical_layout
+      items:
+      - type: horizontal_layout
+        items:
+        - type: spin
+          bind: evolution/delay_ms
+          range: [1, 10000]
+        - type: button
+          bind: evolution/play
+        - type: stop
+          bind: evolution/stop
+        - type: step
+          bind: evolution/step
+        - type: reset
+          bind: evolution/reset
+      - type: color
+        bind: palette/overflow_color
+      - type: vector
+        bind: palette/color_map
+      - type: stretch
+    - type: vertical_layout
+      items:
+      - type: image
+        bind: view
