@@ -20,7 +20,7 @@
 
 namespace {
 
-auto to_qimage(const gc_app::Image& image)
+auto to_qimage(const gc_app::ColorImage& image)
     -> QImage
 {
     auto result = QImage{QSize(image.size.width,
@@ -49,7 +49,7 @@ BitmapView::BitmapView(QWidget* parent) :
 auto BitmapView::set_image(const gc::Value& image)
     -> void
 {
-    img_ = to_qimage(image.as<gc_app::Image>());
+    img_ = to_qimage(image.as<gc_app::ColorImage>());
     update();
 }
 

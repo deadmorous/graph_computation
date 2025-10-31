@@ -35,12 +35,27 @@ GCLIB_STRUCT_TYPE(UintSize, width, height);
 using ColorVec =
     std::vector<Color>;
 
+template <typename Pixel>
 struct Image final
 {
     UintSize size;
-    ColorVec data;
+    std::vector<Pixel> data;
 };
+
+using ColorImage = Image<Color>;
+using I8Image = Image<int8_t>;
+using U8Image = Image<uint8_t>;
+using I16Image = Image<int16_t>;
+using U16Image = Image<uint16_t>;
+using I32Image = Image<int32_t>;
+using U32Image = Image<uint32_t>;
 
 } // namespace gc_app
 
-GC_REGISTER_CUSTOM_TYPE(gc_app::Image, 1);
+GC_REGISTER_CUSTOM_TYPE(gc_app::ColorImage, 1);
+GC_REGISTER_CUSTOM_TYPE(gc_app::I8Image, 2);
+GC_REGISTER_CUSTOM_TYPE(gc_app::U8Image, 3);
+GC_REGISTER_CUSTOM_TYPE(gc_app::I16Image, 4);
+GC_REGISTER_CUSTOM_TYPE(gc_app::U16Image, 5);
+GC_REGISTER_CUSTOM_TYPE(gc_app::I32Image, 6);
+GC_REGISTER_CUSTOM_TYPE(gc_app::U32Image, 7);

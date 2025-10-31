@@ -108,7 +108,7 @@ inputs:
 
     // Check computation results
     const auto& image =
-        group(result.outputs, 3_gc_n)[0_gc_o].as<gc_app::Image>();
+        group(result.outputs, 3_gc_n)[0_gc_o].as<gc_app::ColorImage>();
     EXPECT_EQ(image.size.width, 600);
     EXPECT_EQ(image.size.height, 500);
     EXPECT_EQ(image.data.size(), 500 * 600);
