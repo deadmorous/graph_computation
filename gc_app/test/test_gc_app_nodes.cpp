@@ -8,6 +8,7 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
+#include "gc_app/cell_aut/life.hpp"
 #include "gc_app/eratosthenes_sieve.hpp"
 #include "gc_app/filter_seq.hpp"
 #include "gc_app/image.hpp"
@@ -92,6 +93,29 @@ private:
 
 } // anonymous namespace
 
+
+TEST(GcApp_Node, Life)
+{
+    auto node = cell_aut::make_life({});
+
+    ASSERT_EQ(node->input_count(), gc::InputPortCount{1});
+    ASSERT_EQ(node->output_count(), gc::OutputPortCount{1});
+
+    ASSERT_EQ(node->input_names().size(), 1_gc_ic);
+    ASSERT_EQ(node->input_names()[0_gc_i], "input");
+
+    ASSERT_EQ(node->output_names().size(), 1_gc_oc);
+    ASSERT_EQ(node->output_names()[0_gc_o], "output");
+
+    gc::ValueVec inputs(1);
+    gc::ValueVec outputs(1);
+
+    node->default_inputs(inputs);
+    ASSERT_EQ(inputs[0].type(), gc::type_of<I8Image>());
+
+    node->compute_outputs(outputs, inputs, {}, {});
+    ASSERT_EQ(outputs[0].type(), gc::type_of<I8Image>());
+}
 
 TEST(GcApp_Node, EratosthenesSieve)
 {

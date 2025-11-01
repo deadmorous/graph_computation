@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.20)
 project(gc_app-lib LANGUAGES CXX)
 
 add_library(gc_app-lib STATIC
+    cell_aut/life.cpp
     color.cpp
     computation_node_registry.cpp
     eratosthenes_sieve.cpp
