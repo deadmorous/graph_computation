@@ -10,17 +10,17 @@
 
 #include "gc_app/computation_node_registry.hpp"
 
-#include "gc_app/cell_aut/life.hpp"
-#include "gc_app/eratosthenes_sieve.hpp"
-#include "gc_app/filter_seq.hpp"
-#include "gc_app/multiply.hpp"
-#include "gc_app/project.hpp"
-#include "gc_app/rect_view.hpp"
-#include "gc_app/spiral_view.hpp"
-#include "gc_app/test_sequence.hpp"
-#include "gc_app/uint_size.hpp"
-#include "gc_app/waring.hpp"
-#include "gc_app/waring_parallel.hpp"
+#include "gc_app/nodes/cell_aut/life.hpp"
+#include "gc_app/nodes/num/filter_seq.hpp"
+#include "gc_app/nodes/num/multiply.hpp"
+#include "gc_app/nodes/num/eratosthenes_sieve.hpp"
+#include "gc_app/nodes/num/test_sequence.hpp"
+#include "gc_app/nodes/num/waring.hpp"
+#include "gc_app/nodes/num/waring_parallel.hpp"
+#include "gc_app/nodes/util/project.hpp"
+#include "gc_app/nodes/util/uint_size.hpp"
+#include "gc_app/nodes/visual/rect_view.hpp"
+#include "gc_app/nodes/visual/spiral_view.hpp"
 
 namespace gc_app {
 
@@ -28,21 +28,20 @@ template<>
 auto populate_node_registry(gc::ComputationNodeRegistry& result)
     -> void
 {
-#define GC_APP_REGISTER(name) \
-    result.register_value(#name, gc_app::make_##name)
+#define GC_APP_REGISTER(ns, name) \
+    result.register_value(#name, gc_app::ns::make_##name)
 
-    result.register_value("life", gc_app::cell_aut::make_life);
-
-    GC_APP_REGISTER(eratosthenes_sieve);
-    GC_APP_REGISTER(filter_seq);
-    GC_APP_REGISTER(multiply);
-    GC_APP_REGISTER(project);
-    GC_APP_REGISTER(rect_view);
-    GC_APP_REGISTER(spiral_view);
-    GC_APP_REGISTER(test_sequence);
-    GC_APP_REGISTER(uint_size);
-    GC_APP_REGISTER(waring);
-    GC_APP_REGISTER(waring_parallel);
+    GC_APP_REGISTER(cell_aut, life);
+    GC_APP_REGISTER(num, eratosthenes_sieve);
+    GC_APP_REGISTER(num, filter_seq);
+    GC_APP_REGISTER(num, multiply);
+    GC_APP_REGISTER(num, test_sequence);
+    GC_APP_REGISTER(num, waring);
+    GC_APP_REGISTER(num, waring_parallel);
+    GC_APP_REGISTER(util, project);
+    GC_APP_REGISTER(util, uint_size);
+    GC_APP_REGISTER(visual, rect_view);
+    GC_APP_REGISTER(visual, spiral_view);
 
 #undef GC_APP_REGISTER
 }

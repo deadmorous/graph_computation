@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve.mail.ru>
  */
 
-#include "gc_app/waring.hpp"
+#include "gc_app/nodes/num/waring.hpp"
 
 #include "gc_app/multi_index.hpp"
 
@@ -28,7 +28,7 @@
 using namespace std::string_view_literals;
 using namespace gc::literals;
 
-namespace gc_app {
+namespace gc_app::num {
 namespace {
 
 auto waring(Uint limit,
@@ -136,4 +136,4 @@ auto make_waring(gc::ConstValueSpan args)
     return std::make_shared<Waring>();
 }
 
-} // namespace gc_app
+} // namespace gc_app::num

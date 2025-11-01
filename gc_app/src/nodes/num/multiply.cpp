@@ -8,39 +8,39 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "gc_app/project.hpp"
+#include "gc_app/nodes/num/multiply.hpp"
 
 #include "gc_app/types.hpp"
 
 #include "gc/expect_n_node_args.hpp"
 #include "gc/computation_node.hpp"
 #include "gc/node_port_names.hpp"
-#include "gc/value.hpp"
 
 
 using namespace std::string_view_literals;
 using namespace gc::literals;
 
-namespace gc_app {
+namespace gc_app::num {
 
-class Project final :
+class Multiply final :
     public gc::ComputationNode
 {
 public:
     auto input_names() const
         -> gc::InputNames override
-    { return gc::node_input_names<Project>( "value"sv, "path"sv ); }
+    { return gc::node_input_names<Multiply>( "lhs"sv, "rhs"sv ); }
 
     auto output_names() const
         -> gc::OutputNames override
-    { return gc::node_output_names<Project>( "projection"sv ); }
+    { return gc::node_output_names<Multiply>( "product"sv ); }
+
 
     auto default_inputs(gc::InputValues result) const
         -> void override
     {
         assert(result.size() == 2_gc_ic);
-        result[0_gc_i] = uint_vec_val({10, 20});
-        result[1_gc_i] = uint_val(gc::ValuePath{} / 0u);
+        result[0_gc_i] = uint_val(2);
+        result[1_gc_i] = uint_val(3);
     }
 
     auto compute_outputs(
@@ -52,16 +52,24 @@ public:
     {
         assert(inputs.size() == 2_gc_ic);
         assert(result.size() == 1_gc_oc);
-        result.front() = inputs[0_gc_i].get(inputs[1_gc_i].as<gc::ValuePath>());
+        auto type = inputs[0_gc_i].type();
+        assert(type == inputs[1_gc_i].type());
+        assert(type->aggregate_type() == gc::AggregateType::Scalar);
+        gc::ScalarT(type).visit_numeric(
+            [&](auto tag)
+            {
+                result.front() =
+                    inputs[0_gc_i].as(tag) * inputs[1_gc_i].as(tag);
+            });
         return true;
     }
 };
 
-auto make_project(gc::ConstValueSpan args)
+auto make_multiply(gc::ConstValueSpan args)
     -> std::shared_ptr<gc::ComputationNode>
 {
-    gc::expect_no_node_args("Project", args);
-    return std::make_shared<Project>();
+    gc::expect_no_node_args("Multiply", args);
+    return std::make_shared<Multiply>();
 }
 
-} // namespace gc_app
+} // namespace gc_app::num

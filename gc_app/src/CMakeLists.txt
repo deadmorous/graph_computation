@@ -3,21 +3,21 @@ cmake_minimum_required(VERSION 3.20)
 project(gc_app-lib LANGUAGES CXX)
 
 add_library(gc_app-lib STATIC
-    cell_aut/life.cpp
     color.cpp
     computation_node_registry.cpp
-    eratosthenes_sieve.cpp
-    filter_seq.cpp
-    multiply.cpp
-    rect_view.cpp
+    nodes/cell_aut/life.cpp
+    nodes/num/eratosthenes_sieve.cpp
+    nodes/num/filter_seq.cpp
+    nodes/num/multiply.cpp
+    nodes/num/test_sequence.cpp
+    nodes/num/waring.cpp
+    nodes/num/waring_parallel.cpp
+    nodes/util/project.cpp
+    nodes/util/uint_size.cpp
+    nodes/visual/rect_view.cpp
+    nodes/visual/spiral_view.cpp
     palette.cpp
-    project.cpp
-    spiral_view.cpp
-    test_sequence.cpp
-    type_registry.cpp
-    uint_size.cpp
-    waring.cpp
-    waring_parallel.cpp)
+    type_registry.cpp)
 
 add_library(gc_app::lib ALIAS gc_app-lib)
 

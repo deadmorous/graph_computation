@@ -13,9 +13,9 @@
 #include "gc/computation_node_fwd.hpp"
 #include "gc/value_fwd.hpp"
 
-namespace gc_app {
+namespace gc_app::util {
 
-auto make_waring_parallel(gc::ConstValueSpan)
+auto make_project(gc::ConstValueSpan)
     -> std::shared_ptr<gc::ComputationNode>;
 
-} // namespace gc_app
+} // namespace gc_app::util

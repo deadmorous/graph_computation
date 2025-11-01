@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "gc_app/waring_parallel.hpp"
+#include "gc_app/nodes/num/waring_parallel.hpp"
 
 #include "gc_app/multi_index.hpp"
 
@@ -31,7 +31,7 @@
 using namespace std::string_view_literals;
 using namespace gc::literals;
 
-namespace gc_app {
+namespace gc_app::num {
 namespace {
 
 auto waring_parallel(Uint limit,
@@ -238,4 +238,4 @@ auto make_waring_parallel(gc::ConstValueSpan args)
     return std::make_shared<WaringParallel>(thread_count);
 }
 
-} // namespace gc_app
+} // namespace gc_app::num

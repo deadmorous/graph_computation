@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve.mail.ru>
  */
 
-#include "gc_app/test_sequence.hpp"
+#include "gc_app/nodes/num/test_sequence.hpp"
 
 #include "gc_app/types.hpp"
 
@@ -20,7 +20,7 @@
 using namespace std::string_view_literals;
 using namespace gc::literals;
 
-namespace gc_app {
+namespace gc_app::num {
 namespace {
 
 auto test_seq(Uint limit)
@@ -77,4 +77,4 @@ auto make_test_sequence(gc::ConstValueSpan arg)
     return std::make_shared<TestSequence>();
 }
 
-} // namespace gc_app
+} // namespace gc_app::num

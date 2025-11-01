@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "gc_app/rect_view.hpp"
+#include "gc_app/nodes/visual/rect_view.hpp"
 
 #include "gc_app/image.hpp"
 #include "gc_app/palette.hpp"
@@ -24,7 +24,7 @@
 using namespace std::string_view_literals;
 using namespace gc::literals;
 
-namespace gc_app {
+namespace gc_app::visual {
 
 class SpiralView final :
     public gc::ComputationNode
@@ -154,4 +154,4 @@ auto make_spiral_view(gc::ConstValueSpan args)
     return std::make_shared<SpiralView>();
 }
 
-} // namespace gc_app
+} // namespace gc_app::visual

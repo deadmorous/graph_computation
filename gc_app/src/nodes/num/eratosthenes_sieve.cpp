@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve.mail.ru>
  */
 
-#include "gc_app/eratosthenes_sieve.hpp"
+#include "gc_app/nodes/num/eratosthenes_sieve.hpp"
 
 #include "gc_app/types.hpp"
 
@@ -24,7 +24,7 @@
 using namespace std::string_view_literals;
 using namespace gc::literals;
 
-namespace gc_app {
+namespace gc_app::num {
 namespace {
 
 auto sieve(Uint limit,
@@ -132,4 +132,4 @@ auto make_eratosthenes_sieve(gc::ConstValueSpan args)
     return std::make_shared<EratosthenesSieve>();
 }
 
-} // namespace gc_app
+} // namespace gc_app::num

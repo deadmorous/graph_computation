@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "gc_app/uint_size.hpp"
+#include "gc_app/nodes/util/uint_size.hpp"
 
 #include "gc_app/image.hpp"
 #include "gc_app/types.hpp"
@@ -20,7 +20,7 @@
 using namespace std::string_view_literals;
 using namespace gc::literals;
 
-namespace gc_app {
+namespace gc_app::util {
 
 class UintSizeNode final :
     public gc::ComputationNode
@@ -65,4 +65,4 @@ auto make_uint_size(gc::ConstValueSpan args)
     return std::make_shared<UintSizeNode>();
 }
 
-} // namespace gc_app
+} // namespace gc_app::util

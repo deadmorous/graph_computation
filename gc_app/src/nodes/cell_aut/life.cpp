@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve.mail.ru>
  */
 
-#include "gc_app/cell_aut/life.hpp"
+#include "gc_app/nodes/cell_aut/life.hpp"
 
 #include "gc_app/image.hpp"
 #include "gc_app/types.hpp"

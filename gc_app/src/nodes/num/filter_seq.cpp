@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "gc_app/filter_seq.hpp"
+#include "gc_app/nodes/num/filter_seq.hpp"
 
 #include "gc_app/types.hpp"
 
@@ -20,7 +20,7 @@
 using namespace std::string_view_literals;
 using namespace gc::literals;
 
-namespace gc_app {
+namespace gc_app::num {
 
 class FilterSeq final :
     public gc::ComputationNode
@@ -75,4 +75,4 @@ auto make_filter_seq(gc::ConstValueSpan args)
     return std::make_shared<FilterSeq>();
 }
 
-} // namespace gc_app
+} // namespace gc_app::num
