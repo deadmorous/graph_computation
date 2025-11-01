@@ -10,7 +10,7 @@
 
 #include "gc_app/nodes/num/eratosthenes_sieve.hpp"
 
-#include "gc_app/types.hpp"
+#include "gc_app/types/uint_vec.hpp"
 
 #include "gc/expect_n_node_args.hpp"
 #include "gc/computation_node.hpp"

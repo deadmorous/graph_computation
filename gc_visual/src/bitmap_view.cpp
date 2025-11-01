@@ -12,7 +12,7 @@
 
 #include "gc_visual/qstr.hpp"
 
-#include "gc_app/image.hpp"
+#include "gc_app/types/image.hpp"
 
 #include <QMouseEvent>
 #include <QPainter>

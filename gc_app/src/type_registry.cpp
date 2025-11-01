@@ -10,8 +10,8 @@
 
 #include "gc_app/type_registry.hpp"
 
-#include "gc_app/image.hpp"
-#include "gc_app/palette.hpp"
+#include "gc_app/types/image.hpp"
+#include "gc_app/types/palette.hpp"
 
 namespace gc_app {
 

@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.20)
 project(gc_app-lib LANGUAGES CXX)
 
 add_library(gc_app-lib STATIC
-    color.cpp
     computation_node_registry.cpp
     nodes/cell_aut/life.cpp
     nodes/num/eratosthenes_sieve.cpp
@@ -16,8 +15,9 @@ add_library(gc_app-lib STATIC
     nodes/util/uint_size.cpp
     nodes/visual/rect_view.cpp
     nodes/visual/spiral_view.cpp
-    palette.cpp
-    type_registry.cpp)
+    type_registry.cpp
+    types/color.cpp
+    types/palette.cpp)
 
 add_library(gc_app::lib ALIAS gc_app-lib)
 

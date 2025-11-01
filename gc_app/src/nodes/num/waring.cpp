@@ -10,9 +10,8 @@
 
 #include "gc_app/nodes/num/waring.hpp"
 
-#include "gc_app/multi_index.hpp"
-
-#include "gc_app/types.hpp"
+#include "gc_app/types/multi_index.hpp"
+#include "gc_app/types/uint_vec.hpp"
 
 #include "gc/expect_n_node_args.hpp"
 #include "gc/computation_node.hpp"

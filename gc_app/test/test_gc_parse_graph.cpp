@@ -8,9 +8,9 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "gc_app/image.hpp"
 #include "gc_app/node_registry.hpp"
 #include "gc_app/type_registry.hpp"
+#include "gc_app/types/image.hpp"
 
 #include "gc/computation_node_registry.hpp"
 #include "gc/graph_computation.hpp"

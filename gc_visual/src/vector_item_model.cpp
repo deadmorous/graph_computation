@@ -13,7 +13,7 @@
 #include "gc_visual/color.hpp"
 #include "gc_visual/qstr.hpp"
 
-#include "gc_app/color.hpp"
+#include "gc_app/types/color.hpp"
 
 #include "gc/parse_simple_value.hpp"
 

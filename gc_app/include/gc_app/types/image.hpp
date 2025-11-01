@@ -10,8 +10,8 @@
 
 #pragma once
 
-#include "gc_app/color.hpp"
-#include "gc_app/types.hpp"
+#include "gc_app/types/color.hpp"
+#include "gc_app/types/uint.hpp"
 
 #include "common/struct_type_macro.hpp"
 

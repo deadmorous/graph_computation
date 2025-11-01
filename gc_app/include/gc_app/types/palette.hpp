@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "gc_app/color.hpp"
+#include "gc_app/types/color.hpp"
 
 #include "common/struct_type_macro.hpp"
 #include "common/type.hpp"

@@ -10,8 +10,7 @@
 
 #include "gc_app/nodes/util/uint_size.hpp"
 
-#include "gc_app/image.hpp"
-#include "gc_app/types.hpp"
+#include "gc_app/types/image.hpp"
 
 #include "gc/expect_n_node_args.hpp"
 #include "gc/computation_node.hpp"

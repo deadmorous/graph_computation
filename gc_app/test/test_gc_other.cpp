@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve.mail.ru>
  */
 
-#include "gc_app/multi_index.hpp"
+#include "gc_app/types/multi_index.hpp"
 
 // #include "common/format.hpp"
 

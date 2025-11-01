@@ -14,7 +14,7 @@
 #include "gc_visual/qstr.hpp"
 #include "gc_visual/vector_editor_widget.hpp"
 
-#include "gc_app/color.hpp"
+#include "gc_app/types/color.hpp"
 
 #include "gc/computation_node.hpp"
 

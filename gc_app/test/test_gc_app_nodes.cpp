@@ -8,7 +8,6 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "gc_app/image.hpp"
 #include "gc_app/nodes/cell_aut/life.hpp"
 #include "gc_app/nodes/num/eratosthenes_sieve.hpp"
 #include "gc_app/nodes/num/filter_seq.hpp"
@@ -17,7 +16,8 @@
 #include "gc_app/nodes/num/test_sequence.hpp"
 #include "gc_app/nodes/util/project.hpp"
 #include "gc_app/nodes/util/uint_size.hpp"
-#include "gc_app/types.hpp"
+#include "gc_app/types/image.hpp"
+#include "gc_app/types/uint_vec.hpp"
 
 #include "gc/computation_node.hpp"
 

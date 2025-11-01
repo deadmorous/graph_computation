@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "gc_app/color.hpp"
+#include "gc_app/types/color.hpp"
 
 #include <algorithm>
 #include <cmath>

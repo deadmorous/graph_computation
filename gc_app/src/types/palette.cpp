@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "gc_app/palette.hpp"
+#include "gc_app/types/palette.hpp"
 
 
 namespace gc_app {
