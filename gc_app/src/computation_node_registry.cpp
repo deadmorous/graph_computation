@@ -19,6 +19,7 @@
 #include "gc_app/nodes/num/waring_parallel.hpp"
 #include "gc_app/nodes/util/project.hpp"
 #include "gc_app/nodes/util/uint_size.hpp"
+#include "gc_app/nodes/visual/image_loader.hpp"
 #include "gc_app/nodes/visual/rect_view.hpp"
 #include "gc_app/nodes/visual/spiral_view.hpp"
 
@@ -40,6 +41,7 @@ auto populate_node_registry(gc::ComputationNodeRegistry& result)
     GC_APP_REGISTER(num, waring_parallel);
     GC_APP_REGISTER(util, project);
     GC_APP_REGISTER(util, uint_size);
+    GC_APP_REGISTER(visual, image_loader);
     GC_APP_REGISTER(visual, rect_view);
     GC_APP_REGISTER(visual, spiral_view);
 

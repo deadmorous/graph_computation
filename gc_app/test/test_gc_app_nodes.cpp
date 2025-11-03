@@ -16,7 +16,9 @@
 #include "gc_app/nodes/num/test_sequence.hpp"
 #include "gc_app/nodes/util/project.hpp"
 #include "gc_app/nodes/util/uint_size.hpp"
+#include "gc_app/nodes/visual/image_loader.hpp"
 #include "gc_app/types/image.hpp"
+#include "gc_app/types/palette.hpp"
 #include "gc_app/types/uint_vec.hpp"
 
 #include "gc/computation_node.hpp"
@@ -28,6 +30,7 @@
 
 using namespace gc_app;
 using namespace gc::literals;
+using namespace std::literals;
 
 namespace {
 
@@ -115,6 +118,72 @@ TEST(GcApp_Node, Life)
 
     node->compute_outputs(outputs, inputs, {}, {});
     ASSERT_EQ(outputs[0].type(), gc::type_of<I8Image>());
+}
+
+TEST(GcApp_Node, ImageLoader)
+{
+    auto node = visual::make_image_loader({});
+
+    ASSERT_EQ(node->input_count(), gc::InputPortCount{1});
+    ASSERT_EQ(node->output_count(), gc::OutputPortCount{2});
+
+    ASSERT_EQ(node->input_names().size(), 1_gc_ic);
+    ASSERT_EQ(node->input_names()[0_gc_i], "file");
+
+    ASSERT_EQ(node->output_names().size(), 2_gc_oc);
+    ASSERT_EQ(node->output_names()[0_gc_o], "image");
+    ASSERT_EQ(node->output_names()[1_gc_o], "palette");
+
+    gc::ValueVec inputs(1);
+    gc::ValueVec outputs(2);
+
+    node->default_inputs(inputs);
+    ASSERT_EQ(inputs[0], "image.png"s);
+
+    inputs[0] = "data/acorn.png"s;
+    node->compute_outputs(outputs, inputs, {}, {});
+    ASSERT_EQ(outputs[0].type(), gc::type_of<I8Image>());
+    ASSERT_EQ(outputs[1].type(), gc::type_of<IndexedColorMap>());
+
+    const auto& image = outputs[0].as<I8Image>();
+    const auto& palette = outputs[1].as<IndexedColorMap>();
+
+    // Check image content
+    constexpr size_t acorn_w = 7;
+    constexpr size_t acorn_h = 3;
+    int8_t acorn_data[acorn_h][acorn_w] = {
+        {0, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 1, 0, 0, 0},
+        {1, 1, 0, 0, 1, 1, 1}
+    };
+    constexpr size_t acorn_x = 47;
+    constexpr size_t acorn_y = 48;
+    constexpr size_t w = 100;
+    constexpr size_t h = 100;
+    ASSERT_EQ(image.size.width, w);
+    ASSERT_EQ(image.size.height, h);
+    ASSERT_EQ(image.data.size(), w*h);
+    const auto* pixel_ptr = image.data.data();
+    for (size_t y=0; y<h; ++y)
+    {
+        for (size_t x=0; x<w; ++x, ++pixel_ptr)
+        {
+            auto actual = *pixel_ptr;
+            auto expected = [&]() -> int8_t {
+                if (y < acorn_y || y >= acorn_y + acorn_h ||
+                    x < acorn_x || x >= acorn_x + acorn_w)
+                    return 0;
+                return acorn_data[y-acorn_y][x-acorn_x];
+            }();
+            EXPECT_EQ(actual, expected);
+        }
+    }
+
+    // Check palette content
+    using C = ColorComponent;
+    ASSERT_EQ(palette.size(), 2);
+    EXPECT_EQ(palette[0], rgba(C{0}, C{0}, C{0}));
+    EXPECT_EQ(palette[1], rgba(C{0xff}, C{0xff}, C{0xff}));
 }
 
 TEST(GcApp_Node, EratosthenesSieve)

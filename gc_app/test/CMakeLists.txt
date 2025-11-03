@@ -30,3 +30,10 @@ endif()
 include(GoogleTest)
 gtest_discover_tests(gc-app-test)
 
+# Ensure data files are copied to the data subdirectory of gc-app-test
+add_custom_command(
+    TARGET gc-app-test
+    POST_BUILD
+    COMMAND ${CMAKE_CURRENT_LIST_DIR}/build_data.sh
+            $<TARGET_FILE_DIR:gc-app-test>)
+

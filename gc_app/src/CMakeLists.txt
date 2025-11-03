@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
+find_package(PNG REQUIRED)
+
 project(gc_app-lib LANGUAGES CXX)
 
 add_library(gc_app-lib STATIC
@@ -13,6 +15,7 @@ add_library(gc_app-lib STATIC
     nodes/num/waring_parallel.cpp
     nodes/util/project.cpp
     nodes/util/uint_size.cpp
+    nodes/visual/image_loader.cpp
     nodes/visual/rect_view.cpp
     nodes/visual/spiral_view.cpp
     type_registry.cpp
@@ -36,10 +39,13 @@ endif()
 
 target_link_libraries(gc_app-lib
     PUBLIC
-        gc::lib)
+        gc::lib
+
+    PRIVATE
+        PNG::PNG)
 
 target_include_directories(gc_app-lib
-	PUBLIC
+    PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/../include"
         "${GRAPH_COMPUTATION_CXX_ROOT_DIR}/3p/magic_enum/include")
 

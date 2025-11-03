@@ -1,0 +1,21 @@
+/** @file
+ * @brief TODO: Brief docstring.
+ *
+ * TODO: More documentation here
+ *
+ * Copyright (C) 2025 MPK Software, St.-Petersburg, Russia
+ *
+ * @author Stepan Orlov <majorsteve.mail.ru>
+ */
+
+#pragma once
+
+#include "gc/computation_node_fwd.hpp"
+#include "gc/value_fwd.hpp"
+
+namespace gc_app::visual {
+
+auto make_image_loader(gc::ConstValueSpan)
+    -> std::shared_ptr<gc::ComputationNode>;
+
+} // namespace gc_app::visual
