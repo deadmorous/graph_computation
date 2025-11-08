@@ -19,10 +19,12 @@ set(PROJECT_SOURCES
     computation_thread.cpp      ../include/gc_visual/computation_thread.hpp
     flatten_type.cpp
     graph_broker.cpp            ../include/gc_visual/graph_broker.hpp
+    graph_evolution.cpp
     graph_parameter_editor.cpp  ../include/gc_visual/graph_parameter_editor.hpp
     graph_output_visualizer.cpp ../include/gc_visual/graph_output_visualizer.hpp
     main.cpp
     mainwindow.cpp              ../include/gc_visual/mainwindow.hpp
+    parse_graph_binding.cpp
     parse_layout.cpp
     vector_editor_widget.cpp    ../include/gc_visual/vector_editor_widget.hpp
     vector_item_model.cpp       ../include/gc_visual/vector_item_model.hpp

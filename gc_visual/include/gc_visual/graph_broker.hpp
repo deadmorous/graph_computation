@@ -11,9 +11,9 @@
 #pragma once
 
 #include "gc_visual/computation_thread.hpp"
+#include "gc_visual/parse_graph_binding.hpp"
 
 #include "gc/detail/named_computation_nodes.hpp"
-#include "gc/detail/computation_node_indices.hpp"
 #include "gc/node_port_tags.hpp"
 #include "gc/value_fwd.hpp"
 #include "gc/value_path.hpp"
@@ -38,6 +38,8 @@ public:
 
     auto node_indices() const
         -> const gc::detail::ComputationNodeIndices&;
+
+    auto binding_resolver() -> const gc_visual::BindingResolver&;
 
     auto node_index(const gc::ComputationNode* node) const
         -> gc::NodeIndex;
@@ -70,7 +72,7 @@ private:
     ComputationThread& computation_thread_;
     const gc::detail::NamedComputationNodes& named_nodes_;
     const std::vector<std::string>& input_names_;
-    gc::detail::ComputationNodeIndices node_indices_;
+    gc_visual::BindingResolver binding_resolver_;
 
     gc::ComputationResult computation_result_;
 };

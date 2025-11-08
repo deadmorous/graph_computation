@@ -11,6 +11,7 @@
 #include "gc_visual/mainwindow.hpp"
 
 #include "gc_visual/computation_progress_widget.hpp"
+#include "gc_visual/graph_evolution.hpp"
 #include "gc_visual/parse_layout.hpp"
 
 #include "gc_app/node_registry.hpp"
@@ -257,6 +258,12 @@ auto MainWindow::load(const gc_visual::ConfigSpecification& spec)
         auto graph_config = config["graph"];
         auto [g, provided_inputs, node_map, input_names] =
             gc::yaml::parse_graph(graph_config, context);
+
+        if (auto evolution_config = config["evolution"])
+        {
+            auto evolution = gc_visual::parse_graph_evolution(
+                evolution_config, context, g, node_map, input_names);
+        }
 
         // Compile and compute the graph
         computation_thread_.set_graph(std::move(g), provided_inputs);

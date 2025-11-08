@@ -36,13 +36,12 @@ GraphBroker::GraphBroker(ComputationThread& computation_thread,
     computation_thread_{ computation_thread },
     named_nodes_{ named_nodes },
     input_names_{ input_names },
+    binding_resolver_{
+        computation_thread.computation().graph,
+        named_nodes_,
+        input_names_ },
     computation_result_{ computation_thread.computation().result }
 {
-    const auto& computation =
-        computation_thread_.computation();
-    for (uint32_t index=0; const auto& node: computation.graph.nodes)
-        node_indices_[node.get()] = gc::NodeIndex{index++};
-
     connect(&computation_thread_, &ComputationThread::finished,
             this, &GraphBroker::on_computation_finished);
 }
@@ -57,21 +56,20 @@ auto GraphBroker::named_nodes() const
 
 auto GraphBroker::node_indices() const
     -> const gc::detail::ComputationNodeIndices&
-{ return node_indices_; }
+{ return binding_resolver_.node_indices(); }
+
+auto GraphBroker::binding_resolver() -> const gc_visual::BindingResolver&
+{
+    return binding_resolver_;
+}
 
 auto GraphBroker::node_index(const gc::ComputationNode* node) const
     -> gc::NodeIndex
-{ return node_indices_.at(node); }
+{ return binding_resolver_.node_index(node); }
 
 auto GraphBroker::input_index(const std::string& input_name) const
     -> uint32_t
-{
-    auto it = std::find(input_names_.begin(), input_names_.end(), input_name);
-    if (it == input_names_.end())
-        common::throw_<std::invalid_argument>(
-            "Input with name '", input_name, " is not found");
-    return it - input_names_.begin();
-}
+{ return binding_resolver_.input_index(input_name); }
 
 auto GraphBroker::get_parameter(const gc::ParameterSpec& spec) const
     -> gc::Value
