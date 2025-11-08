@@ -200,7 +200,7 @@ public:
 } // anonymous namespace
 
 
-auto make_canvas(gc::ConstValueSpan args)
+auto make_canvas(gc::ConstValueSpan args, const gc::ActivationContext&)
     -> std::shared_ptr<gc::ActivationNode>
 {
     gc::expect_no_node_args(CanvasNode::static_meta().type_name, args);

@@ -11,11 +11,12 @@
 #pragma once
 
 #include "gc/computation_node_fwd.hpp"
+#include "gc/computation_context_fwd.hpp"
 #include "gc/value_fwd.hpp"
 
 namespace gc_app::num {
 
-auto make_filter_seq(gc::ConstValueSpan)
+auto make_filter_seq(gc::ConstValueSpan, const gc::ComputationContext&)
 -> std::shared_ptr<gc::ComputationNode>;
 
 } // namespace gc_app::num

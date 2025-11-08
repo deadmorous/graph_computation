@@ -70,7 +70,7 @@ public:
     }
 };
 
-auto make_test_sequence(gc::ConstValueSpan arg)
+auto make_test_sequence(gc::ConstValueSpan arg, const gc::ComputationContext&)
     -> std::shared_ptr<gc::ComputationNode>
 {
     assert(arg.empty());

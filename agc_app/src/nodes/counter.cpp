@@ -124,7 +124,7 @@ public:
 } // anonymous namespace
 
 
-auto make_counter(gc::ConstValueSpan args)
+auto make_counter(gc::ConstValueSpan args, const gc::ActivationContext&)
     -> std::shared_ptr<gc::ActivationNode>
 {
     gc::expect_no_node_args(Counter::static_meta().type_name, args);

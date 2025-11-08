@@ -102,7 +102,7 @@ public:
 } // anonymous namespace
 
 
-auto make_func_iterator(gc::ConstValueSpan args)
+auto make_func_iterator(gc::ConstValueSpan args, const gc::ActivationContext&)
     -> std::shared_ptr<gc::ActivationNode>
 {
     gc::expect_no_node_args(FuncIterator::static_meta().type_name, args);

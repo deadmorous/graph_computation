@@ -181,7 +181,7 @@ public:
 } // anonymous namespace
 
 
-auto make_grid_2d(gc::ConstValueSpan args)
+auto make_grid_2d(gc::ConstValueSpan args, const gc::ActivationContext&)
     -> std::shared_ptr<gc::ActivationNode>
 {
     gc::expect_no_node_args(Grid2d::static_meta().type_name, args);

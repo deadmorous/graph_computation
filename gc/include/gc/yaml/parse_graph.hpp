@@ -13,6 +13,7 @@
 #include "gc/detail/named_nodes.hpp"
 #include "gc/activation_graph.hpp"
 #include "gc/computation_graph.hpp"
+#include "gc/context_fwd.hpp"
 #include "gc/source_inputs.hpp"
 #include "gc/node_registry.hpp"
 #include "gc/type_registry.hpp"
@@ -37,8 +38,7 @@ using ParseActivationGraphResult = ParseGraphResult<ActivationNode>;
 using ParseComputationGraphResult = ParseGraphResult<ComputationNode>;
 
 template <typename Node>
-auto parse_graph(const YAML::Node&,
-                 const NodeRegistry<Node>&, const TypeRegistry&)
+auto parse_graph(const YAML::Node&, const Context<Node>&)
     -> ParseGraphResult<Node>;
 
 } // namespace gc::yaml

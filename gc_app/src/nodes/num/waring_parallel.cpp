@@ -229,7 +229,8 @@ private:
     Uint thread_count_;
 };
 
-auto make_waring_parallel(gc::ConstValueSpan args)
+auto make_waring_parallel(gc::ConstValueSpan args,
+                          const gc::ComputationContext&)
     -> std::shared_ptr<gc::ComputationNode>
 {
     gc::expect_n_node_args("WaringParallel", args, 1);

@@ -108,7 +108,7 @@ public:
 } // anonymous namespace
 
 
-auto make_threshold(gc::ConstValueSpan args)
+auto make_threshold(gc::ConstValueSpan args, const gc::ActivationContext&)
     -> std::shared_ptr<gc::ActivationNode>
 {
     gc::expect_no_node_args(Threshold::static_meta().type_name, args);

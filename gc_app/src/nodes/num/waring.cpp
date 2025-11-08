@@ -128,7 +128,7 @@ public:
     }
 };
 
-auto make_waring(gc::ConstValueSpan args)
+auto make_waring(gc::ConstValueSpan args, const gc::ComputationContext&)
     -> std::shared_ptr<gc::ComputationNode>
 {
     gc::expect_no_node_args("Waring", args);

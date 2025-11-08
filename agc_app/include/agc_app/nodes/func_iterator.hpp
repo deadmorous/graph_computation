@@ -10,13 +10,14 @@
 
 #pragma once
 
+#include "gc/activation_context_fwd.hpp"
 #include "gc/activation_node_fwd.hpp"
 
 #include "gc/value_fwd.hpp"
 
 namespace agc_app {
 
-auto make_func_iterator(gc::ConstValueSpan)
+auto make_func_iterator(gc::ConstValueSpan, const gc::ActivationContext&)
     -> std::shared_ptr<gc::ActivationNode>;
 
 } // namespace agc_app

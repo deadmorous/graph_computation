@@ -125,7 +125,8 @@ struct _{_(){
 }}__;
 #endif // 0
 
-auto make_eratosthenes_sieve(gc::ConstValueSpan args)
+auto make_eratosthenes_sieve(gc::ConstValueSpan args,
+                             const gc::ComputationContext&)
     -> std::shared_ptr<gc::ComputationNode>
 {
     gc::expect_no_node_args("EratosthenesSieve", args);

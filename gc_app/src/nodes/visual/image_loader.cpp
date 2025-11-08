@@ -238,7 +238,7 @@ private:
     };
 };
 
-auto make_image_loader(gc::ConstValueSpan args)
+auto make_image_loader(gc::ConstValueSpan args, const gc::ComputationContext&)
     -> std::shared_ptr<gc::ComputationNode>
 {
     gc::expect_no_node_args("ImageLoader", args);

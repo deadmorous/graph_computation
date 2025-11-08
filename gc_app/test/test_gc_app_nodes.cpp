@@ -21,6 +21,7 @@
 #include "gc_app/types/palette.hpp"
 #include "gc_app/types/uint_vec.hpp"
 
+#include "gc/computation_context.hpp"
 #include "gc/computation_node.hpp"
 
 #include "common/func_ref.hpp"
@@ -99,7 +100,7 @@ private:
 
 TEST(GcApp_Node, Life)
 {
-    auto node = cell_aut::make_life({});
+    auto node = cell_aut::make_life({}, {});
 
     ASSERT_EQ(node->input_count(), gc::InputPortCount{1});
     ASSERT_EQ(node->output_count(), gc::OutputPortCount{1});
@@ -122,7 +123,7 @@ TEST(GcApp_Node, Life)
 
 TEST(GcApp_Node, ImageLoader)
 {
-    auto node = visual::make_image_loader({});
+    auto node = visual::make_image_loader({}, {});
 
     ASSERT_EQ(node->input_count(), gc::InputPortCount{1});
     ASSERT_EQ(node->output_count(), gc::OutputPortCount{2});
@@ -188,7 +189,7 @@ TEST(GcApp_Node, ImageLoader)
 
 TEST(GcApp_Node, EratosthenesSieve)
 {
-    auto node = num::make_eratosthenes_sieve({});
+    auto node = num::make_eratosthenes_sieve({}, {});
 
     ASSERT_EQ(node->input_count(), gc::InputPortCount{1});
     ASSERT_EQ(node->output_count(), gc::OutputPortCount{1});
@@ -222,7 +223,7 @@ TEST(GcApp_Node, EratosthenesSieve)
 
 TEST(GcApp_Node, FilterSeq)
 {
-    auto node = num::make_filter_seq({});
+    auto node = num::make_filter_seq({}, {});
 
     ASSERT_EQ(node->input_count(), gc::InputPortCount{2});
     ASSERT_EQ(node->output_count(), gc::OutputPortCount{1});
@@ -271,7 +272,7 @@ TEST(GcApp_Node, FilterSeq)
 
 TEST(GcApp_Node, TestSequence)
 {
-    auto node = gc_app::num::make_test_sequence({});
+    auto node = gc_app::num::make_test_sequence({}, {});
 
     ASSERT_EQ(node->input_count(), gc::InputPortCount{1});
     ASSERT_EQ(node->output_count(), gc::OutputPortCount{1});
@@ -305,7 +306,7 @@ TEST(GcApp_Node, TestSequence)
 
 TEST(GcApp_Node, Multiply)
 {
-    auto node = gc_app::num::make_multiply({});
+    auto node = gc_app::num::make_multiply({}, {});
 
     ASSERT_EQ(node->input_count(), gc::InputPortCount{2});
     ASSERT_EQ(node->output_count(), gc::OutputPortCount{1});
@@ -333,7 +334,7 @@ TEST(GcApp_Node, Multiply)
 
 TEST(GcApp_Node, Project)
 {
-    auto node = gc_app::util::make_project({});
+    auto node = gc_app::util::make_project({}, {});
 
     ASSERT_EQ(node->input_count(), gc::InputPortCount{2});
     ASSERT_EQ(node->output_count(), gc::OutputPortCount{1});
@@ -361,7 +362,7 @@ TEST(GcApp_Node, Project)
 
 TEST(GcApp_Node, UintSizeNode)
 {
-    auto node = util::make_uint_size({});
+    auto node = util::make_uint_size({}, {});
 
     ASSERT_EQ(node->input_count(), gc::InputPortCount{2});
     ASSERT_EQ(node->output_count(), gc::OutputPortCount{1});
@@ -389,7 +390,7 @@ TEST(GcApp_Node, UintSizeNode)
 
 TEST(GcApp_Node, Waring)
 {
-    auto node = gc_app::num::make_waring({});
+    auto node = gc_app::num::make_waring({}, {});
 
     ASSERT_EQ(node->input_count(), gc::InputPortCount{3});
     ASSERT_EQ(node->output_count(), gc::OutputPortCount{1});
@@ -455,7 +456,7 @@ TEST(GcApp_Node, Waring)
 
 TEST(GcApp_Progress, EratosthenesSieve)
 {
-    auto node = num::make_eratosthenes_sieve({});
+    auto node = num::make_eratosthenes_sieve({}, {});
 
     gc::ValueVec inputs(1);
     gc::ValueVec outputs(1);
@@ -470,7 +471,7 @@ TEST(GcApp_Progress, EratosthenesSieve)
 
 TEST(GcApp_Progress, Waring)
 {
-    auto node = num::make_waring({});
+    auto node = num::make_waring({}, {});
 
     gc::ValueVec inputs(3);
     gc::ValueVec outputs(1);

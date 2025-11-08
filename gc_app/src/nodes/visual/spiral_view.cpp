@@ -148,7 +148,7 @@ public:
     }
 };
 
-auto make_spiral_view(gc::ConstValueSpan args)
+auto make_spiral_view(gc::ConstValueSpan args, const gc::ComputationContext&)
     -> std::shared_ptr<gc::ComputationNode>
 {
     gc::expect_no_node_args("SpiralView", args);

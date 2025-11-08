@@ -21,6 +21,7 @@
 #include "agc_app/nodes/split.hpp"
 #include "agc_app/nodes/threshold.hpp"
 
+#include "gc/activation_context.hpp"
 #include "gc/activation_graph.hpp"
 #include "gc/activation_node.hpp"
 #include "gc/algorithm.hpp"
@@ -83,7 +84,7 @@ auto print_node_source_code(gc::ActivationNodePtr node, Ts...types)
 
 TEST(AgcApp_Node, Canvas)
 {
-    auto node = make_canvas({});
+    auto node = make_canvas({}, {});
     EXPECT_EQ(node->input_count(), 5_gc_ic);
     EXPECT_EQ(node->input_names()[0_gc_i], "size"sv);
     EXPECT_EQ(node->input_names()[1_gc_i], "set"sv);
@@ -99,7 +100,7 @@ TEST(AgcApp_Node, Canvas)
 
 TEST(AgcApp_Node, Counter)
 {
-    auto node = make_counter({});
+    auto node = make_counter({}, {});
     EXPECT_EQ(node->input_count(), 2_gc_ic);
     EXPECT_EQ(node->input_names()[0_gc_i], "next"sv);
     EXPECT_EQ(node->input_names()[1_gc_i], "reset"sv);
@@ -112,7 +113,7 @@ TEST(AgcApp_Node, Counter)
 
 TEST(AgcApp_Node, FuncIterator)
 {
-    auto node = make_func_iterator({});
+    auto node = make_func_iterator({}, {});
     EXPECT_EQ(node->input_count(), 3_gc_ic);
     EXPECT_EQ(node->input_names()[0_gc_i], "init"sv);
     EXPECT_EQ(node->input_names()[1_gc_i], "value"sv);
@@ -127,7 +128,7 @@ TEST(AgcApp_Node, FuncIterator)
 
 TEST(AgcApp_Node, Grid2d)
 {
-    auto node = make_grid_2d({});
+    auto node = make_grid_2d({}, {});
     EXPECT_EQ(node->input_count(), 1_gc_ic);
     EXPECT_EQ(node->input_names()[0_gc_i], "spec"sv);
     EXPECT_EQ(node->output_count(), 3_gc_oc);
@@ -141,7 +142,7 @@ TEST(AgcApp_Node, Grid2d)
 
 TEST(AgcApp_Node, LinSpace)
 {
-    auto node = make_linspace({});
+    auto node = make_linspace({}, {});
     EXPECT_EQ(node->input_count(), 1_gc_ic);
     EXPECT_EQ(node->input_names()[0_gc_i], "spec"sv);
     EXPECT_EQ(node->output_count(), 1_gc_oc);
@@ -153,7 +154,7 @@ TEST(AgcApp_Node, LinSpace)
 
 TEST(AgcApp_Node, Mag2)
 {
-    auto node = make_mag2({});
+    auto node = make_mag2({}, {});
     EXPECT_EQ(node->input_count(), 1_gc_ic);
     EXPECT_EQ(node->input_names()[0_gc_i], "value"sv);
     EXPECT_EQ(node->output_count(), 1_gc_oc);
@@ -165,7 +166,7 @@ TEST(AgcApp_Node, Mag2)
 
 TEST(AgcApp_Node, MandelbrotFunc)
 {
-    auto node = make_mandelbrot_func({});
+    auto node = make_mandelbrot_func({}, {});
     EXPECT_EQ(node->input_count(), 2_gc_ic);
     EXPECT_EQ(node->input_names()[0_gc_i], "c"sv);
     EXPECT_EQ(node->input_names()[1_gc_i], "z"sv);
@@ -178,7 +179,7 @@ TEST(AgcApp_Node, MandelbrotFunc)
 
 TEST(AgcApp_Node, Printer)
 {
-    auto node = make_printer({});
+    auto node = make_printer({}, {});
     EXPECT_EQ(node->input_count(), 1_gc_ic);
     EXPECT_EQ(node->input_names()[0_gc_i], "value"sv);
     EXPECT_EQ(node->output_count(), common::Zero);
@@ -189,7 +190,7 @@ TEST(AgcApp_Node, Printer)
 
 TEST(AgcApp_Node, Replicate)
 {
-    auto node = make_replicate({});
+    auto node = make_replicate({}, {});
     EXPECT_EQ(node->input_count(), 2_gc_ic);
     EXPECT_EQ(node->input_names()[0_gc_i], "value"sv);
     EXPECT_EQ(node->input_names()[1_gc_i], "trigger"sv);
@@ -202,7 +203,7 @@ TEST(AgcApp_Node, Replicate)
 
 TEST(AgcApp_Node, Scale)
 {
-    auto node = make_scale({});
+    auto node = make_scale({}, {});
     EXPECT_EQ(node->input_count(), 2_gc_ic);
     EXPECT_EQ(node->input_names()[0_gc_i], "factor"sv);
     EXPECT_EQ(node->input_names()[1_gc_i], "value"sv);
@@ -216,7 +217,7 @@ TEST(AgcApp_Node, Scale)
 TEST(AgcApp_Node, Split)
 {
     auto split_args = std::vector<gc::Value>{3};
-    auto node = make_split(split_args);
+    auto node = make_split(split_args, {});
     EXPECT_EQ(node->input_count(), 1_gc_ic);
     EXPECT_EQ(node->input_names()[0_gc_i], "in"sv);
     EXPECT_EQ(node->output_count(), 3_gc_oc);
@@ -230,7 +231,7 @@ TEST(AgcApp_Node, Split)
 
 TEST(AgcApp_Node, Threshold)
 {
-    auto node = make_threshold({});
+    auto node = make_threshold({}, {});
     EXPECT_EQ(node->input_count(), 2_gc_ic);
     EXPECT_EQ(node->input_names()[0_gc_i], "threshold"sv);
     EXPECT_EQ(node->input_names()[1_gc_i], "value"sv);

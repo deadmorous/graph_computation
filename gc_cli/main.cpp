@@ -13,6 +13,7 @@
 #include "gc_app/node_registry.hpp"
 #include "gc_app/type_registry.hpp"
 
+#include "gc/computation_context.hpp"
 #include "gc/computation_node_registry.hpp"
 #include "gc/graph_computation.hpp"
 #include "gc/yaml/parse_graph.hpp"
@@ -29,10 +30,12 @@ auto run(int argc, char* argv[])
         common::throw_("Usage: gc_cli gc-file");
 
     // Initialize node registry and type registry
-    auto node_registry = gc::computation_node_registry();
-    gc_app::populate_node_registry(node_registry);
-    auto type_registry = gc::type_registry();
-    gc_app::populate_type_registry(type_registry);
+    auto context = gc::ComputationContext{
+        .type_registry = gc::type_registry(),
+        .node_registry = gc::computation_node_registry()
+    };
+    gc_app::populate_node_registry(context.node_registry);
+    gc_app::populate_type_registry(context.type_registry);
 
     // Load graph from the YAML file
     auto config = YAML::LoadFile(argv[1]);
@@ -40,7 +43,7 @@ auto run(int argc, char* argv[])
     // Parse graph from the node object.
     auto graph_config = config["graph"];
     auto [g, provided_inputs, node_map, input_names] =
-        gc::yaml::parse_graph(graph_config, node_registry, type_registry);
+        gc::yaml::parse_graph(graph_config, context);
 
     auto c = computation(g, provided_inputs);
 

@@ -12,6 +12,7 @@
 #include "gc_app/type_registry.hpp"
 #include "gc_app/types/image.hpp"
 
+#include "gc/computation_context.hpp"
 #include "gc/computation_node_registry.hpp"
 #include "gc/graph_computation.hpp"
 #include "gc/yaml/parse_graph.hpp"
@@ -63,16 +64,17 @@ inputs:
 )";
 
     // Initialize node registry and type registry
-    auto node_registry = gc::computation_node_registry();
-    gc_app::populate_node_registry(node_registry);
-
-    auto type_registry = gc::type_registry();
-    gc_app::populate_type_registry(type_registry);
+    auto context = gc::ComputationContext{
+        .type_registry = gc::type_registry(),
+        .node_registry = gc::computation_node_registry()
+    };
+    gc_app::populate_node_registry(context.node_registry);
+    gc_app::populate_type_registry(context.type_registry);
 
     // Parse YAML into a node object; parse graph from that node
     auto config = YAML::Load(config_text);
     auto [g, provided_inputs, node_map, input_names] =
-        gc::yaml::parse_graph(config, node_registry, type_registry);
+        gc::yaml::parse_graph(config, context);
 
     // Check number of nodes and edges
     EXPECT_EQ(g.nodes.size(), 4_gc_nc);

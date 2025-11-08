@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include "gc/activation_context_fwd.hpp"
 #include "gc/activation_node_fwd.hpp"
 #include "gc/alg_type_literal.hpp"
 #include "gc/decl_literal.hpp"
@@ -17,7 +18,7 @@
 
 namespace agc_app {
 
-auto make_grid_2d(gc::ConstValueSpan)
+auto make_grid_2d(gc::ConstValueSpan, const gc::ActivationContext&)
     -> std::shared_ptr<gc::ActivationNode>;
 
 GCLIB_DECL_LITERAL(gc::alg::TypeLiteral, grid_2d_spec_type);

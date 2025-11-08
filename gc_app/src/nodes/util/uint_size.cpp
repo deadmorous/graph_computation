@@ -57,7 +57,7 @@ public:
     }
 };
 
-auto make_uint_size(gc::ConstValueSpan args)
+auto make_uint_size(gc::ConstValueSpan args, const gc::ComputationContext&)
     -> std::shared_ptr<gc::ComputationNode>
 {
     gc::expect_no_node_args("UintSizeNode", args);

@@ -65,7 +65,7 @@ public:
     }
 };
 
-auto make_multiply(gc::ConstValueSpan args)
+auto make_multiply(gc::ConstValueSpan args, const gc::ComputationContext&)
     -> std::shared_ptr<gc::ComputationNode>
 {
     gc::expect_no_node_args("Multiply", args);

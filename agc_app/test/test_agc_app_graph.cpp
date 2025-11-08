@@ -19,6 +19,7 @@
 #include "agc_app_rt/types/grid_2d_spec.hpp"
 #include "agc_app_rt/types/linspace_spec.hpp"
 
+#include "gc/activation_context.hpp"
 #include "gc/activation_graph.hpp"
 #include "gc/activation_node.hpp"
 #include "gc/algorithm.hpp"
@@ -61,8 +62,8 @@ auto module_func(const dlib::Module& module, std::string_view name)
 TEST(AgcApp_Graph, GenerateSource)
 {
     auto node_registry = agc_app::activation_node_registry();
-    auto linspace_node = node_registry.at("linspace")({});
-    auto printer_node = node_registry.at("printer")({});
+    auto linspace_node = node_registry.at("linspace")({}, {});
+    auto printer_node = node_registry.at("printer")({}, {});
     auto g = gc::ActivationGraph{
         .nodes = { linspace_node, printer_node },
         .edges = {
@@ -100,18 +101,19 @@ inputs:
     destinations: [linspace_1.spec]
 )";
 
-    auto node_registry = agc_app::activation_node_registry();
-
-    auto type_registry = gc::type_registry();
+    auto a_context = gc::ActivationContext{
+        .type_registry = gc::type_registry(),
+        .node_registry = agc_app::activation_node_registry()
+    };
 
     // TODO gc_app::populate_type_registry(type_registry);
-    type_registry.register_value(
+    a_context.type_registry.register_value(
         "LinSpaceSpec", gc::type_of<agc_app_rt::LinSpaceSpec>());
 
     // Parse YAML into a node object; parse graph from that node
     auto config = YAML::Load(example_graph_yaml);
     auto [g, provided_inputs, node_map, input_names] =
-        gc::yaml::parse_graph(config, node_registry, type_registry);
+        gc::yaml::parse_graph(config, a_context);
 
     auto alg_storage = gc::alg::AlgorithmStorage{};
 
@@ -197,22 +199,24 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
 
     auto node_registry = agc_app::activation_node_registry();
 
-    auto grid = node_registry.at("grid_2d")({});
-    auto split_grid = node_registry.at("split")(std::vector<gc::Value>{4});
-    auto iter_count = node_registry.at("counter")({});
-    auto repl_z0 = node_registry.at("replicate")({});
-    auto f = node_registry.at("mandelbrot_func")({});
-    auto f_iter = node_registry.at("func_iterator")({});
-    auto split_iter_val = node_registry.at("split")(std::vector<gc::Value>{3});
-    auto repl_iter_val = node_registry.at("replicate")({});
-    auto threshold_iter_count = node_registry.at("threshold")({});
-    auto iter_val_mag2 = node_registry.at("mag2")({});
-    auto threshold_iter_val_mag2 = node_registry.at("threshold")({});
-    auto split_iter_count = node_registry.at("split")(std::vector<gc::Value>{2});
-    auto repl_iter_count = node_registry.at("replicate")({});
-    auto result_scale = node_registry.at("scale")({});
-    auto canvas = node_registry.at("canvas")({});
-    auto printer = node_registry.at("printer")({});
+    auto grid = node_registry.at("grid_2d")({}, {});
+    auto split_grid = node_registry.at("split")(std::vector<gc::Value>{4}, {});
+    auto iter_count = node_registry.at("counter")({}, {});
+    auto repl_z0 = node_registry.at("replicate")({}, {});
+    auto f = node_registry.at("mandelbrot_func")({}, {});
+    auto f_iter = node_registry.at("func_iterator")({}, {});
+    auto split_iter_val =
+        node_registry.at("split")(std::vector<gc::Value>{3}, {});
+    auto repl_iter_val = node_registry.at("replicate")({}, {});
+    auto threshold_iter_count = node_registry.at("threshold")({}, {});
+    auto iter_val_mag2 = node_registry.at("mag2")({}, {});
+    auto threshold_iter_val_mag2 = node_registry.at("threshold")({}, {});
+    auto split_iter_count =
+        node_registry.at("split")(std::vector<gc::Value>{2}, {});
+    auto repl_iter_count = node_registry.at("replicate")({}, {});
+    auto result_scale = node_registry.at("scale")({}, {});
+    auto canvas = node_registry.at("canvas")({}, {});
+    auto printer = node_registry.at("printer")({}, {});
 
     auto g = gc::ActivationGraph{
         .nodes = {

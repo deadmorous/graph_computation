@@ -163,7 +163,7 @@ public:
 } // anonymous namespace
 
 
-auto make_linspace(gc::ConstValueSpan args)
+auto make_linspace(gc::ConstValueSpan args, const gc::ActivationContext&)
     -> std::shared_ptr<gc::ActivationNode>
 {
     gc::expect_no_node_args(LinSpace::static_meta().type_name, args);

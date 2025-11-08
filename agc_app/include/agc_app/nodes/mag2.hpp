@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include "gc/activation_context_fwd.hpp"
 #include "gc/activation_node_fwd.hpp"
 #include "gc/alg_type_literal.hpp"
 #include "gc/decl_literal.hpp"
@@ -17,7 +18,7 @@
 
 namespace agc_app {
 
-auto make_mag2(gc::ConstValueSpan)
+auto make_mag2(gc::ConstValueSpan, const gc::ActivationContext&)
     -> std::shared_ptr<gc::ActivationNode>;
 
 GCLIB_DECL_LITERAL(gc::alg::TypeLiteral, mag2_input_type);

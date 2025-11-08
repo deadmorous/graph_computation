@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include "gc/context_fwd.hpp"
 #include "gc/value_fwd.hpp"
 
 #include "common/object_registry.hpp"
@@ -20,7 +21,7 @@ namespace gc {
 
 template <typename Node>
 using NodeRegistry =
-    common::ObjectRegistry<Node, ConstValueSpan>;
+    common::ObjectRegistry<Node, ConstValueSpan, const Context<Node>&>;
 
 template <typename Node>
 auto populate_gc_node_registry(NodeRegistry<Node>&)

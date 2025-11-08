@@ -10,7 +10,9 @@
 
 #include "gc/yaml/parse_graph.hpp"
 
+#include "gc/activation_context.hpp"
 #include "gc/activation_node_registry.hpp"
+#include "gc/computation_context.hpp"
 #include "gc/computation_node_registry.hpp"
 #include "gc/detail/parse_node_port.hpp"
 #include "gc/value.hpp"
@@ -23,9 +25,7 @@
 namespace gc::yaml {
 
 template <typename Node>
-auto parse_graph(const YAML::Node& config,
-                 const NodeRegistry<Node>& node_registry,
-                 const TypeRegistry& type_registry)
+auto parse_graph(const YAML::Node& config, const Context<Node>& context)
     -> ParseGraphResult<Node>
 {
     auto g = Graph<std::shared_ptr<Node>>{};
@@ -40,12 +40,12 @@ auto parse_graph(const YAML::Node& config,
         if (auto init_ = node["init"])
             for (auto element_ : init_)
             {
-                auto element = parse_value(element_, type_registry);
+                auto element = parse_value(element_, context.type_registry);
                 init.push_back(element);
             }
 
         auto graph_node =
-            node_registry.at(type)(init);
+            context.node_registry.at(type)(init, context);
 
         node_indices.emplace(graph_node.get(), NodeIndex{} + g.nodes.size());
         node_map.emplace(name, graph_node.get());
@@ -68,7 +68,7 @@ auto parse_graph(const YAML::Node& config,
     for (auto in : config["inputs"])
     {
         input_names.push_back(in["name"].as<std::string>());
-        source_inputs.values.push_back(parse_value(in, type_registry));
+        source_inputs.values.push_back(parse_value(in, context.type_registry));
         for (auto d_ : in["destinations"])
         {
             auto d = detail::parse_node_port(
@@ -88,15 +88,13 @@ auto parse_graph(const YAML::Node& config,
 template
 auto parse_graph<ComputationNode>(
                 const YAML::Node& config,
-                const ComputationNodeRegistry& node_registry,
-                const TypeRegistry& type_registry)
+                const ComputationContext& context)
     -> ParseComputationGraphResult;
 
 template
 auto parse_graph<ActivationNode>(
                 const YAML::Node& config,
-                const ActivationNodeRegistry& node_registry,
-                const TypeRegistry& type_registry)
+                const ActivationContext& context)
     -> ParseActivationGraphResult;
 
 } // namespace gc::yaml

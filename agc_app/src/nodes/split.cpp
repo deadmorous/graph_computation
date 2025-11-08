@@ -90,7 +90,7 @@ private:
 } // anonymous namespace
 
 
-auto make_split(gc::ConstValueSpan args)
+auto make_split(gc::ConstValueSpan args, const gc::ActivationContext&)
     -> std::shared_ptr<gc::ActivationNode>
 {
     gc::expect_n_node_args(Split::static_meta().type_name, args, 1);
