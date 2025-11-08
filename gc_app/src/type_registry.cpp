@@ -18,6 +18,7 @@ namespace gc_app {
 auto populate_type_registry(gc::TypeRegistry& result)
     -> void
 {
+    result.register_value("Color", gc::type_of<Color>());
     result.register_value("IndexedPalette", gc::type_of<IndexedPalette>());
     result.register_value("UintSize", gc::type_of<UintSize>());
 }
