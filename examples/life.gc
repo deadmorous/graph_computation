@@ -1,0 +1,75 @@
+graph:
+  nodes:
+    - type: image_loader
+      name: initial_image
+    - name: life
+      type: life
+    - name: palette_maker
+      type: merge
+      init:
+        - type: I32
+          value: 2
+    - name: image_colorizer
+      type: image_colorizer
+  edges:
+    - [initial_image.image, life.input]
+    - [initial_image.color_map, palette_maker.value_0]
+    - [palette_maker.output, image_colorizer.palette]
+    - [life.output, image_colorizer.input_image]
+  inputs:
+    - name: initial_image_file
+      type: String
+      value: "./acorn.png"
+      destinations: [initial_image.file]
+    - name: palette_maker_output_type
+      type: String
+      value: "IndexedPalette"
+      destinations: [palette_maker.output_type]
+    - name: palette_maker_path_0
+      type: ValuePath
+      value: "/color_map"
+      destinations: [palette_maker.path_0]
+    - name: palette_maker_path_1
+      type: ValuePath
+      value: "/overflow_color"
+      destinations: [palette_maker.path_1]
+    - name: palette_maker_value_1
+      type: Color
+      value: 0xff000000
+      destinations: [palette_maker.value_1]
+
+evolution:
+  feedback:
+    - source: life.output
+      sink: initial_image_file
+#  controller:
+#    - name: evolution
+#      type: evolution
+
+layout:
+  type: horizontal_layout
+  items:
+#    - type: vertical_layout
+#      items:
+#      - type: horizontal_layout
+#        items:
+#        - type: spin
+#          bind: evolution/delay_ms
+#          range: [1, 10000]
+#        - type: button
+#          bind: evolution/play
+#        - type: stop
+#          bind: evolution/stop
+#        - type: step
+#          bind: evolution/step
+#        - type: reset
+#          bind: evolution/reset
+#      - type: color
+#        bind: palette/overflow_color
+#      - type: vector
+#        bind: palette/color_map
+#      - type: stretch
+    - type: vertical_layout
+      items:
+      - type: image
+        bind: image_colorizer
