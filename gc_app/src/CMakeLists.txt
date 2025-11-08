@@ -16,6 +16,7 @@ add_library(gc_app-lib STATIC
     nodes/util/merge.cpp
     nodes/util/project.cpp
     nodes/util/uint_size.cpp
+    nodes/visual/image_colorizer.cpp
     nodes/visual/image_loader.cpp
     nodes/visual/rect_view.cpp
     nodes/visual/spiral_view.cpp

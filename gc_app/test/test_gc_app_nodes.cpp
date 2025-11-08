@@ -17,6 +17,7 @@
 #include "gc_app/nodes/num/test_sequence.hpp"
 #include "gc_app/nodes/util/project.hpp"
 #include "gc_app/nodes/util/uint_size.hpp"
+#include "gc_app/nodes/visual/image_colorizer.hpp"
 #include "gc_app/nodes/visual/image_loader.hpp"
 #include "gc_app/types/image.hpp"
 #include "gc_app/types/palette.hpp"
@@ -133,6 +134,49 @@ TEST(GcApp_Node, Life)
 
     node->compute_outputs(outputs, inputs, {}, {});
     ASSERT_EQ(outputs[0].type(), gc::type_of<I8Image>());
+}
+
+TEST(GcApp_Node, ImageColorizer)
+{
+    auto node = visual::make_image_colorizer({}, {});
+
+    ASSERT_EQ(node->input_count(), 2_gc_ic);
+    ASSERT_EQ(node->output_count(), 1_gc_oc);
+
+    ASSERT_EQ(node->input_names().size(), 2_gc_ic);
+    ASSERT_EQ(node->input_names()[0_gc_i], "input_image");
+    ASSERT_EQ(node->input_names()[1_gc_i], "palette");
+
+    ASSERT_EQ(node->output_names().size(), 1_gc_oc);
+    ASSERT_EQ(node->output_names()[0_gc_o], "output_image");
+
+    gc::ValueVec inputs(2);
+    gc::ValueVec outputs(1);
+
+    using C = ColorComponent;
+    constexpr auto black = rgba(C{0x00}, C{0x00}, C{0x00});
+    constexpr auto white = rgba(C{0xff}, C{0xff}, C{0xff});
+    constexpr auto green = rgba(C{0x00}, C{0xcc}, C{0x00});
+    constexpr auto red   = rgba(C{0xcc}, C{0x00}, C{0x00});
+
+    inputs[0] = Image<int8_t>{
+        .size = {3, 2},
+        .data = {0, 1, 2, -1, 3, 0}
+    };
+    inputs[1] = IndexedPalette{
+        .color_map = { black, white, green },
+        .overflow_color = red
+    };
+
+    node->compute_outputs(outputs, inputs, {}, {});
+    ASSERT_EQ(outputs[0].type(), gc::type_of<ColorImage>());
+
+    const auto& image = outputs[0].as<ColorImage>();
+    EXPECT_EQ(image.size, UintSize(3, 2));
+    auto expected_pixels = std::vector<Color>{
+        black, white, green, red, red, black
+    };
+    EXPECT_EQ(image.data, expected_pixels);
 }
 
 TEST(GcApp_Node, ImageLoader)
