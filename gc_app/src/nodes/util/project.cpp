@@ -40,7 +40,7 @@ public:
     {
         assert(result.size() == 2_gc_ic);
         result[0_gc_i] = uint_vec_val({10, 20});
-        result[1_gc_i] = uint_val(gc::ValuePath{} / 0u);
+        result[1_gc_i] = gc::ValuePath{} / 0u;
     }
 
     auto compute_outputs(
