@@ -8,6 +8,7 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
+#include "gc_app/computation_node_registry.hpp"
 #include "gc_app/nodes/cell_aut/life.hpp"
 #include "gc_app/nodes/num/eratosthenes_sieve.hpp"
 #include "gc_app/nodes/num/filter_seq.hpp"
@@ -20,9 +21,11 @@
 #include "gc_app/types/image.hpp"
 #include "gc_app/types/palette.hpp"
 #include "gc_app/types/uint_vec.hpp"
+#include "gc_app/type_registry.hpp"
 
 #include "gc/computation_context.hpp"
 #include "gc/computation_node.hpp"
+#include "gc/computation_node_registry.hpp"
 
 #include "common/func_ref.hpp"
 
@@ -94,6 +97,17 @@ private:
     double shortest_progress_delta_;
     double longest_progress_delta_;
 };
+
+auto make_computation_context() -> gc::ComputationContext
+{
+    auto context = gc::ComputationContext{
+        .type_registry = gc::type_registry(),
+        .node_registry = gc::computation_node_registry()
+    };
+    gc_app::populate_node_registry(context.node_registry);
+    gc_app::populate_type_registry(context.type_registry);
+    return context;
+}
 
 } // anonymous namespace
 
@@ -330,6 +344,47 @@ TEST(GcApp_Node, Multiply)
 
     check(2, 3);
     check(1.2, 3.4);
+}
+
+TEST(GcApp_Node, Merge)
+{
+    auto context = make_computation_context();
+    context.type_registry.register_value(
+        "Vector[I32]", gc::type_of<std::vector<int32_t>>());
+
+    auto input_count = gc::Value{common::Type<size_t>, 2u};
+    auto node = context.node_registry.at("merge")({&input_count, 1}, context);
+
+    ASSERT_EQ(node->input_count(), 5_gc_ic);
+    ASSERT_EQ(node->output_count(), 1_gc_oc);
+
+    ASSERT_EQ(node->input_names().size(), 5_gc_ic);
+    ASSERT_EQ(node->input_names()[0_gc_i], "output_type");
+    ASSERT_EQ(node->input_names()[1_gc_i], "path_0");
+    ASSERT_EQ(node->input_names()[2_gc_i], "value_0");
+    ASSERT_EQ(node->input_names()[3_gc_i], "path_1");
+    ASSERT_EQ(node->input_names()[4_gc_i], "value_1");
+
+    ASSERT_EQ(node->output_names().size(), 1_gc_oc);
+    ASSERT_EQ(node->output_names()[0_gc_o], "output");
+
+    auto output_type = "IndexedPalette"s;
+    auto path_0 = gc::ValuePath{} / "color_map"sv;
+    using C = ColorComponent;
+    auto value_0 = IndexedColorMap{
+        rgba(C{0x00}, C{0x00}, C{0x00}),
+        rgba(C{0xff}, C{0xff}, C{0xff}),
+    };
+    auto path_1 = gc::ValuePath{} / "overflow_color"sv;
+    auto value_1 = rgba(C{0xcc}, C{0x00}, C{0x00});
+    auto inputs = gc::ValueVec{ output_type, path_0, value_0, path_1, value_1 };
+    gc::ValueVec outputs(1);
+
+    node->compute_outputs(outputs, inputs, {}, {});
+
+    auto const& palette = outputs[0].as<IndexedPalette>();
+    ASSERT_EQ(palette.color_map, value_0);
+    ASSERT_EQ(palette.overflow_color, value_1);
 }
 
 TEST(GcApp_Node, Project)

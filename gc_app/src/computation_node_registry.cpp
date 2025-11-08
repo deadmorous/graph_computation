@@ -17,6 +17,7 @@
 #include "gc_app/nodes/num/test_sequence.hpp"
 #include "gc_app/nodes/num/waring.hpp"
 #include "gc_app/nodes/num/waring_parallel.hpp"
+#include "gc_app/nodes/util/merge.hpp"
 #include "gc_app/nodes/util/project.hpp"
 #include "gc_app/nodes/util/uint_size.hpp"
 #include "gc_app/nodes/visual/image_loader.hpp"
@@ -39,6 +40,7 @@ auto populate_node_registry(gc::ComputationNodeRegistry& result)
     GC_APP_REGISTER(num, test_sequence);
     GC_APP_REGISTER(num, waring);
     GC_APP_REGISTER(num, waring_parallel);
+    GC_APP_REGISTER(util, merge);
     GC_APP_REGISTER(util, project);
     GC_APP_REGISTER(util, uint_size);
     GC_APP_REGISTER(visual, image_loader);

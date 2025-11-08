@@ -13,6 +13,7 @@ add_library(gc_app-lib STATIC
     nodes/num/test_sequence.cpp
     nodes/num/waring.cpp
     nodes/num/waring_parallel.cpp
+    nodes/util/merge.cpp
     nodes/util/project.cpp
     nodes/util/uint_size.cpp
     nodes/visual/image_loader.cpp
