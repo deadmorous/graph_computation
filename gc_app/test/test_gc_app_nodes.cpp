@@ -191,7 +191,7 @@ TEST(GcApp_Node, ImageLoader)
 
     ASSERT_EQ(node->output_names().size(), 2_gc_oc);
     ASSERT_EQ(node->output_names()[0_gc_o], "image");
-    ASSERT_EQ(node->output_names()[1_gc_o], "palette");
+    ASSERT_EQ(node->output_names()[1_gc_o], "color_map");
 
     gc::ValueVec inputs(1);
     gc::ValueVec outputs(2);
@@ -205,7 +205,7 @@ TEST(GcApp_Node, ImageLoader)
     ASSERT_EQ(outputs[1].type(), gc::type_of<IndexedColorMap>());
 
     const auto& image = outputs[0].as<I8Image>();
-    const auto& palette = outputs[1].as<IndexedColorMap>();
+    const auto& color_map = outputs[1].as<IndexedColorMap>();
 
     // Check image content
     constexpr size_t acorn_w = 7;
@@ -238,11 +238,11 @@ TEST(GcApp_Node, ImageLoader)
         }
     }
 
-    // Check palette content
+    // Check color map content
     using C = ColorComponent;
-    ASSERT_EQ(palette.size(), 2);
-    EXPECT_EQ(palette[0], rgba(C{0}, C{0}, C{0}));
-    EXPECT_EQ(palette[1], rgba(C{0xff}, C{0xff}, C{0xff}));
+    ASSERT_EQ(color_map.size(), 2);
+    EXPECT_EQ(color_map[0], rgba(C{0}, C{0}, C{0}));
+    EXPECT_EQ(color_map[1], rgba(C{0xff}, C{0xff}, C{0xff}));
 }
 
 TEST(GcApp_Node, EratosthenesSieve)

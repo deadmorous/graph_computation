@@ -40,7 +40,7 @@ using common::Defer;
 struct IndexedImage final
 {
     I8Image image;
-    IndexedColorMap palette;
+    IndexedColorMap color_map;
 };
 
 // Custom Error Handler (must throw to integrate with C++)
@@ -137,11 +137,11 @@ auto load_indexed_png(const std::string& path) -> IndexedImage
     png_get_PLTE(png_ptr, info_ptr, &palette_ptr, &num_palette);
 
     // Copy the palette data into our result struct
-    result.palette.reserve(num_palette);
+    result.color_map.reserve(num_palette);
     for (auto i: common::index_range<size_t>(num_palette))
     {
         auto& c = palette_ptr[i];
-        result.palette.push_back(rgba(
+        result.color_map.push_back(rgba(
             ColorComponent{c.red},
             ColorComponent{c.green},
             ColorComponent{c.blue}));
@@ -204,7 +204,7 @@ public:
 
     auto output_names() const
         -> gc::OutputNames override
-    { return gc::node_output_names<ImageLoader>("image"sv, "palette"sv); }
+    { return gc::node_output_names<ImageLoader>("image"sv, "color_map"sv); }
 
     auto default_inputs(gc::InputValues result) const
         -> void override
@@ -223,9 +223,9 @@ public:
         assert(inputs.size() == 1_gc_ic);
         assert(result.size() == 2_gc_oc);
         const auto& path = inputs[0_gc_i].as<std::string>();
-        auto [image, palette] = load_indexed_png(path);
+        auto [image, color_map] = load_indexed_png(path);
         result[0_gc_o] = std::move(image);
-        result[1_gc_o] = std::move(palette);
+        result[1_gc_o] = std::move(color_map);
         return true;
     }
 
