@@ -12,7 +12,7 @@
 
 #include "gc/activation_context.hpp"
 #include "gc/activation_node_registry.hpp"
-#include "gc/computation_context.hpp"
+#include "gc/computation_context_fwd.hpp"
 #include "gc/computation_node_registry.hpp"
 #include "gc/detail/parse_node_port.hpp"
 #include "gc/value.hpp"
