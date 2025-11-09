@@ -10,6 +10,7 @@
 
 #include "gc_visual/parse_layout.hpp"
 
+#include "gc_visual/evolution_controller.hpp"
 #include "gc_visual/graph_broker.hpp"
 #include "gc_visual/graph_output_visualizer.hpp"
 #include "gc_visual/graph_parameter_editor.hpp"
@@ -80,6 +81,8 @@ auto parse_layout_item(GraphBroker* broker,
             widget = new GraphParameterEditor(type, broker, item_node);
         else if (type == "image" || type == "text")
             widget = new GraphOutputVisualizer(type, broker, item_node);
+        else if (type == "evolution")
+            widget = new EvolutionController(type, broker);
         else
             common::throw_("Unknown layout item type '", type, "'");
 
@@ -100,7 +103,7 @@ auto parse_layout(const YAML::Node& config,
                   const gc::detail::NamedComputationNodes& node_map,
                   const std::vector<std::string>& input_names,
                   QWidget* parent)
-    -> QWidget*
+    -> std::pair<QWidget*, GraphBroker*>
 {
     auto host = new QWidget(parent);
     auto broker =
@@ -109,5 +112,5 @@ auto parse_layout(const YAML::Node& config,
     auto host_layout_item = QWidgetItem{host};
     parse_layout_item(broker, config, &host_layout_item);
 
-    return host;
+    return { host, broker };
 }

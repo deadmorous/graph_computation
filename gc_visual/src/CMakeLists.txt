@@ -17,7 +17,9 @@ set(PROJECT_SOURCES
     color_editor_widget.cpp     ../include/gc_visual/color_editor_widget.hpp
     computation_progress_widget.cpp ../include/gc_visual/computation_progress_widget.hpp
     computation_thread.cpp      ../include/gc_visual/computation_thread.hpp
+    evolution_controller.cpp    ../include/gc_visual/evolution_controller.hpp
     flatten_type.cpp
+    graph_bindings.cpp
     graph_broker.cpp            ../include/gc_visual/graph_broker.hpp
     graph_evolution.cpp
     graph_parameter_editor.cpp  ../include/gc_visual/graph_parameter_editor.hpp

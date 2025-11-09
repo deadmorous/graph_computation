@@ -11,12 +11,11 @@
 #include "gc_visual/graph_parameter_editor.hpp"
 
 #include "gc_visual/color_editor_widget.hpp"
+#include "gc_visual/parse_graph_binding.hpp"
 #include "gc_visual/qstr.hpp"
 #include "gc_visual/vector_editor_widget.hpp"
 
 #include "gc_app/types/color.hpp"
-
-#include "gc/computation_node.hpp"
 
 #include "common/throw.hpp"
 
@@ -29,6 +28,8 @@
 
 
 namespace {
+
+using gc_visual::ParamBinding;
 
 template <typename T>
 class SpinEditor final
@@ -142,51 +143,6 @@ auto wrap_edtor(std::shared_ptr<Editor> editor)
 
 // ---
 
-struct ParamBinding
-{
-    gc::ParameterSpec   param_spec;
-    std::string         input_name;
-};
-
-auto operator<<(std::ostream& s, const ParamBinding& binding)
-    -> std::ostream&
-{
-    return
-        s << binding.input_name
-          << binding.param_spec.path;
-}
-
-auto binding_label(const ParamBinding& binding)
-    -> std::string
-{
-    auto result = binding.input_name;
-    if (!binding.param_spec.path.empty())
-        result += common::format(binding.param_spec.path);
-    return result;
-}
-
-auto parse_param_binding(GraphBroker* broker,
-                         const YAML::Node& item_node)
-    -> ParamBinding
-{
-    // Resolve parameter binding
-    auto input_name = item_node["bind"].as<std::string>();
-
-    auto path = gc::ValuePath{};
-    auto path_pos = input_name.find_first_of('/');
-    if (path_pos != std::string::npos)
-    {
-        path = gc::ValuePath::from_string(input_name.substr(path_pos));
-        input_name = input_name.substr(0, path_pos);
-    }
-
-    auto input = broker->input_index(input_name);
-
-    return { { input, path }, std::move(input_name) };
-}
-
-// ---
-
 auto make_spin(const ParamBinding& binding,
                GraphBroker* broker,
                const YAML::Node& item_node)
@@ -275,7 +231,7 @@ GraphParameterEditor::GraphParameterEditor(const std::string& type,
     QWidget{ parent }
 {
     auto binding =
-        parse_param_binding(broker, item_node);
+        gc_visual::parse_param_binding(broker->binding_resolver(), item_node);
 
     if(type == "spin")
         res_ = make_spin(binding, broker, item_node);
@@ -289,7 +245,7 @@ GraphParameterEditor::GraphParameterEditor(const std::string& type,
     auto layout = new QVBoxLayout{};
     setLayout(layout);
     auto* label =
-        new QLabel(qstr(binding_label(binding)));
+        new QLabel(qstr(gc_visual::param_binding_label(binding)));
     label->setBuddy(res_.get());
     layout->addWidget(label);
     layout->addWidget(res_.get());

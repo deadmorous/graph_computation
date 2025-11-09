@@ -11,6 +11,7 @@
 #pragma once
 
 #include "gc_visual/computation_thread.hpp"
+#include "gc_visual/graph_broker_fwd.hpp"
 
 #include "gc/detail/named_computation_nodes.hpp"
 
@@ -24,4 +25,4 @@ auto parse_layout(const YAML::Node& config,
                   const gc::detail::NamedComputationNodes& node_map,
                   const std::vector<std::string>& input_names,
                   QWidget* parent = nullptr)
-    -> QWidget*;
+    -> std::pair<QWidget*, GraphBroker*>;

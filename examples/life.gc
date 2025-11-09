@@ -41,35 +41,11 @@ graph:
 evolution:
   feedback:
     - source: life.output
-      sink: initial_image_file
-#  controller:
-#    - name: evolution
-#      type: evolution
+      sink: [life.input]
 
 layout:
-  type: horizontal_layout
+  type: vertical_layout
   items:
-#    - type: vertical_layout
-#      items:
-#      - type: horizontal_layout
-#        items:
-#        - type: spin
-#          bind: evolution/delay_ms
-#          range: [1, 10000]
-#        - type: button
-#          bind: evolution/play
-#        - type: stop
-#          bind: evolution/stop
-#        - type: step
-#          bind: evolution/step
-#        - type: reset
-#          bind: evolution/reset
-#      - type: color
-#        bind: palette/overflow_color
-#      - type: vector
-#        bind: palette/color_map
-#      - type: stretch
-    - type: vertical_layout
-      items:
-      - type: image
-        bind: image_colorizer
+    - type: evolution
+    - type: image
+      bind: image_colorizer

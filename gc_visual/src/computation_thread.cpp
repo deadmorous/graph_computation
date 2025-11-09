@@ -36,14 +36,40 @@ auto ComputationThread::ok()
     -> bool
 { return ok_; }
 
-auto ComputationThread::stop()
+auto ComputationThread::evolution() const
+    -> std::optional<gc_visual::GraphEvolution>
+{ return evolution_; }
+
+auto ComputationThread::advance_evolution(size_t skip)
     -> void
 {
-    if (!isRunning())
+    if (!evolution_)
         return;
 
-    stop_source_.request_stop();
-    wait();
+    if (isRunning())
+        return;
+
+    skip_ = skip;
+    start();
+}
+
+auto ComputationThread::reset_evolution()
+    -> void
+{
+    stop();
+    skip_ = 0;
+    auto& res = computation_.result;
+    res.computation_ts = gc::Timestamp{};
+    std::ranges::fill(res.node_ts, gc::Timestamp{});
+    start();
+}
+
+auto ComputationThread::set_evolution(
+                std::optional<gc_visual::GraphEvolution> evolution)
+    -> void
+{
+    stop();
+    evolution_ = evolution;
 }
 
 auto ComputationThread::set_graph(gc::ComputationGraph g,
@@ -59,16 +85,33 @@ auto ComputationThread::set_parameter(const gc::ParameterSpec& spec,
     -> void
 {
     stop();
+    skip_ = 0;
     computation_.source_inputs.values[spec.input].set(spec.path, value);
+}
+
+auto ComputationThread::stop()
+    -> void
+{
+    if (!isRunning())
+        return;
+
+    stop_source_.request_stop();
+    wait();
 }
 
 auto ComputationThread::on_started()
     -> void
-{ emit running_state_changed(true); }
+{
+    if (skip_ == 0)
+        emit running_state_changed(true);
+}
 
 auto ComputationThread::on_finished()
     -> void
-{ emit running_state_changed(false); }
+{
+    if (skip_ == 0)
+        emit running_state_changed(false);
+}
 
 auto ComputationThread::run()
     -> void
@@ -77,9 +120,53 @@ auto ComputationThread::run()
 
     stop_source_ = {};
 
-    auto graph_progress =
-        [this](gc::NodeIndex inode, double node_progress)
-    { emit progress(inode, node_progress); };
+    if (skip_ == 0)
+    {
+        auto graph_progress =
+            [this](gc::NodeIndex inode, double node_progress)
+        { emit progress(inode, node_progress); };
 
-    ok_ = compute(computation_, stop_source_.get_token(), &graph_progress);
+        clear_feedback();
+        ok_ = compute(computation_, stop_source_.get_token(), &graph_progress);
+    }
+    else
+    {
+        auto graph_progress =
+            [this](gc::NodeIndex inode, double node_progress)
+        {};
+
+        for (size_t i=0; i<skip_; ++i)
+        {
+            set_feedback();
+            ok_ = compute(
+                computation_, stop_source_.get_token(), &graph_progress);
+            if (!ok_)
+                break;
+        }
+    }
+}
+
+auto ComputationThread::clear_feedback() -> void
+{
+    auto& res = computation_.result;
+    res.updated_inputs.clear();
+}
+
+auto ComputationThread::set_feedback() -> void
+{
+    clear_feedback();
+    auto& res = computation_.result;
+    res.updated_inputs.clear();
+
+    for (auto& fb : evolution_->feedback)
+    {
+        const auto& src_end = fb.source_output.output;
+        const auto& src_val = group(res.outputs, src_end.node)[src_end.port];
+        for (const auto& dst_end : fb.sink_input.inputs)
+        {
+            auto& dst_val = group(res.inputs, dst_end.node)[dst_end.port];
+            dst_val = src_val;
+            res.updated_inputs.insert(dst_end);
+        }
+    }
 }

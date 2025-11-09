@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "gc_visual/graph_evolution.hpp"
+
 #include "gc/graph_computation.hpp"
 #include "gc/param_spec.hpp"
 
@@ -32,6 +34,9 @@ public:
     auto ok()
         -> bool;
 
+    auto evolution() const
+        -> std::optional<gc_visual::GraphEvolution>;
+
 signals:
     auto progress(gc::NodeIndex inode, double node_progress)
         -> void;
@@ -40,7 +45,13 @@ signals:
         -> void;
 
 public slots:
-    auto stop()
+    auto advance_evolution(size_t skip = 0)
+        -> void;
+
+    auto reset_evolution()
+        -> void;
+
+    auto set_evolution(std::optional<gc_visual::GraphEvolution>)
         -> void;
 
     auto set_graph(gc::ComputationGraph g,
@@ -48,6 +59,9 @@ public slots:
         -> void;
 
     auto set_parameter(const gc::ParameterSpec&, const gc::Value&)
+        -> void;
+
+    auto stop()
         -> void;
 
 private slots:
@@ -58,7 +72,15 @@ protected:
     auto run() -> void override;
 
 private:
+    auto clear_feedback() -> void;
+    auto set_feedback() -> void;
+
     bool ok_;
     std::stop_source stop_source_;
     gc::Computation computation_;
+    std::optional<gc_visual::GraphEvolution> evolution_;
+
+    // Zero value is used in a non-evolution mode, and a positive value -
+    // in the feedback-driven evolution mode
+    size_t skip_ = 0;
 };

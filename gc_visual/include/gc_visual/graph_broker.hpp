@@ -3,12 +3,14 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2024 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2024-2025 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
 #pragma once
+
+#include "gc_visual/graph_broker_fwd.hpp"
 
 #include "gc_visual/computation_thread.hpp"
 #include "gc_visual/parse_graph_binding.hpp"
@@ -56,11 +58,24 @@ public:
     auto get_port_value(gc::EdgeInputEnd port) const
         -> const gc::Value&;
 
+    auto evolution() const
+        -> std::optional<gc_visual::GraphEvolution>;
+
 signals:
     auto output_updated(gc::EdgeOutputEnd output)
         -> void;
 
 public slots:
+
+    auto advance_evolution(size_t skip = 0)
+        -> void;
+
+    auto reset_evolution()
+        -> void;
+
+    auto set_evolution(std::optional<gc_visual::GraphEvolution>)
+        -> void;
+
     auto set_parameter(const gc::ParameterSpec&, const gc::Value&)
         -> void;
 

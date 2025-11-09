@@ -83,6 +83,22 @@ auto GraphBroker::get_port_value(gc::EdgeInputEnd port) const
     -> const gc::Value&
 { return group_value(port.node, port.port, computation_result_.inputs); }
 
+auto GraphBroker::evolution() const
+    -> std::optional<gc_visual::GraphEvolution>
+{ return computation_thread_.evolution(); }
+
+auto GraphBroker::advance_evolution(size_t skip)
+    -> void
+{ computation_thread_.advance_evolution(skip); }
+
+auto GraphBroker::reset_evolution()
+    -> void
+{ computation_thread_.reset_evolution(); }
+
+auto GraphBroker::set_evolution(
+    std::optional<gc_visual::GraphEvolution> evolution) -> void
+{ computation_thread_.set_evolution(std::move(evolution)); }
+
 auto GraphBroker::set_parameter(const gc::ParameterSpec& spec,
                                 const gc::Value& value)
     -> void

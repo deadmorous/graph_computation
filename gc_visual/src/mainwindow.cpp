@@ -11,6 +11,7 @@
 #include "gc_visual/mainwindow.hpp"
 
 #include "gc_visual/computation_progress_widget.hpp"
+#include "gc_visual/graph_broker.hpp"
 #include "gc_visual/graph_evolution.hpp"
 #include "gc_visual/parse_layout.hpp"
 
@@ -259,9 +260,10 @@ auto MainWindow::load(const gc_visual::ConfigSpecification& spec)
         auto [g, provided_inputs, node_map, input_names] =
             gc::yaml::parse_graph(graph_config, context);
 
+        std::optional<gc_visual::GraphEvolution> evolution;
         if (auto evolution_config = config["evolution"])
         {
-            auto evolution = gc_visual::parse_graph_evolution(
+            evolution = gc_visual::parse_graph_evolution(
                 evolution_config, context, g, node_map, input_names);
         }
 
@@ -272,7 +274,7 @@ auto MainWindow::load(const gc_visual::ConfigSpecification& spec)
             &computation_thread_,
             &ComputationThread::finished,
             this,
-            [config, node_map, input_names, spec, this]{
+            [config, node_map, input_names, spec, evolution, this]{
                 computation_thread_.disconnect(this);
 
                 try {
@@ -281,11 +283,12 @@ auto MainWindow::load(const gc_visual::ConfigSpecification& spec)
 
                     // Create visual layout
                     auto layout = config["layout"];
-                    auto central_widget =
+                    auto [central_widget, graph_broker] =
                         parse_layout(layout,
                                      computation_thread_,
                                      node_map,
                                      input_names);
+                    graph_broker->set_evolution(evolution);
                     setCentralWidget(central_widget);
 
                     spec_ = spec;

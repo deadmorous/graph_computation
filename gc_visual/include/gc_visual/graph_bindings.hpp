@@ -18,7 +18,7 @@ namespace gc_visual {
 
 struct InputBinding final
 {
-    size_t          input;
+    std::vector<gc::EdgeInputEnd> inputs;
 };
 
 struct ParamBinding final
@@ -26,6 +26,9 @@ struct ParamBinding final
     gc::ParameterSpec   param_spec;
     std::string         input_name;
 };
+
+auto operator<<(std::ostream& s, const ParamBinding& binding)
+    -> std::ostream&;
 
 struct OutputBinding final
 {

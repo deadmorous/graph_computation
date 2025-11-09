@@ -61,9 +61,19 @@ auto parse_input_binding(const BindingResolver& resolver,
                          const YAML::Node& item_node)
     -> InputBinding
 {
-    auto input_name = item_node.as<std::string>();
-    auto input_index = resolver.input_index(input_name);
-    return { .input = input_index };
+    auto result = InputBinding{};
+    result.inputs.reserve(item_node.size());
+    for (auto input : item_node)
+    {
+        auto edge_end =
+            gc::detail::parse_node_port(
+                input.as<std::string>(),
+                resolver.node_map(),
+                resolver.node_indices(),
+                gc::Input);
+        result.inputs.push_back(edge_end);
+    }
+    return result;
 }
 
 auto parse_output_binding(const BindingResolver& resolver,
