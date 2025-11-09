@@ -70,6 +70,7 @@ auto ComputationThread::set_evolution(
 {
     stop();
     evolution_ = evolution;
+    skip_ = 0;
 }
 
 auto ComputationThread::set_graph(gc::ComputationGraph g,

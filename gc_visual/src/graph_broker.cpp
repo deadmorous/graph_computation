@@ -95,10 +95,6 @@ auto GraphBroker::reset_evolution()
     -> void
 { computation_thread_.reset_evolution(); }
 
-auto GraphBroker::set_evolution(
-    std::optional<gc_visual::GraphEvolution> evolution) -> void
-{ computation_thread_.set_evolution(std::move(evolution)); }
-
 auto GraphBroker::set_parameter(const gc::ParameterSpec& spec,
                                 const gc::Value& value)
     -> void

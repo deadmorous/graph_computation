@@ -267,14 +267,23 @@ auto MainWindow::load(const gc_visual::ConfigSpecification& spec)
                 evolution_config, context, g, node_map, input_names);
         }
 
+        // Current central widget likely binds to signal from the computation
+        // thread. These signals are no longer valid for the old components
+        // as soon as the thread switches to the new graph. Therefore
+        // let's delete the entire central widget before proceeding.
+        auto* oldCentralWidget = centralWidget();
+        setCentralWidget(new QWidget);
+        delete oldCentralWidget;
+
         // Compile and compute the graph
         computation_thread_.set_graph(std::move(g), provided_inputs);
+        computation_thread_.set_evolution(evolution);
 
         connect(
             &computation_thread_,
             &ComputationThread::finished,
             this,
-            [config, node_map, input_names, spec, evolution, this]{
+            [config, node_map, input_names, spec, this]{
                 computation_thread_.disconnect(this);
 
                 try {
@@ -288,7 +297,6 @@ auto MainWindow::load(const gc_visual::ConfigSpecification& spec)
                                      computation_thread_,
                                      node_map,
                                      input_names);
-                    graph_broker->set_evolution(evolution);
                     setCentralWidget(central_widget);
 
                     spec_ = spec;

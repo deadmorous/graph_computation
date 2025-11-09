@@ -73,9 +73,6 @@ public slots:
     auto reset_evolution()
         -> void;
 
-    auto set_evolution(std::optional<gc_visual::GraphEvolution>)
-        -> void;
-
     auto set_parameter(const gc::ParameterSpec&, const gc::Value&)
         -> void;
 
