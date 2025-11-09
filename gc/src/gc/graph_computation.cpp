@@ -472,8 +472,15 @@ auto compute(ComputationResult& result,
             for (const auto& e : group(instructions->edges, level-1))
             {
                 const auto& [e0, e1] = e;
-                group(result.inputs, e1.node)[e1.port] =
-                    group(result.outputs, e0.node)[e0.port];
+                if (result.updated_inputs.contains(e1))
+                    // Do not transfer upstream output to node input
+                    // for updated inputs, because we should assume
+                    // that such inputs are already updated manually;
+                    // reset node timestamp to force its recalculation.
+                    result.node_ts[e1.node] = Timestamp{};
+                else
+                    group(result.inputs, e1.node)[e1.port] =
+                        group(result.outputs, e0.node)[e0.port];
             }
         }
 

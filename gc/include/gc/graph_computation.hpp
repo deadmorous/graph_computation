@@ -17,8 +17,10 @@
 #include "common/func_ref_fwd.hpp"
 #include "common/strong_grouped.hpp"
 #include "common/strong_vector.hpp"
+#include "common/detail/hash.hpp"
 
 #include <stop_token>
+#include <unordered_set>
 
 
 namespace gc {
@@ -43,6 +45,9 @@ struct ComputationResult final
     common::StrongGrouped<Value, NodeIndex, OutputPort> prev_source_outputs;
     common::StrongVector<Timestamp, NodeIndex> node_ts;
     Timestamp computation_ts{};
+
+    // Used when there is a feedback determining state evolution
+    std::unordered_set<EdgeInputEnd, common::detail::Hash> updated_inputs;
 };
 
 auto compute(ComputationResult& result,
