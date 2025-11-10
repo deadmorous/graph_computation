@@ -6,6 +6,7 @@ project(gc_app-lib LANGUAGES CXX)
 
 add_library(gc_app-lib STATIC
     computation_node_registry.cpp
+    nodes/cell_aut/cell2d.cpp
     nodes/cell_aut/life.cpp
     nodes/num/eratosthenes_sieve.cpp
     nodes/num/filter_seq.cpp

@@ -9,6 +9,7 @@
  */
 
 #include "gc_app/computation_node_registry.hpp"
+#include "gc_app/nodes/cell_aut/cell2d.hpp"
 #include "gc_app/nodes/cell_aut/life.hpp"
 #include "gc_app/nodes/num/eratosthenes_sieve.hpp"
 #include "gc_app/nodes/num/filter_seq.hpp"
@@ -19,6 +20,7 @@
 #include "gc_app/nodes/util/uint_size.hpp"
 #include "gc_app/nodes/visual/image_colorizer.hpp"
 #include "gc_app/nodes/visual/image_loader.hpp"
+#include "gc_app/types/cell2d_rules.hpp"
 #include "gc_app/types/image.hpp"
 #include "gc_app/types/palette.hpp"
 #include "gc_app/types/uint_vec.hpp"
@@ -112,6 +114,31 @@ auto make_computation_context() -> gc::ComputationContext
 
 } // anonymous namespace
 
+
+TEST(GcApp_Node, Cell2d)
+{
+    auto node = cell_aut::make_cell2d({}, {});
+
+    ASSERT_EQ(node->input_count(), 2_gc_ic);
+    ASSERT_EQ(node->output_count(), 1_gc_oc);
+
+    ASSERT_EQ(node->input_names().size(), 2_gc_ic);
+    ASSERT_EQ(node->input_names()[0_gc_i], "rules");
+    ASSERT_EQ(node->input_names()[1_gc_i], "input_state");
+
+    ASSERT_EQ(node->output_names().size(), 1_gc_oc);
+    ASSERT_EQ(node->output_names()[0_gc_o], "output_state");
+
+    gc::ValueVec inputs(2);
+    gc::ValueVec outputs(1);
+
+    node->default_inputs(inputs);
+    ASSERT_EQ(inputs[0].type(), gc::type_of<Cell2dRules>());
+    ASSERT_EQ(inputs[1].type(), gc::type_of<I8Image>());
+
+    node->compute_outputs(outputs, inputs, {}, {});
+    ASSERT_EQ(outputs[0].type(), gc::type_of<I8Image>());
+}
 
 TEST(GcApp_Node, Life)
 {

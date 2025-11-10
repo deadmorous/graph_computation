@@ -1,0 +1,62 @@
+graph:
+  nodes:
+    - type: image_loader
+      name: initial_image
+    - name: cell2d
+      type: cell2d
+    - name: palette_maker
+      type: merge
+      init:
+        - type: I32
+          value: 2
+    - name: image_colorizer
+      type: image_colorizer
+  edges:
+    - [initial_image.image, cell2d.input_state]
+    - [initial_image.color_map, palette_maker.value_0]
+    - [palette_maker.output, image_colorizer.palette]
+    - [cell2d.output_state, image_colorizer.input_image]
+  inputs:
+    - name: initial_image_file
+      type: String
+      value: "./acorn.png"
+      destinations: [initial_image.file]
+    - name: rules
+      type: Cell2dRules
+      value:
+        state_count: 2
+        int8_t min_state: 0
+        tor: true
+        count_self: false
+        map9: [0, 0, -128, 1, 0, 0, 0, 0, 0]
+        map6: [0, 0, -128, 1, 0, 0]
+        map4: [0, 0, -128, 1]
+      destinations: [cell2d.rules]
+    - name: palette_maker_output_type
+      type: String
+      value: "IndexedPalette"
+      destinations: [palette_maker.output_type]
+    - name: palette_maker_path_0
+      type: ValuePath
+      value: "/color_map"
+      destinations: [palette_maker.path_0]
+    - name: palette_maker_path_1
+      type: ValuePath
+      value: "/overflow_color"
+      destinations: [palette_maker.path_1]
+    - name: palette_maker_value_1
+      type: Color
+      value: 0xff000000
+      destinations: [palette_maker.value_1]
+
+evolution:
+  feedback:
+    - source: cell2d.output_state
+      sink: [cell2d.input_state]
+
+layout:
+  type: vertical_layout
+  items:
+    - type: evolution
+    - type: image
+      bind: image_colorizer

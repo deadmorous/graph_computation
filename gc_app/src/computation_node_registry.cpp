@@ -10,6 +10,7 @@
 
 #include "gc_app/computation_node_registry.hpp"
 
+#include "gc_app/nodes/cell_aut/cell2d.hpp"
 #include "gc_app/nodes/cell_aut/life.hpp"
 #include "gc_app/nodes/num/filter_seq.hpp"
 #include "gc_app/nodes/num/multiply.hpp"
@@ -34,6 +35,7 @@ auto populate_node_registry(gc::ComputationNodeRegistry& result)
 #define GC_APP_REGISTER(ns, name) \
     result.register_value(#name, gc_app::ns::make_##name)
 
+    GC_APP_REGISTER(cell_aut, cell2d);
     GC_APP_REGISTER(cell_aut, life);
     GC_APP_REGISTER(num, eratosthenes_sieve);
     GC_APP_REGISTER(num, filter_seq);
