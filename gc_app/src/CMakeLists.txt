@@ -9,6 +9,7 @@ add_library(gc_app-lib STATIC
     nodes/cell_aut/cell2d.cpp
     nodes/cell_aut/life.cpp
     nodes/cell_aut/random_image.cpp
+    nodes/cell_aut/rule_reader.cpp
     nodes/num/eratosthenes_sieve.cpp
     nodes/num/filter_seq.cpp
     nodes/num/multiply.cpp

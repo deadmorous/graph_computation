@@ -13,6 +13,7 @@
 #include "gc_app/nodes/cell_aut/cell2d.hpp"
 #include "gc_app/nodes/cell_aut/life.hpp"
 #include "gc_app/nodes/cell_aut/random_image.hpp"
+#include "gc_app/nodes/cell_aut/rule_reader.hpp"
 #include "gc_app/nodes/num/filter_seq.hpp"
 #include "gc_app/nodes/num/multiply.hpp"
 #include "gc_app/nodes/num/eratosthenes_sieve.hpp"
@@ -39,6 +40,7 @@ auto populate_node_registry(gc::ComputationNodeRegistry& result)
     GC_APP_REGISTER(cell_aut, cell2d);
     GC_APP_REGISTER(cell_aut, life);
     GC_APP_REGISTER(cell_aut, random_image);
+    GC_APP_REGISTER(cell_aut, rule_reader);
     GC_APP_REGISTER(num, eratosthenes_sieve);
     GC_APP_REGISTER(num, filter_seq);
     GC_APP_REGISTER(num, multiply);
