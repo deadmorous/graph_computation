@@ -27,6 +27,8 @@
 #include <QVBoxLayout>
 
 
+using namespace std::string_view_literals;
+
 namespace {
 
 using gc_visual::ParamBinding;
@@ -221,6 +223,24 @@ auto make_vector(const ParamBinding& binding,
     return wrap_edtor(std::move(editor));
 }
 
+using GraphParameterEditorFactoryFunc =
+    std::shared_ptr<QWidget>(*)(
+        const ParamBinding&, GraphBroker*, const YAML::Node&);
+
+using GraphParameterEditorFactoryMap =
+    std::unordered_map<std::string_view, GraphParameterEditorFactoryFunc>;
+
+auto editor_factory_map() -> const GraphParameterEditorFactoryMap&
+{
+    static auto result = GraphParameterEditorFactoryMap{
+        { "spin"sv, make_spin },
+        { "color"sv, make_color },
+        { "vector"sv, make_vector },
+    };
+
+    return result;
+}
+
 } // anonymous namespace
 
 
@@ -233,14 +253,7 @@ GraphParameterEditor::GraphParameterEditor(const std::string& type,
     auto binding =
         gc_visual::parse_param_binding(broker->binding_resolver(), item_node);
 
-    if(type == "spin")
-        res_ = make_spin(binding, broker, item_node);
-    else if (type == "color")
-        res_ = make_color(binding, broker, item_node);
-    else if (type == "vector")
-        res_ = make_vector(binding, broker, item_node);
-    else
-        common::throw_("Unknown graph parameter ediror type '", type, '\'');
+    res_ = editor_factory_map().at(type)(binding, broker, item_node);
 
     auto layout = new QVBoxLayout{};
     setLayout(layout);
@@ -249,4 +262,9 @@ GraphParameterEditor::GraphParameterEditor(const std::string& type,
     label->setBuddy(res_.get());
     layout->addWidget(label);
     layout->addWidget(res_.get());
+}
+
+auto GraphParameterEditor::supports_type(const std::string& type) -> bool
+{
+    return editor_factory_map().contains(type);
 }

@@ -23,6 +23,8 @@
 #include <QVBoxLayout>
 
 
+using namespace std::string_view_literals;
+
 namespace {
 
 auto make_image(GraphBroker* broker,
@@ -126,6 +128,24 @@ auto make_text(GraphBroker* broker,
     on_output_updated(output_port);
 }
 
+using GraphOutputVisualizerFactoryFunc =
+    void(*)(GraphBroker*, const YAML::Node&, GraphOutputVisualizer*);
+
+using GraphOutputVisualizerFactoryMap =
+    std::unordered_map<std::string_view, GraphOutputVisualizerFactoryFunc>;
+
+
+
+auto editor_factory_map() -> const GraphOutputVisualizerFactoryMap&
+{
+    static auto result = GraphOutputVisualizerFactoryMap{
+        { "image"sv, make_image },
+        { "text"sv, make_text },
+    };
+
+    return result;
+}
+
 } // anonymous namespace
 
 
@@ -135,10 +155,10 @@ GraphOutputVisualizer::GraphOutputVisualizer(const std::string& type,
                                              QWidget* parent) :
     QWidget{ parent }
 {
-    if(type == "image")
-        make_image(broker, item_node, this);
-    else if(type == "text")
-        make_text(broker, item_node, this);
-    else
-        common::throw_("Unknown graph output visualizer type '", type, '\'');
+    editor_factory_map().at(type)(broker, item_node, this);
+}
+
+auto GraphOutputVisualizer::supports_type(const std::string& type) -> bool
+{
+    return editor_factory_map().contains(type);
 }

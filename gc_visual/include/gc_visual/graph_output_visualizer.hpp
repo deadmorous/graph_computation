@@ -30,4 +30,6 @@ public:
         GraphBroker* broker,
         const YAML::Node& item_node,
         QWidget* parent = nullptr);
+
+    static auto supports_type(const std::string& type) -> bool;
 };

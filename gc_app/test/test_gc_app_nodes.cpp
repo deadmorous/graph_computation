@@ -12,6 +12,7 @@
 #include "gc_app/nodes/cell_aut/cell2d.hpp"
 #include "gc_app/nodes/cell_aut/life.hpp"
 #include "gc_app/nodes/cell_aut/random_image.hpp"
+#include "gc_app/nodes/cell_aut/rule_reader.hpp"
 #include "gc_app/nodes/num/eratosthenes_sieve.hpp"
 #include "gc_app/nodes/num/filter_seq.hpp"
 #include "gc_app/nodes/num/multiply.hpp"
@@ -213,6 +214,21 @@ TEST(GcApp_Node, RandomImage)
     }
     EXPECT_LT(n0, 2*n1);
     EXPECT_LT(n1, 2*n0);
+}
+
+TEST(GcApp_Node, RuleReader)
+{
+    auto node = cell_aut::make_rule_reader({}, {});
+
+    ASSERT_EQ(node->input_count(), 1_gc_ic);
+    ASSERT_EQ(node->output_count(), 1_gc_oc);
+
+    ASSERT_EQ(node->input_names().size(), 1_gc_ic);
+
+    ASSERT_EQ(node->input_names()[0_gc_i], "file"sv);
+
+    ASSERT_EQ(node->output_names().size(), 1_gc_oc);
+    ASSERT_EQ(node->output_names()[0_gc_o], "rules");
 }
 
 TEST(GcApp_Node, ImageColorizer)

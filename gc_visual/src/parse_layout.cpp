@@ -77,9 +77,9 @@ auto parse_layout_item(GraphBroker* broker,
     {
         QWidget* widget = nullptr;
 
-        if (type == "spin" || type == "color" || type == "vector")
+        if (GraphParameterEditor::supports_type(type))
             widget = new GraphParameterEditor(type, broker, item_node);
-        else if (type == "image" || type == "text")
+        else if (GraphOutputVisualizer::supports_type(type))
             widget = new GraphOutputVisualizer(type, broker, item_node);
         else if (type == "evolution")
             widget = new EvolutionController(type, broker);

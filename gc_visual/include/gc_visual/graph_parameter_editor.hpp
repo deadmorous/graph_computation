@@ -30,6 +30,8 @@ public:
         const YAML::Node& item_node,
         QWidget* parent = nullptr);
 
+    static auto supports_type(const std::string& type) -> bool;
+
 private:
     std::shared_ptr<QWidget> res_;
 };
