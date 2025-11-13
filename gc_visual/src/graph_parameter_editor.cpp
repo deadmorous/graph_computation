@@ -22,12 +22,16 @@
 #include <yaml-cpp/yaml.h>
 
 #include <QDoubleSpinBox>
+#include <QFileDialog>
+#include <QFileInfo>
 #include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
 #include <QSpinBox>
 #include <QVBoxLayout>
 
 
-using namespace std::string_view_literals;
+using namespace std::literals;
 
 namespace {
 
@@ -133,6 +137,66 @@ private:
     EditorWidgetType* widget_;
 };
 
+class FileEditor final
+{
+public:
+
+    FileEditor(const std::string& filter,
+               const std::string& value,
+               gc::ParameterSpec param_spec,
+               GraphBroker* broker,
+               QWidget* parent) :
+        widget_{ new QWidget{ parent } }
+    {
+        auto* layout = new QHBoxLayout{widget_};
+        auto text_input = new QLineEdit{};
+        layout->addWidget(text_input);
+        auto* button = new QPushButton("&...");
+        layout->addWidget(button);
+
+        text_input->setText(QString::fromUtf8(value));
+
+        QObject::connect(
+            text_input,
+            &QLineEdit::textChanged,
+            broker,
+            [=](const QString& v)
+            {
+                auto gc_val = gc::Value(v.toUtf8().toStdString());
+                broker->set_parameter(param_spec, gc_val);
+            });
+
+        auto open_file = [this, text_input, filter]{
+            auto f_info = QFileInfo{text_input->text()};
+            auto path = QString{};
+            if (f_info.exists())
+                path = f_info.filePath();
+            else {
+                auto parent_dir = f_info.dir();
+                if (parent_dir.exists())
+                    path = parent_dir.path();
+            }
+
+            auto file_name = QFileDialog::getOpenFileName(
+                widget_, "Open File",
+                path,
+                QString::fromUtf8(filter));
+            if (file_name.isEmpty())
+                return;
+            text_input->setText(file_name);
+        };
+
+        QObject::connect(button, &QPushButton::clicked, open_file);
+    }
+
+    auto widget()
+        -> QWidget*
+    { return widget_; }
+
+private:
+    QWidget* widget_;
+};
+
 // ---
 
 template <typename Editor>
@@ -223,6 +287,33 @@ auto make_vector(const ParamBinding& binding,
     return wrap_edtor(std::move(editor));
 }
 
+auto make_file(const ParamBinding& binding,
+               GraphBroker* broker,
+               const YAML::Node& item_node)
+    -> std::shared_ptr<QWidget>
+{
+    auto filter = "All files (*)"s;
+    if (auto filter_node = item_node["filter"]; filter_node.IsDefined())
+        filter = filter_node.as<std::string>();
+
+    auto value = broker->get_parameter(binding.param_spec);
+
+    if (value.type()->aggregate_type() != gc::AggregateType::String)
+        common::throw_(
+            "Invalid binding: 'file' can only bind to a string type",
+            ", whereas" " the parameter ", common::format(binding),
+            " is of type ", value.type());
+
+    auto editor
+        = std::make_shared<FileEditor>(filter,
+                                       value.as<std::string>(),
+                                       binding.param_spec,
+                                       broker,
+                                       nullptr);
+
+    return wrap_edtor(std::move(editor));
+}
+
 using GraphParameterEditorFactoryFunc =
     std::shared_ptr<QWidget>(*)(
         const ParamBinding&, GraphBroker*, const YAML::Node&);
@@ -236,6 +327,7 @@ auto editor_factory_map() -> const GraphParameterEditorFactoryMap&
         { "spin"sv, make_spin },
         { "color"sv, make_color },
         { "vector"sv, make_vector },
+        { "file"sv, make_file },
     };
 
     return result;

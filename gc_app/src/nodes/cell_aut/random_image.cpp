@@ -65,8 +65,8 @@ public:
         assert(inputs.size() == 4_gc_ic);
         assert(result.size() == 1_gc_oc);
         const auto& size = inputs[0_gc_i].as<UintSize>();
-        auto lowest_state = inputs[1_gc_i].as<int8_t>();
-        auto range_size = inputs[2_gc_i].as<int8_t>();
+        auto lowest_state = inputs[1_gc_i].convert_to<int8_t>();
+        auto range_size = inputs[2_gc_i].convert_to<int8_t>();
         const auto& map = inputs[3_gc_i].as<std::vector<int8_t>>();
 
         result[0_gc_o] = generate_image(size, lowest_state, range_size, map);
