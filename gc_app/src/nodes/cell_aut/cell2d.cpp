@@ -196,8 +196,7 @@ private:
                     next[w-2] + next[w-1] + next[0];
         };
 
-        constexpr int NeighborhoodTerm = count_self ? 1 : 0;
-        auto rtr9 = RtRules<8+NeighborhoodTerm>(
+        auto rtr9 = RtRules<9>(
             rules.state_count, rules.min_state, rules.map9);
 
         auto const* prev_line = line(src, h-1);
@@ -364,12 +363,11 @@ private:
                      cur[w-2];
         };
 
-        constexpr int NeighborhoodTerm = count_self ? 1 : 0;
-        auto rtr9 = RtRules<8+NeighborhoodTerm>(
+        auto rtr9 = RtRules<9>(
             rules.state_count, rules.min_state, rules.map9);
-        auto rtr6 = RtRules<5+NeighborhoodTerm>(
+        auto rtr6 = RtRules<6>(
             rules.state_count, rules.min_state, rules.map6);
-        auto rtr4 = RtRules<3+NeighborhoodTerm>(
+        auto rtr4 = RtRules<4>(
             rules.state_count, rules.min_state, rules.map4);
 
         auto const* prev_line = line(src, 0);
