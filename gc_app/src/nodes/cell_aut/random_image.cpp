@@ -78,11 +78,11 @@ public:
     }
 
 private:
-    auto generate_image(
+    static auto generate_image(
         const UintSize& size,
         int8_t lowest_state,
         int8_t range_size,
-        const std::vector<int8_t>& map) const -> I8Image
+        const std::vector<int8_t>& map) -> I8Image
     {
         if (range_size == 0)
             throw std::invalid_argument(
