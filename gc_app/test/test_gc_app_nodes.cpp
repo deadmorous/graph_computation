@@ -11,6 +11,7 @@
 #include "gc_app/computation_node_registry.hpp"
 #include "gc_app/nodes/cell_aut/cell2d.hpp"
 #include "gc_app/nodes/cell_aut/life.hpp"
+#include "gc_app/nodes/cell_aut/random_image.hpp"
 #include "gc_app/nodes/num/eratosthenes_sieve.hpp"
 #include "gc_app/nodes/num/filter_seq.hpp"
 #include "gc_app/nodes/num/multiply.hpp"
@@ -161,6 +162,57 @@ TEST(GcApp_Node, Life)
 
     node->compute_outputs(outputs, inputs, {}, {});
     ASSERT_EQ(outputs[0].type(), gc::type_of<I8Image>());
+}
+
+TEST(GcApp_Node, RandomImage)
+{
+    auto node = cell_aut::make_random_image({}, {});
+
+    ASSERT_EQ(node->input_count(), 4_gc_ic);
+    ASSERT_EQ(node->output_count(), 1_gc_oc);
+
+    ASSERT_EQ(node->input_names().size(), 4_gc_ic);
+
+    ASSERT_EQ(node->input_names()[0_gc_i], "size"sv);
+    ASSERT_EQ(node->input_names()[1_gc_i], "lowest_state"sv);
+    ASSERT_EQ(node->input_names()[2_gc_i], "range_size"sv);
+    ASSERT_EQ(node->input_names()[3_gc_i], "map"sv);
+
+    ASSERT_EQ(node->output_names().size(), 1_gc_oc);
+    ASSERT_EQ(node->output_names()[0_gc_o], "image");
+
+    gc::ValueVec inputs(4);
+    gc::ValueVec outputs(1);
+
+    node->default_inputs(inputs);
+    ASSERT_EQ(inputs[0].type(), gc::type_of<UintSize>());
+    ASSERT_EQ(inputs[1].type(), gc::type_of<int8_t>());
+    ASSERT_EQ(inputs[2].type(), gc::type_of<int8_t>());
+    ASSERT_EQ(inputs[3].type(), gc::type_of<std::vector<int8_t>>());
+
+    ASSERT_EQ(inputs[0].as<UintSize>(), UintSize(100, 100));
+    ASSERT_EQ(inputs[1].as<int8_t>(), int8_t{0});
+    ASSERT_EQ(inputs[2].as<int8_t>(), int8_t{2});
+    ASSERT_EQ(inputs[3].as<std::vector<int8_t>>(), std::vector<int8_t>{});
+
+    node->compute_outputs(outputs, inputs, {}, {});
+    ASSERT_EQ(outputs[0].type(), gc::type_of<I8Image>());
+
+    const auto& img = outputs[0].as<I8Image>();
+    EXPECT_EQ(img.size, UintSize(100, 100));
+    size_t n0{};
+    size_t n1{};
+    for (auto pixel : img.data)
+    {
+        if (pixel == 0)
+            ++n0;
+        else if (pixel == 1)
+            ++n1;
+        else
+            FAIL() << "Unexpected pixel value";
+    }
+    EXPECT_LT(n0, 2*n1);
+    EXPECT_LT(n1, 2*n0);
 }
 
 TEST(GcApp_Node, ImageColorizer)
