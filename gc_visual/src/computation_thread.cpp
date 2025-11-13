@@ -117,8 +117,6 @@ auto ComputationThread::on_finished()
 auto ComputationThread::run()
     -> void
 {
-    ok_ = false;
-
     stop_source_ = {};
 
     if (skip_ == 0)
@@ -128,7 +126,7 @@ auto ComputationThread::run()
         { emit progress(inode, node_progress); };
 
         clear_feedback();
-        ok_ = compute(computation_, stop_source_.get_token(), &graph_progress);
+        try_compute(graph_progress);
     }
     else
     {
@@ -139,11 +137,23 @@ auto ComputationThread::run()
         for (size_t i=0; i<skip_; ++i)
         {
             set_feedback();
-            ok_ = compute(
-                computation_, stop_source_.get_token(), &graph_progress);
+            try_compute(graph_progress);
             if (!ok_)
                 break;
         }
+    }
+}
+
+auto ComputationThread::try_compute(const auto& graph_progress) -> void
+{
+    ok_ = false;
+    try {
+        ok_ = compute(
+            computation_, stop_source_.get_token(), &graph_progress);
+    }
+    catch (std::exception& e)
+    {
+        emit computation_error(QString::fromUtf8(e.what()));
     }
 }
 

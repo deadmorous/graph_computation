@@ -56,5 +56,5 @@ private:
 
     std::chrono::steady_clock::time_point computing_start_time_;
     std::chrono::steady_clock::time_point computing_end_time_;
-    QLabel* computing_time_indicator_;
+    QLabel* status_indicator_;
 };

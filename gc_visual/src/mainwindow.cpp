@@ -125,8 +125,8 @@ MainWindow::MainWindow(const gc_visual::ConfigSpecification& spec,
 
     setMenuBar(menu_bar);
 
-    computing_time_indicator_ = new QLabel{};
-    statusBar()->addPermanentWidget(computing_time_indicator_);
+    status_indicator_ = new QLabel{};
+    statusBar()->addPermanentWidget(status_indicator_);
 
     auto progress_widget = new ComputationProgressWidget{};
     statusBar()->addPermanentWidget(progress_widget);
@@ -175,6 +175,9 @@ MainWindow::MainWindow(const gc_visual::ConfigSpecification& spec,
             set_computing_end_time);
     connect(&computation_thread_, &ComputationThread::progress,
             set_computing_end_time);
+
+    connect(&computation_thread_, &ComputationThread::computation_error,
+            status_indicator_, &QLabel::setText);
 
     load(spec);
 }
@@ -340,5 +343,5 @@ auto MainWindow::update_computing_time_indicator()
     auto dt =
         std::chrono::nanoseconds{ computing_end_time_ - computing_start_time_ }
         .count() / 1e9;
-    computing_time_indicator_->setText(QString::number(dt) + " s");
+    status_indicator_->setText(QString::number(dt) + " s");
 }

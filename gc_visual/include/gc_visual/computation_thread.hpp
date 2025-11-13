@@ -44,6 +44,9 @@ signals:
     auto running_state_changed(bool running)
         -> void;
 
+    auto computation_error(QString what)
+        -> void;
+
 public slots:
     auto advance_evolution(size_t skip = 0)
         -> void;
@@ -72,6 +75,7 @@ protected:
     auto run() -> void override;
 
 private:
+    auto try_compute(const auto& graph_progress) -> void;
     auto clear_feedback() -> void;
     auto set_feedback() -> void;
 
