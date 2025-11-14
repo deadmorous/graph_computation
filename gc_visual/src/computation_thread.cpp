@@ -22,6 +22,8 @@ ComputationThread::ComputationThread(QObject* parent) :
             this, &ComputationThread::on_started);
     connect(this, &ComputationThread::finished,
             this, &ComputationThread::on_finished);
+    connect(this, &ComputationThread::queued_start,
+            this, &QThread::start, Qt::QueuedConnection);
 }
 
 auto ComputationThread::computation()
@@ -50,7 +52,7 @@ auto ComputationThread::advance_evolution(size_t skip)
         return;
 
     skip_ = skip;
-    start();
+    start_computation();
 }
 
 auto ComputationThread::reset_evolution()
@@ -61,7 +63,7 @@ auto ComputationThread::reset_evolution()
     auto& res = computation_.result;
     res.computation_ts = gc::Timestamp{};
     std::ranges::fill(res.node_ts, gc::Timestamp{});
-    start();
+    start_computation();
 }
 
 auto ComputationThread::set_evolution(
@@ -88,6 +90,12 @@ auto ComputationThread::set_parameter(const gc::ParameterSpec& spec,
     stop();
     skip_ = 0;
     computation_.source_inputs.values[spec.input].set(spec.path, value);
+}
+
+auto ComputationThread::start_computation()
+    -> void
+{
+    emit queued_start(InheritPriority);
 }
 
 auto ComputationThread::stop()

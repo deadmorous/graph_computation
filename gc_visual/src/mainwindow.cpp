@@ -313,7 +313,7 @@ auto MainWindow::load(const gc_visual::ConfigSpecification& spec)
                 }
             });
 
-        computation_thread_.start();
+        computation_thread_.start_computation();
     }
     catch (std::exception& e)
     {

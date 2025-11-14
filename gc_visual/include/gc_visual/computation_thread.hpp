@@ -64,12 +64,22 @@ public slots:
     auto set_parameter(const gc::ParameterSpec&, const gc::Value&)
         -> void;
 
+    auto start_computation()
+        -> void;
+
     auto stop()
         -> void;
 
 private slots:
     auto on_started() -> void;
     auto on_finished() -> void;
+
+signals:
+    auto queued_start(Priority)
+        -> void;
+
+private:
+    using QThread::start;
 
 protected:
     auto run() -> void override;

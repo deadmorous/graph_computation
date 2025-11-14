@@ -100,7 +100,7 @@ auto GraphBroker::set_parameter(const gc::ParameterSpec& spec,
     -> void
 {
     computation_thread_.set_parameter(spec, value);
-    computation_thread_.start();
+    computation_thread_.start_computation();
 }
 
 auto GraphBroker::on_computation_finished()
