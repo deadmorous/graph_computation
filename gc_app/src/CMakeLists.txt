@@ -8,6 +8,7 @@ add_library(gc_app-lib STATIC
     computation_node_registry.cpp
     nodes/cell_aut/cell2d.cpp
     nodes/cell_aut/life.cpp
+    nodes/cell_aut/offset_image.cpp
     nodes/cell_aut/random_image.cpp
     nodes/cell_aut/rule_reader.cpp
     nodes/num/eratosthenes_sieve.cpp

@@ -11,6 +11,7 @@
 #include "gc_app/computation_node_registry.hpp"
 #include "gc_app/nodes/cell_aut/cell2d.hpp"
 #include "gc_app/nodes/cell_aut/life.hpp"
+#include "gc_app/nodes/cell_aut/offset_image.hpp"
 #include "gc_app/nodes/cell_aut/random_image.hpp"
 #include "gc_app/nodes/cell_aut/rule_reader.hpp"
 #include "gc_app/nodes/num/eratosthenes_sieve.hpp"
@@ -163,6 +164,43 @@ TEST(GcApp_Node, Life)
 
     node->compute_outputs(outputs, inputs, {}, {});
     ASSERT_EQ(outputs[0].type(), gc::type_of<I8Image>());
+}
+
+TEST(GcApp_Node, OffsetImage)
+{
+    auto node = cell_aut::make_offset_image({}, {});
+
+    ASSERT_EQ(node->input_count(), 2_gc_ic);
+    ASSERT_EQ(node->output_count(), 1_gc_oc);
+
+    ASSERT_EQ(node->input_names().size(), 2_gc_ic);
+
+    ASSERT_EQ(node->input_names()[0_gc_i], "input_image"sv);
+    ASSERT_EQ(node->input_names()[1_gc_i], "offset"sv);
+
+    ASSERT_EQ(node->output_names().size(), 1_gc_oc);
+    ASSERT_EQ(node->output_names()[0_gc_o], "output_image");
+
+    gc::ValueVec inputs(2);
+    gc::ValueVec outputs(1);
+
+    node->default_inputs(inputs);
+    ASSERT_EQ(inputs[0].type(), gc::type_of<I8Image>());
+    ASSERT_EQ(inputs[1].type(), gc::type_of<int8_t>());
+
+    auto& input_image = inputs[0].as<I8Image>();
+    auto& offset = inputs[1].as<int8_t>();
+
+    input_image = I8Image{
+        .size{2, 2},
+        .data{0, 1, -1, 2}
+    };
+
+    node->compute_outputs(outputs, inputs, {}, {});
+    const auto& output_image = outputs[0].as<I8Image>();
+    EXPECT_EQ(output_image.size, UintSize(2, 2));
+    auto expected_output_pixels = std::vector<int8_t>{-1, 0, -2, 1};
+    EXPECT_EQ(output_image.data, expected_output_pixels);
 }
 
 TEST(GcApp_Node, RandomImage)
