@@ -8,15 +8,16 @@ add_executable(
     gc-lib-test
     main.cpp
     test_algorithm.cpp
+    test_build.cpp
     test_binomial.cpp
+    test_expr_calculator.cpp
     test_func_ref.cpp
     test_gc.cpp
     test_gc_type_value.cpp
     test_index_set.cpp
     test_nested_seq.cpp
     test_pow2.cpp
-    test_strong.cpp
-    test_build.cpp)
+    test_strong.cpp)
 
 target_link_libraries(
     gc-lib-test
