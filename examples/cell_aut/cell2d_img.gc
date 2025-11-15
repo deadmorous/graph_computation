@@ -55,7 +55,7 @@ graph:
       destinations: [palette_maker.path_1]
     - name: palette_maker_value_1
       type: Color
-      value: 0xffff0000
+      value: 0xffff00ff
       destinations: [palette_maker.value_1]
 
 evolution:
@@ -70,11 +70,11 @@ layout:
     - type: horizontal_layout
       items:
       - type: file
-        bind: rules
-        filter: "Rule files (*.rul)"
-      - type: file
         bind: initial_image_file
         filter: "Image files (*.png)"
+      - type: file
+        bind: rules
+        filter: "Rule files (*.rul)"
     - type: image
       bind: image_colorizer
     - type: stretch
