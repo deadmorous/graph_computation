@@ -35,7 +35,7 @@ graph:
       destinations: [min_state.path]
     - name: initial_image_file
       type: String
-      value: "./acorn3.png"
+      value: "images/acorn3.png"
       destinations: [initial_image.file]
     - name: rules
       type: String

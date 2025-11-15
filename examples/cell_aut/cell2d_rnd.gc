@@ -28,14 +28,6 @@ graph:
         width: 300
         height: 300
       destinations: [initial_image.size]
-#    - name: initial_image_lowest_state
-#      type: I8
-#      value: -1
-#      destinations: [initial_image.lowest_state]
-#    - name: initial_image_range_size
-#      type: I8
-#      value: 3
-#      destinations: [initial_image.range_size]
     - name: rules
       type: String
       value: "rules/lifelife.rul"
