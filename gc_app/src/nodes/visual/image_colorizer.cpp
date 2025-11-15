@@ -31,7 +31,7 @@ public:
         -> gc::InputNames override
     {
         return gc::node_input_names<ImageColorizer>(
-            "input_image"sv, "palette"sv);
+            "input_image"sv, "palette"sv, "min_state"sv);
     }
 
     auto output_names() const
@@ -41,7 +41,7 @@ public:
     auto default_inputs(gc::InputValues result) const
         -> void override
     {
-        assert(result.size() == 2_gc_ic);
+        assert(result.size() == 3_gc_ic);
         result[0_gc_i] = Image<int8_t>{
             .size = {100, 100},
             .data = std::vector<int8_t>(100*100, 0)
@@ -53,6 +53,7 @@ public:
                 rgba(C{0xff}, C{0xff}, C{0xff}) },
             .overflow_color = rgba(C{0xcc}, C{0x00}, C{0x00})
         };
+        result[2_gc_i] = int8_t{0};
     }
 
     auto compute_outputs(
@@ -62,10 +63,11 @@ public:
             const gc::NodeProgress& progress) const
         -> bool override
     {
-        assert(inputs.size() == 2_gc_ic);
+        assert(inputs.size() == 3_gc_ic);
         assert(result.size() == 1_gc_oc);
         const auto& input_image = inputs[0_gc_i].as<Image<int8_t>>();
         const auto& palette = inputs[1_gc_i].as<IndexedPalette>();
+        auto min_state = inputs[2_gc_i].convert_to<int8_t>();
 
         auto& output_image = [&]() -> ColorImage&
         {
@@ -89,7 +91,7 @@ public:
         auto N = palette.color_map.size();
         for (auto _ : common::index_range<size_t>(input_image.data.size()))
         {
-            auto in = *input_pixel++;
+            auto in = *input_pixel++ - min_state;
             auto out = in >= 0 && in < N
                            ? palette.color_map[in]
                            : palette.overflow_color;

@@ -273,17 +273,18 @@ TEST(GcApp_Node, ImageColorizer)
 {
     auto node = visual::make_image_colorizer({}, {});
 
-    ASSERT_EQ(node->input_count(), 2_gc_ic);
+    ASSERT_EQ(node->input_count(), 3_gc_ic);
     ASSERT_EQ(node->output_count(), 1_gc_oc);
 
-    ASSERT_EQ(node->input_names().size(), 2_gc_ic);
+    ASSERT_EQ(node->input_names().size(), 3_gc_ic);
     ASSERT_EQ(node->input_names()[0_gc_i], "input_image");
     ASSERT_EQ(node->input_names()[1_gc_i], "palette");
+    ASSERT_EQ(node->input_names()[2_gc_i], "min_state");
 
     ASSERT_EQ(node->output_names().size(), 1_gc_oc);
     ASSERT_EQ(node->output_names()[0_gc_o], "output_image");
 
-    gc::ValueVec inputs(2);
+    gc::ValueVec inputs(3);
     gc::ValueVec outputs(1);
 
     using C = ColorComponent;
@@ -300,6 +301,7 @@ TEST(GcApp_Node, ImageColorizer)
         .color_map = { black, white, green },
         .overflow_color = red
     };
+    inputs[2] = int8_t{0};
 
     node->compute_outputs(outputs, inputs, {}, {});
     ASSERT_EQ(outputs[0].type(), gc::type_of<ColorImage>());
