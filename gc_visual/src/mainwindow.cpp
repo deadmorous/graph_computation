@@ -156,25 +156,12 @@ MainWindow::MainWindow(const gc_visual::ConfigSpecification& spec,
     connect(progress_widget, &ComputationProgressWidget::stop,
             stop_action, &QAction::trigger);
 
-    auto set_computing_start_time = [this]
-    {
-        computing_start_time_ = std::chrono::steady_clock::now();
-        computing_end_time_ = computing_start_time_;
-        update_computing_time_indicator();
-    };
-
-    auto set_computing_end_time = [this]
-    {
-        computing_end_time_ = std::chrono::steady_clock::now();
-        update_computing_time_indicator();
-    };
-
     connect(&computation_thread_, &ComputationThread::started,
-            set_computing_start_time);
+            this, &MainWindow::set_computing_start_time);
     connect(&computation_thread_, &ComputationThread::finished,
-            set_computing_end_time);
+            this, &MainWindow::set_computing_end_time);
     connect(&computation_thread_, &ComputationThread::progress,
-            set_computing_end_time);
+            this, &MainWindow::set_computing_end_time);
 
     connect(&computation_thread_, &ComputationThread::computation_error,
             status_indicator_, &QLabel::setText);
@@ -239,6 +226,21 @@ auto MainWindow::on_load_finished(const gc_visual::ConfigSpecification& spec)
     }
 }
 
+auto MainWindow::set_computing_start_time()
+    -> void
+{
+    computing_start_time_ = std::chrono::steady_clock::now();
+    computing_end_time_ = computing_start_time_;
+    update_computing_time_indicator();
+}
+
+auto MainWindow::set_computing_end_time()
+    -> void
+{
+    computing_end_time_ = std::chrono::steady_clock::now();
+    update_computing_time_indicator();
+}
+
 auto MainWindow::closeEvent(QCloseEvent*)
     -> void
 { computation_thread_.stop(); }
@@ -287,8 +289,6 @@ auto MainWindow::load(const gc_visual::ConfigSpecification& spec)
             &ComputationThread::finished,
             this,
             [config, node_map, input_names, spec, this]{
-                computation_thread_.disconnect(this);
-
                 try {
                     if (!computation_thread_.ok())
                         common::throw_("Graph computation has been terminated");
@@ -311,7 +311,8 @@ auto MainWindow::load(const gc_visual::ConfigSpecification& spec)
                     QMessageBox::critical(
                         this, "Load failed", QString::fromUtf8(e.what()));
                 }
-            });
+            },
+            Qt::SingleShotConnection);
 
         computation_thread_.start_computation();
     }

@@ -37,6 +37,8 @@ private slots:
     auto edit() -> void;
     auto reload() -> void;
     auto on_load_finished(const gc_visual::ConfigSpecification& spec) -> void;
+    auto set_computing_start_time() -> void;
+    auto set_computing_end_time() -> void;
 
 signals:
     auto load_finished(const gc_visual::ConfigSpecification& spec) -> void;
