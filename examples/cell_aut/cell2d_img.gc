@@ -1,0 +1,80 @@
+graph:
+  nodes:
+    - type: image_loader
+      name: initial_image
+    - type: rule_reader
+      name: rule_reader
+    - type: project
+      name: min_state
+    - type: offset_image
+      name: offset_initial_image
+    - name: cell2d
+      type: cell2d
+    - name: palette_maker
+      type: merge
+      init:
+        - type: I32
+          value: 2
+    - name: image_colorizer
+      type: image_colorizer
+
+  edges:
+    - [initial_image.image, offset_initial_image.input_image]
+    - [rule_reader.rules, min_state.value]
+    - [min_state.projection, offset_initial_image.offset]
+    - [offset_initial_image.output_image, cell2d.input_state]
+    - [initial_image.color_map, palette_maker.value_0]
+    - [palette_maker.output, image_colorizer.palette]
+    - [rule_reader.rules, cell2d.rules]
+    - [min_state.projection, image_colorizer.min_state]
+    - [cell2d.output_state, image_colorizer.input_image]
+  inputs:
+    - name: min_state_path
+      type: ValuePath
+      value: "/min_state"
+      destinations: [min_state.path]
+    - name: initial_image_file
+      type: String
+      value: "./acorn3.png"
+      destinations: [initial_image.file]
+    - name: rules
+      type: String
+      value: "rules/lifelife.rul"
+      destinations: [rule_reader.file]
+    - name: palette_maker_output_type
+      type: String
+      value: "IndexedPalette"
+      destinations: [palette_maker.output_type]
+    - name: palette_maker_path_0
+      type: ValuePath
+      value: "/color_map"
+      destinations: [palette_maker.path_0]
+    - name: palette_maker_path_1
+      type: ValuePath
+      value: "/overflow_color"
+      destinations: [palette_maker.path_1]
+    - name: palette_maker_value_1
+      type: Color
+      value: 0xffff0000
+      destinations: [palette_maker.value_1]
+
+evolution:
+  feedback:
+    - source: cell2d.output_state
+      sink: [cell2d.input_state]
+
+layout:
+  type: vertical_layout
+  items:
+    - type: evolution
+    - type: horizontal_layout
+      items:
+      - type: file
+        bind: rules
+        filter: "Rule files (*.rul)"
+      - type: file
+        bind: initial_image_file
+        filter: "Image files (*.png)"
+    - type: image
+      bind: image_colorizer
+    - type: stretch
