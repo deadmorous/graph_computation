@@ -162,9 +162,8 @@ MainWindow::MainWindow(const gc_visual::ConfigSpecification& spec,
             this, &MainWindow::set_computing_end_time);
     connect(&computation_thread_, &ComputationThread::progress,
             this, &MainWindow::set_computing_end_time);
-
     connect(&computation_thread_, &ComputationThread::computation_error,
-            status_indicator_, &QLabel::setText);
+            this, &MainWindow::set_computation_error_message);
 
     load(spec);
 }
@@ -229,6 +228,7 @@ auto MainWindow::on_load_finished(const gc_visual::ConfigSpecification& spec)
 auto MainWindow::set_computing_start_time()
     -> void
 {
+    ok_ = true;
     computing_start_time_ = std::chrono::steady_clock::now();
     computing_end_time_ = computing_start_time_;
     update_computing_time_indicator();
@@ -238,7 +238,14 @@ auto MainWindow::set_computing_end_time()
     -> void
 {
     computing_end_time_ = std::chrono::steady_clock::now();
-    update_computing_time_indicator();
+    if (ok_)
+        update_computing_time_indicator();
+}
+
+auto MainWindow::set_computation_error_message(const QString& text) -> void
+{
+    ok_ = false;
+    status_indicator_->setText(text);
 }
 
 auto MainWindow::closeEvent(QCloseEvent*)

@@ -39,6 +39,7 @@ private slots:
     auto on_load_finished(const gc_visual::ConfigSpecification& spec) -> void;
     auto set_computing_start_time() -> void;
     auto set_computing_end_time() -> void;
+    auto set_computation_error_message(const QString&) -> void;
 
 signals:
     auto load_finished(const gc_visual::ConfigSpecification& spec) -> void;
@@ -59,4 +60,5 @@ private:
     std::chrono::steady_clock::time_point computing_start_time_;
     std::chrono::steady_clock::time_point computing_end_time_;
     QLabel* status_indicator_;
+    bool ok_{true};
 };
