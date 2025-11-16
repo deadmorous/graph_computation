@@ -1,0 +1,76 @@
+graph:
+  nodes:
+    - type: random_image
+      name: initial_image
+    - type: gen_rule_reader
+      name: gen_rule_reader
+    - type: generate_rules
+      name: generate_rules
+    - name: cell2d
+      type: cell2d
+    - name: image_colorizer
+      type: image_colorizer
+    - name: state_count
+      type: project
+    - name: min_state
+      type: project
+
+  edges:
+    - [gen_rule_reader.gen_rules, generate_rules.gen_rules]
+    - [generate_rules.rules, state_count.value]
+    - [state_count.projection, initial_image.range_size]
+    - [generate_rules.rules, min_state.value ]
+    - [min_state.projection, initial_image.lowest_state]
+    - [initial_image.image, cell2d.input_state]
+    - [generate_rules.rules, cell2d.rules]
+    - [cell2d.output_state, image_colorizer.input_image]
+  inputs:
+    - name: initial_image_size
+      type: UintSize
+      value:
+        width: 300
+        height: 300
+      destinations: [initial_image.size]
+    - name: gen_rules
+      type: String
+      value: "gen-rules/cosmos.gen"
+      destinations: [gen_rule_reader.file]
+
+    # TODO: Generate palette for all states
+    - name: palette
+      type: IndexedPalette
+      value:
+        color_map:
+          - 0xffffffff
+          - 0xff5953ff
+          - 0xff8adabf
+          - 0xffffc7f9
+          - 0xffffff7f
+          - 0xffd40004
+          - 0xff00aa00
+        overflow_color: 0xff000000
+      destinations: [image_colorizer.palette]
+    - name: state_count
+      type: ValuePath
+      value: "/state_count"
+      destinations: [state_count.path]
+    - name: min_state
+      type: ValuePath
+      value: "/min_state"
+      destinations: [min_state.path]
+
+evolution:
+  feedback:
+    - source: cell2d.output_state
+      sink: [cell2d.input_state]
+
+layout:
+  type: vertical_layout
+  items:
+    - type: evolution
+    - type: file
+      bind: gen_rules
+      filter: "Rule generation files (*.gen)"
+    - type: image
+      bind: image_colorizer
+    - type: stretch
