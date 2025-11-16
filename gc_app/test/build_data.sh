@@ -20,4 +20,6 @@ SRC_DIR="$SCRIPT_DIR/data"
 DST_DIR="$TARGET_DIR/data"
 echo "Building gc-app test data in directory '$DST_DIR'"
 mkdir -p "$DST_DIR"
-cp "$SRC_DIR/acorn.png" "$DST_DIR/"
+for file in "$SRC_DIR"/*; do
+    cp "$file" "$DST_DIR/"
+done

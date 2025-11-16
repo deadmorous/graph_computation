@@ -7,6 +7,8 @@ project(gc_app-lib LANGUAGES CXX)
 add_library(gc_app-lib STATIC
     computation_node_registry.cpp
     nodes/cell_aut/cell2d.cpp
+    nodes/cell_aut/gen_rule_reader.cpp
+    nodes/cell_aut/generate_rules.cpp
     nodes/cell_aut/life.cpp
     nodes/cell_aut/offset_image.cpp
     nodes/cell_aut/random_image.cpp

@@ -10,6 +10,8 @@
 
 #include "gc_app/computation_node_registry.hpp"
 #include "gc_app/nodes/cell_aut/cell2d.hpp"
+#include "gc_app/nodes/cell_aut/gen_rule_reader.hpp"
+#include "gc_app/nodes/cell_aut/generate_rules.hpp"
 #include "gc_app/nodes/cell_aut/life.hpp"
 #include "gc_app/nodes/cell_aut/offset_image.hpp"
 #include "gc_app/nodes/cell_aut/random_image.hpp"
@@ -23,6 +25,7 @@
 #include "gc_app/nodes/util/uint_size.hpp"
 #include "gc_app/nodes/visual/image_colorizer.hpp"
 #include "gc_app/nodes/visual/image_loader.hpp"
+#include "gc_app/types/cell2d_gen_rules.hpp"
 #include "gc_app/types/cell2d_rules.hpp"
 #include "gc_app/types/image.hpp"
 #include "gc_app/types/palette.hpp"
@@ -141,6 +144,111 @@ TEST(GcApp_Node, Cell2d)
 
     node->compute_outputs(outputs, inputs, {}, {});
     ASSERT_EQ(outputs[0].type(), gc::type_of<I8Image>());
+}
+
+TEST(GcApp_Node, GenRuleReader)
+{
+    auto node = cell_aut::make_gen_rule_reader({}, {});
+
+    ASSERT_EQ(node->input_count(), 1_gc_ic);
+    ASSERT_EQ(node->output_count(), 1_gc_oc);
+
+    ASSERT_EQ(node->input_names().size(), 1_gc_ic);
+    ASSERT_EQ(node->input_names()[0_gc_i], "file");
+
+    ASSERT_EQ(node->output_names().size(), 1_gc_oc);
+    ASSERT_EQ(node->output_names()[0_gc_o], "gen_rules");
+
+    gc::ValueVec inputs(1);
+    gc::ValueVec outputs(1);
+
+    node->default_inputs(inputs);
+    ASSERT_EQ(inputs[0].type(), gc::type_of<std::string>());
+
+    // Case 1 - read gen_rules
+    {
+        inputs[0] = "data/hunt.gen"s;
+        node->compute_outputs(outputs, inputs, {}, {});
+        ASSERT_EQ(outputs[0].type(), gc::type_of<Cell2dGenRules>());
+
+        const auto& actual_gen_rules = outputs[0].as<Cell2dGenRules>();
+        auto expected_gen_rules = Cell2dGenRules{
+            .state_count = 128,
+            .min_state = 0,
+            .tor = true,
+            .count_self = false,
+            .map9{
+                .formula = "4*n*(127-n/9)/1143"
+            },
+            .map6{},
+            .map4{}
+        };
+
+        EXPECT_EQ(actual_gen_rules, expected_gen_rules);
+    }
+
+    // Case 2 - check if "count center cell" heuristics works
+    {
+        inputs[0] = "data/mid.gen"s;
+        node->compute_outputs(outputs, inputs, {}, {});
+
+        const auto& actual_gen_rules = outputs[0].as<Cell2dGenRules>();
+        auto expected_gen_rules = Cell2dGenRules{
+            .state_count = 128,
+            .min_state = 0,
+            .tor = false,
+            .count_self = true,
+            .map9{
+                .formula = "n/9"
+            },
+            .map6{
+                .formula = "n/6"
+            },
+            .map4{
+                .formula = "n/4"
+            }
+        };
+
+        EXPECT_EQ(actual_gen_rules, expected_gen_rules);
+    }
+}
+
+TEST(GcApp_Node, GenerateRules)
+{
+    auto node = cell_aut::make_generate_rules({}, {});
+
+    ASSERT_EQ(node->input_count(), 1_gc_ic);
+    ASSERT_EQ(node->output_count(), 1_gc_oc);
+
+    ASSERT_EQ(node->input_names().size(), 1_gc_ic);
+    ASSERT_EQ(node->input_names()[0_gc_i], "gen_rules");
+
+    ASSERT_EQ(node->output_names().size(), 1_gc_oc);
+    ASSERT_EQ(node->output_names()[0_gc_o], "rules");
+
+    gc::ValueVec inputs(1);
+    gc::ValueVec outputs(1);
+
+    node->default_inputs(inputs);
+    ASSERT_EQ(inputs[0].type(), gc::type_of<Cell2dGenRules>());
+
+    inputs[0] = Cell2dGenRules{
+        .state_count = 128,
+        .min_state = 0,
+        .tor = false,
+        .count_self = true,
+        .map9{
+            .formula = "n/9"
+        },
+        .map6{
+            .formula = "n/6"
+        },
+        .map4{
+            .formula = "n/4"
+        }
+    };
+    node->compute_outputs(outputs, inputs, {}, {});
+    ASSERT_EQ(outputs[0].type(), gc::type_of<Cell2dRules>());
 }
 
 TEST(GcApp_Node, Life)
