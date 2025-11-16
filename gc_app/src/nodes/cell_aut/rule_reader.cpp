@@ -75,7 +75,7 @@ auto read_rules(const std::string& path) -> Cell2dRules
     auto f = std::fstream( path.c_str() );
     if( !f.is_open() )
         throw std::runtime_error(
-            common::format("CELL2D: Can't open rules file ", path));
+            common::format("read_rules: Can't open rules file ", path));
     f.exceptions(std::ios::failbit);
     ignore_comments(f);
     auto rules = Cell2dRules{};
@@ -116,7 +116,7 @@ auto read_rules(const std::string& path) -> Cell2dRules
         rule = read_rule("map6", i++);
 
     for(size_t i=0; auto& rule : rules.map4)
-        rule = read_rule("map6", i++);
+        rule = read_rule("map4", i++);
 
     rules.tor = false;
 
