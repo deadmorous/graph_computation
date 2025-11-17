@@ -11,7 +11,9 @@
 #include "gc_app/computation_node_registry.hpp"
 
 #include "gc_app/nodes/cell_aut/cell2d.hpp"
+#include "gc_app/nodes/cell_aut/gen_cmap_reader.hpp"
 #include "gc_app/nodes/cell_aut/gen_rule_reader.hpp"
+#include "gc_app/nodes/cell_aut/generate_cmap.hpp"
 #include "gc_app/nodes/cell_aut/generate_rules.hpp"
 #include "gc_app/nodes/cell_aut/life.hpp"
 #include "gc_app/nodes/cell_aut/offset_image.hpp"
@@ -41,7 +43,9 @@ auto populate_node_registry(gc::ComputationNodeRegistry& result)
     result.register_value(#name, gc_app::ns::make_##name)
 
     GC_APP_REGISTER(cell_aut, cell2d);
+    GC_APP_REGISTER(cell_aut, gen_cmap_reader);
     GC_APP_REGISTER(cell_aut, gen_rule_reader);
+    GC_APP_REGISTER(cell_aut, generate_cmap);
     GC_APP_REGISTER(cell_aut, generate_rules);
     GC_APP_REGISTER(cell_aut, life);
     GC_APP_REGISTER(cell_aut, offset_image);

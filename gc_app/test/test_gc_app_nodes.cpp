@@ -10,7 +10,9 @@
 
 #include "gc_app/computation_node_registry.hpp"
 #include "gc_app/nodes/cell_aut/cell2d.hpp"
+#include "gc_app/nodes/cell_aut/gen_cmap_reader.hpp"
 #include "gc_app/nodes/cell_aut/gen_rule_reader.hpp"
+#include "gc_app/nodes/cell_aut/generate_cmap.hpp"
 #include "gc_app/nodes/cell_aut/generate_rules.hpp"
 #include "gc_app/nodes/cell_aut/life.hpp"
 #include "gc_app/nodes/cell_aut/offset_image.hpp"
@@ -25,6 +27,7 @@
 #include "gc_app/nodes/util/uint_size.hpp"
 #include "gc_app/nodes/visual/image_colorizer.hpp"
 #include "gc_app/nodes/visual/image_loader.hpp"
+#include "gc_app/types/cell2d_gen_cmap.hpp"
 #include "gc_app/types/cell2d_gen_rules.hpp"
 #include "gc_app/types/cell2d_rules.hpp"
 #include "gc_app/types/image.hpp"
@@ -146,6 +149,92 @@ TEST(GcApp_Node, Cell2d)
     ASSERT_EQ(outputs[0].type(), gc::type_of<I8Image>());
 }
 
+TEST(GcApp_Node, GenCmapReader)
+{
+    auto node = cell_aut::make_gen_cmap_reader({}, {});
+
+    ASSERT_EQ(node->input_count(), 1_gc_ic);
+    ASSERT_EQ(node->output_count(), 1_gc_oc);
+
+    ASSERT_EQ(node->input_names().size(), 1_gc_ic);
+    ASSERT_EQ(node->input_names()[0_gc_i], "file");
+
+    ASSERT_EQ(node->output_names().size(), 1_gc_oc);
+    ASSERT_EQ(node->output_names()[0_gc_o], "gen_cmap");
+
+    gc::ValueVec inputs(1);
+    gc::ValueVec outputs(1);
+
+    node->default_inputs(inputs);
+    ASSERT_EQ(inputs[0].type(), gc::type_of<std::string>());
+
+    inputs[0] = "data/program.cf"s;
+    node->compute_outputs(outputs, inputs, {}, {});
+    ASSERT_EQ(outputs[0].type(), gc::type_of<Cell2dGenCmap>());
+
+    const auto& actual_gen_cmap = outputs[0].as<Cell2dGenCmap>();
+    auto expected_gen_cmap = Cell2dGenCmap{
+        .state_count = 256,
+        .formula = {
+            .r = "0",
+            .g = "0",
+            .b = "0"
+        },
+        .overlays = {
+            {
+                .formula = {
+                    .r = "0",
+                    .g = "0",
+                    .b = "n*4",
+                },
+                .range = {
+                    .min = 0,
+                    .max = 63,
+                    .step = 1
+                }
+            },
+            {
+                .formula = {
+                    .r = "n*4",
+                    .g = "n*4",
+                    .b = "0",
+                },
+                .range = {
+                    .min = 64,
+                    .max = 127,
+                    .step = 1
+                }
+            },
+            {
+                .formula = {
+                    .r = "0",
+                    .g = "n*4",
+                    .b = "0",
+                },
+                .range = {
+                    .min = 128,
+                    .max = 191,
+                    .step = 1
+                }
+            },
+            {
+                .formula = {
+                    .r = "n*4",
+                    .g = "0",
+                    .b = "0",
+                },
+                .range = {
+                    .min = 192,
+                    .max = 255,
+                    .step = 1
+                }
+            }
+        }
+    };
+
+    EXPECT_EQ(actual_gen_cmap, expected_gen_cmap);
+}
+
 TEST(GcApp_Node, GenRuleReader)
 {
     auto node = cell_aut::make_gen_rule_reader({}, {});
@@ -249,6 +338,72 @@ TEST(GcApp_Node, GenerateRules)
     };
     node->compute_outputs(outputs, inputs, {}, {});
     ASSERT_EQ(outputs[0].type(), gc::type_of<Cell2dRules>());
+}
+
+TEST(GcApp_Node, GenerateCmap)
+{
+    auto node = cell_aut::make_generate_cmap({}, {});
+
+    ASSERT_EQ(node->input_count(), 1_gc_ic);
+    ASSERT_EQ(node->output_count(), 1_gc_oc);
+
+    ASSERT_EQ(node->input_names().size(), 1_gc_ic);
+    ASSERT_EQ(node->input_names()[0_gc_i], "gen_cmap");
+
+    ASSERT_EQ(node->output_names().size(), 1_gc_oc);
+    ASSERT_EQ(node->output_names()[0_gc_o], "cmap");
+
+    gc::ValueVec inputs(1);
+    gc::ValueVec outputs(1);
+
+    node->default_inputs(inputs);
+    ASSERT_EQ(inputs[0].type(), gc::type_of<Cell2dGenCmap>());
+
+    inputs[0] = Cell2dGenCmap{
+        .state_count = 256,
+        .formula = {
+            .r = "n",
+            .g = "255-n",
+            .b = "n/2"
+        },
+        .overlays = {
+            {
+                .formula = {
+                    .r = "1",
+                    .g = "2",
+                    .b = "3"
+                },
+                .range = {
+                    .min = 10,
+                    .max = 20,
+                    .step = 2
+                }
+            }
+        }
+    };
+    node->compute_outputs(outputs, inputs, {}, {});
+    ASSERT_EQ(outputs[0].type(), gc::type_of<IndexedColorMap>());
+
+    const auto& cmap = outputs[0].as<IndexedColorMap>();
+    ASSERT_EQ(cmap.size(), 256);
+    using C = ColorComponent;
+    for (size_t n : common::index_range<size_t>(256))
+    {
+        auto [r, g, b, a] = r_g_b_a(cmap[n]);
+        EXPECT_EQ(a, C{0xff});
+        if (n >= 10 && n <= 20 && n % 2 == 0)
+        {
+            EXPECT_EQ(r, C{1});
+            EXPECT_EQ(g, C{2});
+            EXPECT_EQ(b, C{3});
+        }
+        else
+        {
+            EXPECT_EQ(r, C(n));
+            EXPECT_EQ(g, C(255 - n));
+            EXPECT_EQ(b, C(n / 2));
+        }
+    }
 }
 
 TEST(GcApp_Node, Life)
