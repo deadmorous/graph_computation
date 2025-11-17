@@ -8,6 +8,15 @@ graph:
       name: generate_rules
     - name: cell2d
       type: cell2d
+    - name: gen_cmap_reader
+      type: gen_cmap_reader
+    - type: generate_cmap
+      name: generate_cmap
+    - name: palette_maker
+      type: merge
+      init:
+        - type: I32
+          value: 2
     - name: image_colorizer
       type: image_colorizer
     - name: state_count
@@ -24,6 +33,11 @@ graph:
     - [initial_image.image, cell2d.input_state]
     - [generate_rules.rules, cell2d.rules]
     - [cell2d.output_state, image_colorizer.input_image]
+    - [gen_cmap_reader.gen_cmap, generate_cmap.gen_cmap]
+    - [generate_cmap.cmap, palette_maker.value_0]
+    - [palette_maker.output, image_colorizer.palette]
+    - [min_state.projection, image_colorizer.min_state]
+
   inputs:
     - name: initial_image_size
       type: UintSize
@@ -35,21 +49,28 @@ graph:
       type: String
       value: "gen-rules/cosmos.gen"
       destinations: [gen_rule_reader.file]
+    - name: gen_cmap
+      type: String
+      value: "gen-colormaps/program.cf"
+      destinations: [gen_cmap_reader.file]
 
-    # TODO: Generate palette for all states
-    - name: palette
-      type: IndexedPalette
-      value:
-        color_map:
-          - 0xffffffff
-          - 0xff5953ff
-          - 0xff8adabf
-          - 0xffffc7f9
-          - 0xffffff7f
-          - 0xffd40004
-          - 0xff00aa00
-        overflow_color: 0xff000000
-      destinations: [image_colorizer.palette]
+    - name: palette_maker_output_type
+      type: String
+      value: "IndexedPalette"
+      destinations: [palette_maker.output_type]
+    - name: palette_maker_path_0
+      type: ValuePath
+      value: "/color_map"
+      destinations: [palette_maker.path_0]
+    - name: palette_maker_path_1
+      type: ValuePath
+      value: "/overflow_color"
+      destinations: [palette_maker.path_1]
+    - name: palette_maker_value_1
+      type: Color
+      value: 0xffff00ff
+      destinations: [palette_maker.value_1]
+
     - name: state_count
       type: ValuePath
       value: "/state_count"
@@ -68,9 +89,14 @@ layout:
   type: vertical_layout
   items:
     - type: evolution
-    - type: file
-      bind: gen_rules
-      filter: "Rule generation files (*.gen)"
+    - type: horizontal_layout
+      items:
+      - type: file
+        bind: gen_cmap
+        filter: "Colormap generation files (*.cf)"
+      - type: file
+        bind: gen_rules
+        filter: "Rule generation files (*.gen)"
     - type: image
       bind: image_colorizer
     - type: stretch
