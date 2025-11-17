@@ -3,12 +3,14 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2024 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2025 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
 #pragma once
+
+#include "gc_app/types/cell2d_gen_range.hpp"
 
 #include "common/struct_type_macro.hpp"
 
@@ -22,9 +24,7 @@ namespace gc_app {
 struct Cell2dGenRules_Overlay final
 {
     std::string formula;
-    int min_sum{};
-    int max_sum{};
-    int step{1};
+    Cell2dIndexRange range;
 
     auto operator==(const Cell2dGenRules_Overlay&) const noexcept
         -> bool = default;
@@ -55,7 +55,7 @@ struct Cell2dGenRules final
     auto operator==(const Cell2dGenRules&) const noexcept -> bool = default;
 };
 
-GCLIB_STRUCT_TYPE(Cell2dGenRules_Overlay, formula, min_sum, max_sum, step);
+GCLIB_STRUCT_TYPE(Cell2dGenRules_Overlay, formula, range);
 
 GCLIB_STRUCT_TYPE(Cell2dGenRules_Map, formula, overlays);
 

@@ -23,7 +23,6 @@
 
 #include <cassert>
 #include <cstring>
-#include <fstream>
 
 
 using namespace std::literals;
@@ -34,33 +33,6 @@ namespace gc_app::cell_aut {
 namespace {
 
 constexpr int8_t NoChange = -128;
-
-template <typename T>
-struct I
-{
-    explicit I(T& v) noexcept : v{v} {}
-    T& v;
-};
-
-template <typename T>
-auto operator>>(std::istream& s, I<T>&& i) -> std::istream&
-{
-    int v;
-    s >> v;
-    i.v = static_cast<T>(v);
-    return s;
-}
-
-auto rtrim(std::string& s) -> void
-{
-    if (s.empty())
-        return;
-    int pos=s.size() - 1;
-    for (; pos>=0; --pos)
-        if (!strchr(" \r\n\t", s[pos]))
-            break;
-    s.erase(pos+1);
-}
 
 auto generate_rules(const Cell2dGenRules& gen_rules) -> Cell2dRules
 {
@@ -75,11 +47,11 @@ auto generate_rules(const Cell2dGenRules& gen_rules) -> Cell2dRules
             auto variables = std::unordered_map<std::string_view, double>{};
             auto& n_var = variables["n"sv];
             auto offset = gen_rules.min_state * nbrs;
-            auto step = std::min(overlay.step, 1);
-            for(int n=overlay.min_sum; n<=overlay.max_sum; n+=step)
+            auto step = std::max(overlay.range.step, 1);
+            for(int n=overlay.range.min; n<=overlay.range.max; n+=step)
             {
                 n_var = n;
-                map.at(n-offset) = calc(variables);
+                map.at(n-offset) = calc(variables); // TODO: Clamp & round
             }
         }
         catch(std::exception& e) {
@@ -88,7 +60,7 @@ auto generate_rules(const Cell2dGenRules& gen_rules) -> Cell2dRules
     };
 
     auto test_map = [&](
-        std::vector<int8_t>& map,
+        const std::vector<int8_t>& map,
         int nbrs,
         const std::string& context)
     {
@@ -121,9 +93,11 @@ auto generate_rules(const Cell2dGenRules& gen_rules) -> Cell2dRules
             result,
             {
                 .formula = gen_map.formula,
-                .min_sum = min_sum,
-                .max_sum = max_sum,
-                .step = 1
+                .range = {
+                     .min = min_sum,
+                     .max = max_sum,
+                     .step = 1
+                }
             },
             nbrs,
             context + ", main formula");

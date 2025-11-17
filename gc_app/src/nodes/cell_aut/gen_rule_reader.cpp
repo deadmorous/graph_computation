@@ -177,24 +177,20 @@ auto read_gen_rules(const std::string& path) -> Cell2dGenRules
             auto overlay_context =
                 common::format(context, ", overlay ", overlay_index);
             auto overlay = Cell2dGenRules::Overlay{};
-            f >> overlay.min_sum >> overlay.max_sum >> overlay.step;
-            if( overlay.max_sum == -1000000 )
-                overlay.max_sum = map_length - 1;
-            if( overlay.min_sum  == -1000000 )
-                overlay.min_sum  = map_length - 1;
-            if( overlay.min_sum < min_sum   ||
-                overlay.max_sum > max_sum ||
-                overlay.max_sum < overlay.min_sum   ||
-                ( overlay.min_sum < overlay.max_sum   &&  overlay.step < 1 ) )
+            f >> overlay.range.min >> overlay.range.max >> overlay.range.step;
+            if( overlay.range.max == -1000000 )
+                overlay.range.max = map_length - 1;
+            if( overlay.range.min  == -1000000 )
+                overlay.range.min  = map_length - 1;
+            if (!overlay.range.ok(min_sum, max_sum))
             {
                 common::throw_(
-                    "read_gen_rules: ", context,
-                    ": Invalid range: min_sum=", overlay.min_sum,
-                    ", max_sum=", overlay.max_sum, ", step=", overlay.step);
+                    "read_gen_rules: ", overlay_context,
+                    ": Invalid range: ", gc::Value{overlay.range});
             }
 
             read_rtrimmed_line();   // Ignore EOL
-            overlay.formula = read_checked_formula(context);
+            overlay.formula = read_checked_formula(overlay_context);
             result.overlays.push_back(std::move(overlay));
         }
         return result;
