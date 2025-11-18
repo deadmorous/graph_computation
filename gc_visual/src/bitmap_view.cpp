@@ -50,6 +50,7 @@ auto BitmapView::set_image(const gc::Value& image)
     -> void
 {
     img_ = to_qimage(image.as<gc_app::ColorImage>());
+    resize(img_.size() * scale_);
     update();
 }
 
@@ -57,6 +58,7 @@ auto BitmapView::set_scale(double scale)
     -> void
 {
     scale_ = scale;
+    resize(img_.size() * scale_);
     update();
 }
 

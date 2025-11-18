@@ -76,19 +76,28 @@ auto parse_layout_item(GraphBroker* broker,
     else
     {
         QWidget* widget = nullptr;
+        int stretch = 0;
 
         if (GraphParameterEditor::supports_type(type))
             widget = new GraphParameterEditor(type, broker, item_node);
         else if (GraphOutputVisualizer::supports_type(type))
+        {
             widget = new GraphOutputVisualizer(type, broker, item_node);
+            stretch = 1;
+        }
         else if (type == "evolution")
             widget = new EvolutionController(type, broker);
         else
             common::throw_("Unknown layout item type '", type, "'");
 
-        if (auto parent_layout = parent_item->layout())
-            parent_layout->addWidget(widget);
-        else if (auto parent_widget = parent_item->widget())
+        if (auto* parent_layout = parent_item->layout())
+        {
+            if (auto* box_layout = qobject_cast<QBoxLayout*>(parent_layout))
+                box_layout->addWidget(widget, stretch);
+            else
+                parent_layout->addWidget(widget);
+        }
+        else if (auto* parent_widget = parent_item->widget())
             widget->setParent(parent_widget);
         else
             assert(false);

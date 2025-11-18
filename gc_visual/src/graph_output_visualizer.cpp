@@ -18,6 +18,7 @@
 
 #include <yaml-cpp/yaml.h>
 
+#include <QScrollArea>
 #include <QSlider>
 #include <QTextEdit>
 #include <QVBoxLayout>
@@ -49,25 +50,29 @@ auto make_image(GraphBroker* broker,
     slider->setMaximum(100);
     layout->addWidget(slider);
 
-    auto view = new BitmapView{};
-    layout->addWidget(view);
+    auto scroll_view = new QScrollArea{};
+
+    auto bitmap_view = new BitmapView{};
+    scroll_view->setWidget(bitmap_view);
+
+    layout->addWidget(scroll_view);
 
     QObject::connect(
         slider, &QSlider::valueChanged,
-        view,
-        [=](int pos) { view->set_scale(1. + (pos-1)/10.); });
+        bitmap_view,
+        [=](int pos) { bitmap_view->set_scale(1. + (pos-1)/10.); });
 
     auto on_output_updated = [=](gc::EdgeOutputEnd output)
     {
         if (output != output_port)
             return;
 
-        view->set_image(broker->get_port_value(output_port));
+        bitmap_view->set_image(broker->get_port_value(output_port));
     };
 
     QObject::connect(
         broker, &GraphBroker::output_updated,
-        view, on_output_updated );
+        bitmap_view, on_output_updated );
 
     on_output_updated(output_port);
 }
