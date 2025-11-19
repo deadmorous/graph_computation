@@ -462,6 +462,9 @@ auto compute(ComputationResult& result,
                 source_updated[d.node] = true;
             }
         }
+
+        for (const auto& e1 : result.updated_inputs)
+            source_updated.at(e1.node) = true;
     }
 
     auto nlevels = group_count(instructions->nodes);
