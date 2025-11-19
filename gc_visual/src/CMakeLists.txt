@@ -24,6 +24,7 @@ set(PROJECT_SOURCES
     graph_evolution.cpp
     graph_parameter_editor.cpp  ../include/gc_visual/graph_parameter_editor.hpp
     graph_output_visualizer.cpp ../include/gc_visual/graph_output_visualizer.hpp
+    invalidate_button.cpp       ../include/gc_visual/invalidate_button.hpp
     main.cpp
     mainwindow.cpp              ../include/gc_visual/mainwindow.hpp
     parse_graph_binding.cpp

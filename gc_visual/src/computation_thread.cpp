@@ -42,6 +42,17 @@ auto ComputationThread::evolution() const
     -> std::optional<gc_visual::GraphEvolution>
 { return evolution_; }
 
+auto ComputationThread::reset_computation()
+    -> void
+{
+    stop();
+    skip_ = 0;
+    auto& res = computation_.result;
+    res.computation_ts = gc::Timestamp{};
+    std::ranges::fill(res.node_ts, gc::Timestamp{});
+    start_computation();
+}
+
 auto ComputationThread::advance_evolution(size_t skip)
     -> void
 {
@@ -52,17 +63,6 @@ auto ComputationThread::advance_evolution(size_t skip)
         return;
 
     skip_ = skip;
-    start_computation();
-}
-
-auto ComputationThread::reset_evolution()
-    -> void
-{
-    stop();
-    skip_ = 0;
-    auto& res = computation_.result;
-    res.computation_ts = gc::Timestamp{};
-    std::ranges::fill(res.node_ts, gc::Timestamp{});
     start_computation();
 }
 
@@ -90,6 +90,19 @@ auto ComputationThread::set_parameter(const gc::ParameterSpec& spec,
     stop();
     skip_ = 0;
     computation_.source_inputs.values[spec.input].set(spec.path, value);
+}
+
+auto ComputationThread::invalidate_input(const gc::ParameterSpec& spec)
+    -> void
+{
+    stop();
+    skip_ = 0;
+    auto& res = computation_.result;
+    for (const auto& dst :
+         group(computation_.source_inputs.destinations, spec.input))
+    {
+        res.updated_inputs.insert(dst);
+    }
 }
 
 auto ComputationThread::start_computation()
@@ -133,7 +146,6 @@ auto ComputationThread::run()
             [this](gc::NodeIndex inode, double node_progress)
         { emit progress(inode, node_progress); };
 
-        clear_feedback();
         try_compute(graph_progress);
     }
     else
@@ -150,6 +162,8 @@ auto ComputationThread::run()
                 break;
         }
     }
+
+    clear_feedback();
 }
 
 auto ComputationThread::try_compute(const auto& graph_progress) -> void
@@ -173,9 +187,7 @@ auto ComputationThread::clear_feedback() -> void
 
 auto ComputationThread::set_feedback() -> void
 {
-    clear_feedback();
     auto& res = computation_.result;
-    res.updated_inputs.clear();
 
     for (auto& fb : evolution_->feedback)
     {

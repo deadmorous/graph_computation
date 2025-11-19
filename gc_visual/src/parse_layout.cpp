@@ -14,6 +14,7 @@
 #include "gc_visual/graph_broker.hpp"
 #include "gc_visual/graph_output_visualizer.hpp"
 #include "gc_visual/graph_parameter_editor.hpp"
+#include "gc_visual/invalidate_button.hpp"
 
 #include "common/throw.hpp"
 
@@ -87,6 +88,8 @@ auto parse_layout_item(GraphBroker* broker,
         }
         else if (type == "evolution")
             widget = new EvolutionController(type, broker);
+        else if (type == "invalidate")
+            widget = new InvalidateButton(broker, item_node);
         else
             common::throw_("Unknown layout item type '", type, "'");
 

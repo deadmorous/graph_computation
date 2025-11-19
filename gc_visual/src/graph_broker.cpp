@@ -91,15 +91,22 @@ auto GraphBroker::advance_evolution(size_t skip)
     -> void
 { computation_thread_.advance_evolution(skip); }
 
-auto GraphBroker::reset_evolution()
+auto GraphBroker::reset_computation()
     -> void
-{ computation_thread_.reset_evolution(); }
+{ computation_thread_.reset_computation(); }
 
 auto GraphBroker::set_parameter(const gc::ParameterSpec& spec,
                                 const gc::Value& value)
     -> void
 {
     computation_thread_.set_parameter(spec, value);
+    computation_thread_.start_computation();
+}
+
+auto GraphBroker::invalidate_input(const gc::ParameterSpec& spec)
+    -> void
+{
+    computation_thread_.invalidate_input(spec);
     computation_thread_.start_computation();
 }
 

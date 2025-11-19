@@ -30,8 +30,6 @@ EvolutionController::EvolutionController(
         return widget;
     };
 
-    auto* reset_button = add_widget(new QPushButton{"&reset"});
-
     auto* next_button = add_widget(new QPushButton{"&next"});
 
     auto* start_button = add_widget(new QPushButton{"st&art"});
@@ -75,14 +73,6 @@ EvolutionController::EvolutionController(
     };
 
     // ---
-
-    connect(
-        reset_button,
-        &QPushButton::clicked,
-        [stop, broker] {
-            stop();
-            broker->reset_evolution();
-        });
 
     connect(
         next_button,

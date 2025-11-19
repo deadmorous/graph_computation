@@ -66,7 +66,12 @@ evolution:
 layout:
   type: vertical_layout
   items:
-    - type: evolution
+    - type: horizontal_layout
+      items:
+      - type: invalidate
+        bind: initial_image_file
+        label: "&reset"
+      - type: evolution
     - type: horizontal_layout
       items:
       - type: file

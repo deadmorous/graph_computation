@@ -67,13 +67,16 @@ signals:
 
 public slots:
 
+    auto reset_computation()
+        -> void;
+
     auto advance_evolution(size_t skip = 0)
         -> void;
 
-    auto reset_evolution()
+    auto set_parameter(const gc::ParameterSpec&, const gc::Value&)
         -> void;
 
-    auto set_parameter(const gc::ParameterSpec&, const gc::Value&)
+    auto invalidate_input(const gc::ParameterSpec&)
         -> void;
 
 private slots:

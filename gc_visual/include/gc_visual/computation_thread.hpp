@@ -48,10 +48,10 @@ signals:
         -> void;
 
 public slots:
-    auto advance_evolution(size_t skip = 0)
+    auto reset_computation()
         -> void;
 
-    auto reset_evolution()
+    auto advance_evolution(size_t skip = 0)
         -> void;
 
     auto set_evolution(std::optional<gc_visual::GraphEvolution>)
@@ -62,6 +62,9 @@ public slots:
         -> void;
 
     auto set_parameter(const gc::ParameterSpec&, const gc::Value&)
+        -> void;
+
+    auto invalidate_input(const gc::ParameterSpec&)
         -> void;
 
     auto start_computation()
