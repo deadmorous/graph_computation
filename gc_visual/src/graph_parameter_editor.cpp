@@ -14,6 +14,7 @@
 #include "gc_visual/parse_graph_binding.hpp"
 #include "gc_visual/qstr.hpp"
 #include "gc_visual/vector_editor_widget.hpp"
+#include "gc_visual/cell2d_rule_editor_widget.hpp"
 
 #include "gc_app/types/color.hpp"
 
@@ -197,6 +198,35 @@ private:
     QWidget* widget_;
 };
 
+class Cell2dRuleEditor final
+{
+public:
+    using EditorWidgetType = Cell2dRuleEditorWidget;
+
+    Cell2dRuleEditor(gc::Value value,
+                     gc::ParameterSpec param_spec,
+                     GraphBroker* broker,
+                     QWidget* parent) :
+        widget_{ new EditorWidgetType{ std::move(value), parent } }
+    {
+        QObject::connect(
+            widget_,
+            &EditorWidgetType::valueChanged,
+            broker,
+            [=](const gc::Value& v)
+            {
+                broker->set_parameter(param_spec, v);
+            });
+    }
+
+    auto widget()
+        -> EditorWidgetType*
+    { return widget_; }
+
+private:
+    EditorWidgetType* widget_;
+};
+
 // ---
 
 template <typename Editor>
@@ -314,6 +344,23 @@ auto make_file(const ParamBinding& binding,
     return wrap_edtor(std::move(editor));
 }
 
+
+auto make_cell2d_rules(const ParamBinding& binding,
+                       GraphBroker* broker,
+                       const YAML::Node& item_node)
+    -> std::shared_ptr<QWidget>
+{
+    auto value = broker->get_parameter(binding.param_spec);
+
+    auto editor
+        = std::make_shared<Cell2dRuleEditor>(value,
+                                             binding.param_spec,
+                                             broker,
+                                             nullptr);
+
+    return wrap_edtor(std::move(editor));
+}
+
 using GraphParameterEditorFactoryFunc =
     std::shared_ptr<QWidget>(*)(
         const ParamBinding&, GraphBroker*, const YAML::Node&);
@@ -328,6 +375,7 @@ auto editor_factory_map() -> const GraphParameterEditorFactoryMap&
         { "color"sv, make_color },
         { "vector"sv, make_vector },
         { "file"sv, make_file },
+        { "cell2d_rules"sv, make_cell2d_rules },
     };
 
     return result;

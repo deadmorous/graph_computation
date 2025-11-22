@@ -28,9 +28,9 @@ graph:
         int8_t min_state: 0
         tor: true
         count_self: false
-        map9: [0, 0, -128, 1, 0, 0, 0, 0, 0]
-        map6: [0, 0, -128, 1, 0, 0]
-        map4: [0, 0, -128, 1]
+        map9: [0, 0, -128, 1, 0, 0, 0, 0, 0, 0]
+        map6: [0, 0, -128, 1, 0, 0, 0]
+        map4: [0, 0, -128, 1, 0]
       destinations: [cell2d.rules]
     - name: palette_maker_output_type
       type: String
@@ -46,7 +46,7 @@ graph:
       destinations: [palette_maker.path_1]
     - name: palette_maker_value_1
       type: Color
-      value: 0xff000000
+      value: 0xffff0000
       destinations: [palette_maker.value_1]
 
 evolution:
@@ -55,13 +55,23 @@ evolution:
       sink: [cell2d.input_state]
 
 layout:
-  type: vertical_layout
+  type: horizontal_layout
   items:
-    - type: horizontal_layout
+    - type: vertical_layout
       items:
-      - type: invalidate
-        bind: initial_image_file
-        label: "&reset"
-      - type: evolution
-    - type: image
-      bind: image_colorizer
+        - type: cell2d_rules
+          bind: rules
+        - type: stretch
+    - type: vertical_layout
+      items:
+        - type: vertical_layout
+          items:
+            - type: horizontal_layout
+              items:
+                - type: invalidate
+                  bind: initial_image_file
+                  label: "&reset"
+                - type: evolution
+        - type: image
+          bind: image_colorizer
+        - type: stretch
