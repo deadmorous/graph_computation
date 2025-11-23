@@ -11,7 +11,11 @@ graph:
           value: 2
     - name: image_colorizer
       type: image_colorizer
+    - name: min_state
+      type: project
   edges:
+    - [min_state.projection, image_colorizer.min_state]
+    - [min_state.projection, initial_image.min_state ]
     - [initial_image.image, cell2d.input_state]
     - [initial_image.color_map, palette_maker.value_0]
     - [palette_maker.output, image_colorizer.palette]
@@ -31,7 +35,7 @@ graph:
         map9: [0, 0, -128, 1, 0, 0, 0, 0, 0, 0]
         map6: [0, 0, -128, 1, 0, 0, 0]
         map4: [0, 0, -128, 1, 0]
-      destinations: [cell2d.rules]
+      destinations: [cell2d.rules, min_state.value]
     - name: palette_maker_output_type
       type: String
       value: "IndexedPalette"
@@ -48,6 +52,10 @@ graph:
       type: Color
       value: 0xffff0000
       destinations: [palette_maker.value_1]
+    - name: min_state
+      type: ValuePath
+      value: "/min_state"
+      destinations: [min_state.path]
 
 evolution:
   feedback:
