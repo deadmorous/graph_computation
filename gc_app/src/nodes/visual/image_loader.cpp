@@ -199,7 +199,7 @@ public:
     auto input_names() const
         -> gc::InputNames override
     {
-        return gc::node_input_names<ImageLoader>("file"sv);
+        return gc::node_input_names<ImageLoader>("file"sv, "min_state"sv);
     }
 
     auto output_names() const
@@ -209,8 +209,9 @@ public:
     auto default_inputs(gc::InputValues result) const
         -> void override
     {
-        assert(result.size() == 1_gc_ic);
+        assert(result.size() == 2_gc_ic);
         result[0_gc_i] = "image.png"s;
+        result[1_gc_i] = int8_t{0};
     }
 
     auto compute_outputs(
@@ -220,10 +221,13 @@ public:
             const gc::NodeProgress& progress) const
         -> bool override
     {
-        assert(inputs.size() == 1_gc_ic);
+        assert(inputs.size() == 2_gc_ic);
         assert(result.size() == 2_gc_oc);
         const auto& path = inputs[0_gc_i].as<std::string>();
+        auto lowest_state = inputs[1_gc_i].convert_to<int8_t>();
         auto [image, color_map] = load_indexed_png(path);
+        for (auto& pixel : image.data)
+            pixel += lowest_state;
         result[0_gc_o] = std::move(image);
         result[1_gc_o] = std::move(color_map);
         return true;

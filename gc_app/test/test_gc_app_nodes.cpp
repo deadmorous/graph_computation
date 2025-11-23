@@ -581,21 +581,23 @@ TEST(GcApp_Node, ImageLoader)
 {
     auto node = visual::make_image_loader({}, {});
 
-    ASSERT_EQ(node->input_count(), gc::InputPortCount{1});
+    ASSERT_EQ(node->input_count(), gc::InputPortCount{2});
     ASSERT_EQ(node->output_count(), gc::OutputPortCount{2});
 
-    ASSERT_EQ(node->input_names().size(), 1_gc_ic);
+    ASSERT_EQ(node->input_names().size(), 2_gc_ic);
     ASSERT_EQ(node->input_names()[0_gc_i], "file");
+    ASSERT_EQ(node->input_names()[1_gc_i], "min_state");
 
     ASSERT_EQ(node->output_names().size(), 2_gc_oc);
     ASSERT_EQ(node->output_names()[0_gc_o], "image");
     ASSERT_EQ(node->output_names()[1_gc_o], "color_map");
 
-    gc::ValueVec inputs(1);
+    gc::ValueVec inputs(2);
     gc::ValueVec outputs(2);
 
     node->default_inputs(inputs);
     ASSERT_EQ(inputs[0], "image.png"s);
+    ASSERT_EQ(inputs[1], int8_t{0});
 
     inputs[0] = "data/acorn.png"s;
     node->compute_outputs(outputs, inputs, {}, {});
