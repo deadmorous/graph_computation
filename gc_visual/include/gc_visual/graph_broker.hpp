@@ -46,8 +46,8 @@ public:
     auto node_index(const gc::ComputationNode* node) const
         -> gc::NodeIndex;
 
-    auto input_index(const std::string& input_name) const
-        -> uint32_t;
+    auto io_spec(const std::string& io_name) const
+        -> gc::IoSpec;
 
     auto get_parameter(const gc::ParameterSpec&) const
         -> gc::Value;

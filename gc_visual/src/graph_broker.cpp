@@ -3,7 +3,7 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2024 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2024-2025 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
@@ -67,9 +67,9 @@ auto GraphBroker::node_index(const gc::ComputationNode* node) const
     -> gc::NodeIndex
 { return binding_resolver_.node_index(node); }
 
-auto GraphBroker::input_index(const std::string& input_name) const
-    -> uint32_t
-{ return binding_resolver_.input_index(input_name); }
+auto GraphBroker::io_spec(const std::string& io_name) const
+    -> gc::IoSpec
+{ return binding_resolver_.io_spec(io_name); }
 
 auto GraphBroker::get_parameter(const gc::ParameterSpec& spec) const
     -> gc::Value

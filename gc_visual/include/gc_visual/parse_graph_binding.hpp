@@ -34,8 +34,8 @@ public:
     auto node_index(const gc::ComputationNode* node) const
         -> gc::NodeIndex;
 
-    auto input_index(const std::string& input_name) const
-        -> size_t;
+    auto io_spec(const std::string& io_name) const
+        -> gc::IoSpec;
 
     auto node_map() const noexcept
         -> const gc::detail::NamedNodes<gc::ComputationNode>&;

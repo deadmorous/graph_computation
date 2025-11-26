@@ -217,6 +217,21 @@ public:
             {
                 broker->set_parameter(param_spec, v);
             });
+
+        // TODO: Generalize this code for any editor
+        if (holds_alternative<gc::NodeOutputSpec>(param_spec.io))
+        {
+            auto output = get<gc::NodeOutputSpec>(param_spec.io).output;
+            QObject::connect(
+                broker, &GraphBroker::output_updated,
+                [output, broker, param_spec, this](gc::EdgeOutputEnd updated)
+                {
+                    if (output != updated)
+                        return;
+                    auto updated_value = broker->get_parameter(param_spec);
+                    widget_->setValue(updated_value);
+                });
+        }
     }
 
     auto widget()

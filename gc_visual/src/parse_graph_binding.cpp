@@ -10,6 +10,7 @@
 
 #include "gc_visual/parse_graph_binding.hpp"
 
+#include "gc/computation_node.hpp"
 #include "gc/detail/parse_node_port.hpp"
 
 #include "common/format.hpp"
@@ -35,14 +36,51 @@ auto BindingResolver::node_index(const gc::ComputationNode* node) const
     -> gc::NodeIndex
 { return node_indices_.at(node); }
 
-auto BindingResolver::input_index(const std::string& input_name) const
-    -> size_t
+auto BindingResolver::io_spec(const std::string& io_name) const
+    -> gc::IoSpec
 {
-    auto it = std::find(input_names_.begin(), input_names_.end(), input_name);
-    if (it == input_names_.end())
-        common::throw_<std::invalid_argument>(
-            "Input with name '", input_name, " is not found");
-    return it - input_names_.begin();
+    auto dot_pos = io_name.find_first_of('.');
+
+    if (dot_pos == std::string::npos)
+    {
+        // No dot in the name means it's an input name
+        auto it =
+            std::find(input_names_.begin(), input_names_.end(), io_name);
+
+        if (it == input_names_.end())
+            common::throw_<std::invalid_argument>(
+                "Input with name '", io_name, "' is not found");
+
+        return gc::ExternalInputSpec{
+            .input = size_t(it - input_names_.begin()) };
+    }
+    else
+    {
+        // Dot in the name means it's node.output_port
+        auto node_name = io_name.substr(0, dot_pos);
+        auto it_node = node_map_.find(node_name);
+
+        if (it_node == node_map_.end())
+            common::throw_<std::invalid_argument>(
+                "Output with name '", io_name,
+                "' is not found - no node '", node_name, "'");
+
+        const auto* node = it_node->second;
+        auto output_names = node->output_names();
+        auto port_name = io_name.substr(dot_pos+1);
+        auto it_port =
+            std::ranges::find(output_names, std::string_view{port_name});
+
+        if (it_port == output_names.end())
+            common::throw_<std::invalid_argument>(
+                "Output with name '", io_name,
+                "' is not found - node '", node_name,
+                "' has no port '", port_name, "'");
+
+        auto index = node_index(node);
+        auto port = gc::OutputPort(it_port - output_names.begin());
+        return gc::NodeOutputSpec{ .output = {index, port} };
+    }
 }
 
 auto BindingResolver::node_map() const noexcept
@@ -92,7 +130,7 @@ auto parse_output_binding(const BindingResolver& resolver,
 auto param_binding_label(const ParamBinding& binding)
     -> std::string
 {
-    auto result = binding.input_name;
+    auto result = binding.io_name;
     if (!binding.param_spec.path.empty())
         result += common::format(binding.param_spec.path);
     return result;
@@ -103,19 +141,19 @@ auto parse_param_binding(const BindingResolver& resolver,
     -> ParamBinding
 {
     // Resolve parameter binding
-    auto input_name = item_node["bind"].as<std::string>();
+    auto io_name = item_node["bind"].as<std::string>();
 
     auto path = gc::ValuePath{};
-    auto path_pos = input_name.find_first_of('/');
+    auto path_pos = io_name.find_first_of('/');
     if (path_pos != std::string::npos)
     {
-        path = gc::ValuePath::from_string(input_name.substr(path_pos));
-        input_name = input_name.substr(0, path_pos);
+        path = gc::ValuePath::from_string(io_name.substr(path_pos));
+        io_name = io_name.substr(0, path_pos);
     }
 
-    auto input = resolver.input_index(input_name);
+    auto io = resolver.io_spec(io_name);
 
-    return { { input, path }, std::move(input_name) };
+    return { { io, path }, std::move(io_name) };
 }
 
 } // namespace gc_visual

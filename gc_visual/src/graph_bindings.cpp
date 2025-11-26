@@ -19,7 +19,7 @@ auto operator<<(std::ostream& s, const ParamBinding& binding)
     -> std::ostream&
 {
     return
-        s << binding.input_name
+        s << binding.io_name
           << binding.param_spec.path;
 }
 

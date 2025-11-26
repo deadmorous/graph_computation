@@ -3,7 +3,7 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2024 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2024-2025 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
@@ -11,6 +11,7 @@
 #include "gc_visual/computation_thread.hpp"
 
 #include "common/func_ref.hpp"
+#include "common/overloads.hpp"
 
 #include <QtGlobal>
 
@@ -32,7 +33,24 @@ auto ComputationThread::computation()
 
 auto ComputationThread::get_parameter(const gc::ParameterSpec& spec) const
     -> gc::Value
-{ return computation_.source_inputs.values[spec.input].get(spec.path); }
+{
+    return visit(
+        common::Overloads{
+            [&](const gc::ExternalInputSpec& i) -> gc::Value
+            {
+                return computation_
+                    .source_inputs.values[i.input].get(spec.path);
+            },
+                [&](const gc::NodeOutputSpec& o) -> gc::Value
+            {
+                const auto& res = computation_.result;
+                auto node_outputs = group(res.outputs, o.output.node);
+                assert(node_outputs.index_range().contains(o.output.port));
+                return node_outputs[o.output.port].get(spec.path);
+            }
+        },
+        spec.io);
+}
 
 auto ComputationThread::ok()
     -> bool
@@ -89,7 +107,36 @@ auto ComputationThread::set_parameter(const gc::ParameterSpec& spec,
 {
     stop();
     skip_ = 0;
-    computation_.source_inputs.values[spec.input].set(spec.path, value);
+
+    visit(
+        common::Overloads{
+            [&](const gc::ExternalInputSpec& i)
+            {
+                computation_.source_inputs
+                    .values[i.input].set(spec.path, value);
+            },
+            [&](const gc::NodeOutputSpec& o)
+            {
+                auto& res = computation_.result;
+
+                auto node_outputs = group(res.outputs, o.output.node);
+                assert(node_outputs.index_range().contains(o.output.port));
+                node_outputs[o.output.port].set(spec.path, value);
+
+                for (const auto& e : computation_.graph.edges)
+                {
+                    if (e.from != o.output)
+                        continue;
+
+                    auto node_inputs = group(res.inputs, e.to.node);
+                    assert(node_inputs.index_range().contains(e.to.port));
+                    node_inputs[e.to.port].set(spec.path, value);
+
+                    res.updated_inputs.insert(e.to);
+                }
+            }
+        },
+        spec.io);
 }
 
 auto ComputationThread::invalidate_input(const gc::ParameterSpec& spec)
@@ -98,11 +145,27 @@ auto ComputationThread::invalidate_input(const gc::ParameterSpec& spec)
     stop();
     skip_ = 0;
     auto& res = computation_.result;
-    for (const auto& dst :
-         group(computation_.source_inputs.destinations, spec.input))
-    {
-        res.updated_inputs.insert(dst);
-    }
+
+    visit(
+        common::Overloads{
+            [&](const gc::ExternalInputSpec& i)
+            {
+                for (const auto& dst :
+                     group(computation_.source_inputs.destinations, i.input))
+                {
+                    res.updated_inputs.insert(dst);
+                }
+            },
+                [&](const gc::NodeOutputSpec& o)
+            {
+                for (const auto& e : computation_.graph.edges)
+                {
+                    if (e.from == o.output)
+                        res.updated_inputs.insert(e.to);
+                }
+            }
+        },
+        spec.io);
 }
 
 auto ComputationThread::start_computation()

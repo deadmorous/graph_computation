@@ -31,7 +31,7 @@ InvalidateButton::InvalidateButton(
     if (auto label_node = item_node["label"])
         label_text = QString::fromUtf8(label_node.as<std::string>());
     else
-        label_text = QString::fromUtf8("-> " + binding.input_name);
+        label_text = QString::fromUtf8("-> " + binding.io_name);
     setText(label_text);
     connect(this, &QPushButton::clicked,
             [broker, binding]{

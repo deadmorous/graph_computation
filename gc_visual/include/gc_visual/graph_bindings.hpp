@@ -24,7 +24,7 @@ struct InputBinding final
 struct ParamBinding final
 {
     gc::ParameterSpec   param_spec;
-    std::string         input_name;
+    std::string         io_name;
 };
 
 auto operator<<(std::ostream& s, const ParamBinding& binding)
