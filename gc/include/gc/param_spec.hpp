@@ -3,21 +3,35 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2024 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2024-2025 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
 #pragma once
 
-#include "gc/computation_node_fwd.hpp"
 #include "gc/value_path.hpp"
+#include "gc/edge.hpp"
+
+#include <variant>
 
 namespace gc {
 
-struct ParameterSpec
+struct ExternalInputSpec final
 {
-    size_t          input;
+    size_t input;
+};
+
+struct NodeOutputSpec final
+{
+    EdgeOutputEnd output;
+};
+
+using IoSpec = std::variant<ExternalInputSpec, NodeOutputSpec>;
+
+struct ParameterSpec final
+{
+    IoSpec io;
     gc::ValuePath   path;
 };
 
