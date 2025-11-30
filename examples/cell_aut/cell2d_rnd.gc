@@ -67,6 +67,10 @@ layout:
         - type: cell2d_rules
           bind: rule_reader.rules
         - type: stretch
+        - type: color
+          bind: palette/overflow_color
+        - type: vector
+          bind: palette/color_map
     - type: vertical_layout
       items:
         - type: horizontal_layout
