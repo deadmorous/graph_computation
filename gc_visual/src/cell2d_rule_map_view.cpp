@@ -23,7 +23,7 @@
 #include <QSpinBox>
 
 #include <algorithm>
-#include <ranges>
+#include <sstream>
 
 
 auto Cell2dRuleMapView::Layout::size() const noexcept -> QSize
@@ -92,10 +92,36 @@ Cell2dRuleMapView::Cell2dRuleMapView(uint8_t max_neighborhood_size,
     menu_ = new QMenu{this};
     connect(menu_->addAction("&Copy"), &QAction::triggered,
             [&]{
-                auto m = std::ranges::views::transform(
-                    map_, [](int8_t x) -> int { return x; });
-                auto text = common::format_seq(m);
+                auto m = std::vector<int>{};
+                m.assign(map_.begin(), map_.end());
+                m.resize(map_size(), 0);
+                auto text = common::format_seq(m, " ");
                 qApp->clipboard()->setText(QString::fromUtf8(text));
+            });
+
+    paste_action_ = menu_->addAction("&Paste");
+    connect(paste_action_, &QAction::triggered,
+            [&]{
+                auto text = qApp->clipboard()->text().toStdString();
+                if (text.size() == 0)
+                    return;
+                auto m = std::vector<int8_t>{};
+                auto s = std::istringstream{text};
+                while (true)
+                {
+                    int n;
+                    s >> n;
+                    if (s.fail())
+                        break;
+                    m.push_back(n);
+                }
+                if (m.empty())
+                    return;
+                m.resize(map_size(), 0);
+                if (m == map_)
+                    return;
+                set_map(m);
+                emit map_changed(map_);
             });
 }
 
@@ -115,7 +141,7 @@ auto Cell2dRuleMapView::set_map(const std::vector<int8_t>& map) -> void
 auto Cell2dRuleMapView::set_state_count(uint8_t state_count) -> void
 {
     state_count_ = state_count;
-    map_.resize(max_neighborhood_size_ * state_count, 0);
+    map_.resize(map_size(), 0);
     calc_layout();
     update();
 }
@@ -230,7 +256,10 @@ auto Cell2dRuleMapView::mouseReleaseEvent(QMouseEvent *event)
     auto ctrl = (event->modifiers() & Qt::ControlModifier) != 0;
     visit(common::Overloads{
         [](NoItem) {},
-        [&](MenuBtn) { menu_->exec(mapToGlobal(event->pos())); },
+        [&](MenuBtn) {
+            paste_action_->setDisabled(qApp->clipboard()->text().isEmpty());
+            menu_->exec(mapToGlobal(event->pos()));
+        },
         [&](const RowCol& item) {
             if (item.col >= map_.size())
                 return;
@@ -243,6 +272,11 @@ auto Cell2dRuleMapView::mouseReleaseEvent(QMouseEvent *event)
             update();
         }
     }, layout_.item(event->pos()));
+}
+
+auto Cell2dRuleMapView::map_size() const noexcept -> size_t
+{
+    return max_neighborhood_size_ * (size_t(state_count_) - 1u) + 1;
 }
 
 auto Cell2dRuleMapView::calc_layout() -> void

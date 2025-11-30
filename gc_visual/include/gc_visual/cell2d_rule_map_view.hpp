@@ -73,11 +73,14 @@ private:
         auto item(const QPoint& pos) const noexcept -> Item;
     };
 
+    auto map_size() const noexcept -> size_t;
+
     auto calc_layout() -> void;
 
     uint8_t max_neighborhood_size_{};
     QFont font_;
     QMenu* menu_;
+    QAction* paste_action_;
 
     uint8_t state_count_{2};
     int8_t min_state_{0};
