@@ -61,4 +61,6 @@ private:
     RuleMapWidgets map9_{};
     RuleMapWidgets map6_{};
     RuleMapWidgets map4_{};
+
+    int in_set_value_{};
 };
