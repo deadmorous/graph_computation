@@ -14,11 +14,15 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 set(PROJECT_SOURCES
     bitmap_view.cpp             ../include/gc_visual/bitmap_view.hpp
-    cell2d_rule_editor_widget.cpp ../include/gc_visual/cell2d_rule_editor_widget.hpp
     cell2d_rule_map_view.cpp    ../include/gc_visual/cell2d_rule_map_view.hpp
-    color_editor_widget.cpp     ../include/gc_visual/color_editor_widget.hpp
     computation_progress_widget.cpp ../include/gc_visual/computation_progress_widget.hpp
     computation_thread.cpp      ../include/gc_visual/computation_thread.hpp
+    editors/cell2d_rule_editor_widget.cpp   ../include/gc_visual/editors/cell2d_rule_editor_widget.hpp
+    editors/color_editor_widget.cpp         ../include/gc_visual/editors/color_editor_widget.hpp
+    editors/file_picker_widget.cpp          ../include/gc_visual/editors/file_picker_widget.hpp
+    editors/spin_editor_widget.cpp          ../include/gc_visual/editors/spin_editor_widget.hpp
+    editors/vector_editor_widget.cpp        ../include/gc_visual/editors/vector_editor_widget.hpp
+    editors/vector_item_model.cpp           ../include/gc_visual/editors/vector_item_model.hpp
     evolution_controller.cpp    ../include/gc_visual/evolution_controller.hpp
     flatten_type.cpp
     graph_bindings.cpp
@@ -29,10 +33,9 @@ set(PROJECT_SOURCES
     invalidate_button.cpp       ../include/gc_visual/invalidate_button.hpp
     main.cpp
     mainwindow.cpp              ../include/gc_visual/mainwindow.hpp
+    parameter_editor_widget.cpp ../include/gc_visual/parameter_editor_widget.hpp
     parse_graph_binding.cpp
     parse_layout.cpp
-    vector_editor_widget.cpp    ../include/gc_visual/vector_editor_widget.hpp
-    vector_item_model.cpp       ../include/gc_visual/vector_item_model.hpp
 )
 
 

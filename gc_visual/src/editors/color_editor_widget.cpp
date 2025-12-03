@@ -3,23 +3,23 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2024 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2024-2025 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "gc_visual/color_editor_widget.hpp"
+#include "gc_visual/editors/color_editor_widget.hpp"
 
 #include "gc_visual/color.hpp"
+
+#include "gc/value.hpp"
 
 #include <QColorDialog>
 #include <QPainter>
 
 
-ColorEditorWidget::ColorEditorWidget(gc_app::Color color,
-                                     QWidget* parent) :
-    QWidget{ parent },
-    color_{ color }
+ColorEditorWidget::ColorEditorWidget(const YAML::Node&, QWidget* parent) :
+    ParameterEditorWidget{ parent }
 {
     // TODO: Specify a better size policy
     setMinimumSize(48, 24);
@@ -28,13 +28,25 @@ ColorEditorWidget::ColorEditorWidget(gc_app::Color color,
     setCursor(Qt::PointingHandCursor);
 }
 
-auto ColorEditorWidget::color() const noexcept -> gc_app::Color
+auto ColorEditorWidget::value() const -> gc::Value
 { return color_; }
 
-auto ColorEditorWidget::setColor(gc_app::Color color)
-    -> void
+auto ColorEditorWidget::check_type(const gc::Type* type) -> TypeCheckResult
 {
-    color_ = color;
+    static auto expected_type = gc::type_of<gc_app::Color>();
+
+    if (type == expected_type)
+        return { .ok = true };
+
+    return {
+        .ok = false,
+        .expected_type_description = common::format(expected_type)
+    };
+}
+
+void ColorEditorWidget::set_value(const gc::Value& value)
+{
+    color_ = value.as<gc_app::Color>();
     update();
 }
 
@@ -78,5 +90,5 @@ auto ColorEditorWidget::mouseReleaseEvent(QMouseEvent *event)
     if (!new_qcolor.isValid())
         return;
     color_ = gc_visual::color(new_qcolor);
-    emit valueChanged(color_);
+    emit value_changed(color_);
 }

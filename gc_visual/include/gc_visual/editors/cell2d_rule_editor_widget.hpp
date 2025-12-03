@@ -12,7 +12,7 @@
 
 #include "gc_app/types/cell2d_rules.hpp"
 
-#include "gc/value.hpp"
+#include "gc_visual/parameter_editor_widget.hpp"
 
 #include <QWidget>
 
@@ -24,22 +24,20 @@ class QScrollArea;
 class QSpinBox;
 
 class Cell2dRuleEditorWidget final :
-    public QWidget
+    public ParameterEditorWidget
 {
     Q_OBJECT
+
 public:
-    Cell2dRuleEditorWidget(gc::Value v, QWidget* parent = nullptr);
+    explicit Cell2dRuleEditorWidget(const YAML::Node&,
+                                    QWidget* parent = nullptr);
 
-    auto value() const noexcept
-        -> gc::Value;
+    auto value() const -> gc::Value override;
 
-signals:
-    auto valueChanged(const gc::Value& v) -> void;
+    static auto check_type(const gc::Type*) -> TypeCheckResult;
 
 public slots:
-    auto setValue(gc::Value v) -> void;
-
-protected:
+    void set_value(const gc::Value& v) override;
 
 private:
     struct RuleMapWidgets final

@@ -8,9 +8,11 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "gc_visual/cell2d_rule_editor_widget.hpp"
+#include "gc_visual/editors/cell2d_rule_editor_widget.hpp"
 
 #include "gc_visual/cell2d_rule_map_view.hpp"
+
+#include "gc/value.hpp"
 
 #include "common/scoped_inc.hpp"
 
@@ -26,8 +28,9 @@ auto Cell2dRuleEditorWidget::RuleMapWidgets::setVisible(bool visible) -> void
     scroll_view->setVisible(visible);
 }
 
-Cell2dRuleEditorWidget::Cell2dRuleEditorWidget(gc::Value v, QWidget* parent) :
-    QWidget{ parent }
+Cell2dRuleEditorWidget::Cell2dRuleEditorWidget(const YAML::Node&,
+                                               QWidget* parent) :
+    ParameterEditorWidget{ parent }
 {
     auto* layout = new QVBoxLayout{};
     setLayout(layout);
@@ -83,7 +86,7 @@ Cell2dRuleEditorWidget::Cell2dRuleEditorWidget(gc::Value v, QWidget* parent) :
                     &Cell2dRuleMapView::map_changed,
                     [&](const std::vector<int8_t>& map) {
                         dst = map;
-                        emit valueChanged(rules_);
+                        emit value_changed(rules_);
                     });
         };
 
@@ -103,7 +106,7 @@ Cell2dRuleEditorWidget::Cell2dRuleEditorWidget(gc::Value v, QWidget* parent) :
                 map9_.view->set_state_count(state_count);
                 map6_.view->set_state_count(state_count);
                 map4_.view->set_state_count(state_count);
-                emit valueChanged(rules_);
+                emit value_changed(rules_);
             });
 
     connect(min_state_, &QSpinBox::valueChanged,
@@ -118,7 +121,7 @@ Cell2dRuleEditorWidget::Cell2dRuleEditorWidget(gc::Value v, QWidget* parent) :
                 rules_.map6 = map6_.view->map();
                 map4_.view->set_min_state(min_state);
                 rules_.map4 = map4_.view->map();
-                emit valueChanged(rules_);
+                emit value_changed(rules_);
             });
 
     connect(tor_, &QCheckBox::clicked,
@@ -128,7 +131,7 @@ Cell2dRuleEditorWidget::Cell2dRuleEditorWidget(gc::Value v, QWidget* parent) :
                 rules_.tor = checked;
                 map6_.setVisible(!checked);
                 map4_.setVisible(!checked);
-                emit valueChanged(rules_);
+                emit value_changed(rules_);
             });
 
     connect(count_self_, &QCheckBox::clicked,
@@ -136,17 +139,28 @@ Cell2dRuleEditorWidget::Cell2dRuleEditorWidget(gc::Value v, QWidget* parent) :
                 if (in_set_value_ > 0)
                     return;
                 rules_.count_self = checked;
-                emit valueChanged(rules_);
+                emit value_changed(rules_);
             });
-
-    setValue(v);
 }
 
-auto Cell2dRuleEditorWidget::value() const noexcept
+auto Cell2dRuleEditorWidget::value() const
     -> gc::Value
 { return rules_; }
 
-auto Cell2dRuleEditorWidget::setValue(gc::Value v) -> void
+auto Cell2dRuleEditorWidget::check_type(const gc::Type* type) -> TypeCheckResult
+{
+    static auto expected_type = gc::type_of<gc_app::Cell2dRules>();
+
+    if (type == expected_type)
+        return { .ok = true };
+
+    return {
+        .ok = false,
+        .expected_type_description = common::format(expected_type)
+    };
+}
+
+void Cell2dRuleEditorWidget::set_value(const gc::Value& v)
 {
     auto inc_in_set_value = common::ScopedInc{in_set_value_};
 
