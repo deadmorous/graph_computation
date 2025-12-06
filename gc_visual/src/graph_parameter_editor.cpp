@@ -10,6 +10,7 @@
 
 #include "gc_visual/graph_parameter_editor.hpp"
 
+#include "gc_visual/editors/cell2d_gen_rule_editor_widget.hpp"
 #include "gc_visual/editors/cell2d_rule_editor_widget.hpp"
 #include "gc_visual/editors/color_editor_widget.hpp"
 #include "gc_visual/editors/file_picker_widget.hpp"
@@ -151,6 +152,7 @@ auto editor_factory(common::Type_Tag<EditorWidget> = {})
 auto editor_factory_map() -> const GraphParameterEditorFactoryMap&
 {
     static auto result = GraphParameterEditorFactoryMap{
+        { "cell2d_gen_rules"sv, editor_factory<Cell2dGenRuleEditorWidget>() },
         { "cell2d_rules"sv, editor_factory<Cell2dRuleEditorWidget>() },
         { "color"sv, editor_factory<ColorEditorWidget>() },
         { "file"sv, editor_factory<FilePickerWidget>() },
