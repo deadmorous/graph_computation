@@ -45,3 +45,18 @@ TEST(Common_ExprCalculator, Basic)
         127*sin(1.25*3.14159*10./127/8));
     EXPECT_THROW(calc("foo + 1"sv, 123), std::runtime_error);
 }
+
+TEST(Common_ExprCalculator, Error)
+{
+    EXPECT_THROW(
+        common::ExprCalculator{"1+"},
+        std::runtime_error);
+
+    EXPECT_THROW(
+        common::ExprCalculator{"(1+) + 1"},
+        std::runtime_error);
+
+    EXPECT_THROW(
+        common::ExprCalculator{"1 1"},
+        std::runtime_error);
+}

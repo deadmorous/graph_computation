@@ -10,20 +10,23 @@
 
 #include "common/expr_calculator.hpp"
 
+#include "common/throw.hpp"
+
+#include <algorithm>
+#include <charconv>
+#include <cmath>
 #include <iostream>
+#include <sstream>
+#include <stack>
+#include <stdexcept>
 #include <string>
 #include <string_view>
-#include <vector>
 #include <unordered_map>
-#include <stack>
-#include <cmath>
-#include <algorithm>
-#include <stdexcept>
-#include <sstream>
+#include <vector>
 
 namespace common {
 
-/* NOTE: The implementation was fully vibe-coded using Google Gemini
+/* NOTE: Initially, the implementation was fully vibe-coded using Google Gemini
  *
  * Here is the prompt:
  *
@@ -57,6 +60,16 @@ namespace common {
  * machine, which are run when operator() is invoked.
  *
  * Can you please help with that?
+ * ---
+ *
+ * Later a few changes were made manually:
+ * - Attempt to parse a number no longer relies on exceptions
+ * - Bug fixed: ensure that invalid expressions cause compile errors, rather
+ *   than failures at evaluation time. For example. '1+' passed compilation
+ *   but caused a crash at evaluation time
+ * - Tokenizer does not start with removing all whitespace (that might lead
+ *   to gluing numbers in an invalid expressions). Whitespaces are ignored
+ *   between tokens.
  */
 
 /**
@@ -138,16 +151,45 @@ class ExprCalculator::Impl final
         throw std::runtime_error("Unknown operator or function token: " + std::string(token));
     }
 
+    int value_stack_delta(OpCode op_code) const
+    {
+        switch(op_code)
+        {
+        case OpCode::PUSH_LITERAL: return 1;
+        case OpCode::PUSH_VARIABLE: return 1;
+        case OpCode::ADD: return -1;
+        case OpCode::SUB: return -1;
+        case OpCode::MUL: return -1;
+        case OpCode::DIV: return -1;
+        case OpCode::MOD: return -1;
+        case OpCode::POW: return -1;
+        case OpCode::NEGATE: return 0;
+        case OpCode::FN_SIN: return 0;
+        case OpCode::FN_COS: return 0;
+        case OpCode::FN_TAN: return 0;
+        case OpCode::FN_ASIN: return 0;
+        case OpCode::FN_ACOS: return 0;
+        case OpCode::FN_ATAN: return 0;
+        case OpCode::FN_LOG: return 0;
+        case OpCode::FN_LOG10: return 0;
+        case OpCode::FN_EXP: return 0;
+        case OpCode::FN_SQRT: return 0;
+        case OpCode::FN_ABS: return 0;
+        case OpCode::BIT_AND: return -1;
+        case OpCode::BIT_OR: return -1;
+        case OpCode::BIT_XOR: return -1;
+        case OpCode::BIT_NOT: return 0;
+        }
+        __builtin_unreachable();
+    }
+
     // Simple tokenizer for the expression string
-    std::vector<std::string> tokenize(std::string_view expr) {
+    std::vector<std::string> tokenize(std::string_view s) {
         std::vector<std::string> tokens;
-        std::string s(expr); // Copy to a modifiable string
-
-        // Remove all whitespace
-        s.erase(std::remove_if(s.begin(), s.end(), ::isspace), s.end());
-
         for (size_t i = 0; i < s.length(); ++i) {
             char c = s[i];
+            if (::isspace(c))
+                continue;
 
             // Handle literals (numbers)
             if (isdigit(c) || c == '.') {
@@ -208,19 +250,33 @@ public:
     {
         std::vector<std::string> tokens = tokenize(expr);
         std::stack<std::string> op_stack;
+        auto value_stack_pos = int{};
+        auto push_instruction = [&](Instruction instruction)
+        {
+            value_stack_pos += value_stack_delta(instruction.code);
+            if (value_stack_pos <= 0)
+                throw std::runtime_error("Expression exhausts the value stack");
+            compiled_instructions.push_back(instruction);
+        };
 
         for (const auto& token : tokens) {
             // 1. Check if token is a number
-            try {
-                size_t pos;
-                double val = std::stod(token, &pos);
-                if (pos == token.length()) { // Successfully converted to number
-                    compiled_instructions.push_back({OpCode::PUSH_LITERAL, val, ""});
+            {
+                auto val = double{};
+                const auto* first = token.data();
+                const auto* last = first + token.size();
+                auto fc_result = std::from_chars(first, last, val);
+                if (fc_result.ec == std::errc{})
+                {
+                    if (fc_result.ptr != last)
+                        throw std::invalid_argument(
+                            "Unexpected characters following numeric literal: '"
+                            + token + "'");
+                    push_instruction({OpCode::PUSH_LITERAL, val, ""});
                     continue;
                 }
-            } catch (const std::exception&) {
-                // Not a number, continue to check variables/operators
             }
+            // Not a number, continue to check variables/operators
 
             // 2. Check if token is a variable or function name
             if (isalpha(token[0])) {
@@ -230,7 +286,7 @@ public:
                     op_stack.push(token); // Push function onto the stack
                 } else {
                     // Variable
-                    compiled_instructions.push_back({OpCode::PUSH_VARIABLE, 0.0, token});
+                    push_instruction({OpCode::PUSH_VARIABLE, 0.0, token});
                 }
                 continue;
             }
@@ -242,7 +298,7 @@ public:
             }
             if (token == ")") {
                 while (!op_stack.empty() && op_stack.top() != "(") {
-                    compiled_instructions.push_back(token_to_instruction(op_stack.top()));
+                    push_instruction(token_to_instruction(op_stack.top()));
                     op_stack.pop();
                 }
                 if (op_stack.empty() || op_stack.top() != "(") {
@@ -252,7 +308,7 @@ public:
 
                 // Check if a function is at the top of the stack (e.g., sin, cos)
                 if (!op_stack.empty() && isalpha(op_stack.top()[0])) {
-                    compiled_instructions.push_back(token_to_instruction(op_stack.top()));
+                    push_instruction(token_to_instruction(op_stack.top()));
                     op_stack.pop();
                 }
                 continue;
@@ -265,7 +321,7 @@ public:
                     int p2 = get_precedence(op_stack.top());
 
                     if (p1 < p2 || (p1 == p2 && is_left_associative(token))) {
-                        compiled_instructions.push_back(token_to_instruction(op_stack.top()));
+                        push_instruction(token_to_instruction(op_stack.top()));
                         op_stack.pop();
                     } else {
                         break;
@@ -284,9 +340,14 @@ public:
             if (op_stack.top() == "(") {
                 throw std::runtime_error("Mismatched parentheses in expression.");
             }
-            compiled_instructions.push_back(token_to_instruction(op_stack.top()));
+            push_instruction(token_to_instruction(op_stack.top()));
             op_stack.pop();
         }
+
+        if (value_stack_pos != 1)
+            throw_<std::runtime_error>("Expression leaves ", value_stack_pos,
+                                       " elements on the value stack");
+
     }
 
     /**
