@@ -23,6 +23,7 @@
 
 #include <cassert>
 #include <cstring>
+#include <numbers>
 
 
 using namespace std::literals;
@@ -46,6 +47,7 @@ auto generate_rules(const Cell2dGenRules& gen_rules) -> Cell2dRules
             auto calc = common::ExprCalculator{overlay.formula};
             auto variables = std::unordered_map<std::string_view, double>{};
             auto& n_var = variables["n"sv];
+            variables["pi"sv] = std::numbers::pi;
             auto offset = gen_rules.min_state * nbrs;
             auto step = std::max(overlay.range.step, 1);
             for(int n=overlay.range.min; n<=overlay.range.max; n+=step)
