@@ -196,7 +196,7 @@ auto VectorItemModel::headerData(int section,
         if (path.empty())
             return tr("element");
         else
-            return format_qstr(path);
+            return format_qstr(path).mid(1);    // Skip leading slash
     }
     }
     __builtin_unreachable();
