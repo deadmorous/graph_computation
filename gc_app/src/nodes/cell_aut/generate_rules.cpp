@@ -37,8 +37,10 @@ constexpr int8_t NoChange = -128;
 
 auto generate_rules(const Cell2dGenRules& gen_rules) -> Cell2dRules
 {
+    using MapVec = std::vector<int8_t>;
+
     auto fill_map = [&](
-        std::vector<int8_t>& map,
+        MapVec& map,
         const Cell2dGenRules::Overlay& overlay,
         int nbrs,
         const std::string& context)
@@ -62,7 +64,7 @@ auto generate_rules(const Cell2dGenRules& gen_rules) -> Cell2dRules
     };
 
     auto test_map = [&](
-        const std::vector<int8_t>& map,
+        const MapVec& map,
         int nbrs,
         const std::string& context)
     {
@@ -89,7 +91,7 @@ auto generate_rules(const Cell2dGenRules& gen_rules) -> Cell2dRules
         auto min_sum = gen_rules.min_state * nbrs;
         auto max_sum = min_sum + map_length - 1;
 
-        auto result = std::vector<int8_t>(map_length, 0);
+        auto result = MapVec(map_length, 0);
 
         fill_map(
             result,
@@ -115,15 +117,17 @@ auto generate_rules(const Cell2dGenRules& gen_rules) -> Cell2dRules
         return result;
     };
 
+    auto tor = gen_rules.tor;
+
     return
     {
         .state_count = gen_rules.state_count,
         .min_state = gen_rules.min_state,
-        .tor = gen_rules.tor,
+        .tor = tor,
         .count_self = gen_rules.count_self,
         .map9 = generate_map(gen_rules.map9, 9, "map9"),
-        .map6 = generate_map(gen_rules.map9, 6, "map6"),
-        .map4 = generate_map(gen_rules.map9, 4, "map4")
+        .map6 = tor? MapVec{}: generate_map(gen_rules.map6, 6, "map6"),
+        .map4 = tor? MapVec{}: generate_map(gen_rules.map4, 4, "map4")
     };
 }
 
