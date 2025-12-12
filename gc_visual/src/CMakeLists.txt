@@ -17,6 +17,7 @@ set(PROJECT_SOURCES
     cell2d_rule_map_view.cpp    ../include/gc_visual/cell2d_rule_map_view.hpp
     computation_progress_widget.cpp ../include/gc_visual/computation_progress_widget.hpp
     computation_thread.cpp      ../include/gc_visual/computation_thread.hpp
+    editors/cell2d_gen_cmap_editor_widget.cpp   ../include/gc_visual/editors/cell2d_gen_cmap_editor_widget.hpp
     editors/cell2d_gen_rule_editor_widget.cpp   ../include/gc_visual/editors/cell2d_gen_rule_editor_widget.hpp
     editors/cell2d_rule_editor_widget.cpp   ../include/gc_visual/editors/cell2d_rule_editor_widget.hpp
     editors/color_editor_widget.cpp         ../include/gc_visual/editors/color_editor_widget.hpp
