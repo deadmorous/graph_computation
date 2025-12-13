@@ -1,0 +1,10 @@
+% See initial state skull_face_256.png
+%
+255 -127
+-128
+2
+-1100 1100 15
+-127*sin(n/(255*9)*pi)
+-1125 1125 25
+127*sin(n/(255*9)*pi)
+END

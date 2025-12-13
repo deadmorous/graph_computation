@@ -1,0 +1,8 @@
+% See initial state skull_face_128.png
+%
+127 -63
+-128
+1
+-550 550 6
+-63*sin(n/(129*9)*pi)
+END
