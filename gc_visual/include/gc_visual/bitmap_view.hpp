@@ -22,6 +22,8 @@ Q_OBJECT
 public:
     explicit BitmapView(QWidget* parent = nullptr);
 
+    auto qimage() const -> QImage;
+
 public slots:
     auto set_image(const gc::Value& image)
         -> void;

@@ -46,6 +46,11 @@ BitmapView::BitmapView(QWidget* parent) :
     setMouseTracking(true);
 }
 
+auto BitmapView::qimage() const -> QImage
+{
+    return img_;
+}
+
 auto BitmapView::set_image(const gc::Value& image)
     -> void
 {

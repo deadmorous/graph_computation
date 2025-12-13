@@ -16,7 +16,6 @@
 
 #include <QWidget>
 
-class BitmapView;
 class GraphBroker;
 
 class GraphOutputVisualizer final :

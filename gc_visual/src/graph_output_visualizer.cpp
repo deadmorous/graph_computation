@@ -18,10 +18,13 @@
 
 #include <yaml-cpp/yaml.h>
 
+#include <QBoxLayout>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QPushButton>
 #include <QScrollArea>
 #include <QSlider>
 #include <QTextEdit>
-#include <QVBoxLayout>
 
 
 using namespace std::string_view_literals;
@@ -45,14 +48,20 @@ auto make_image(GraphBroker* broker,
                                     broker->node_indices(),
                                     gc::Output);
 
-    auto slider = new QSlider{ Qt::Horizontal };
+    auto* sub_layout = new QHBoxLayout{};
+    layout->addLayout(sub_layout);
+
+    auto* slider = new QSlider{ Qt::Horizontal };
     slider->setMinimum(1);
     slider->setMaximum(100);
-    layout->addWidget(slider);
+    sub_layout->addWidget(slider);
 
-    auto scroll_view = new QScrollArea{};
+    auto* save_button = new QPushButton("Sa&ve...");
+    sub_layout->addWidget(save_button);
 
-    auto bitmap_view = new BitmapView{};
+    auto* scroll_view = new QScrollArea{};
+
+    auto* bitmap_view = new BitmapView{};
     scroll_view->setWidget(bitmap_view);
 
     layout->addWidget(scroll_view);
@@ -61,6 +70,28 @@ auto make_image(GraphBroker* broker,
         slider, &QSlider::valueChanged,
         bitmap_view,
         [=](int pos) { bitmap_view->set_scale(1. + (pos-1)/10.); });
+
+
+    QObject::connect(
+        save_button, &QPushButton::clicked,
+        [bitmap_view, parent, last_saved_name=QString{}]() mutable {
+            auto image = bitmap_view->qimage();
+            if (image.isNull())
+            {
+                QMessageBox::critical(parent, {}, "Current image is empty");
+                return;
+            }
+
+            auto file_name = QFileDialog::getSaveFileName(
+                parent, "Save image", last_saved_name, "Images (*.png)");
+            if (file_name.isEmpty())
+                return;
+            if (image.save(file_name))
+                last_saved_name = file_name;
+            else
+                QMessageBox::critical(
+                    parent, {}, "Failed to save file " + file_name);
+        });
 
     auto on_output_updated = [=](gc::EdgeOutputEnd output)
     {
@@ -72,7 +103,7 @@ auto make_image(GraphBroker* broker,
 
     QObject::connect(
         broker, &GraphBroker::output_updated,
-        bitmap_view, on_output_updated );
+        bitmap_view, on_output_updated);
 
     on_output_updated(output_port);
 }
