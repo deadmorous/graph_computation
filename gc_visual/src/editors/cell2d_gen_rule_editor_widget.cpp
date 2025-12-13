@@ -22,6 +22,8 @@
 #include "common/func_ref.hpp"
 #include "common/scoped_inc.hpp"
 
+#include <yaml-cpp/yaml.h>
+
 #include <QBoxLayout>
 #include <QCheckBox>
 #include <QGroupBox>

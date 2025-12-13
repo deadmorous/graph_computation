@@ -16,6 +16,8 @@
 
 #include "common/scoped_inc.hpp"
 
+#include <yaml-cpp/yaml.h>
+
 #include <QBoxLayout>
 #include <QCheckBox>
 #include <QLabel>
