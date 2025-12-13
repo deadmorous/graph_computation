@@ -149,7 +149,7 @@ auto read_gen_rules(const std::string& path) -> Cell2dGenRules
         try {
             auto formula = read_rtrimmed_line();
             auto expr = common::ExprCalculator{formula};
-            expr({{"n", 0.}});
+            expr({{"n", 0.}, {"pi", std::numbers::pi}});
             return formula;
         }
         catch (std::exception& e) {
