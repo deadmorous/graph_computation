@@ -156,7 +156,7 @@ Cell2dGenCmapEditorWidget::Cell2dGenCmapEditorWidget(const YAML::Node&,
         return spin;
     };
 
-    s.state_count = make_spin("state count", 2, 255);
+    s.state_count = make_spin("state count", 2, 256);
 
     sub_layout = new QHBoxLayout{};
     layout->addLayout(sub_layout);
@@ -189,8 +189,7 @@ Cell2dGenCmapEditorWidget::Cell2dGenCmapEditorWidget(const YAML::Node&,
                 auto& s = *storage_;
                 if (s.in_set_value > 0)
                     return;
-                auto state_count = uint8_t(value);
-                s.gen_cmap.state_count = state_count;
+                s.gen_cmap.state_count = value;
                 emit value_changed(s.gen_cmap);
                 visualize_cmap(s);
             });
