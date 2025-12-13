@@ -112,7 +112,6 @@ auto rules_pixmap(Cell2dGenRuleEditorWidget::Storage& s) -> QPixmap
 
     auto N = rules->map9.size();
     auto W = pixmap_size.width();
-    auto subsample = std::max(1ul, (N+W-1) / W);
     auto plot_map = [&](const std::vector<int8_t>& m, QRgb rgb)
     {
         auto fade_color = QColor::fromRgb(rgb);
@@ -129,7 +128,7 @@ auto rules_pixmap(Cell2dGenRuleEditorWidget::Storage& s) -> QPixmap
 
         for (size_t x=0, n=m.size(); x<n; ++x)
         {
-            auto px = x / subsample;
+            auto px = x * W / N;
             if (m[x] == -128)
                 p.fillRect(px, 0, 1, pixmap_size.height(), fade_color);
             else
