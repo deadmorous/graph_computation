@@ -72,30 +72,6 @@ auto generate_cmap(const Cell2dGenCmap& gen_cmap) -> IndexedColorMap
         fill_map(maps.b, overlay.formula.b, overlay.range, context + ", blue");
     };
 
-    auto test_map = [&](
-        const U8Vec& map,
-        const std::string& context)
-    {
-
-        for(auto i : common::index_range<size_t>(map.size()))
-        {
-            if((map[i] > max || map[i] < 0))
-            {
-                common::throw_(
-                    "generate_cmap: ", context, ": Map element ", i,
-                    " is out of range (==", int(map[i]), ")");
-            }
-        }
-    };
-
-    auto test_rgb_maps = [&](
-        const RgbComponentVecs& maps)
-    {
-        test_map(maps.r, "red");
-        test_map(maps.g, "green");
-        test_map(maps.b, "blue");
-    };
-
     auto rgb_maps = RgbComponentVecs{
         .r = U8Vec(gen_cmap.state_count, 0),
         .g = U8Vec(gen_cmap.state_count, 0),
@@ -115,8 +91,6 @@ auto generate_cmap(const Cell2dGenCmap& gen_cmap) -> IndexedColorMap
             rgb_maps,
             overlay,
             common::format("overlay ", overlay_index++));
-
-    test_rgb_maps(rgb_maps);
 
     auto result = IndexedColorMap(gen_cmap.state_count);
     using C = ColorComponent;
