@@ -31,6 +31,9 @@ public slots:
     auto set_scale(double scale)
         -> void;
 
+signals:
+    void image_updated(const QImage&);
+
 protected:
     auto paintEvent(QPaintEvent*)
         -> void override;

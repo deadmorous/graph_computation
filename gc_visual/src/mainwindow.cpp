@@ -309,6 +309,10 @@ auto MainWindow::load(const gc_visual::ConfigSpecification& spec)
                                      input_names);
                     setCentralWidget(central_widget);
 
+                    connect(
+                        graph_broker, &GraphBroker::gui_error,
+                        this, &MainWindow::set_computation_error_message);
+
                     spec_ = spec;
                     emit load_finished(spec);
                 }

@@ -65,6 +65,9 @@ signals:
     auto output_updated(gc::EdgeOutputEnd output)
         -> void;
 
+    auto gui_error(const QString&)
+        -> void;
+
 public slots:
 
     auto reset_computation()

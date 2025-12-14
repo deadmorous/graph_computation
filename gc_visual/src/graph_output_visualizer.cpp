@@ -13,17 +13,20 @@
 #include "gc_visual/bitmap_view.hpp"
 #include "gc_visual/graph_broker.hpp"
 #include "gc_visual/qstr.hpp"
+#include "gc_visual/video_recorder.hpp"
 
 #include "gc/detail/parse_node_port.hpp"
 
 #include <yaml-cpp/yaml.h>
 
 #include <QBoxLayout>
+#include <QCheckBox>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QScrollArea>
 #include <QSlider>
+#include <QSpinBox>
 #include <QTextEdit>
 
 
@@ -56,7 +59,17 @@ auto make_image(GraphBroker* broker,
     slider->setMaximum(100);
     sub_layout->addWidget(slider);
 
-    auto* save_button = new QPushButton("Sa&ve...");
+    auto* record_video_check = new QCheckBox("&Video");
+    sub_layout->addWidget(record_video_check);
+
+    auto video_quality = new QSpinBox{parent};
+    constexpr int default_video_quality = 23;
+    video_quality->setMinimum(0);
+    video_quality->setMaximum(51);
+    video_quality->setValue(default_video_quality);
+    sub_layout->addWidget(video_quality);
+
+    auto* save_button = new QPushButton("Sav&e...");
     sub_layout->addWidget(save_button);
 
     auto* scroll_view = new QScrollArea{};
@@ -66,15 +79,106 @@ auto make_image(GraphBroker* broker,
 
     layout->addWidget(scroll_view);
 
+    auto* video_recorder = new VideoRecorder{parent};
+
+    auto start_video_recording = [=, last_saved_video_name=QString{}]() mutable
+    {
+        if (video_recorder->status() != VideoRecorderStatus::Ready)
+        {
+            QMessageBox::critical(
+                parent, {}, "Video recording is already in progress");
+            return false;
+        }
+
+        const auto& image = bitmap_view->qimage();
+        if (image.isNull())
+        {
+            QMessageBox::critical(parent, {}, "Current image is empty");
+            return false;
+        }
+
+
+        auto file_name = QFileDialog::getSaveFileName(
+            parent, "Save image", last_saved_video_name, "Videos (*.mp4)");
+
+        if (file_name.isEmpty())
+            return false;
+
+        auto errors = QStringList{};
+        auto on_start_recording_error = [&](const QString& error)
+        {
+            errors.append(error);
+        };
+
+        auto conn_err = QObject::connect(
+            video_recorder, &VideoRecorder::error, on_start_recording_error);
+
+        constexpr int default_fps = 25; // TODO: Configure it?
+        video_quality->value();
+
+        auto ok = video_recorder->start(
+            file_name, image.width(), image.height(),
+            {
+                .fps = default_fps,
+                .h264_quality = video_quality->value()
+            });
+
+        QObject::disconnect(conn_err);
+
+        if (!ok)
+        {
+            QMessageBox::critical(
+                parent, {}, "Failed to start recording:\n" + errors.join('\n'));
+        }
+
+        last_saved_video_name = file_name;
+
+        return true;
+    };
+
+    auto stop_video_recording = [=]
+    {
+        switch (video_recorder->status())
+        {
+        case VideoRecorderStatus::Ready:
+            QMessageBox::critical(
+                parent, {}, "Video recording is not currently in progress");
+            return false;
+        case VideoRecorderStatus::Recording:
+            video_recorder->request_stop();
+            return true;
+        case VideoRecorderStatus::Finishing:
+            QMessageBox::critical(
+                parent, {}, "Video recording is currently being finalized");
+            return false;
+        }
+        __builtin_unreachable();
+    };
+
     QObject::connect(
         slider, &QSlider::valueChanged,
         bitmap_view,
         [=](int pos) { bitmap_view->set_scale(1. + (pos-1)/10.); });
 
+    QObject::connect(
+        record_video_check, &QCheckBox::clicked,
+        [=](bool checked) mutable
+        {
+            if (checked)
+            {
+                if (!start_video_recording())
+                    record_video_check->setChecked(false);
+            }
+            else
+            {
+                if (!stop_video_recording())
+                    record_video_check->setChecked(true);
+            }
+        });
 
     QObject::connect(
         save_button, &QPushButton::clicked,
-        [bitmap_view, parent, last_saved_name=QString{}]() mutable {
+        [=, last_saved_name=QString{}]() mutable {
             auto image = bitmap_view->qimage();
             if (image.isNull())
             {
@@ -106,6 +210,14 @@ auto make_image(GraphBroker* broker,
         bitmap_view, on_output_updated);
 
     on_output_updated(output_port);
+
+    QObject::connect(
+        bitmap_view, &BitmapView::image_updated,
+        video_recorder, &VideoRecorder::enqueue_frame);
+
+    QObject::connect(
+        video_recorder, &VideoRecorder::error,
+        broker, &GraphBroker::gui_error);
 }
 
 auto make_text(GraphBroker* broker,

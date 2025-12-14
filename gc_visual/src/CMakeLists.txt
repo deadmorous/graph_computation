@@ -9,6 +9,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+find_package(FFMpeg REQUIRED)
+
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
@@ -38,6 +40,7 @@ set(PROJECT_SOURCES
     parameter_editor_widget.cpp ../include/gc_visual/parameter_editor_widget.hpp
     parse_graph_binding.cpp
     parse_layout.cpp
+    video_recorder.cpp          ../include/gc_visual/video_recorder.hpp
 )
 
 
@@ -72,7 +75,9 @@ target_include_directories(gc_visual
 target_link_libraries(gc_visual
     PRIVATE
         Qt${QT_VERSION_MAJOR}::Widgets
-        gc_app::lib)
+        gc_app::lib
+        FFMpeg::Encoder
+    )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
