@@ -24,6 +24,7 @@
 
 #include <cassert>
 #include <cstring>
+#include <numbers>
 
 
 using namespace std::literals;
@@ -50,10 +51,19 @@ auto generate_cmap(const Cell2dGenCmap& gen_cmap) -> IndexedColorMap
             auto calc = common::ExprCalculator{formula};
             auto variables = std::unordered_map<std::string_view, double>{};
             auto& n_var = variables["n"sv];
+            auto& p_var = variables["p"sv];
+            auto& t_var = variables["t"sv];
+            auto& N_var = variables["N"sv];
+            auto& M_var = variables["M"sv];
+            N_var = 255.;
+            M_var = max;
+            variables["pi"sv] = std::numbers::pi;
             auto step = std::max(range.step, 1);
             for(int n=range.min; n<=range.max; n+=step)
             {
                 n_var = n;
+                p_var = n / M_var;
+                t_var = 2.*p_var - 1;
                 map.at(n) = calc(variables);    // TODO: Clamp & round
             }
         }
