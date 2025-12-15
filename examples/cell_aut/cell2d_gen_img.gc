@@ -83,10 +83,16 @@ layout:
   items:
     - type: vertical_layout
       items:
+        - type: file
+          bind: gen_rules
+          filter: "Rule generation files (*.gen)"
         - type: cell2d_gen_rules
           bind: gen_rule_reader.gen_rules
         - type: color
           bind: overflow_color
+        - type: file
+          bind: gen_cmap
+          filter: "Colormap generation files (*.cf)"
         - type: cell2d_gen_cmap
           bind: gen_cmap_reader.gen_cmap
         - type: stretch
@@ -98,17 +104,9 @@ layout:
             bind: initial_image_file
             label: "&reset"
           - type: evolution
-        - type: horizontal_layout
-          items:
-          - type: file
-            bind: initial_image_file
-            filter: "Image files (*.png)"
-          - type: file
-            bind: gen_cmap
-            filter: "Colormap generation files (*.cf)"
-          - type: file
-            bind: gen_rules
-            filter: "Rule generation files (*.gen)"
+        - type: file
+          bind: initial_image_file
+          filter: "Image files (*.png)"
         - type: image
           bind: image_colorizer
         - type: stretch

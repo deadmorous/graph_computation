@@ -22,11 +22,11 @@ graph:
     - [rule_reader.rules, cell2d.rules]
     - [cell2d.output_state, image_colorizer.input_image]
   inputs:
-    - name: initial_image_size
+    - name: image_size
       type: UintSize
       value:
-        width: 300
-        height: 300
+        width: 500
+        height: 500
       destinations: [initial_image.size]
     - name: rules
       type: String
@@ -64,6 +64,9 @@ layout:
   items:
     - type: vertical_layout
       items:
+        - type: file
+          bind: rules
+          filter: "Rule files (*.rul)"
         - type: cell2d_rules
           bind: rule_reader.rules
         - type: color
@@ -75,13 +78,18 @@ layout:
       items:
         - type: horizontal_layout
           items:
+            - type: spin
+              range: [1, 2000]
+              bind: image_size/width
+            - type: spin
+              range: [1, 2000]
+              bind: image_size/height
+        - type: horizontal_layout
+          items:
             - type: invalidate
-              bind: initial_image_size
+              bind: image_size
               label: "&reset"
             - type: evolution
-        - type: file
-          bind: rules
-          filter: "Rule files (*.rul)"
         - type: image
           bind: image_colorizer
         - type: stretch

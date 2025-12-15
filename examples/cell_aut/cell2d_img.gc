@@ -68,6 +68,9 @@ layout:
   items:
     - type: vertical_layout
       items:
+        - type: file
+          bind: rules
+          filter: "Rule files (*.rul)"
         - type: cell2d_rules
           bind: rule_reader.rules
         - type: color
@@ -88,9 +91,6 @@ layout:
           - type: file
             bind: initial_image_file
             filter: "Image files (*.png)"
-          - type: file
-            bind: rules
-            filter: "Rule files (*.rul)"
         - type: image
           bind: image_colorizer
         - type: stretch
