@@ -93,4 +93,6 @@ layout:
             filter: "Image files (*.png)"
         - type: image
           bind: image_colorizer
+          blend_factor: 0.9
+          blend_mode: light
         - type: stretch

@@ -21,13 +21,17 @@
 
 #include <QBoxLayout>
 #include <QCheckBox>
+#include <QDoubleSpinBox>
 #include <QFileDialog>
+#include <QLabel>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QScrollArea>
 #include <QSlider>
 #include <QSpinBox>
 #include <QTextEdit>
+
+#include <magic_enum/magic_enum.hpp>
 
 
 using namespace std::string_view_literals;
@@ -54,10 +58,44 @@ auto make_image(GraphBroker* broker,
     auto* sub_layout = new QHBoxLayout{};
     layout->addLayout(sub_layout);
 
-    auto* slider = new QSlider{ Qt::Horizontal };
-    slider->setMinimum(1);
-    slider->setMaximum(100);
-    sub_layout->addWidget(slider);
+    auto* scale_slider = new QSlider{ Qt::Horizontal };
+    scale_slider->setMinimum(1);
+    scale_slider->setMaximum(100);
+    sub_layout->addWidget(scale_slider);
+
+    QDoubleSpinBox* blend_spin{};
+
+    auto blend_factor = std::optional<double>{};
+    auto blend_mode = BitmapView::BlendMode::none;
+    if (auto blend_factor_node = item_node["blend_factor"];
+        blend_factor_node.IsDefined())
+    {
+        auto* blend_spin_label = new QLabel("blend");
+        blend_spin = new QDoubleSpinBox{};
+        blend_spin_label->setBuddy(blend_spin);
+        blend_spin->setRange(0, 1);
+        blend_spin->setDecimals(2);
+        blend_spin->setSingleStep(0.1);
+        sub_layout->addWidget(blend_spin_label);
+        sub_layout->addWidget(blend_spin);
+
+        blend_factor = blend_factor_node.as<double>();
+        blend_spin->setValue(*blend_factor);
+
+        auto blend_mode_node = item_node["blend_mode"];
+        if (blend_mode_node.IsDefined())
+        {
+            auto mode_str = blend_mode_node.as<std::string>();
+            auto opt_blend_mode =
+                magic_enum::enum_cast<BitmapView::BlendMode>(mode_str);
+            if (!opt_blend_mode)
+                common::throw_(
+                    "Invalid blend mode '", mode_str, "', expected one of ",
+                    common::format_seq(
+                        magic_enum::enum_names<BitmapView::BlendMode>(), ", "));
+            blend_mode = *opt_blend_mode;
+        }
+    }
 
     auto* record_video_check = new QCheckBox("&Video");
     sub_layout->addWidget(record_video_check);
@@ -74,7 +112,7 @@ auto make_image(GraphBroker* broker,
 
     auto* scroll_view = new QScrollArea{};
 
-    auto* bitmap_view = new BitmapView{};
+    auto* bitmap_view = new BitmapView{blend_mode, blend_factor.value_or(0.)};
     scroll_view->setWidget(bitmap_view);
 
     layout->addWidget(scroll_view);
@@ -156,9 +194,14 @@ auto make_image(GraphBroker* broker,
     };
 
     QObject::connect(
-        slider, &QSlider::valueChanged,
+        scale_slider, &QSlider::valueChanged,
         bitmap_view,
         [=](int pos) { bitmap_view->set_scale(1. + (pos-1)/10.); });
+
+    if (blend_factor)
+        QObject::connect(
+            blend_spin, &QDoubleSpinBox::valueChanged,
+            bitmap_view, &BitmapView::set_blend_factor);
 
     QObject::connect(
         record_video_check, &QCheckBox::clicked,

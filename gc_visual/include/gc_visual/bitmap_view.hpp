@@ -20,7 +20,18 @@ class BitmapView
 {
 Q_OBJECT
 public:
-    explicit BitmapView(QWidget* parent = nullptr);
+    enum class BlendMode : uint8_t
+    {
+        none,
+        all,
+        light,
+        dark
+    };
+
+    explicit BitmapView(
+        BlendMode blend_mode = BlendMode::none,
+        double blend_factor = 0,
+        QWidget* parent = nullptr);
 
     auto qimage() const -> QImage;
 
@@ -29,6 +40,9 @@ public slots:
         -> void;
 
     auto set_scale(double scale)
+        -> void;
+
+    auto set_blend_factor(double blend_factor)
         -> void;
 
 signals:
@@ -44,4 +58,6 @@ protected:
 private:
     QImage img_;
     double scale_{1};
+    BlendMode blend_mode_{BlendMode::none};
+    double blend_factor_{0};
 };
