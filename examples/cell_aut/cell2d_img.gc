@@ -35,11 +35,11 @@ graph:
       destinations: [min_state.path]
     - name: initial_image_file
       type: String
-      value: "images/acorn3.png"
+      value: "images/simple/special/acorn3.png"
       destinations: [initial_image.file]
     - name: rules
       type: String
-      value: "rules/lifelife.rul"
+      value: "rules/3-state/lifelife.rul"
       destinations: [rule_reader.file]
     - name: palette_maker_output_type
       type: String
@@ -93,6 +93,6 @@ layout:
             filter: "Image files (*.png)"
         - type: image
           bind: image_colorizer
-          blend_factor: 0.9
+          blend_factor: 0
           blend_mode: light
         - type: stretch

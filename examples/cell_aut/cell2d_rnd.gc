@@ -30,7 +30,7 @@ graph:
       destinations: [initial_image.size]
     - name: rules
       type: String
-      value: "rules/lifelife.rul"
+      value: "rules/3-state/lifelife.rul"
       destinations: [rule_reader.file]
     - name: palette
       type: IndexedPalette
@@ -92,6 +92,6 @@ layout:
             - type: evolution
         - type: image
           bind: image_colorizer
-          blend_factor: 0.9
+          blend_factor: 0
           blend_mode: light
         - type: stretch

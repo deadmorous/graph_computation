@@ -19,7 +19,7 @@ graph:
   inputs:
     - name: initial_image_file
       type: String
-      value: "images/acorn.png"
+      value: "images/life/acorn.png"
       destinations: [initial_image.file]
     - name: palette_maker_output_type
       type: String

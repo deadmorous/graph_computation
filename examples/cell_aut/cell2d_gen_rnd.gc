@@ -119,4 +119,6 @@ layout:
               bind: image_size/height
         - type: image
           bind: image_colorizer
+          blend_factor: 0
+          blend_mode: all
         - type: stretch
