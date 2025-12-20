@@ -123,6 +123,17 @@ Cell2dRuleMapView::Cell2dRuleMapView(uint8_t max_neighborhood_size,
                 set_map(m);
                 emit map_changed(map_);
             });
+
+    menu_->addSeparator();
+
+    connect(menu_->addAction("Set &no-op rules"), &QAction::triggered,
+            [&]{
+                auto m = std::vector<int8_t>(map_.size(), -128);
+                if (m == map_)
+                    return;
+                set_map(m);
+                emit map_changed(map_);
+            });
 }
 
 auto Cell2dRuleMapView::map() const noexcept
