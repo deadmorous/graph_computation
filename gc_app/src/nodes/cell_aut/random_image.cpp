@@ -38,7 +38,10 @@ public:
             "size"sv,
             "lowest_state"sv,
             "range_size"sv,
-            "map"sv);
+            "map"sv,
+            "radius"sv,
+            "shape"sv,
+            "outer_state"sv);
     }
 
     auto output_names() const
@@ -48,11 +51,14 @@ public:
     auto default_inputs(gc::InputValues result) const
         -> void override
     {
-        assert(result.size() == 4_gc_ic);
+        assert(result.size() == 7_gc_ic);
         result[0_gc_i] = UintSize{100, 100};
         result[1_gc_i] = int8_t{0};
         result[2_gc_i] = int8_t{2};
         result[3_gc_i] = std::vector<int8_t>{};
+        result[4_gc_i] = -1;
+        result[5_gc_i] = std::string{"circle"};
+        result[6_gc_i] = int8_t{0};
     }
 
     auto compute_outputs(
@@ -62,14 +68,18 @@ public:
             const gc::NodeProgress& progress) const
         -> bool override
     {
-        assert(inputs.size() == 4_gc_ic);
+        assert(inputs.size() == 7_gc_ic);
         assert(result.size() == 1_gc_oc);
         const auto& size = inputs[0_gc_i].as<UintSize>();
         auto lowest_state = inputs[1_gc_i].convert_to<int8_t>();
         auto range_size = inputs[2_gc_i].convert_to<int8_t>();
         const auto& map = inputs[3_gc_i].as<std::vector<int8_t>>();
+        auto radius = inputs[4_gc_i].convert_to<int>();
+        auto shape = inputs[5_gc_i].convert_to<std::string_view>();
+        auto outer_state = inputs[6_gc_i].convert_to<int8_t>();
 
-        result[0_gc_o] = generate_image(size, lowest_state, range_size, map);
+        result[0_gc_o] = generate_image(
+            size, lowest_state, range_size, map, radius, shape, outer_state);
 
         if (progress)
             progress(1);
@@ -82,7 +92,10 @@ private:
         const UintSize& size,
         int8_t lowest_state,
         int8_t range_size,
-        const std::vector<int8_t>& map) -> I8Image
+        const std::vector<int8_t>& map,
+        int radius,
+        std::string_view shape_str,
+        int8_t outer_state) -> I8Image
     {
         if (range_size == 0)
             throw std::invalid_argument(
@@ -101,8 +114,51 @@ private:
             .size = size,
             .data = std::vector<int8_t>(size.width * size.height, 0)
         };
-        for (auto& pixel : image.data)
-            pixel = distrib(gen);
+        if (radius < 0)
+            for (auto& pixel : image.data)
+                pixel = distrib(gen);
+        else
+        {
+            enum class Shape{ circle, rectangle };
+            auto shape = [shape_str]{
+                if (shape_str == "circle")
+                    return Shape::circle;
+                if (shape_str == "rectangle")
+                    return Shape::rectangle;
+                common::throw_<std::invalid_argument>(
+                    "Invalid shape '", shape_str, "'");
+            }();
+
+            int width = size.width;
+            int height = size.height;
+            int xc = width / 2;
+            int yc = height / 2;
+            auto* pixel = image.data.data();
+            auto r2 = radius * radius;
+            for (int y=0; y<height; ++y)
+                for (int x=0; x<width; ++x, ++pixel)
+                {
+                    auto dx = x - xc;
+                    auto dy = y - yc;
+                    switch(shape)
+                    {
+                    case Shape::rectangle:
+                        if (std::abs(dx) > radius || std::abs(dy) > radius)
+                        {
+                            *pixel = outer_state;
+                            continue;
+                        }
+                        break;
+                    case Shape::circle:
+                        if (dx*dx + dy*dy > r2)
+                        {
+                            *pixel = outer_state;
+                            continue;
+                        }
+                    }
+                    *pixel = distrib(gen);
+                }
+        }
 
         if( !map.empty() )
         {

@@ -470,20 +470,23 @@ TEST(GcApp_Node, RandomImage)
 {
     auto node = cell_aut::make_random_image({}, {});
 
-    ASSERT_EQ(node->input_count(), 4_gc_ic);
+    ASSERT_EQ(node->input_count(), 7_gc_ic);
     ASSERT_EQ(node->output_count(), 1_gc_oc);
 
-    ASSERT_EQ(node->input_names().size(), 4_gc_ic);
+    ASSERT_EQ(node->input_names().size(), 7_gc_ic);
 
     ASSERT_EQ(node->input_names()[0_gc_i], "size"sv);
     ASSERT_EQ(node->input_names()[1_gc_i], "lowest_state"sv);
     ASSERT_EQ(node->input_names()[2_gc_i], "range_size"sv);
     ASSERT_EQ(node->input_names()[3_gc_i], "map"sv);
+    ASSERT_EQ(node->input_names()[4_gc_i], "radius"sv);
+    ASSERT_EQ(node->input_names()[5_gc_i], "shape"sv);
+    ASSERT_EQ(node->input_names()[6_gc_i], "outer_state"sv);
 
     ASSERT_EQ(node->output_names().size(), 1_gc_oc);
     ASSERT_EQ(node->output_names()[0_gc_o], "image");
 
-    gc::ValueVec inputs(4);
+    gc::ValueVec inputs(7);
     gc::ValueVec outputs(1);
 
     node->default_inputs(inputs);
@@ -491,11 +494,17 @@ TEST(GcApp_Node, RandomImage)
     ASSERT_EQ(inputs[1].type(), gc::type_of<int8_t>());
     ASSERT_EQ(inputs[2].type(), gc::type_of<int8_t>());
     ASSERT_EQ(inputs[3].type(), gc::type_of<std::vector<int8_t>>());
+    ASSERT_EQ(inputs[4].type(), gc::type_of<int>());
+    ASSERT_EQ(inputs[5].type(), gc::type_of<std::string>());
+    ASSERT_EQ(inputs[6].type(), gc::type_of<int8_t>());
 
     ASSERT_EQ(inputs[0].as<UintSize>(), UintSize(100, 100));
     ASSERT_EQ(inputs[1].as<int8_t>(), int8_t{0});
     ASSERT_EQ(inputs[2].as<int8_t>(), int8_t{2});
     ASSERT_EQ(inputs[3].as<std::vector<int8_t>>(), std::vector<int8_t>{});
+    ASSERT_EQ(inputs[4].as<int>(), -1);
+    ASSERT_EQ(inputs[5].as<std::string>(), "circle");
+    ASSERT_EQ(inputs[6].as<int8_t>(), int8_t{0});
 
     node->compute_outputs(outputs, inputs, {}, {});
     ASSERT_EQ(outputs[0].type(), gc::type_of<I8Image>());

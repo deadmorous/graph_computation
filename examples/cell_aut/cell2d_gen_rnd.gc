@@ -45,6 +45,18 @@ graph:
         width: 500
         height: 500
       destinations: [initial_image.size]
+    - name: randomness_radius
+      type: I32
+      value: 100
+      destinations: [initial_image.radius]
+    - name: randomness_shape
+      type: String
+      value: "circle"
+      destinations: [initial_image.shape]
+    - name: outer_state
+      type: I8
+      value: 0
+      destinations: [initial_image.outer_state]
     - name: gen_rules
       type: String
       value: "gen-rules/cosmos.gen"
@@ -117,6 +129,12 @@ layout:
             - type: spin
               range: [1, 2000]
               bind: image_size/height
+            - type: spin
+              range: [-1, 500]
+              bind: randomness_radius
+            - type: spin
+              range: [-127, 127]
+              bind: outer_state
         - type: image
           bind: image_colorizer
           blend_factor: 0
