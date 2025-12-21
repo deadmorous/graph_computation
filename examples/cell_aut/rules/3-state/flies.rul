@@ -1,0 +1,7 @@
+% Random state decays to a set of
+% - diagonally moving gliders
+% - horizontally and vertically moving gliders looking like flies
+% - oscillators (with period 14 and a few others with period 2)
+3 0
+0 0 1 1 1 1 1 2 1 1 1 1 0 0 0 0 0 0 0
+END

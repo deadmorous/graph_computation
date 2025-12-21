@@ -1,0 +1,6 @@
+% Best viewed with skip == 2
+% Exhibits very slow chaotisation, perhaps related to canvas size
+% (tested for 500 x 500).
+2 0
+1 -128 -128 -128 1 0 1 0 1 -128
+END

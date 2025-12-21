@@ -1,0 +1,6 @@
+% Random state starts moving randomly, and then slowly separates into regions
+% of constant state (two states are stable). From time to time, area "shoots"
+% in horizontal or vertical direction.
+3 0
+0 0 0 0 0 -128 2 2 1 0 0 -128 2 2 2 2 2 -128 -128
+END

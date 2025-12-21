@@ -1,0 +1,7 @@
+% Random state quickly decays to a set of gliders moving vertically
+% and horizontally, and a few oscillators. Gliders are slow: they reproduce
+% themselves at an offset of 1 pixel in 6 steps.
+% Oscillators have a period of 6.
+3 0
+0 0 0 1 2 1 2 1 1 1 2 2 2 0 2 2 2 -128 -128
+END

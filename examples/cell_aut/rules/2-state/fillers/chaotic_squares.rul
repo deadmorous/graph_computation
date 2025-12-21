@@ -1,0 +1,5 @@
+% Best viewed with skip == 2
+% Exhibits 1D chaotic behavior
+2 0
+0 1 1 1 1 1 1 1 0 -128
+END

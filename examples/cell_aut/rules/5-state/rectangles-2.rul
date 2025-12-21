@@ -1,0 +1,6 @@
+% Similar to rectangles-1.rul, but here state 0 areas are also rectangular,
+% with 1-pixel border of state 1.
+% Rectangular shapes here are not always perfect.
+5 0
+0 0 0 0 0 0 0 1 1 1 1 1 1 2 2 2 2 2 2 2 3 3 3 3 3 3 4 4 4 4 4 4 4 -128 -128 -128 -128
+END

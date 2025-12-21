@@ -1,0 +1,6 @@
+% Random state decays to a set of
+% - diagonally moving gliders
+% - a few 2-periodic oscillators
+3 0
+0 0 2 2 0 0 1 1 1 1 1 1 1 2 2 0 0 2 2
+END

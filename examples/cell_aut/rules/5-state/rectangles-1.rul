@@ -1,0 +1,8 @@
+% Random initial state quickly decays into a set of motionless areas
+% of constant state. different states have different sizes, state-2 area
+% being the largest, usually making a connected set and "containing" others.
+% Interestingly, areas of state 4 are rectangular, with 1-pixel width
+% borders of state 3.
+5 0
+0 0 0 0 0 0 1 1 1 1 1 1 1 2 2 2 2 2 2 2 3 3 3 3 3 3 4 4 4 4 4 4 4 -128 -128 -128 -128
+END

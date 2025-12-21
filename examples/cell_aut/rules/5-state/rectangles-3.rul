@@ -1,0 +1,6 @@
+% Similar to rectangles-2.rul, but despite the name, 4-areas and 0-areas are
+% no longer rectangular. They expand quite greedily, but each of them is
+% an obstacle to the other one.
+5 0
+0 0 0 0 0 0 0 1 1 1 1 1 1 2 2 2 -128 2 2 2 3 3 3 3 3 3 4 4 4 4 4 4 4 -128 -128 -128 -128
+END
