@@ -26,5 +26,6 @@ add_subdirectory(agc_rt)
 add_subdirectory(gc_app)
 add_subdirectory(gc_cli)
 add_subdirectory(gc_visual)
+add_subdirectory(sieve)
 
 add_subdirectory(3p)
