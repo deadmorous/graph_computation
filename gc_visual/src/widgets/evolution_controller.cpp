@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "gc_visual/evolution_controller.hpp"
+#include "gc_visual/widgets/evolution_controller.hpp"
 
 #include <QHBoxLayout>
 #include <QLabel>

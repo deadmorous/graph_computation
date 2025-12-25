@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "gc_visual/parameter_editor_widget.hpp"
+#include "gc_visual/editors/parameter_editor_widget.hpp"
 
 #include <yaml-cpp/node/node.h>
 

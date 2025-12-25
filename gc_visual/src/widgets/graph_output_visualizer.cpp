@@ -8,12 +8,12 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "gc_visual/graph_output_visualizer.hpp"
+#include "gc_visual/widgets/graph_output_visualizer.hpp"
 
-#include "gc_visual/bitmap_view.hpp"
 #include "gc_visual/graph_broker.hpp"
 #include "gc_visual/qstr.hpp"
 #include "gc_visual/video_recorder.hpp"
+#include "gc_visual/widgets/bitmap_view.hpp"
 
 #include "gc/detail/parse_node_port.hpp"
 

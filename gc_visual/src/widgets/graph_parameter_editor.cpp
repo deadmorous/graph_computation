@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "gc_visual/graph_parameter_editor.hpp"
+#include "gc_visual/widgets/graph_parameter_editor.hpp"
 
 #include "gc_visual/editors/cell2d_gen_cmap_editor_widget.hpp"
 #include "gc_visual/editors/cell2d_gen_rule_editor_widget.hpp"
@@ -17,6 +17,7 @@
 #include "gc_visual/editors/file_picker_widget.hpp"
 #include "gc_visual/editors/spin_editor_widget.hpp"
 #include "gc_visual/editors/vector_editor_widget.hpp"
+#include "gc_visual/graph_broker.hpp"
 #include "gc_visual/parse_graph_binding.hpp"
 #include "gc_visual/qstr.hpp"
 

@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "gc_visual/graph_broker.hpp"
+#include "gc_visual/graph_broker_fwd.hpp"
 
 #include <yaml-cpp/node/node.h>
 

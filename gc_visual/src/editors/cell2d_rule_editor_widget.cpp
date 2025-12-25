@@ -10,7 +10,7 @@
 
 #include "gc_visual/editors/cell2d_rule_editor_widget.hpp"
 
-#include "gc_visual/cell2d_rule_map_view.hpp"
+#include "gc_visual/widgets/cell2d_rule_map_view.hpp"
 
 #include "gc/value.hpp"
 

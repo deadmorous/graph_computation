@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "gc_visual/computation_progress_widget.hpp"
+#include "gc_visual/widgets/computation_progress_widget.hpp"
 
 #include <QHBoxLayout>
 #include <QLabel>

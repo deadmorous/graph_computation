@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "gc_visual/parameter_editor_widget.hpp"
+#include "gc_visual/editors/parameter_editor_widget.hpp"
 
 ParameterEditorWidget::ParameterEditorWidget(QWidget* parent):
     QWidget{parent}

@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve.mail.ru>
  */
 
-#include "gc_visual/bitmap_view.hpp"
+#include "gc_visual/widgets/bitmap_view.hpp"
 
 #include "gc_visual/qstr.hpp"
 

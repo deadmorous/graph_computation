@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "gc_visual/cell2d_rule_map_view.hpp"
+#include "gc_visual/widgets/cell2d_rule_map_view.hpp"
 
 #include "common/format.hpp"
 #include "common/overloads.hpp"

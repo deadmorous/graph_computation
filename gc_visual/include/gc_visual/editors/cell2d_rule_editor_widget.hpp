@@ -12,7 +12,7 @@
 
 #include "gc_app/types/cell2d_rules.hpp"
 
-#include "gc_visual/parameter_editor_widget.hpp"
+#include "gc_visual/editors/parameter_editor_widget.hpp"
 
 #include <QWidget>
 

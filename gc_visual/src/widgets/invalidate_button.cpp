@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "gc_visual/invalidate_button.hpp"
+#include "gc_visual/widgets/invalidate_button.hpp"
 
 #include <yaml-cpp/yaml.h>
 

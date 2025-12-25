@@ -10,11 +10,11 @@
 
 #include "gc_visual/parse_layout.hpp"
 
-#include "gc_visual/evolution_controller.hpp"
+#include "gc_visual/widgets/evolution_controller.hpp"
 #include "gc_visual/graph_broker.hpp"
-#include "gc_visual/graph_output_visualizer.hpp"
-#include "gc_visual/graph_parameter_editor.hpp"
-#include "gc_visual/invalidate_button.hpp"
+#include "gc_visual/widgets/graph_output_visualizer.hpp"
+#include "gc_visual/widgets/graph_parameter_editor.hpp"
+#include "gc_visual/widgets/invalidate_button.hpp"
 
 #include "common/throw.hpp"
 

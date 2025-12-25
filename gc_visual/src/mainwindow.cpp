@@ -10,7 +10,7 @@
 
 #include "gc_visual/mainwindow.hpp"
 
-#include "gc_visual/computation_progress_widget.hpp"
+#include "gc_visual/widgets/computation_progress_widget.hpp"
 #include "gc_visual/graph_broker.hpp"
 #include "gc_visual/graph_evolution.hpp"
 #include "gc_visual/parse_layout.hpp"
