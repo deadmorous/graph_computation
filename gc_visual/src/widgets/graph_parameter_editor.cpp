@@ -21,6 +21,7 @@
 #include "gc_visual/parse_graph_binding.hpp"
 #include "gc_visual/qstr.hpp"
 
+#include "common/func_ref.hpp"
 #include "common/throw.hpp"
 
 #include <yaml-cpp/yaml.h>
@@ -108,48 +109,36 @@ private:
     EditorWidget* widget_{};
 };
 
-struct AbstractEditorFactory
+using EditorFactoryFunc =
+    common::FuncRef<std::shared_ptr<QWidget>(
+        const std::string&,
+        const ParamBinding&,
+        GraphBroker*,
+        const YAML::Node&)>;
+
+template <std::derived_from<ParameterEditorWidget> EditorWidget>
+auto editor_factory() -> EditorFactoryFunc
 {
-    ~AbstractEditorFactory() = default;
-
-    virtual auto operator()(const std::string& editor_type,
-                            const ParamBinding& binding,
-                            GraphBroker* broker,
-                            const YAML::Node& config) const
-        -> std::shared_ptr<QWidget> = 0;
-};
-
-using EditorFactoryPtr = std::shared_ptr<AbstractEditorFactory>;
-
-template<std::derived_from<ParameterEditorWidget> EditorWidget>
-struct EditorFactory final : AbstractEditorFactory
-{
-    auto operator()(const std::string& editor_type,
-                    const ParamBinding& binding,
-                    GraphBroker* broker,
-                    const YAML::Node& config) const
-        -> std::shared_ptr<QWidget> override
+    static constexpr auto impl = [](const std::string& editor_type,
+                                    const ParamBinding& binding,
+                                    GraphBroker* broker,
+                                    const YAML::Node& item_node)
+        -> std::shared_ptr<QWidget>
     {
         auto editor = std::make_shared<Editor<EditorWidget>>(
             editor_type,
             binding,
             broker,
             nullptr,
-            config);
+            item_node);
         return { editor->widget(),
                 [e=std::move(editor)](QWidget*) mutable { e.reset(); } };
-    }
-};
+    };
+    return &impl;
+}
 
 using GraphParameterEditorFactoryMap =
-    std::unordered_map<std::string_view, EditorFactoryPtr>;
-
-template<std::derived_from<ParameterEditorWidget> EditorWidget>
-auto editor_factory(common::Type_Tag<EditorWidget> = {})
-    -> EditorFactoryPtr
-{
-    return std::make_shared<EditorFactory<EditorWidget>>();
-};
+    std::unordered_map<std::string_view, EditorFactoryFunc>;
 
 auto editor_factory_map() -> const GraphParameterEditorFactoryMap&
 {
@@ -178,7 +167,7 @@ GraphParameterEditor::GraphParameterEditor(const std::string& type,
     auto binding =
         gc_visual::parse_param_binding(broker->binding_resolver(), item_node);
 
-    res_ = (*editor_factory_map().at(type))(type, binding, broker, item_node);
+    res_ = editor_factory_map().at(type)(type, binding, broker, item_node);
 
     auto layout = new QVBoxLayout{};
     setLayout(layout);
