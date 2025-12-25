@@ -21,20 +21,15 @@
 #include <QWidget>
 
 
-class ParameterEditorWidget :
+class VisualizerWidget :
     public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit ParameterEditorWidget(QWidget* parent = nullptr);
+    explicit VisualizerWidget(QWidget* parent = nullptr);
 
-    virtual ~ParameterEditorWidget() = default;
-
-    virtual auto value() const -> gc::Value = 0;
-
-signals:
-    void value_changed(const gc::Value&, gc::ValuePathView path={});
+    virtual ~VisualizerWidget() = default;
 
 public slots:
     virtual void set_value(const gc::Value&) = 0;

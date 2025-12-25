@@ -34,6 +34,9 @@ set(PROJECT_SOURCES
     parse_graph_binding.cpp
     parse_layout.cpp
     video_recorder.cpp          ../include/gc_visual/video_recorder.hpp
+    visualizers/image_visualizer.cpp    ../include/gc_visual/visualizers/image_visualizer.hpp
+    visualizers/text_visualizer.cpp     ../include/gc_visual/visualizers/text_visualizer.hpp
+    visualizers/visualizer_widget.cpp   ../include/gc_visual/visualizers/visualizer_widget.hpp
     widgets/bitmap_view.cpp             ../include/gc_visual/widgets/bitmap_view.hpp
     widgets/cell2d_rule_map_view.cpp    ../include/gc_visual/widgets/cell2d_rule_map_view.hpp
     widgets/computation_progress_widget.cpp ../include/gc_visual/widgets/computation_progress_widget.hpp

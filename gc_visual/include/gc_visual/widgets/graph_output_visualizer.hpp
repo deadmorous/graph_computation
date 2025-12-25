@@ -10,13 +10,11 @@
 
 #pragma once
 
-#include "gc/edge.hpp"
+#include "gc_visual/graph_broker_fwd.hpp"
 
 #include <yaml-cpp/node/node.h>
 
 #include <QWidget>
-
-class GraphBroker;
 
 class GraphOutputVisualizer final :
     public QWidget

@@ -9,329 +9,67 @@
  */
 
 #include "gc_visual/widgets/graph_output_visualizer.hpp"
+#include "gc_visual/visualizers/visualizer_widget.hpp"
 
 #include "gc_visual/graph_broker.hpp"
 #include "gc_visual/qstr.hpp"
-#include "gc_visual/video_recorder.hpp"
-#include "gc_visual/widgets/bitmap_view.hpp"
+#include "gc_visual/visualizers/image_visualizer.hpp"
+#include "gc_visual/visualizers/text_visualizer.hpp"
 
 #include "gc/detail/parse_node_port.hpp"
 
-#include <yaml-cpp/yaml.h>
+#include "common/func_ref.hpp"
+#include "common/throw.hpp"
 
 #include <QBoxLayout>
-#include <QCheckBox>
-#include <QDoubleSpinBox>
-#include <QFileDialog>
 #include <QLabel>
-#include <QMessageBox>
-#include <QPushButton>
-#include <QScrollArea>
-#include <QSlider>
-#include <QSpinBox>
-#include <QTextEdit>
-
-#include <magic_enum/magic_enum.hpp>
 
 
 using namespace std::string_view_literals;
 
 namespace {
 
-auto make_image(GraphBroker* broker,
-                const YAML::Node& item_node,
-                GraphOutputVisualizer* parent)
-    -> void
+using VisualizerFactoryFunc =
+    common::FuncRef<VisualizerWidget*(
+        const std::string&,
+        const gc::EdgeOutputEnd&,
+        GraphBroker*,
+        const YAML::Node&)>;
+
+template <std::derived_from<VisualizerWidget> Visualizer>
+auto visualizer_factory() -> VisualizerFactoryFunc
 {
-    parent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    auto* layout = new QVBoxLayout{};
-    parent->setLayout(layout);
-
-    // Resolve output port binding
-    auto node_port_str = item_node["bind"].as<std::string>();
-    auto output_port =
-        gc::detail::parse_node_port(node_port_str,
-                                    broker->named_nodes(),
-                                    broker->node_indices(),
-                                    gc::Output);
-
-    auto* sub_layout = new QHBoxLayout{};
-    layout->addLayout(sub_layout);
-
-    auto* scale_slider = new QSlider{ Qt::Horizontal };
-    scale_slider->setMinimum(1);
-    scale_slider->setMaximum(100);
-    sub_layout->addWidget(scale_slider);
-
-    QDoubleSpinBox* blend_spin{};
-
-    auto blend_factor = std::optional<double>{};
-    auto blend_mode = BitmapView::BlendMode::none;
-    if (auto blend_factor_node = item_node["blend_factor"];
-        blend_factor_node.IsDefined())
+    static constexpr auto impl = [](const std::string& visualizer_type,
+                                    const gc::EdgeOutputEnd& port,
+                                    GraphBroker* broker,
+                                    const YAML::Node& item_node)
     {
-        auto* blend_spin_label = new QLabel("blend");
-        blend_spin = new QDoubleSpinBox{};
-        blend_spin_label->setBuddy(blend_spin);
-        blend_spin->setRange(0, 1);
-        blend_spin->setDecimals(2);
-        blend_spin->setSingleStep(0.1);
-        sub_layout->addWidget(blend_spin_label);
-        sub_layout->addWidget(blend_spin);
+        auto value = broker->get_port_value(port);
 
-        blend_factor = blend_factor_node.as<double>();
-        blend_spin->setValue(*blend_factor);
-
-        auto blend_mode_node = item_node["blend_mode"];
-        if (blend_mode_node.IsDefined())
+        if (auto type_check_result = Visualizer::check_type(value.type());
+            !type_check_result.ok)
         {
-            auto mode_str = blend_mode_node.as<std::string>();
-            auto opt_blend_mode =
-                magic_enum::enum_cast<BitmapView::BlendMode>(mode_str);
-            if (!opt_blend_mode)
-                common::throw_(
-                    "Invalid blend mode '", mode_str, "', expected one of ",
-                    common::format_seq(
-                        magic_enum::enum_names<BitmapView::BlendMode>(), ", "));
-            blend_mode = *opt_blend_mode;
-        }
-    }
-
-    auto* record_video_check = new QCheckBox("&Video");
-    sub_layout->addWidget(record_video_check);
-
-    auto video_quality = new QSpinBox{parent};
-    constexpr int default_video_quality = 23;
-    video_quality->setMinimum(0);
-    video_quality->setMaximum(51);
-    video_quality->setValue(default_video_quality);
-    sub_layout->addWidget(video_quality);
-
-    auto* save_button = new QPushButton("Sav&e...");
-    sub_layout->addWidget(save_button);
-
-    auto* scroll_view = new QScrollArea{};
-
-    auto* bitmap_view = new BitmapView{blend_mode, blend_factor.value_or(0.)};
-    scroll_view->setWidget(bitmap_view);
-
-    layout->addWidget(scroll_view);
-
-    auto* video_recorder = new VideoRecorder{parent};
-
-    auto start_video_recording = [=, last_saved_video_name=QString{}]() mutable
-    {
-        if (video_recorder->status() != VideoRecorderStatus::Ready)
-        {
-            QMessageBox::critical(
-                parent, {}, "Video recording is already in progress");
-            return false;
+            common::throw_(
+                "Invalid binding: '", visualizer_type,
+                "' can only bind to ",
+                type_check_result.expected_type_description,
+                ", whereas the output ", common::format(port),
+                " is of type ", value.type());
         }
 
-        const auto& image = bitmap_view->qimage();
-        if (image.isNull())
-        {
-            QMessageBox::critical(parent, {}, "Current image is empty");
-            return false;
-        }
-
-
-        auto file_name = QFileDialog::getSaveFileName(
-            parent, "Save image", last_saved_video_name, "Videos (*.mp4)");
-
-        if (file_name.isEmpty())
-            return false;
-
-        auto errors = QStringList{};
-        auto on_start_recording_error = [&](const QString& error)
-        {
-            errors.append(error);
-        };
-
-        auto conn_err = QObject::connect(
-            video_recorder, &VideoRecorder::error, on_start_recording_error);
-
-        constexpr int default_fps = 25; // TODO: Configure it?
-        video_quality->value();
-
-        auto ok = video_recorder->start(
-            file_name, image.width(), image.height(),
-            {
-                .fps = default_fps,
-                .h264_quality = video_quality->value()
-            });
-
-        QObject::disconnect(conn_err);
-
-        if (!ok)
-        {
-            QMessageBox::critical(
-                parent, {}, "Failed to start recording:\n" + errors.join('\n'));
-        }
-
-        last_saved_video_name = file_name;
-
-        return true;
+        return new Visualizer(broker, item_node);
     };
-
-    auto stop_video_recording = [=]
-    {
-        switch (video_recorder->status())
-        {
-        case VideoRecorderStatus::Ready:
-            QMessageBox::critical(
-                parent, {}, "Video recording is not currently in progress");
-            return false;
-        case VideoRecorderStatus::Recording:
-            video_recorder->request_stop();
-            return true;
-        case VideoRecorderStatus::Finishing:
-            QMessageBox::critical(
-                parent, {}, "Video recording is currently being finalized");
-            return false;
-        }
-        __builtin_unreachable();
-    };
-
-    QObject::connect(
-        scale_slider, &QSlider::valueChanged,
-        bitmap_view,
-        [=](int pos) { bitmap_view->set_scale(1. + (pos-1)/10.); });
-
-    if (blend_factor)
-        QObject::connect(
-            blend_spin, &QDoubleSpinBox::valueChanged,
-            bitmap_view, &BitmapView::set_blend_factor);
-
-    QObject::connect(
-        record_video_check, &QCheckBox::clicked,
-        [=](bool checked) mutable
-        {
-            if (checked)
-            {
-                if (!start_video_recording())
-                    record_video_check->setChecked(false);
-            }
-            else
-            {
-                if (!stop_video_recording())
-                    record_video_check->setChecked(true);
-            }
-        });
-
-    QObject::connect(
-        save_button, &QPushButton::clicked,
-        [=, last_saved_name=QString{}]() mutable {
-            auto image = bitmap_view->qimage();
-            if (image.isNull())
-            {
-                QMessageBox::critical(parent, {}, "Current image is empty");
-                return;
-            }
-
-            auto file_name = QFileDialog::getSaveFileName(
-                parent, "Save image", last_saved_name, "Images (*.png)");
-            if (file_name.isEmpty())
-                return;
-            if (image.save(file_name))
-                last_saved_name = file_name;
-            else
-                QMessageBox::critical(
-                    parent, {}, "Failed to save file " + file_name);
-        });
-
-    auto on_output_updated = [=](gc::EdgeOutputEnd output)
-    {
-        if (output != output_port)
-            return;
-
-        bitmap_view->set_image(broker->get_port_value(output_port));
-    };
-
-    QObject::connect(
-        broker, &GraphBroker::output_updated,
-        bitmap_view, on_output_updated);
-
-    on_output_updated(output_port);
-
-    QObject::connect(
-        bitmap_view, &BitmapView::image_updated,
-        video_recorder, &VideoRecorder::enqueue_frame);
-
-    QObject::connect(
-        video_recorder, &VideoRecorder::error,
-        broker, &GraphBroker::gui_error);
+    return &impl;
 }
 
-auto make_text(GraphBroker* broker,
-                const YAML::Node& item_node,
-                GraphOutputVisualizer* parent)
-    -> void
+using VisualizerFactoryMap =
+    std::unordered_map<std::string_view, VisualizerFactoryFunc>;
+
+auto visualizer_factory_map() -> const VisualizerFactoryMap&
 {
-    parent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    auto* layout = new QVBoxLayout{};
-    parent->setLayout(layout);
-
-    // Resolve output port binding
-    auto node_port_str = item_node["bind"].as<std::string>();
-    auto output_port =
-        gc::detail::parse_node_port(node_port_str,
-                                    broker->named_nodes(),
-                                    broker->node_indices(),
-                                    gc::Output);
-
-    auto view = new QTextEdit{};
-    layout->addWidget(view);
-
-    view->setReadOnly(true);
-    view->setAcceptRichText(false);
-
-    auto on_output_updated = [=](gc::EdgeOutputEnd output)
-    {
-        if (output != output_port)
-            return;
-
-        const auto& v = broker->get_port_value(output_port);
-
-        constexpr auto max_lines = 1000ul;
-
-        if (v.type()->aggregate_type() == gc::AggregateType::Vector)
-        {
-            view->clear();
-            for (size_t i=0, n=std::min(v.size(), max_lines); i<n; ++i)
-                view->append(format_qstr(i, '\t', v.get(gc::ValuePath{i})));
-
-            if (v.size() > max_lines)
-                view->append("...");
-        }
-        else
-            view->setText(format_qstr(v));
-
-        auto cursor = view->textCursor();
-        cursor.setPosition(0);
-        view->setTextCursor(cursor);
-    };
-
-    QObject::connect(
-        broker, &GraphBroker::output_updated,
-        view, on_output_updated );
-
-    on_output_updated(output_port);
-}
-
-using GraphOutputVisualizerFactoryFunc =
-    void(*)(GraphBroker*, const YAML::Node&, GraphOutputVisualizer*);
-
-using GraphOutputVisualizerFactoryMap =
-    std::unordered_map<std::string_view, GraphOutputVisualizerFactoryFunc>;
-
-
-
-auto editor_factory_map() -> const GraphOutputVisualizerFactoryMap&
-{
-    static auto result = GraphOutputVisualizerFactoryMap{
-        { "image"sv, make_image },
-        { "text"sv, make_text },
+    static auto result = VisualizerFactoryMap{
+        { "image"sv, visualizer_factory<ImageVisualizer>() },
+        { "text"sv, visualizer_factory<TextVisualizer>() },
     };
 
     return result;
@@ -346,10 +84,40 @@ GraphOutputVisualizer::GraphOutputVisualizer(const std::string& type,
                                              QWidget* parent) :
     QWidget{ parent }
 {
-    editor_factory_map().at(type)(broker, item_node, this);
+    // Resolve output port binding
+    auto node_port_str = item_node["bind"].as<std::string>();
+    auto port =
+        gc::detail::parse_node_port(node_port_str,
+                                    broker->named_nodes(),
+                                    broker->node_indices(),
+                                    gc::Output);
+
+    auto* visualizer = visualizer_factory_map().at(type)(
+        type, port, broker, item_node);
+
+    auto layout = new QVBoxLayout{};
+    setLayout(layout);
+    auto* label = new QLabel(qstr(node_port_str));
+    label->setBuddy(visualizer);
+    layout->addWidget(label);
+    layout->addWidget(visualizer);
+
+    auto on_output_updated = [=](gc::EdgeOutputEnd output)
+    {
+        if (output != port)
+            return;
+
+        visualizer->set_value(broker->get_port_value(port));
+    };
+
+    QObject::connect(
+        broker, &GraphBroker::output_updated,
+        visualizer, on_output_updated);
+
+    on_output_updated(port);
 }
 
 auto GraphOutputVisualizer::supports_type(const std::string& type) -> bool
 {
-    return editor_factory_map().contains(type);
+    return visualizer_factory_map().contains(type);
 }
