@@ -1,0 +1,150 @@
+graph:
+  nodes:
+    - type: random_image
+      name: initial_image
+    - type: gen_rule_reader
+      name: gen_rule_reader
+    - type: generate_rules
+      name: generate_rules
+    - name: cell2d
+      type: cell2d
+    - name: gen_cmap_reader
+      type: gen_cmap_reader
+    - type: generate_cmap
+      name: generate_cmap
+    - name: palette_maker
+      type: merge
+      init:
+        - type: I32
+          value: 2
+    - name: image_colorizer
+      type: image_colorizer
+    - name: state_count
+      type: project
+    - name: min_state
+      type: project
+    - name: image_metrics
+      type: i8_image_metrics
+
+  edges:
+    - [gen_rule_reader.gen_rules, generate_rules.gen_rules]
+    - [generate_rules.rules, state_count.value]
+    - [state_count.projection, initial_image.range_size]
+    - [generate_rules.rules, min_state.value ]
+    - [min_state.projection, initial_image.lowest_state]
+    - [initial_image.image, cell2d.input_state]
+    - [generate_rules.rules, cell2d.rules]
+    - [cell2d.output_state, image_colorizer.input_image]
+    - [gen_cmap_reader.gen_cmap, generate_cmap.gen_cmap]
+    - [generate_cmap.cmap, palette_maker.value_0]
+    - [palette_maker.output, image_colorizer.palette]
+    - [min_state.projection, image_colorizer.min_state]
+
+    - [cell2d.output_state, image_metrics.image]
+    - [min_state.projection, image_metrics.min_state]
+    - [state_count.projection, image_metrics.state_count]
+
+  inputs:
+    - name: image_size
+      type: UintSize
+      value:
+        width: 500
+        height: 500
+      destinations: [initial_image.size]
+    - name: randomness_radius
+      type: I32
+      value: 100
+      destinations: [initial_image.radius]
+    - name: randomness_shape
+      type: String
+      value: "circle"
+      destinations: [initial_image.shape]
+    - name: outer_state
+      type: I8
+      value: 0
+      destinations: [initial_image.outer_state]
+    - name: gen_rules
+      type: String
+      value: "gen-rules/cosmos.gen"
+      destinations: [gen_rule_reader.file]
+    - name: gen_cmap
+      type: String
+      value: "gen-colormaps/program.cf"
+      destinations: [gen_cmap_reader.file]
+
+    - name: palette_maker_output_type
+      type: String
+      value: "IndexedPalette"
+      destinations: [palette_maker.output_type]
+    - name: palette_maker_path_0
+      type: ValuePath
+      value: "/color_map"
+      destinations: [palette_maker.path_0]
+    - name: palette_maker_path_1
+      type: ValuePath
+      value: "/overflow_color"
+      destinations: [palette_maker.path_1]
+    - name: palette_maker_value_1
+      type: Color
+      value: 0xffff00ff
+      destinations: [palette_maker.value_1]
+
+    - name: state_count
+      type: ValuePath
+      value: "/state_count"
+      destinations: [state_count.path]
+    - name: min_state
+      type: ValuePath
+      value: "/min_state"
+      destinations: [min_state.path]
+
+evolution:
+  feedback:
+    - source: cell2d.output_state
+      sink: [cell2d.input_state]
+
+layout:
+  type: horizontal_layout
+  items:
+    - type: vertical_layout
+      items:
+        - type: file
+          bind: gen_rules
+          filter: "Rule generation files (*.gen)"
+        - type: cell2d_gen_rules
+          bind: gen_rule_reader.gen_rules
+        - type: file
+          bind: gen_cmap
+          filter: "Colormap generation files (*.cf)"
+        - type: cell2d_gen_cmap
+          bind: gen_cmap_reader.gen_cmap
+        - type: stretch
+    - type: vertical_layout
+      items:
+        - type: horizontal_layout
+          items:
+          - type: invalidate
+            bind: image_size
+            label: "&reset"
+          - type: evolution
+        - type: horizontal_layout
+          items:
+            - type: spin
+              range: [1, 2000]
+              bind: image_size/width
+            - type: spin
+              range: [1, 2000]
+              bind: image_size/height
+            - type: spin
+              range: [-1, 500]
+              bind: randomness_radius
+            - type: spin
+              range: [-127, 127]
+              bind: outer_state
+        - type: image
+          bind: image_colorizer
+          blend_factor: 0
+          blend_mode: all
+        - type: text
+          bind: image_metrics.image_metrics
+        - type: stretch
