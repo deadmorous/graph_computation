@@ -76,6 +76,7 @@ target_link_libraries(gc_visual
     PRIVATE
         Qt${QT_VERSION_MAJOR}::Widgets
         gc_app::lib
+        sieve::lib
         FFMpeg::Encoder
     )
 

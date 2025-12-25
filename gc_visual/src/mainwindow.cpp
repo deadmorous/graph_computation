@@ -18,6 +18,9 @@
 #include "gc_app/node_registry.hpp"
 #include "gc_app/type_registry.hpp"
 
+#include "sieve/node_registry.hpp"
+#include "sieve/type_registry.hpp"
+
 #include "gc/computation_context.hpp"
 #include "gc/computation_node_registry.hpp"
 #include "gc/yaml/parse_graph.hpp"
@@ -266,6 +269,8 @@ auto MainWindow::load(const gc_visual::ConfigSpecification& spec)
         };
         gc_app::populate_node_registry(context.node_registry);
         gc_app::populate_type_registry(context.type_registry);
+        sieve::populate_node_registry(context.node_registry);
+        sieve::populate_type_registry(context.type_registry);
 
         // Parse graph from the node object.
         auto graph_config = config["graph"];
