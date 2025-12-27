@@ -9,12 +9,13 @@
  */
 
 #include "gc_visual/widgets/graph_output_visualizer.hpp"
-#include "gc_visual/visualizers/visualizer_widget.hpp"
 
 #include "gc_visual/graph_broker.hpp"
 #include "gc_visual/qstr.hpp"
+#include "gc_visual/visualizers/image_metrics_visualizer.hpp"
 #include "gc_visual/visualizers/image_visualizer.hpp"
 #include "gc_visual/visualizers/text_visualizer.hpp"
+#include "gc_visual/visualizers/visualizer_widget.hpp"
 
 #include "gc/detail/parse_node_port.hpp"
 
@@ -69,6 +70,7 @@ auto visualizer_factory_map() -> const VisualizerFactoryMap&
 {
     static auto result = VisualizerFactoryMap{
         { "image"sv, visualizer_factory<ImageVisualizer>() },
+        { "image_metrics"sv, visualizer_factory<ImageMetricsVisualizer>() },
         { "text"sv, visualizer_factory<TextVisualizer>() },
     };
 

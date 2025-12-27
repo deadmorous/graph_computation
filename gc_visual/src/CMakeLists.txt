@@ -35,6 +35,7 @@ set(PROJECT_SOURCES
     parse_layout.cpp
     plot/layout.cpp
     video_recorder.cpp          ../include/gc_visual/video_recorder.hpp
+    visualizers/image_metrics_visualizer.cpp    ../include/gc_visual/visualizers/image_metrics_visualizer.hpp
     visualizers/image_visualizer.cpp    ../include/gc_visual/visualizers/image_visualizer.hpp
     visualizers/text_visualizer.cpp     ../include/gc_visual/visualizers/text_visualizer.hpp
     visualizers/visualizer_widget.cpp   ../include/gc_visual/visualizers/visualizer_widget.hpp
@@ -44,6 +45,7 @@ set(PROJECT_SOURCES
     widgets/evolution_controller.cpp    ../include/gc_visual/widgets/evolution_controller.hpp
     widgets/graph_output_visualizer.cpp ../include/gc_visual/widgets/graph_output_visualizer.hpp
     widgets/graph_parameter_editor.cpp  ../include/gc_visual/widgets/graph_parameter_editor.hpp
+    widgets/image_metrics_view.cpp      ../include/gc_visual/widgets/image_metrics_view.hpp
     widgets/invalidate_button.cpp       ../include/gc_visual/widgets/invalidate_button.hpp
 )
 

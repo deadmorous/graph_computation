@@ -64,6 +64,10 @@ auto param_binding_label(const ParamBinding& binding)
     -> std::string;
 
 auto parse_param_binding(const BindingResolver& resolver,
+                         std::string io_name)
+    -> ParamBinding;
+
+auto parse_param_binding(const BindingResolver& resolver,
                          const YAML::Node& item_node)
     -> ParamBinding;
 

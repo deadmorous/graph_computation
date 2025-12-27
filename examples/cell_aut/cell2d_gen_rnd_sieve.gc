@@ -145,6 +145,14 @@ layout:
           bind: image_colorizer
           blend_factor: 0
           blend_mode: all
-        - type: text
+        - type: image_metrics
           bind: image_metrics.image_metrics
+          palette: palette_maker.output
+          lookback: 1000
+          metric: StateHistogram
+        - type: image_metrics
+          bind: image_metrics.image_metrics
+          palette: palette_maker.output
+          lookback: 1000
+          metric: EdgeHistogram
         - type: stretch

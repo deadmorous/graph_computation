@@ -137,12 +137,9 @@ auto param_binding_label(const ParamBinding& binding)
 }
 
 auto parse_param_binding(const BindingResolver& resolver,
-                         const YAML::Node& item_node)
+                         std::string io_name)
     -> ParamBinding
 {
-    // Resolve parameter binding
-    auto io_name = item_node["bind"].as<std::string>();
-
     auto path = gc::ValuePath{};
     auto path_pos = io_name.find_first_of('/');
     if (path_pos != std::string::npos)
@@ -154,6 +151,15 @@ auto parse_param_binding(const BindingResolver& resolver,
     auto io = resolver.io_spec(io_name);
 
     return { { io, path }, std::move(io_name) };
+}
+
+auto parse_param_binding(const BindingResolver& resolver,
+                         const YAML::Node& item_node)
+    -> ParamBinding
+{
+    // Resolve parameter binding
+    auto io_name = item_node["bind"].as<std::string>();
+    return parse_param_binding(resolver, io_name);
 }
 
 } // namespace gc_visual
