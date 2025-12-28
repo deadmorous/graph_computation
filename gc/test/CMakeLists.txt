@@ -10,6 +10,7 @@ add_executable(
     test_algorithm.cpp
     test_build.cpp
     test_binomial.cpp
+    test_enum_flags.cpp
     test_expr_calculator.cpp
     test_func_ref.cpp
     test_gc.cpp
