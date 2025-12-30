@@ -104,10 +104,73 @@ TEST(Gc, Array)
     EXPECT_THROW(v.set(gc::ValuePath{4}, 11), std::out_of_range);
 }
 
+
+enum class MyEnum : uint8_t
+{
+    Foo,
+    Bar = 5,
+    Baz
+};
+
+GCLIB_REGISTER_ENUM_TYPE(MyEnum, 1);
+
+TEST(Gc, EnumType)
+{
+    using Underlying = std::underlying_type_t<MyEnum>;
+    using UnderlyingVec = std::vector<Underlying>;
+    using StringViewVec = std::vector<std::string_view>;
+
+    // Type-specific checks
+
+    const auto* t_my_enum = gc::Type::of<MyEnum>();
+    EXPECT_EQ(common::format(t_my_enum), "Type{Enum<MyEnum: 1>}");
+
+    auto v0 = gc::Value::make(t_my_enum);
+
+    auto names =
+        v0.get(gc::ValuePath{ "names"sv }).as<StringViewVec>();
+    auto expected_names = StringViewVec{ "Foo"sv, "Bar"sv, "Baz"sv };
+    EXPECT_EQ(names, expected_names);
+
+    auto values =
+        v0.get(gc::ValuePath{ "values"sv }).as<UnderlyingVec>();
+    auto expected_values = UnderlyingVec{ 0, 5, 6 };
+    EXPECT_EQ(values, expected_values);
+
+    // Value-specific checks
+
+    auto v = gc::Value{MyEnum::Baz};
+
+    auto e = v.as<MyEnum>();
+    EXPECT_EQ(e, MyEnum::Baz);
+
+    v.set({}, MyEnum::Bar);
+    EXPECT_EQ(v, MyEnum::Bar);
+
+    auto vi = v.get(gc::ValuePath{ "index"sv }).as<size_t>();
+    EXPECT_EQ(vi, magic_enum::enum_index(MyEnum::Bar));
+
+    auto vv = v.get(gc::ValuePath{ "value"sv }).as<Underlying>();
+    EXPECT_EQ(vv, magic_enum::enum_integer(MyEnum::Bar));
+
+    auto vn = v.get(gc::ValuePath{ "name"sv }).as<std::string_view>();
+    EXPECT_EQ(vn, "Bar"sv);
+
+    v.set(gc::ValuePath{ "index"sv }, size_t{1});
+    EXPECT_EQ(common::format(v), "Bar");
+
+    v.set(gc::ValuePath{ "name"sv }, "Foo"s);
+    EXPECT_EQ(v.as<MyEnum>(), MyEnum::Foo);
+
+    v.set(gc::ValuePath{ "value"sv },
+          gc::Value{ common::Type<Underlying>, 6 });
+    EXPECT_EQ(v.as<MyEnum>(), MyEnum::Baz);
+}
+
 class MyBlob final
 {};
 
-GC_REGISTER_CUSTOM_TYPE(MyBlob, 1);
+GCLIB_REGISTER_CUSTOM_TYPE(MyBlob, 1);
 
 TEST(Gc, CustomType)
 {

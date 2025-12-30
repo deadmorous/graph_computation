@@ -105,6 +105,15 @@ struct SimpleValueParser final
             " because custom types are not supported");
     }
 
+    auto operator()(const EnumT& t, std::string_view text) const
+        -> Value
+    {
+        auto v = gc::Value::make(t.type());
+        // TODO better: pass `text` directly when it is supported
+        v.set(gc::ValuePath{ "name"sv }, std::string{text});
+        return v;
+    }
+
     auto operator()(const PathT& t, std::string_view text) const
         -> Value
     { return ValuePath::from_string(text); }

@@ -59,6 +59,10 @@ struct YamlValueParser final
             "YamlValueParser: Failed to parse value of type ", t.type(),
             " because custom types are not supported");
     }
+    auto operator()(const EnumT& t, Value& value, const YAML::Node& node) const
+        -> void
+    { value = parse_simple_value(node.as<std::string>(), t.type()); }
+
     auto operator()(const PathT& t, Value& value, const YAML::Node& node) const
         -> void
     { value = parse_simple_value(node.as<std::string>(), t.type()); }

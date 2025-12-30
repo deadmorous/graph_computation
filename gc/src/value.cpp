@@ -67,6 +67,10 @@ public:
         -> std::string
     { return "custom"; }
 
+    auto operator()(const gc::EnumT& t, const Value& value) const
+        -> std::string
+    { return value.get(ValuePath{ "name"sv }).convert_to<std::string>(); }
+
     auto operator()(const gc::PathT& t, const Value& value) const
         -> std::string
     { return common::format(value.as<ValuePath>()); }

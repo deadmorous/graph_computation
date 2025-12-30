@@ -47,6 +47,10 @@ public:
     {
     }
 
+    auto operator()(const gc::EnumT& t)
+        -> void
+    { result_.push_back({ t.type(), current_path_ }); }
+
     auto operator()(const gc::PathT& t)
         -> void
     { result_.push_back({ t.type(), current_path_ }); }

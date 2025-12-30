@@ -13,7 +13,9 @@
 #include "gc/type_fwd.hpp"
 #include "gc/value_path.hpp"
 
+#include "common/defer.hpp"
 #include "common/maybe_const.hpp"
+#include "common/nil.hpp"
 #include "common/strong.hpp"
 #include "common/throw.hpp"
 #include "common/tuple_like.hpp"
@@ -87,6 +89,9 @@ struct ValueComponentAccess
 
     virtual auto make_data() const
         -> std::any = 0;
+
+    virtual auto type_specific_data() const
+        -> const std::any& = 0;
 };
 
 // ---
@@ -239,6 +244,13 @@ struct ValueComponentAccessImpl final : ValueComponentAccess<Type>
     auto make_data() const
         -> std::any override
     { return T{}; }
+
+    auto type_specific_data() const
+        -> const std::any& override
+    {
+        static std::any result = ValueComponents<Type, T>::type_specific_data;
+        return result;
+    }
 };
 
 // ---
@@ -252,6 +264,8 @@ struct ValueComponents<Type, T> final
         assert(path.empty());
         return std::invoke(std::forward<F>(f), data, common::Type<T>);
     }
+
+    static constexpr auto type_specific_data = common::Nil;
 };
 
 template <typename Type>
@@ -263,6 +277,8 @@ struct ValueComponents<Type, ValuePath>
         assert(path.empty());
         return std::invoke(std::forward<F>(f), data, common::Type<ValuePath>);
     }
+
+    static constexpr auto type_specific_data = common::Nil;
 };
 
 template <typename Type, typename T>
@@ -281,6 +297,8 @@ struct ValueComponents<Type, std::vector<T>>
         return ValueComponents<Type, T>::dispatch(
             path.subspan(1), element, std::forward<F>(f));
     }
+
+    static constexpr auto type_specific_data = common::Nil;
 };
 
 template <typename Type, typename T, size_t N>
@@ -299,6 +317,8 @@ struct ValueComponents<Type, std::array<T, N>>
         return ValueComponents<Type, T>::dispatch(
             path.subspan(1), element, std::forward<F>(f));
     }
+
+    static constexpr auto type_specific_data = common::Nil;
 };
 
 template <typename Type, typename... Ts>
@@ -325,6 +345,8 @@ struct ValueComponents<Type, std::tuple<Ts...>>
                     path.subspan(1), element, std::forward<F>(f));
             });
     }
+
+    static constexpr auto type_specific_data = common::Nil;
 };
 
 template <typename Type, common::StructType T>
@@ -355,6 +377,8 @@ struct ValueComponents<Type, T>
                     path.subspan(1), element, std::forward<F>(f));
             });
     }
+
+    static constexpr auto type_specific_data = common::Nil;
 };
 
 template <typename Type, RegisteredCustomType T>
@@ -366,6 +390,117 @@ struct ValueComponents<Type, T>
         assert(path.empty());
         return std::invoke(std::forward<F>(f), data, common::Type<T>);
     }
+
+    static constexpr auto type_specific_data = common::Nil;
+};
+
+template <typename Type, RegisteredEnumType T>
+struct ValueComponents<Type, T>
+{
+    template <common::MaybeConst<T> U, typename F>
+    static auto dispatch(ValuePathView path, U& data, F&& f)
+    {
+        namespace me = magic_enum;
+
+        if (path.empty())
+            return std::invoke(std::forward<F>(f), data, common::Type<T>);
+
+        auto name = path[0].name();
+        if (name == "index")
+        {
+            auto opt_index = me::enum_index(data);
+            if (!opt_index)
+                common::throw_(
+                    "Unable to get an index for a value of enumerated type ",
+                    Type::template of<T>());
+            auto defer = common::Defer{
+                [&]{
+                    if constexpr (!std::is_const_v<U>)
+                        data = me::enum_value<T>(*opt_index);
+                }
+            };
+
+            return ValueComponents<Type, size_t>::dispatch(
+                path.subspan(1), *opt_index, std::forward<F>(f));
+        }
+
+        if (name == "value")
+        {
+            using Underlying = me::underlying_type_t<T>;
+            auto underlying = me::enum_integer(data);
+            auto defer = common::Defer{
+                [&]{
+                    if constexpr (!std::is_const_v<U>)
+                    {
+                        auto opt_value = me::enum_cast<T>(underlying);
+                        if (!opt_value)
+                            common::throw_(
+                                "Unable to convert integer '", underlying,
+                                "' into a value of enumerated type ",
+                                Type::template of<T>());
+                        data = *opt_value;
+                    }
+                }
+            };
+
+            return ValueComponents<Type, Underlying>::dispatch(
+                path.subspan(1), underlying, std::forward<F>(f));
+        }
+
+        if (name == "name")
+        {
+            if constexpr (std::is_const_v<U>)
+            {
+                auto name = me::enum_name(data);
+                return ValueComponents<Type, std::string_view>::dispatch(
+                    path.subspan(1), name, std::forward<F>(f));
+            }
+            else
+            {
+                auto name = std::string{ me::enum_name(data) };
+                auto defer = common::Defer{
+                    [&]{
+                        auto opt_value = me::enum_cast<T>(name);
+                        if (!opt_value)
+                            common::throw_(
+                                "Unable to convert string '", name,
+                                "' into a value of enumerated type ",
+                                Type::template of<T>());
+                        data = *opt_value;
+                    }
+                };
+                return ValueComponents<Type, std::string>::dispatch(
+                    path.subspan(1), name, std::forward<F>(f));
+            }
+        }
+
+        if (name == "names")
+        {
+            using Inner = std::vector<std::string_view>;
+            constexpr auto names = me::enum_names<T>();
+            auto name_vec = Inner(names.begin(), names.end());
+            return ValueComponents<Type, Inner>::dispatch(
+                    path.subspan(1), name_vec, std::forward<F>(f));
+        }
+
+        if (name == "values")
+        {
+            using Inner = std::vector<std::underlying_type_t<T>>;
+            auto value_vec = []<size_t... I>(std::index_sequence<I...>) -> Inner
+            {
+                return { me::enum_integer(me::enum_value<T>(I)) ... };
+            }(std::make_index_sequence<me::enum_count<T>()>());
+            return ValueComponents<Type, Inner>::dispatch(
+                path.subspan(1), value_vec, std::forward<F>(f));
+        }
+
+        common::throw_(
+            "For an enumerated type, only possible path keys are 'index', "
+            "'name', 'names', 'value', and 'values'. Got '", name,
+            "' for type ", Type::template of<T>());
+    }
+
+    static constexpr auto type_specific_data = UntypedEnumData{common::Type<T>};
 };
 
 template <typename Type, StringType T>
@@ -377,6 +512,8 @@ struct ValueComponents<Type, T>
         assert(path.empty());
         return std::invoke(std::forward<F>(f), data, common::Type<T>);
     }
+
+    static constexpr auto type_specific_data = common::Nil;
 };
 
 template <typename Type, common::StrongType T>
@@ -399,6 +536,8 @@ struct ValueComponents<Type, T>
         return ValueComponents<Type, Weak>::dispatch(
             path.subspan(1), weak, std::forward<F>(f));
     }
+
+    static constexpr auto type_specific_data = common::Nil;
 };
 
 template <typename T>
@@ -406,8 +545,8 @@ using ValueComponentsAccessFactoryFunc =
     std::unique_ptr<ValueComponentAccess<Type>>(*)();
 
 template <typename Type, typename T>
-auto value_components_access_factory(common::Type_Tag<Type> = {},
-                                     common::Type_Tag<T> = {})
+constexpr auto value_components_access_factory(common::Type_Tag<Type> = {},
+                                               common::Type_Tag<T> = {})
     -> ValueComponentsAccessFactoryFunc<Type>
 {
     constexpr auto result = +[]()

@@ -72,6 +72,13 @@ struct AggregatePrinter final
           << ": " << static_cast<uint32_t>(t.id()) << '>';
     }
 
+    auto operator()(const gc::EnumT& t) const
+        -> void
+    {
+        s << "Enum<" << t.name()
+          << ": " << static_cast<uint32_t>(t.id()) << '>';
+    }
+
     auto operator()(const PathT& t)
         -> void
     { s << "Path"; }
@@ -251,6 +258,32 @@ auto CustomT::name() const noexcept
 auto CustomT::id() const noexcept
     -> uint8_t
 { return static_cast<uint8_t>(type_->storage()[2]); }
+
+
+EnumT::EnumT(const Type* type) noexcept :
+    type_{ type }
+{ assert(agg_type(type_) == AggregateType::Enum); }
+
+auto EnumT::type() const noexcept
+    -> const Type*
+{ return type_; }
+
+auto EnumT::name() const noexcept
+    -> std::string_view
+{
+    return *get_pointer<const std::string_view>(
+        type_->storage().data() + ptr_align_index(3));
+}
+
+auto EnumT::id() const noexcept
+    -> uint8_t
+{ return static_cast<uint8_t>(type_->storage()[2]); }
+
+auto EnumT::enum_data() const noexcept -> const UntypedEnumData&
+{
+    return std::any_cast<const UntypedEnumData&>(
+        type_->value_component_access()->type_specific_data());
+}
 
 
 PathT::PathT(const Type* type) noexcept :

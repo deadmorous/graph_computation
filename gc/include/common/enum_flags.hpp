@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include "common/enum_type.hpp"
 #include "common/format.hpp"
 
 #include <magic_enum/magic_enum.hpp>
@@ -24,9 +25,6 @@
 #include <type_traits>
 
 namespace common {
-
-template <typename E>
-concept EnumType = std::is_enum_v<E>;
 
 template <EnumType E>
 class EnumFlags final

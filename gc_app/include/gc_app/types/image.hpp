@@ -52,10 +52,10 @@ using U32Image = Image<uint32_t>;
 
 } // namespace gc_app
 
-GC_REGISTER_CUSTOM_TYPE(gc_app::ColorImage, 1);
-GC_REGISTER_CUSTOM_TYPE(gc_app::I8Image, 2);
-GC_REGISTER_CUSTOM_TYPE(gc_app::U8Image, 3);
-GC_REGISTER_CUSTOM_TYPE(gc_app::I16Image, 4);
-GC_REGISTER_CUSTOM_TYPE(gc_app::U16Image, 5);
-GC_REGISTER_CUSTOM_TYPE(gc_app::I32Image, 6);
-GC_REGISTER_CUSTOM_TYPE(gc_app::U32Image, 7);
+GCLIB_REGISTER_CUSTOM_TYPE(gc_app::ColorImage, 1);
+GCLIB_REGISTER_CUSTOM_TYPE(gc_app::I8Image, 2);
+GCLIB_REGISTER_CUSTOM_TYPE(gc_app::U8Image, 3);
+GCLIB_REGISTER_CUSTOM_TYPE(gc_app::I16Image, 4);
+GCLIB_REGISTER_CUSTOM_TYPE(gc_app::U16Image, 5);
+GCLIB_REGISTER_CUSTOM_TYPE(gc_app::I32Image, 6);
+GCLIB_REGISTER_CUSTOM_TYPE(gc_app::U32Image, 7);

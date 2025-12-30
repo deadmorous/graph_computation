@@ -32,7 +32,7 @@
 #include <tuple>
 #include <vector>
 
-#define GC_REGISTER_CUSTOM_TYPE(T, id_)                                     \
+#define GCLIB_REGISTER_CUSTOM_TYPE(T, id_)                                  \
     namespace gc {                                                          \
     template <> struct CustomTypeToId<T>                                    \
     {                                                                       \
@@ -49,6 +49,25 @@
     }                                                                       \
     static_assert(true)
 
+#define GCLIB_REGISTER_ENUM_TYPE(T, id_)                                    \
+    namespace gc {                                                          \
+    template <> struct EnumTypeToId<T>                                      \
+    {                                                                       \
+        using type = T;                                                     \
+        static constexpr uint8_t id = id_;                                  \
+        static constexpr std::string_view name = #T;                        \
+    };                                                                      \
+                                                                            \
+    template <> struct IdToEnumType<id_>                                    \
+    {                                                                       \
+        using type = T;                                                     \
+        static constexpr uint8_t id = id_;                                  \
+        static constexpr auto enum_data =                                   \
+            gc::UntypedEnumData{ common::Type<T> };                         \
+    };                                                                      \
+    }                                                                       \
+    static_assert(true)
+
 
 namespace gc {
 
@@ -56,6 +75,7 @@ enum class AggregateType : uint8_t
 {
     Array,
     Custom,
+    Enum,
     Path,
     Scalar,
     String,
@@ -133,7 +153,18 @@ public:
     {
         return intern(
             detail::value_components_access_factory(this_tag, tag),
-            { AggregateType::Scalar, scalar_type_id_of(tag) });
+            {AggregateType::Scalar, scalar_type_id_of(tag)});
+    }
+
+    template <RegisteredEnumType T>
+    static auto of(common::Type_Tag<T> tag)
+        -> const Type*
+    {
+        return intern(
+            detail::value_components_access_factory(this_tag, tag),
+            {AggregateType::Enum, EnumTypeToId<T>::id},
+            {},
+            {&EnumTypeToId<T>::name});
     }
 
     template <StringType T>
@@ -142,7 +173,7 @@ public:
     {
         return intern(
             detail::value_components_access_factory(this_tag, tag),
-            { AggregateType::String, string_type_id_of(tag) });
+            {AggregateType::String, string_type_id_of(tag)});
     }
 
     template <common::StrongType T>
@@ -151,7 +182,7 @@ public:
     {
         return intern(
             detail::value_components_access_factory(this_tag, tag),
-            { AggregateType::Strong},
+            {AggregateType::Strong},
             {of<typename T::Weak>()});
     }
 
@@ -283,6 +314,19 @@ public:
     auto type() const noexcept -> const Type*;
     auto name() const noexcept -> std::string_view;
     auto id() const noexcept -> uint8_t;
+
+private:
+    const Type* type_;
+};
+
+class EnumT final
+{
+public:
+    EnumT(const Type*) noexcept;
+    auto type() const noexcept -> const Type*;
+    auto name() const noexcept -> std::string_view;
+    auto id() const noexcept -> uint8_t;
+    auto enum_data() const noexcept -> const UntypedEnumData&;
 
 private:
     const Type* type_;
@@ -466,6 +510,9 @@ auto visit(const Type* type, F&& f, Args&&... args)
         case AggregateType::Custom:
             return std::invoke(
                 std::forward<F>(f), CustomT(type), std::forward<Args>(args)...);
+        case AggregateType::Enum:
+            return std::invoke(
+                std::forward<F>(f), EnumT(type), std::forward<Args>(args)...);
         case AggregateType::Path:
             return std::invoke(
                 std::forward<F>(f), PathT(type), std::forward<Args>(args)...);

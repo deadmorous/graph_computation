@@ -17,6 +17,7 @@ add_executable(
     test_gc_type_value.cpp
     test_index_set.cpp
     test_nested_seq.cpp
+    test_parse_simple_value.cpp
     test_pow2.cpp
     test_strong.cpp)
 
