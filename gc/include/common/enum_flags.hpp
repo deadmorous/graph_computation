@@ -30,7 +30,9 @@ template <EnumType E>
 class EnumFlags final
 {
 public:
-    using Enum = E;
+    using key_type = E;
+    using value_type = E;
+
     static constexpr auto size = magic_enum::enum_count<E>();
 
     EnumFlags() = default;
@@ -50,10 +52,7 @@ public:
 
     constexpr auto set(E flag, bool value) -> void
     {
-        auto opt_index = magic_enum::enum_index(flag);
-        if (!opt_index.has_value())
-            throw std::invalid_argument("Specified enum value is not found");
-        storage_.set(opt_index.value(), value);
+        storage_.set(index(flag), value);
     }
 
     template <std::same_as<E>... Ts>
@@ -108,6 +107,16 @@ public:
         return storage_.any();
     }
 
+    auto contains(E flag) const -> bool
+    {
+        return storage_.test(index(flag));
+    }
+
+    auto empty() const noexcept -> bool
+    {
+        return !any();
+    }
+
     operator bool() const noexcept
     {
         return any();
@@ -122,6 +131,19 @@ public:
     }
 
 private:
+    static auto index(E flag) -> size_t
+    {
+        auto opt_index = magic_enum::enum_index(flag);
+        if (!opt_index.has_value())
+            throw std::invalid_argument("Specified enum value is not found");
+        return *opt_index;
+    }
+
+    static constexpr auto value(size_t index) noexcept -> E
+    {
+        return magic_enum::enum_value<E>(index);
+    }
+
     using Storage = std::bitset<size>;
 
 public:
@@ -140,9 +162,7 @@ public:
         auto operator*() const noexcept
             -> reference
         {
-            size_t index = std::countr_zero(storage_.to_ullong());
-            assert(index < size);
-            return magic_enum::enum_value<E>(index);
+            return value(index());
         }
 
         auto operator++() noexcept -> const_iterator&
@@ -165,10 +185,25 @@ public:
             storage_{storage}
         {}
 
+        const_iterator(Storage storage, size_t index) noexcept
+        {
+            auto bits = storage.to_ullong();
+            bits &= ~((1ull << index) - 1ull);
+            storage_ = Storage{bits};
+        }
+
+        auto index() const noexcept -> size_t
+        {
+            size_t result = std::countr_zero(storage_.to_ullong());
+            assert(result < size);
+            return result;
+        }
+
         Storage storage_;
     };
 
     friend class const_iterator;
+    using iterator = const_iterator;
 
     auto begin() const noexcept -> const_iterator
     {
@@ -178,6 +213,31 @@ public:
     auto end() const noexcept -> const_iterator
     {
         return const_iterator{};
+    }
+
+    auto find(E flag) const -> const_iterator
+    {
+        auto i = index(flag);
+        if (storage_.test(i))
+            return const_iterator{storage_, i};
+
+        return end();
+    }
+
+    auto insert(E flag) -> std::pair<iterator, bool>
+    {
+        auto i = index(flag);
+        auto need_insert = !storage_.test(i);
+        if (need_insert)
+            storage_.set(i);
+        return {iterator{storage_, i}, need_insert};
+    }
+
+    auto erase(iterator it)
+    {
+        storage_.set(it.index(), false);
+        ++it;
+        return it;
     }
 
 private:

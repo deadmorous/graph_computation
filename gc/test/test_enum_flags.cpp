@@ -81,3 +81,76 @@ TEST(Common_EnumFlags, Basic)
     flags |= FruitFlags{Fruit::Apple, Fruit::Banana};
     EXPECT_EQ(flags, FruitFlags(Fruit::Apple, Fruit::Banana, Fruit::Orange));
 }
+
+TEST(Common_EnumFlags, Set)
+{
+    auto flags = FruitFlags{};
+
+    EXPECT_TRUE(flags.empty());
+
+    {
+        auto [it, inserted] = flags.insert(Fruit::Banana);
+        EXPECT_EQ(*it, Fruit::Banana);
+        EXPECT_TRUE(inserted);
+        ++it;
+        EXPECT_EQ(it, flags.end());
+        EXPECT_FALSE(flags.empty());
+        EXPECT_EQ(std::distance(flags.begin(), flags.end()), 1);
+    }
+
+    {
+        auto [it, inserted] = flags.insert(Fruit::Orange);
+        EXPECT_EQ(*it, Fruit::Orange);
+        EXPECT_TRUE(inserted);
+        ++it;
+        EXPECT_EQ(it, flags.end());
+        EXPECT_FALSE(flags.empty());
+        EXPECT_EQ(std::distance(flags.begin(), flags.end()), 2);
+    }
+
+    {
+        auto [it, inserted] = flags.insert(Fruit::Banana);
+        EXPECT_EQ(*it, Fruit::Banana);
+        EXPECT_FALSE(inserted);
+        ++it;
+        EXPECT_EQ(*it, Fruit::Orange);
+        ++it;
+        EXPECT_EQ(it, flags.end());
+        EXPECT_FALSE(flags.empty());
+        EXPECT_EQ(std::distance(flags.begin(), flags.end()), 2);
+    }
+
+    {
+        auto it = flags.find(Fruit::Banana);
+        EXPECT_NE(it, flags.end());
+        it = flags.erase(it);
+        EXPECT_EQ(*it, Fruit::Orange);
+        ++it;
+        EXPECT_EQ(it, flags.end());
+        EXPECT_FALSE(flags.empty());
+        EXPECT_EQ(std::distance(flags.begin(), flags.end()), 1);
+    }
+
+    {
+        auto [it, inserted] = flags.insert(Fruit::Apple);
+        EXPECT_EQ(*it, Fruit::Apple);
+        EXPECT_TRUE(inserted);
+        ++it;
+        EXPECT_EQ(*it, Fruit::Orange);
+        ++it;
+        EXPECT_EQ(it, flags.end());
+        EXPECT_FALSE(flags.empty());
+        EXPECT_EQ(std::distance(flags.begin(), flags.end()), 2);
+    }
+
+    {
+        auto it = flags.find(Fruit::Apple);
+        EXPECT_NE(it, flags.end());
+        it = flags.erase(it);
+        EXPECT_EQ(*it, Fruit::Orange);
+        it = flags.erase(it);
+        EXPECT_EQ(it, flags.end());
+        EXPECT_TRUE(flags.empty());
+        EXPECT_EQ(std::distance(flags.begin(), flags.end()), 0);
+    }
+}
