@@ -279,12 +279,6 @@ auto EnumT::id() const noexcept
     -> uint8_t
 { return static_cast<uint8_t>(type_->storage()[2]); }
 
-auto EnumT::enum_data() const noexcept -> const UntypedEnumData&
-{
-    return std::any_cast<const UntypedEnumData&>(
-        type_->value_component_access()->type_specific_data());
-}
-
 
 PathT::PathT(const Type* type) noexcept :
     type_{ type }

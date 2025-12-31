@@ -32,16 +32,16 @@
 #include <tuple>
 #include <vector>
 
-#define GCLIB_REGISTER_CUSTOM_TYPE(T, id_)                                  \
+#define GCLIB_IMPL_REGISTER_TYPE(T, id_, MapToId, MapFromId)                \
     namespace gc {                                                          \
-    template <> struct CustomTypeToId<T>                                    \
+    template <> struct MapToId<T>                                           \
     {                                                                       \
         using type = T;                                                     \
         static constexpr uint8_t id = id_;                                  \
         static constexpr std::string_view name = #T;                        \
     };                                                                      \
                                                                             \
-    template <> struct IdToCustomType<id_>                                  \
+    template <> struct MapFromId<id_>                                       \
     {                                                                       \
         using type = T;                                                     \
         static constexpr uint8_t id = id_;                                  \
@@ -49,24 +49,11 @@
     }                                                                       \
     static_assert(true)
 
+#define GCLIB_REGISTER_CUSTOM_TYPE(T, id_)                                  \
+    GCLIB_IMPL_REGISTER_TYPE(T, id_, CustomTypeToId, IdToCustomType)
+
 #define GCLIB_REGISTER_ENUM_TYPE(T, id_)                                    \
-    namespace gc {                                                          \
-    template <> struct EnumTypeToId<T>                                      \
-    {                                                                       \
-        using type = T;                                                     \
-        static constexpr uint8_t id = id_;                                  \
-        static constexpr std::string_view name = #T;                        \
-    };                                                                      \
-                                                                            \
-    template <> struct IdToEnumType<id_>                                    \
-    {                                                                       \
-        using type = T;                                                     \
-        static constexpr uint8_t id = id_;                                  \
-        static constexpr auto enum_data =                                   \
-            gc::UntypedEnumData{ common::Type<T> };                         \
-    };                                                                      \
-    }                                                                       \
-    static_assert(true)
+    GCLIB_IMPL_REGISTER_TYPE(T, id_, EnumTypeToId, IdToEnumType)
 
 
 namespace gc {
@@ -326,7 +313,6 @@ public:
     auto type() const noexcept -> const Type*;
     auto name() const noexcept -> std::string_view;
     auto id() const noexcept -> uint8_t;
-    auto enum_data() const noexcept -> const UntypedEnumData&;
 
 private:
     const Type* type_;

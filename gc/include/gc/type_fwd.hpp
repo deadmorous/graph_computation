@@ -103,33 +103,6 @@ concept RegisteredCustomType =
 };
 
 
-template <common::EnumType E>
-struct TypedEnumData
-{
-    static constexpr auto count = magic_enum::enum_count<E>();
-
-    static constexpr auto names = magic_enum::enum_names<E>();
-
-    static constexpr auto values = []<size_t... I>(std::index_sequence<I...>)
-    {
-        namespace me = magic_enum;
-        return std::array<int64_t, sizeof...(I)>{
-            me::enum_integer(me::enum_value<E>(I))... };
-    }(std::make_index_sequence<count>());
-};
-
-struct UntypedEnumData final
-{
-    template <common::EnumType E>
-    constexpr UntypedEnumData(common::Type_Tag<E> = {}):
-        names{TypedEnumData<E>::names},
-        values{TypedEnumData<E>::values}
-    {}
-
-    std::span<const std::string_view> names;
-    std::span<const int64_t> values;
-};
-
 template <common::EnumType> struct EnumTypeToId;
 template <uint8_t> struct IdToEnumType;
 
@@ -141,7 +114,6 @@ concept RegisteredEnumType =
     EnumTypeToId<T>::id;
     EnumTypeToId<T>::name;
     requires IdToEnumType<EnumTypeToId<T>::id>::id == EnumTypeToId<T>::id;
-    IdToEnumType<EnumTypeToId<T>::id>::enum_data;
 };
 
 class Type;

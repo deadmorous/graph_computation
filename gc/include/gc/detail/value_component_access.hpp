@@ -15,7 +15,6 @@
 
 #include "common/defer.hpp"
 #include "common/maybe_const.hpp"
-#include "common/nil.hpp"
 #include "common/strong.hpp"
 #include "common/throw.hpp"
 #include "common/tuple_like.hpp"
@@ -89,9 +88,6 @@ struct ValueComponentAccess
 
     virtual auto make_data() const
         -> std::any = 0;
-
-    virtual auto type_specific_data() const
-        -> const std::any& = 0;
 };
 
 // ---
@@ -244,13 +240,6 @@ struct ValueComponentAccessImpl final : ValueComponentAccess<Type>
     auto make_data() const
         -> std::any override
     { return T{}; }
-
-    auto type_specific_data() const
-        -> const std::any& override
-    {
-        static std::any result = ValueComponents<Type, T>::type_specific_data;
-        return result;
-    }
 };
 
 // ---
@@ -264,8 +253,6 @@ struct ValueComponents<Type, T> final
         assert(path.empty());
         return std::invoke(std::forward<F>(f), data, common::Type<T>);
     }
-
-    static constexpr auto type_specific_data = common::Nil;
 };
 
 template <typename Type>
@@ -277,8 +264,6 @@ struct ValueComponents<Type, ValuePath>
         assert(path.empty());
         return std::invoke(std::forward<F>(f), data, common::Type<ValuePath>);
     }
-
-    static constexpr auto type_specific_data = common::Nil;
 };
 
 template <typename Type, typename T>
@@ -297,8 +282,6 @@ struct ValueComponents<Type, std::vector<T>>
         return ValueComponents<Type, T>::dispatch(
             path.subspan(1), element, std::forward<F>(f));
     }
-
-    static constexpr auto type_specific_data = common::Nil;
 };
 
 template <typename Type, typename T, size_t N>
@@ -317,8 +300,6 @@ struct ValueComponents<Type, std::array<T, N>>
         return ValueComponents<Type, T>::dispatch(
             path.subspan(1), element, std::forward<F>(f));
     }
-
-    static constexpr auto type_specific_data = common::Nil;
 };
 
 template <typename Type, typename... Ts>
@@ -345,8 +326,6 @@ struct ValueComponents<Type, std::tuple<Ts...>>
                     path.subspan(1), element, std::forward<F>(f));
             });
     }
-
-    static constexpr auto type_specific_data = common::Nil;
 };
 
 template <typename Type, common::StructType T>
@@ -377,8 +356,6 @@ struct ValueComponents<Type, T>
                     path.subspan(1), element, std::forward<F>(f));
             });
     }
-
-    static constexpr auto type_specific_data = common::Nil;
 };
 
 template <typename Type, RegisteredCustomType T>
@@ -499,8 +476,6 @@ struct ValueComponents<Type, T>
             "'name', 'names', 'value', and 'values'. Got '", name,
             "' for type ", Type::template of<T>());
     }
-
-    static constexpr auto type_specific_data = UntypedEnumData{common::Type<T>};
 };
 
 template <typename Type, StringType T>
@@ -512,8 +487,6 @@ struct ValueComponents<Type, T>
         assert(path.empty());
         return std::invoke(std::forward<F>(f), data, common::Type<T>);
     }
-
-    static constexpr auto type_specific_data = common::Nil;
 };
 
 template <typename Type, common::StrongType T>
@@ -536,8 +509,6 @@ struct ValueComponents<Type, T>
         return ValueComponents<Type, Weak>::dispatch(
             path.subspan(1), weak, std::forward<F>(f));
     }
-
-    static constexpr auto type_specific_data = common::Nil;
 };
 
 template <typename T>
