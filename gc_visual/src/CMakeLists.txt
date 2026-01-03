@@ -21,6 +21,7 @@ set(PROJECT_SOURCES
     editors/cell2d_rule_editor_widget.cpp   ../include/gc_visual/editors/cell2d_rule_editor_widget.hpp
     editors/color_editor_widget.cpp         ../include/gc_visual/editors/color_editor_widget.hpp
     editors/file_picker_widget.cpp          ../include/gc_visual/editors/file_picker_widget.hpp
+    editors/list_editor_widget.cpp          ../include/gc_visual/editors/list_editor_widget.hpp
     editors/parameter_editor_widget.cpp     ../include/gc_visual/editors/parameter_editor_widget.hpp
     editors/spin_editor_widget.cpp          ../include/gc_visual/editors/spin_editor_widget.hpp
     editors/vector_editor_widget.cpp        ../include/gc_visual/editors/vector_editor_widget.hpp

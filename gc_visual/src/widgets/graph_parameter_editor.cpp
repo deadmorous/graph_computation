@@ -3,7 +3,7 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2024-2025 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2024-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
@@ -15,6 +15,7 @@
 #include "gc_visual/editors/cell2d_rule_editor_widget.hpp"
 #include "gc_visual/editors/color_editor_widget.hpp"
 #include "gc_visual/editors/file_picker_widget.hpp"
+#include "gc_visual/editors/list_editor_widget.hpp"
 #include "gc_visual/editors/spin_editor_widget.hpp"
 #include "gc_visual/editors/vector_editor_widget.hpp"
 #include "gc_visual/graph_broker.hpp"
@@ -147,6 +148,7 @@ auto editor_factory_map() -> const GraphParameterEditorFactoryMap&
         { "cell2d_gen_rules"sv, editor_factory<Cell2dGenRuleEditorWidget>() },
         { "cell2d_rules"sv, editor_factory<Cell2dRuleEditorWidget>() },
         { "color"sv, editor_factory<ColorEditorWidget>() },
+        { "list"sv, editor_factory<ListEditorWidget>() },
         { "file"sv, editor_factory<FilePickerWidget>() },
         { "spin"sv, editor_factory<SpinEditorWidget>() },
         { "vector"sv, editor_factory<VectorEditorWidget>() },
