@@ -29,24 +29,26 @@ TEST(Sieve_Node, ImageMetrics)
 {
     auto node = make_i8_image_metrics({}, {});
 
-    ASSERT_EQ(node->input_count(), 3_gc_ic);
+    ASSERT_EQ(node->input_count(), 4_gc_ic);
     ASSERT_EQ(node->output_count(), 1_gc_oc);
 
-    ASSERT_EQ(node->input_names().size(), 3_gc_ic);
+    ASSERT_EQ(node->input_names().size(), 4_gc_ic);
     ASSERT_EQ(node->input_names()[0_gc_i], "image");
     ASSERT_EQ(node->input_names()[1_gc_i], "min_state");
     ASSERT_EQ(node->input_names()[2_gc_i], "state_count");
+    ASSERT_EQ(node->input_names()[3_gc_i], "metric_types");
 
     ASSERT_EQ(node->output_names().size(), 1_gc_oc);
     ASSERT_EQ(node->output_names()[0_gc_o], "image_metrics");
 
-    gc::ValueVec inputs(3);
+    gc::ValueVec inputs(4);
     gc::ValueVec outputs(1);
 
     node->default_inputs(inputs);
     ASSERT_EQ(inputs[0].type(), gc::type_of<gc_app::I8Image>());
     ASSERT_EQ(inputs[1].type(), gc::type_of<int>());
     ASSERT_EQ(inputs[2].type(), gc::type_of<int>());
+    ASSERT_EQ(inputs[3].type(), gc::type_of<ImageMetricSet>());
 
     node->compute_outputs(outputs, inputs, {}, {});
     ASSERT_EQ(outputs[0].type(), gc::type_of<ImageMetrics>());

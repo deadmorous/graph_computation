@@ -20,7 +20,8 @@ TEST(Sieve_ImageMetrics, Basic)
         const sieve::I8Range& range,
         const sieve::ImageMetrics& expected_metrics)
     {
-        auto metrics = sieve::image_metrics(image, range);
+        auto all_types = sieve::ImageMetricSet::full();
+        auto metrics = sieve::image_metrics(image, range, all_types);
         EXPECT_EQ(metrics.histogram, expected_metrics.histogram);
         EXPECT_EQ(metrics.edge_histogram, expected_metrics.edge_histogram);
     };

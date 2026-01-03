@@ -32,7 +32,7 @@ public:
         -> gc::InputNames override
     {
         return gc::node_input_names<I8ImageMetricsNode>(
-            "image"sv, "min_state"sv, "state_count"sv);
+            "image"sv, "min_state"sv, "state_count"sv, "metric_types"sv);
     }
 
     auto output_names() const
@@ -42,10 +42,11 @@ public:
     auto default_inputs(gc::InputValues result) const
         -> void override
     {
-        assert(result.size() == 3_gc_ic);
+        assert(result.size() == 4_gc_ic);
         result[0_gc_i] = gc_app::I8Image{};
         result[1_gc_i] = 0;
         result[2_gc_i] = 2;
+        result[3_gc_i] = ImageMetricSet::full();
     }
 
     auto compute_outputs(
@@ -55,12 +56,14 @@ public:
             const gc::NodeProgress& progress) const
         -> bool override
     {
-        assert(inputs.size() == 3_gc_ic);
+        assert(inputs.size() == 4_gc_ic);
         assert(result.size() == 1_gc_oc);
         const auto& image = inputs[0_gc_i].as<gc_app::I8Image>();
         auto min_state = inputs[1_gc_i].convert_to<int>();
         auto state_count = inputs[2_gc_i].convert_to<int>();
-        result[0_gc_o] = image_metrics(image, {min_state, state_count});
+        auto metric_types = inputs[3_gc_i].as<ImageMetricSet>();
+        result[0_gc_o] =
+            image_metrics(image, {min_state, state_count}, metric_types);
 
         if (progress)
             progress(1);

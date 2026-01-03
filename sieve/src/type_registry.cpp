@@ -18,6 +18,8 @@ namespace sieve {
 auto populate_type_registry(gc::TypeRegistry& result)
     -> void
 {
+    result.register_value("ImageMetric", gc::type_of<ImageMetric>());
+    result.register_value("ImageMetricSet", gc::type_of<ImageMetricSet>());
     result.register_value("ImageMetrics", gc::type_of<ImageMetrics>());
 }
 

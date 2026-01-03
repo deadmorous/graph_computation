@@ -100,13 +100,17 @@ auto edge_histogram(const gc_app::I8Image& img, I8Range range)
 } // anonymous namespace
 
 
-auto image_metrics(const gc_app::I8Image& img, I8Range state_range)
+auto image_metrics(const gc_app::I8Image& img,
+                   I8Range state_range,
+                   ImageMetricSet metric_types)
     -> ImageMetrics
 {
-    return {
-        .histogram = histogram(img, state_range),
-        .edge_histogram = edge_histogram(img, state_range)
-    };
+    auto result = ImageMetrics{};
+    if (metric_types.contains(ImageMetric::StateHistogram))
+        result.histogram = histogram(img, state_range);
+    if (metric_types.contains(ImageMetric::EdgeHistogram))
+        result.edge_histogram = edge_histogram(img, state_range);
+    return result;
 }
 
 } // namespace sieve

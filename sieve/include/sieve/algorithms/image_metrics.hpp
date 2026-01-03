@@ -17,7 +17,9 @@
 
 namespace sieve {
 
-auto image_metrics(const gc_app::I8Image& img, I8Range state_range)
+auto image_metrics(const gc_app::I8Image& img,
+                   I8Range state_range,
+                   ImageMetricSet metric_types)
     -> ImageMetrics;
 
 } // namespace sieve
