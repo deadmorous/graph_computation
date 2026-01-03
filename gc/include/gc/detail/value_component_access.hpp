@@ -3,7 +3,7 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2024-2025 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2024-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
@@ -15,6 +15,7 @@
 
 #include "common/defer.hpp"
 #include "common/detail/set_like.hpp"
+#include "common/format.hpp"
 #include "common/maybe_const.hpp"
 #include "common/strong.hpp"
 #include "common/throw.hpp"
@@ -567,7 +568,9 @@ struct ValueComponents<Type, T>
                             common::throw_(
                                 "Unable to convert string '", name,
                                 "' into a value of enumerated type ",
-                                Type::template of<T>());
+                                Type::template of<T>(), ". Valid values are ",
+                                common::format_seq(
+                                    magic_enum::enum_names<T>(), ", "), ".");
                         data = *opt_value;
                     }
                 };
