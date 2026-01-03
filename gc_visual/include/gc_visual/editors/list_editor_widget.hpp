@@ -10,13 +10,12 @@
 
 #pragma once
 
-#include "gc_visual/editors/parameter_editor_widget.hpp"
+#include "gc_visual/editors/parameter_editor_widget_wrapper.hpp"
 
-
-class QComboBox;
+#include <QComboBox>
 
 class ListEditorWidget final :
-    public ParameterEditorWidget
+    public ParameterEditorWidgetWrapper<QComboBox>
 {
     Q_OBJECT
 
@@ -27,16 +26,10 @@ public:
 
     static auto check_type(const gc::Type*) -> TypeCheckResult;
 
-    QSize sizeHint() const override;
-    QSize minimumSizeHint() const override;
-    bool hasHeightForWidth() const override;
-    int heightForWidth(int w) const override;
-
 public slots:
     void set_value(const gc::Value& value) override;
 
 private:
     const gc::Type* type_{};
-    QComboBox* combo_;
     int in_set_value_{};
 };

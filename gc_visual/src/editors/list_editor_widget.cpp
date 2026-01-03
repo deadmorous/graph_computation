@@ -14,26 +14,13 @@
 
 #include "common/scoped_inc.hpp"
 
-#include <QBoxLayout>
-#include <QComboBox>
-
 
 using namespace std::string_view_literals;
 
 ListEditorWidget::ListEditorWidget(const YAML::Node&, QWidget* parent) :
-    ParameterEditorWidget{ parent }
+    ParameterEditorWidgetWrapper<QComboBox>{ new QComboBox{}, parent }
 {
-    auto* layout = new QHBoxLayout{};
-    setLayout(layout);
-
-    combo_ = new QComboBox{};
-    layout->addWidget(combo_);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
-
-    setSizePolicy(combo_->sizePolicy());
-
-    connect(combo_, &QComboBox::currentIndexChanged, this,
+    connect(widget_, &QComboBox::currentIndexChanged, this,
             [&]{
                 if (in_set_value_ > 0)
                     return;
@@ -47,7 +34,7 @@ auto ListEditorWidget::value() const -> gc::Value
         return {};
 
     auto result = gc::Value::make(type_);
-    auto index = combo_->currentIndex();
+    auto index = widget_->currentIndex();
     if (index < 0)
         return result;
 
@@ -66,26 +53,6 @@ auto ListEditorWidget::check_type(const gc::Type* type) -> TypeCheckResult
     };
 }
 
-QSize ListEditorWidget::sizeHint() const
-{
-    return combo_->sizeHint();
-}
-
-QSize ListEditorWidget::minimumSizeHint() const
-{
-    return combo_->minimumSizeHint();
-}
-
-bool ListEditorWidget::hasHeightForWidth() const
-{
-    return combo_->hasHeightForWidth();
-}
-
-int ListEditorWidget::heightForWidth(int w) const
-{
-    return combo_->heightForWidth(w);
-}
-
 void ListEditorWidget::set_value(const gc::Value& value)
 {
     auto inc_in_set_value = common::ScopedInc{in_set_value_};
@@ -93,19 +60,19 @@ void ListEditorWidget::set_value(const gc::Value& value)
     auto type = value.type();
     if (type_ != type)
     {
-        combo_->clear();
+        widget_->clear();
         auto names =
             value.get(gc::ValuePath{"names"sv})
                 .as<std::vector<std::string_view>>();
 
         for (auto name : names)
-            combo_->addItem(QString::fromUtf8(name));
+            widget_->addItem(QString::fromUtf8(name));
 
         type_ = type;
     }
 
     auto index = value.get(gc::ValuePath{"index"sv}).convert_to<int>();
-    combo_->setCurrentIndex(index);
+    widget_->setCurrentIndex(index);
 
     emit value_changed(this->value());
 }
