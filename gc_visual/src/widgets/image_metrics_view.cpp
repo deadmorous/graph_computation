@@ -3,7 +3,7 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2025 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2025-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve.mail.ru>
  */
@@ -16,9 +16,9 @@
 #include "gc_visual/plot/linear_coordinate_mapping.hpp"
 #include "gc_visual/plot/layout.hpp"
 
-// #include <QMouseEvent>
+#include "gc/value.hpp"
+
 #include <QPainter>
-// #include <QToolTip>
 
 #include <deque>
 
@@ -29,7 +29,7 @@ struct ImageMetricsView::Storage
 
     size_t buf_size{};
     Buffer buf;
-    Type type{Type::StateHistogram};
+    sieve::ImageMetric type{sieve::ImageMetric::StateHistogram};
     std::optional<gc_app::IndexedPalette> state_palette;
     std::optional<gc_app::IndexedPalette> edge_palette;
 };
@@ -94,11 +94,11 @@ struct MetricViewData
     QString title;
 };
 
-auto metric_view_data(ImageMetricsView::Type type) -> MetricViewData
+auto metric_view_data(sieve::ImageMetric type) -> MetricViewData
 {
     switch(type)
     {
-    case ImageMetricsView::Type::StateHistogram:
+    case sieve::ImageMetric::StateHistogram:
         return {
             .metric = &sieve::ImageMetrics::histogram,
             .palette = &ImageMetricsView::Storage::state_palette,
@@ -108,7 +108,7 @@ auto metric_view_data(ImageMetricsView::Type type) -> MetricViewData
             .y_label = "state fraction",
             .title = "State histogram"
         };
-    case ImageMetricsView::Type::EdgeHistogram:
+    case sieve::ImageMetric::EdgeHistogram:
         return {
             .metric = &sieve::ImageMetrics::edge_histogram,
             .palette = &ImageMetricsView::Storage::edge_palette,
@@ -228,7 +228,7 @@ ImageMetricsView::ImageMetricsView(size_t buf_size, QWidget* parent):
 
 ImageMetricsView::~ImageMetricsView() = default;
 
-auto ImageMetricsView::type() const noexcept -> Type
+auto ImageMetricsView::type() const noexcept -> sieve::ImageMetric
 {
     return storage_->type;
 }
@@ -256,10 +256,15 @@ auto ImageMetricsView::set_palette(const gc_app::IndexedPalette& palette)
     update();
 }
 
-auto ImageMetricsView::set_type(Type type) -> void
+auto ImageMetricsView::set_type(sieve::ImageMetric type) -> void
 {
     storage_->type = type;
     update();
+}
+
+auto ImageMetricsView::set_type(const gc::Value& v) -> void
+{
+    set_type(v.as<sieve::ImageMetric>());
 }
 
 auto ImageMetricsView::paintEvent(QPaintEvent*) -> void

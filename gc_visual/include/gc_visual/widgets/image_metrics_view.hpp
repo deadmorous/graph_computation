@@ -3,7 +3,7 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2025 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2025-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve.mail.ru>
  */
@@ -14,6 +14,8 @@
 
 #include "gc_app/types/palette.hpp"
 
+#include "gc/value_fwd.hpp"
+
 #include <QImage>
 #include <QWidget>
 
@@ -23,25 +25,18 @@ class ImageMetricsView
     Q_OBJECT
 
 public:
-
-    enum class Type : uint8_t
-    {
-        StateHistogram,
-        EdgeHistogram
-    };
-    Q_ENUM(Type);
-
     explicit ImageMetricsView(size_t buf_size, QWidget* parent = nullptr);
 
     ~ImageMetricsView();
 
-    auto type() const noexcept -> Type;
+    auto type() const noexcept -> sieve::ImageMetric;
 
 public slots:
     auto add_image_metrics(const sieve::ImageMetrics& image_metrics) -> void;
     auto clear() -> void;
     auto set_palette(const gc_app::IndexedPalette&) -> void;
-    auto set_type(Type) -> void;
+    auto set_type(sieve::ImageMetric) -> void;
+    auto set_type(const gc::Value& v) -> void;
 
 protected:
     auto paintEvent(QPaintEvent*) -> void override;
@@ -52,5 +47,3 @@ public:
 private:
     std::unique_ptr<Storage> storage_;
 };
-
-Q_DECLARE_METATYPE(ImageMetricsView::Type);

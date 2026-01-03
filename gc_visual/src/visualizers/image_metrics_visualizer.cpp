@@ -3,17 +3,20 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2025 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2025-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
 #include "gc_visual/visualizers/image_metrics_visualizer.hpp"
 
+#include "gc_visual/editors/list_editor_widget.hpp"
 #include "gc_visual/graph_broker.hpp"
 #include "gc_visual/widgets/image_metrics_view.hpp"
 
 #include "sieve/types/image_metrics.hpp"
+
+#include "gc/yaml/parse_value.hpp"
 
 #include "common/throw.hpp"
 
@@ -22,7 +25,6 @@
 #include <magic_enum/magic_enum.hpp>
 
 #include <QBoxLayout>
-#include <QComboBox>
 #include <QTextEdit>
 
 struct ImageMetricsVisualizer::Storage
@@ -48,13 +50,8 @@ ImageMetricsVisualizer::ImageMetricsVisualizer(GraphBroker* broker,
 
     auto* sub_layout = new QHBoxLayout{};
     layout->addLayout(sub_layout);
-    auto* type_list = new QComboBox{};
+    auto* type_list = new ListEditorWidget{item_node};
     sub_layout->addWidget(type_list);
-    type_list->addItem(
-        "State histogram",
-        QVariant::fromValue(ImageMetricsView::Type::StateHistogram));
-    type_list->addItem("Edge histogram",
-        QVariant::fromValue(ImageMetricsView::Type::EdgeHistogram));
 
     auto* view = storage_->view = new ImageMetricsView{ lookback };
     layout->addWidget(view);
@@ -86,24 +83,14 @@ ImageMetricsVisualizer::ImageMetricsVisualizer(GraphBroker* broker,
     }
 
     QObject::connect(
-        type_list, &QComboBox::currentIndexChanged,
-        view, [type_list, view](int index) {
-            auto type =
-                type_list->currentData().value<ImageMetricsView::Type>();
-            view->set_type(type);
-        });
+        type_list, &ListEditorWidget::value_changed,
+        view, qOverload<const gc::Value&>(&ImageMetricsView::set_type));
 
     if (auto type_node = item_node["metric"]; type_node.IsDefined())
     {
-        auto type_str = type_node.as<std::string>();
-        auto type = magic_enum::enum_cast<ImageMetricsView::Type>(type_str);
-        if (!type)
-            common::throw_(
-                "Invalid metric type: expected one of ",
-                common::format_seq(
-                    magic_enum::enum_names<ImageMetricsView::Type>(), ", "),
-                ", got ", type_str);
-        type_list->setCurrentIndex(static_cast<int>(*type));
+        auto value = gc::yaml::parse_value(
+            type_node, gc::type_of<sieve::ImageMetric>(), {});
+        type_list->set_value(value);
     }
 
 }
