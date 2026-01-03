@@ -76,13 +76,41 @@ struct YamlValueParser final
     {
         value.set_default();
         const auto* key_type = t.key_type();
-        for (const auto& key: value.path_item_keys())
+        if (node.IsSequence())
         {
-            auto key_node = node[key.index()];
-            auto k = Value::make(key_type);
-            visit(key_type, YamlValueParser{}, k, key_node);
-            value.insert(k);
+            for (size_t index=0, n=node.size(); index<n; ++index)
+            {
+                auto key_node = node[index];
+                auto k = Value::make(key_type);
+                visit(key_type, YamlValueParser{}, k, key_node);
+                value.insert(k);
+            }
         }
+        else if (node.IsScalar())
+        {
+            auto node_str = node.as<std::string>();
+            if (node_str == "all")
+            {
+                auto k = Value::make(key_type);
+                auto names =
+                    k.get(ValuePath{"names"sv})
+                        .as<std::vector<std::string_view>>();
+                for (auto name : names)
+                {
+                    k.set(ValuePath{"name"sv}, std::string{name});
+                    value.insert(k);
+                }
+            }
+            else
+                common::throw_(
+                    "YamlValueParser: Failed to parse value of type ", t.type(),
+                    " - if specified as a scalar, only 'all' is recognized");
+
+        }
+        else
+            common::throw_(
+                "YamlValueParser: Failed to parse value of type ", t.type(),
+                " - node is neither an array nor a scalar");
     }
 
     auto operator()(const StringT& t, Value& value, const YAML::Node& node) const
