@@ -37,7 +37,7 @@ struct YamlValueParser final
                 " because actual array size ", node.size(), " differs from "
                 "expected size ", value.size());
 
-        for (const auto& key: value.keys())
+        for (const auto& key: value.path_item_keys())
         {
             auto element_value_node = node[key.index()];
 
@@ -71,6 +71,20 @@ struct YamlValueParser final
         -> void
     { value = parse_simple_value(node.as<std::string>(), t.type()); }
 
+    auto operator()(const SetT& t, Value& value, const YAML::Node& node) const
+        -> void
+    {
+        value.set_default();
+        const auto* key_type = t.key_type();
+        for (const auto& key: value.path_item_keys())
+        {
+            auto key_node = node[key.index()];
+            auto k = Value::make(key_type);
+            visit(key_type, YamlValueParser{}, k, key_node);
+            value.insert(k);
+        }
+    }
+
     auto operator()(const StringT& t, Value& value, const YAML::Node& node) const
         -> void
     { value = parse_simple_value(node.as<std::string>(), t.type()); }
@@ -82,7 +96,7 @@ struct YamlValueParser final
     auto operator()(const StructT& t, Value& value, const YAML::Node& node) const
         -> void
     {
-        for (const auto& key: value.keys())
+        for (const auto& key: value.path_item_keys())
         {
             auto field_value_node = node[key.name()];
             if (!field_value_node)
@@ -104,7 +118,7 @@ struct YamlValueParser final
     auto operator()(const TupleT& t, Value& value, const YAML::Node& node) const
         -> void
     {
-        auto keys = value.keys();
+        auto keys = value.path_item_keys();
         if (node.size() != keys.size())
             common::throw_(
                 "YamlValueParser: Failed to parse value of type ", t.type(),
@@ -129,7 +143,7 @@ struct YamlValueParser final
         -> void
     {
         value.resize({}, node.size());
-        for (const auto& key: value.keys())
+        for (const auto& key: value.path_item_keys())
         {
             auto element_value_node = node[key.index()];
 

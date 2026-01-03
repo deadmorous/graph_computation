@@ -167,6 +167,56 @@ TEST(Gc, EnumType)
     EXPECT_EQ(v.as<MyEnum>(), MyEnum::Baz);
 }
 
+TEST(Gc, EnumFlagsType)
+{
+    using MyFlags = common::EnumFlags<MyEnum>;
+    const auto* type = gc::Type::of<MyFlags>();
+    EXPECT_EQ(common::format(type), "Type{EnumFlags{Enum<MyEnum: 1>}}");
+
+    auto flags = MyFlags{MyEnum::Foo};
+    auto v = gc::Value{flags};
+
+    EXPECT_EQ(v.as<MyFlags>(), flags);
+    EXPECT_EQ(v.size(), 1);
+    EXPECT_TRUE(v.contains(MyEnum::Foo));
+    EXPECT_FALSE(v.contains(MyEnum::Bar));
+    EXPECT_FALSE(v.contains(MyEnum::Baz));
+    EXPECT_EQ(common::format(v), common::format(flags));
+
+    flags |= MyEnum::Baz;
+    v.insert(MyEnum::Baz);
+    EXPECT_EQ(v.as<MyFlags>(), flags);
+    EXPECT_EQ(v.size(), 2);
+    EXPECT_TRUE(v.contains(MyEnum::Foo));
+    EXPECT_FALSE(v.contains(MyEnum::Bar));
+    EXPECT_TRUE(v.contains(MyEnum::Baz));
+    EXPECT_EQ(common::format(v), common::format(flags));
+    EXPECT_EQ(common::format(flags), "{Foo, Baz}");
+
+    {
+        auto keys = v.keys();
+        ASSERT_EQ(keys.size(), 2);
+        EXPECT_EQ(keys[0].as<MyEnum>(), MyEnum::Foo);
+        EXPECT_EQ(keys[1].as<MyEnum>(), MyEnum::Baz);
+    }
+
+    flags &= ~MyFlags{MyEnum::Foo};
+    v.remove(MyEnum::Foo);
+    EXPECT_EQ(v.as<MyFlags>(), flags);
+    EXPECT_EQ(common::format(v), common::format(flags));
+    EXPECT_EQ(common::format(flags), "{Baz}");
+
+    {
+        auto keys = v.keys();
+        ASSERT_EQ(keys.size(), 1);
+        EXPECT_EQ(keys[0].as<MyEnum>(), MyEnum::Baz);
+    }
+
+    v.set_default();
+    EXPECT_EQ(v.size(), 0);
+    EXPECT_FALSE(v.contains(MyEnum::Foo));
+}
+
 class MyBlob final
 {};
 
@@ -292,14 +342,14 @@ TEST(Gc, ValueReflection)
     });
 
     // Key extraction
-    auto struct_keys = v_struct.keys();
+    auto struct_keys = v_struct.path_item_keys();
     EXPECT_EQ(struct_keys.size(), 3);
     EXPECT_EQ(struct_keys[0], gc::ValuePathItem("foo"sv));
     EXPECT_EQ(struct_keys[1], gc::ValuePathItem("bar"sv));
     EXPECT_EQ(struct_keys[2], gc::ValuePathItem("flags"sv));
 
     auto v_flags = v_struct.get(gc::ValuePath{} / "flags"sv);
-    auto flags_keys = v_flags.keys();
+    auto flags_keys = v_flags.path_item_keys();
     EXPECT_EQ(flags_keys.size(), 5);
     EXPECT_EQ(flags_keys[0], gc::ValuePathItem(0u));
     EXPECT_EQ(flags_keys[1], gc::ValuePathItem(1u));
@@ -308,7 +358,7 @@ TEST(Gc, ValueReflection)
     EXPECT_EQ(flags_keys[4], gc::ValuePathItem(4u));
 
     auto v_tuple = gc::Value(std::make_tuple(1, 2.3));
-    auto tuple_keys = v_tuple.keys();
+    auto tuple_keys = v_tuple.path_item_keys();
     EXPECT_EQ(tuple_keys.size(), 2);
     EXPECT_EQ(tuple_keys[0], gc::ValuePathItem(0u));
     EXPECT_EQ(tuple_keys[1], gc::ValuePathItem(1u));
@@ -321,7 +371,7 @@ TEST(Gc, ValueReflection)
     EXPECT_EQ(typed_struct2.bar, 0);
     EXPECT_EQ(typed_struct2.flags.size(), 0);
 
-    auto struct2_keys = v_struct2.keys();
+    auto struct2_keys = v_struct2.path_item_keys();
     EXPECT_EQ(struct2_keys.size(), 3);
     EXPECT_EQ(struct2_keys[0], gc::ValuePathItem("foo"sv));
     EXPECT_EQ(struct2_keys[1], gc::ValuePathItem("bar"sv));

@@ -59,6 +59,10 @@ public:
         -> void
     { result_.push_back({ t.type(), current_path_ }); }
 
+    auto operator()(const gc::SetT& t)
+        -> void
+    { common::throw_("flatten_type failed: nested sets are not supported"); }
+
     auto operator()(const gc::StringT& t)
         -> void
     { result_.push_back({ t.type(), current_path_ }); }

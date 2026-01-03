@@ -14,6 +14,7 @@
 #include "gc/value_path.hpp"
 
 #include "common/defer.hpp"
+#include "common/detail/set_like.hpp"
 #include "common/maybe_const.hpp"
 #include "common/strong.hpp"
 #include "common/throw.hpp"
@@ -62,7 +63,7 @@ struct ValueComponentAccess
 {
     virtual ~ValueComponentAccess() = default;
 
-    virtual auto keys(const std::any& data) const
+    virtual auto path_intem_keys(const std::any& data) const
         -> std::vector<ValuePathItem> = 0;
 
     virtual auto get(ValuePathView path,
@@ -82,6 +83,20 @@ struct ValueComponentAccess
                         std::any& data,
                         size_t size) const
         -> void = 0;
+
+    virtual auto keys(const std::any& data) const
+        -> std::pair<const Type*, std::vector<std::any>> = 0;
+
+    virtual auto contains(const std::any& data,
+                          const std::any& key) const -> bool = 0;
+
+    virtual auto insert(ValuePathView path,
+                        std::any& data,
+                        const std::any& key) const -> void = 0;
+
+    virtual auto remove(ValuePathView path,
+                        std::any& data,
+                        const std::any& key) const -> void = 0;
 
     virtual auto equal(const std::any& lhs, const std::any& rhs) const
         -> bool = 0;
@@ -135,7 +150,7 @@ struct ValueComponents;
 template <typename Type, typename T>
 struct ValueComponentAccessImpl final : ValueComponentAccess<Type>
 {
-    auto keys(const std::any& data) const
+    auto path_intem_keys(const std::any& data) const
         -> std::vector<ValuePathItem> override
     {
         constexpr auto make_path_index_items =
@@ -152,7 +167,7 @@ struct ValueComponentAccessImpl final : ValueComponentAccess<Type>
         if constexpr (common::StructType<T>)
         {
             constexpr auto fields = field_names_of(tag);
-            return std::vector<ValuePathItem>( fields.begin(), fields.end() );
+            return std::vector<ValuePathItem>(fields.begin(), fields.end());
         }
         else if constexpr (requires { std::size(v); })
             return make_path_index_items(std::size(v));
@@ -214,6 +229,102 @@ struct ValueComponentAccessImpl final : ValueComponentAccess<Type>
             });
     }
 
+    auto keys(const std::any& data) const
+        -> std::pair<const Type*, std::vector<std::any>> override
+    {
+        using Result = std::pair<const Type*, std::vector<std::any>>;
+
+        constexpr auto make_path_index_items =
+            [](size_t size) -> Result
+        {
+            auto keys = std::vector<std::any>{};
+            keys.reserve(size);
+            for (size_t index=0; index<size; ++index)
+                keys.emplace_back(index);
+            const auto* key_type = Type::of(common::Type<size_t>);
+            return {key_type, std::move(keys)};
+        };
+        constexpr auto tag = common::Type<T>;
+        const auto& v = unpack(data, tag);
+        if constexpr (common::StructType<T>)
+        {
+            constexpr auto fields = field_names_of(tag);
+            const auto* key_type = Type::of(common::Type<std::string_view>);
+            auto keys = std::vector<std::any>(fields.begin(), fields.end());
+            return {key_type, std::move(keys)};
+        }
+        else if constexpr (common::detail::SetLikeType<T>)
+        {
+            const auto* key_type = Type::of(common::Type<typename T::key_type>);
+            auto keys = std::vector<std::any>(v.begin(), v.end());
+            return {key_type, std::move(keys)};
+        }
+        else if constexpr (requires { std::size(v); })
+            return make_path_index_items(std::size(v));
+        else if constexpr (common::is_tuple_like_v<T>)
+            return make_path_index_items(std::tuple_size_v<T>);
+        else
+            throw std::invalid_argument(
+                "Method 'keys' is not supported for objects of this type");
+    }
+
+    auto contains(const std::any& data,
+                  const std::any& key) const -> bool override
+    {
+        if constexpr (common::detail::SetLikeType<T>)
+        {
+            constexpr auto tag = common::Type<T>;
+            constexpr auto key_tag = common::Type<typename T::key_type>;
+            const auto& v = unpack(data, tag);
+            const auto& k = unpack(key, key_tag);
+            return v.contains(k);
+        }
+        else
+            throw std::invalid_argument(
+                "Method 'contains' is not supported for objects of this type");
+    }
+
+    auto insert(ValuePathView path,
+                std::any& data,
+                const std::any& key) const -> void override
+    {
+        if constexpr (common::detail::SetLikeType<T>)
+        {
+            constexpr auto tag = common::Type<T>;
+            constexpr auto key_tag = common::Type<typename T::key_type>;
+            auto& v = unpack(data, tag);
+            const auto& k = unpack(key, key_tag);
+            v.insert(k);
+        }
+        else
+            throw std::invalid_argument(
+                "Method 'insert' is not supported for objects of this type");
+    }
+
+    auto remove(ValuePathView path,
+                std::any& data,
+                const std::any& key) const -> void override
+    {
+        if constexpr (common::detail::SetLikeType<T>)
+        {
+            constexpr auto tag = common::Type<T>;
+            constexpr auto key_tag = common::Type<typename T::key_type>;
+            auto& v = unpack(data, tag);
+            const auto& k = unpack(key, key_tag);
+            while (true)
+            {
+                auto it = v.find(k);
+                if (it == v.end())
+                    return;
+                v.erase(it);
+            }
+        }
+        else
+            throw std::invalid_argument(
+                "Method 'remove' is not supported for objects of this type");
+    }
+
+
     auto equal(const std::any& lhs, const std::any& rhs) const
         -> bool override
     {
@@ -221,8 +332,8 @@ struct ValueComponentAccessImpl final : ValueComponentAccess<Type>
             return unpack<T>(lhs) == unpack<T>(rhs);
         else
         {
-            auto k = keys(lhs);
-            if (k != keys(rhs))
+            auto k = path_intem_keys(lhs);
+            if (k != path_intem_keys(rhs))
                 return false;
             for (const auto& key : k)
             {
@@ -250,6 +361,20 @@ struct ValueComponents<Type, T> final
     template <common::MaybeConst<T> U, typename F>
     static auto dispatch(ValuePathView path, U& data, F&& f)
     {
+        assert(path.empty());
+        return std::invoke(std::forward<F>(f), data, common::Type<T>);
+    }
+};
+
+template <typename Type, common::detail::SetLikeType T>
+struct ValueComponents<Type, T> final
+{
+    template <common::MaybeConst<T> U, typename F>
+    static auto dispatch(ValuePathView path, U& data, F&& f)
+    {
+        // NOTE:
+        //  Navigation through keys of a set is not possible because
+        //  they cannot, in a general case, be represented by path items.
         assert(path.empty());
         return std::invoke(std::forward<F>(f), data, common::Type<T>);
     }

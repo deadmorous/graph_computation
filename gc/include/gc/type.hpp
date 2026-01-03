@@ -65,6 +65,7 @@ enum class AggregateType : uint8_t
     Enum,
     Path,
     Scalar,
+    Set,
     String,
     Strong,
     Struct,
@@ -106,6 +107,10 @@ public:
             : b{ *reinterpret_cast<const std::byte*>(&scalar_type_id) }
         { static_assert(sizeof(scalar_type_id) == sizeof(std::byte)); }
 
+        ByteInitializer(SetTypeId set_type_id)
+            : b{ *reinterpret_cast<const std::byte*>(&set_type_id) }
+        { static_assert(sizeof(set_type_id) == sizeof(std::byte)); }
+
         ByteInitializer(StringTypeId string_type_id)
             : b{ *reinterpret_cast<const std::byte*>(&string_type_id) }
         { static_assert(sizeof(string_type_id) == sizeof(std::byte)); }
@@ -141,6 +146,16 @@ public:
         return intern(
             detail::value_components_access_factory(this_tag, tag),
             {AggregateType::Scalar, scalar_type_id_of(tag)});
+    }
+
+    template <common::detail::SetLikeType T>
+    static auto of(common::Type_Tag<T> tag)
+        -> const Type*
+    {
+        return intern(
+            detail::value_components_access_factory(this_tag, tag),
+            {AggregateType::Set, set_type_id_of(tag)},
+            {of<typename T::value_type>()});
     }
 
     template <RegisteredEnumType T>
@@ -430,6 +445,20 @@ private:
     const Type* type_;
 };
 
+class SetT final
+{
+public:
+    SetT(const Type*) noexcept;
+    auto type() const noexcept -> const Type*;
+    auto id() const noexcept -> SetTypeId;
+    auto name() const noexcept -> std::string_view;
+    auto key_type() const noexcept
+        -> const Type*;
+
+private:
+    const Type* type_;
+};
+
 class StrongT final
 {
 public:
@@ -505,6 +534,9 @@ auto visit(const Type* type, F&& f, Args&&... args)
         case AggregateType::Scalar:
             return std::invoke(
                 std::forward<F>(f), ScalarT(type), std::forward<Args>(args)...);
+        case AggregateType::Set:
+            return std::invoke(
+                std::forward<F>(f), SetT(type), std::forward<Args>(args)...);
         case AggregateType::String:
             return std::invoke(
                 std::forward<F>(f), StringT(type), std::forward<Args>(args)...);

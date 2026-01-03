@@ -70,7 +70,9 @@ public:
 
     // Interface for C++ type-unaware users
 
-    auto keys() const
+    // Value tree navigation and editing
+
+    auto path_item_keys() const
         -> std::vector<ValuePathItem>;
 
     auto get(ValuePathView path) const
@@ -78,6 +80,14 @@ public:
 
     auto set(ValuePathView path, const Value& v)
         -> void;
+
+    auto set_default(ValuePathView path)
+        -> void;
+
+    auto set_default()
+        -> void;
+
+    // Operations for vector-like values
 
     auto size(ValuePathView path) const
         -> size_t;
@@ -90,6 +100,22 @@ public:
 
     auto resize(size_t size)
         -> void;
+
+    // Operations for set-like values
+
+    auto keys() const -> std::vector<Value>;
+
+    auto contains(const Value& key) const -> bool;
+
+    auto insert(ValuePathView path, const Value& key) -> void;
+
+    auto insert(const Value& key) -> void;
+
+    auto remove(ValuePathView path, const Value& key) -> void;
+
+    auto remove(const Value& key) -> void;
+
+    // ---
 
     auto operator==(const Value& that) const
         -> bool;

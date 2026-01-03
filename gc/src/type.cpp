@@ -87,6 +87,14 @@ struct AggregatePrinter final
         -> void
     { s << t.name(); }
 
+    auto operator()(const SetT& t)
+        -> void
+    {
+        s << t.name() << '{';
+        print_type(s, t.key_type());
+        s << '}';
+    }
+
     auto operator()(const StringT& t)
         -> void
     { s << t.name(); }
@@ -320,6 +328,29 @@ auto StringT::id() const noexcept
 
 auto StringT::name() const noexcept -> std::string_view
 { return magic_enum::enum_name(id()); }
+
+
+SetT::SetT(const Type* type) noexcept :
+    type_{ type }
+{ assert(agg_type(type_) == AggregateType::Set); }
+
+auto SetT::type() const noexcept
+    -> const Type*
+{ return type_; }
+
+auto SetT::id() const noexcept
+    -> SetTypeId
+{ return static_cast<SetTypeId>(type_->storage()[2]); }
+
+auto SetT::name() const noexcept -> std::string_view
+{ return magic_enum::enum_name(id()); }
+
+auto SetT::key_type() const noexcept
+    -> const Type*
+{
+    return get_pointer<const Type>(
+        type_->storage().data() + ptr_align_index(3));
+}
 
 
 StrongT::StrongT(const Type* type) noexcept :

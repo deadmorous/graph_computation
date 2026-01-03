@@ -126,6 +126,14 @@ struct SimpleValueParser final
         -> Value
     { return std::string{ text }; }
 
+    auto operator()(const SetT& t, std::string_view text) const
+        -> Value
+    {
+        common::throw_(
+            "SimpleValueParser: Failed to parse value of type ", t.type(),
+            " because struct types are not supported");
+    }
+
     auto operator()(const StrongT& t, std::string_view text) const
         -> Value
     {

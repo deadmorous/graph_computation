@@ -79,6 +79,10 @@ public:
         -> std::string
     { return t.visit(ScalarFormatter{}, value); }
 
+    auto operator()(const gc::SetT& t, const Value& value) const
+        -> std::string
+    { return '{' + common::format_seq(value.keys(), ", ") + '}'; }
+
     auto operator()(const gc::StringT& t, const Value& value) const
         -> std::string
     { return value.convert_to<std::string>(); }
@@ -176,9 +180,9 @@ auto Value::data() const noexcept
 { return data_; }
 
 
-auto Value::keys() const
+auto Value::path_item_keys() const
     -> std::vector<ValuePathItem>
-{ return type_->value_component_access()->keys(data_); }
+{ return type_->value_component_access()->path_intem_keys(data_); }
 
 auto Value::get(ValuePathView path) const
     -> Value
@@ -190,6 +194,18 @@ auto Value::get(ValuePathView path) const
 auto Value::set(ValuePathView path, const Value& v)
     -> void
 { type_->value_component_access()->set(path, data_, v.data_); }
+
+auto Value::set_default(ValuePathView path)
+    -> void
+{
+    auto [t, _] = type_->value_component_access()->get(path, data_);
+    auto d = t->value_component_access()->make_data();
+    type_->value_component_access()->set(path, data_, d);
+}
+
+auto Value::set_default()
+    -> void
+{ set_default({}); }
 
 auto Value::size(ValuePathView path) const
     -> size_t
@@ -206,6 +222,33 @@ auto Value::resize(ValuePathView path, size_t size)
 auto Value::resize(size_t size)
     -> void
 { return resize({}, size); }
+
+auto Value::keys() const -> std::vector<Value>
+{
+    auto [key_type, any_keys] = type_->value_component_access()->keys(data_);
+    auto result = std::vector<Value>{};
+    result.reserve(any_keys.size());
+    std::ranges::transform(
+        any_keys,
+        back_inserter(result),
+        [&](const std::any& k) { return Value{key_type, k}; });
+    return result;
+}
+
+auto Value::contains(const Value& key) const -> bool
+{ return type_->value_component_access()->contains(data_, key.data_); }
+
+auto Value::insert(ValuePathView path, const Value& key) -> void
+{ type_->value_component_access()->insert(path, data_, key.data_); }
+
+auto Value::insert(const Value& key) -> void
+{ type_->value_component_access()->insert({}, data_, key.data_); }
+
+auto Value::remove(ValuePathView path, const Value& key) -> void
+{ type_->value_component_access()->remove(path, data_, key.data_); }
+
+auto Value::remove(const Value& key) -> void
+{ type_->value_component_access()->remove({}, data_, key.data_); }
 
 auto Value::operator==(const Value& that) const
     -> bool

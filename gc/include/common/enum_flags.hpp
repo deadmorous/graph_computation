@@ -33,7 +33,7 @@ public:
     using key_type = E;
     using value_type = E;
 
-    static constexpr auto size = magic_enum::enum_count<E>();
+    static constexpr auto capacity = magic_enum::enum_count<E>();
 
     EnumFlags() = default;
 
@@ -60,6 +60,11 @@ public:
     {
         set(flag0, true);
         (set(flags, true), ...);
+    }
+
+    constexpr auto clear() -> void
+    {
+        storage_.reset();
     }
 
     template <std::same_as<E>... Ts>
@@ -107,6 +112,11 @@ public:
         return storage_.any();
     }
 
+    constexpr auto size() const noexcept -> size_t
+    {
+        return std::popcount(storage_.to_ullong());
+    }
+
     auto contains(E flag) const -> bool
     {
         return storage_.test(index(flag));
@@ -144,7 +154,7 @@ private:
         return magic_enum::enum_value<E>(index);
     }
 
-    using Storage = std::bitset<size>;
+    using Storage = std::bitset<capacity>;
 
 public:
     class const_iterator final
@@ -168,7 +178,7 @@ public:
         auto operator++() noexcept -> const_iterator&
         {
             auto index = std::countr_zero(storage_.to_ullong());
-            assert(index < size);
+            assert(index < capacity);
             storage_.set(index, 0);
             return *this;
         }
@@ -195,7 +205,7 @@ public:
         auto index() const noexcept -> size_t
         {
             size_t result = std::countr_zero(storage_.to_ullong());
-            assert(result < size);
+            assert(result < capacity);
             return result;
         }
 

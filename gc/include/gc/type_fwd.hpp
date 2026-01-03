@@ -11,6 +11,7 @@
 #pragma once
 
 #include "common/enum_type.hpp"
+#include "common/enum_flags.hpp"
 #include "common/type.hpp"
 #include "common/struct_type.hpp"
 
@@ -88,6 +89,17 @@ GRAPH_COMPUTATION_DECL_STRING_TYPE_ID(std::string_view, StringView);
 template <typename T>
 concept StringType =
     std::same_as<T, std::string> || std::same_as<T, std::string_view>;
+
+
+enum class SetTypeId : uint8_t
+{
+    EnumFlags
+};
+
+template <common::EnumFlagsType T>
+constexpr inline auto set_type_id_of(common::Type_Tag<T>) noexcept
+    -> SetTypeId
+{ return SetTypeId::EnumFlags; }                                                \
 
 
 template <typename> struct CustomTypeToId;
