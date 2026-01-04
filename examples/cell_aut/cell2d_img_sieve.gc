@@ -70,6 +70,10 @@ graph:
       type: Color
       value: 0xffff00ff
       destinations: [palette_maker.value_1]
+    - name: metric_types
+      type: ImageMetricSet
+      value: all
+      destinations: [image_metrics.metric_types]
 
 evolution:
   feedback:
@@ -90,6 +94,8 @@ layout:
           bind: overflow_color
         - type: vector
           bind: initial_image.color_map
+        - type: flags
+          bind: metric_types
         - type: stretch
     - type: vertical_layout
       items:

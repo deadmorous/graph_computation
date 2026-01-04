@@ -72,6 +72,10 @@ graph:
       type: ValuePath
       value: "/min_state"
       destinations: [min_state.path]
+    - name: metric_types
+      type: ImageMetricSet
+      value: all
+      destinations: [image_metrics.metric_types]
 
 evolution:
   feedback:
@@ -92,6 +96,8 @@ layout:
           bind: palette/overflow_color
         - type: vector
           bind: palette/color_map
+        - type: flags
+          bind: metric_types
         - type: stretch
     - type: vertical_layout
       items:

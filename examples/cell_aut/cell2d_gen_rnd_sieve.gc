@@ -98,6 +98,11 @@ graph:
       value: "/min_state"
       destinations: [min_state.path]
 
+    - name: metric_types
+      type: ImageMetricSet
+      value: all
+      destinations: [image_metrics.metric_types]
+
 evolution:
   feedback:
     - source: cell2d.output_state
@@ -118,6 +123,8 @@ layout:
           filter: "Colormap generation files (*.cf)"
         - type: cell2d_gen_cmap
           bind: gen_cmap_reader.gen_cmap
+        - type: flags
+          bind: metric_types
         - type: stretch
     - type: vertical_layout
       items:
