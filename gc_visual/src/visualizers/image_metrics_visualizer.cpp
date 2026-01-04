@@ -86,14 +86,16 @@ ImageMetricsVisualizer::ImageMetricsVisualizer(GraphBroker* broker,
         type_list, &ListEditorWidget::value_changed,
         view, qOverload<const gc::Value&>(&ImageMetricsView::set_type));
 
-    if (auto type_node = item_node["metric"]; type_node.IsDefined())
-    {
-        auto value = gc::yaml::parse_value(
-            type_node, gc::type_of<sieve::ImageMetric>(), {});
-        type_list->set_value(value);
-        view->set_type(value);
-    }
+    auto metric_type = [&]() -> gc::Value {
+        auto type_node = item_node["metric"];
+        if (!type_node.IsDefined())
+            return sieve::ImageMetric::StateHistogram;
 
+        return gc::yaml::parse_value(
+            type_node, gc::type_of<sieve::ImageMetric>(), {});
+    }();
+    type_list->set_value(metric_type);
+    view->set_type(metric_type);
 }
 
 ImageMetricsVisualizer::~ImageMetricsVisualizer() = default;
