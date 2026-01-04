@@ -15,6 +15,7 @@
 #include "gc_visual/editors/cell2d_rule_editor_widget.hpp"
 #include "gc_visual/editors/color_editor_widget.hpp"
 #include "gc_visual/editors/file_picker_widget.hpp"
+#include "gc_visual/editors/flags_editor_widget.hpp"
 #include "gc_visual/editors/list_editor_widget.hpp"
 #include "gc_visual/editors/spin_editor_widget.hpp"
 #include "gc_visual/editors/vector_editor_widget.hpp"
@@ -150,6 +151,7 @@ auto editor_factory_map() -> const GraphParameterEditorFactoryMap&
         { "color"sv, editor_factory<ColorEditorWidget>() },
         { "list"sv, editor_factory<ListEditorWidget>() },
         { "file"sv, editor_factory<FilePickerWidget>() },
+        { "flags"sv, editor_factory<FlagsEditorWidget>() },
         { "spin"sv, editor_factory<SpinEditorWidget>() },
         { "vector"sv, editor_factory<VectorEditorWidget>() },
     };
