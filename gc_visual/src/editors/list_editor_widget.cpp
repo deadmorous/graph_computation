@@ -73,6 +73,4 @@ void ListEditorWidget::set_value(const gc::Value& value)
 
     auto index = value.get(gc::ValuePath{"index"sv}).convert_to<int>();
     widget_->setCurrentIndex(index);
-
-    emit value_changed(this->value());
 }

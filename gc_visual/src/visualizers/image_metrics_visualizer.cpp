@@ -91,6 +91,7 @@ ImageMetricsVisualizer::ImageMetricsVisualizer(GraphBroker* broker,
         auto value = gc::yaml::parse_value(
             type_node, gc::type_of<sieve::ImageMetric>(), {});
         type_list->set_value(value);
+        view->set_type(value);
     }
 
 }
