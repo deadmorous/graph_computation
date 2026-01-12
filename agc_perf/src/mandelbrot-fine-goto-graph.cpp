@@ -90,15 +90,19 @@ struct State final
 
 auto run(State* s) -> void
 {
+[[maybe_unused]]
 activate_Threshold_threshold_iter_count:
     s->threshold_iter_count.threshold = s->max_iter_count.value;
 
+[[maybe_unused]]
 activate_Scale_p:
     s->result_scale.factor = s->result_scale_factor.value;
 
+[[maybe_unused]]
 activate_Threshold_threshold_mag2:
     s->threshold_iter_val_mag2.threshold = s->max_mag2.value;
 
+[[maybe_unused]]
 activate_Grid2d_trigger:
     {
         const auto& [rect, resolution] = s->grid_param.value;
@@ -114,38 +118,50 @@ activate_Grid2d_trigger:
             {
                 s->grid.z = Complex{x, y};
 
+                [[maybe_unused]]
                 activate_Counter_reset:
                     s->iter_count.n = 0;
 
+                [[maybe_unused]]
                 activate_Replicate_trigger_z0:
+                [[maybe_unused]]
                 activate_Iterator_init:
                     s->f_iter.z = s->z0.value;
 
+                [[maybe_unused]]
                 activate_Iterator_next:
+                [[maybe_unused]]
                 activate_F_arg:
 
                 auto f_z = s->f_iter.z * s->f_iter.z + s->grid.z;
 
+                [[maybe_unused]]
                 activate_Iterator_f:
                     s->f_iter.z = f_z;
 
+                [[maybe_unused]]
                 activate_Counter_next:
                     ++s->iter_count.n;
 
+                [[maybe_unused]]
                 activate_Threshold_check_iter_count:
                     if (s->iter_count.n < s->threshold_iter_count.threshold)
                     {
+                        [[maybe_unused]]
                         activate_Replicate_trigger_iter_val:
 
+                        [[maybe_unused]]
                         activate_Mag2:
                         auto mag2 = s->f_iter.z.real() * s->f_iter.z.real() +
                                     s->f_iter.z.imag() * s->f_iter.z.imag();
 
+                        [[maybe_unused]]
                         activate_Threshold_check_mag2:
                         if (mag2 < s->threshold_iter_val_mag2.threshold)
                             goto activate_Iterator_next;
                         else
                         {
+                            [[maybe_unused]]
                             activate_Replicate_trigger_iter_count:
                             goto activate_Scale_scale;
                         }
@@ -156,6 +172,7 @@ activate_Grid2d_trigger:
                 activate_Scale_scale:
                     auto result = static_cast<double>(s->iter_count.n * s->result_scale.factor);
 
+                [[maybe_unused]]
                 activate_Canvas_next:
                     s->canvas.canvas.values.at(s->canvas.index) = result;
                     ++s->canvas.index;

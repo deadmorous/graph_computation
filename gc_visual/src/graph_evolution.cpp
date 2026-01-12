@@ -15,7 +15,7 @@
 namespace gc_visual {
 
 auto parse_graph_evolution(
-    const YAML::Node& config, const gc::ComputationContext& context,
+    const YAML::Node& config, const gc::ComputationContext&,
     const gc::ComputationGraph& graph,
     const gc::detail::NamedNodes<gc::ComputationNode>& node_map,
     std::span<std::string> input_names) -> GraphEvolution

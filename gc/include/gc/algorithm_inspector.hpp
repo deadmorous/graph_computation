@@ -121,7 +121,7 @@ struct AlgorithmInspector final
             (*this)(id);
     }
 
-    auto operator()(const Lib& spec)
+    auto operator()(const Lib&)
         -> void
     {}
 
@@ -149,7 +149,7 @@ struct AlgorithmInspector final
         (*this)(spec.header_file);
     }
 
-    auto operator()(const TypeFromBinding& spec)
+    auto operator()(const TypeFromBinding&)
         -> void
     {}
 

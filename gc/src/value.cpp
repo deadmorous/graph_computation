@@ -63,15 +63,15 @@ public:
         -> std::string
     { return format_seq( t, value, value.size(), '[', ']' ); }
 
-    auto operator()(const gc::CustomT& t, const Value& value) const
+    auto operator()(const gc::CustomT&, const Value&) const
         -> std::string
     { return "custom"; }
 
-    auto operator()(const gc::EnumT& t, const Value& value) const
+    auto operator()(const gc::EnumT&, const Value& value) const
         -> std::string
     { return value.get(ValuePath{ "name"sv }).convert_to<std::string>(); }
 
-    auto operator()(const gc::PathT& t, const Value& value) const
+    auto operator()(const gc::PathT&, const Value& value) const
         -> std::string
     { return common::format(value.as<ValuePath>()); }
 
@@ -79,15 +79,15 @@ public:
         -> std::string
     { return t.visit(ScalarFormatter{}, value); }
 
-    auto operator()(const gc::SetT& t, const Value& value) const
+    auto operator()(const gc::SetT&, const Value& value) const
         -> std::string
     { return '{' + common::format_seq(value.keys(), ", ") + '}'; }
 
-    auto operator()(const gc::StringT& t, const Value& value) const
+    auto operator()(const gc::StringT&, const Value& value) const
         -> std::string
     { return value.convert_to<std::string>(); }
 
-    auto operator()(const gc::StrongT& t, const Value& value) const
+    auto operator()(const gc::StrongT&, const Value& value) const
         -> std::string
     {
         // Format as weakly-typed value - TODO better
@@ -127,7 +127,7 @@ public:
 
 private:
     template <typename SecT>
-    auto format_seq(const SecT& t,
+    auto format_seq(const SecT&,
                     const Value& value,
                     size_t size,
                     char open_brace,

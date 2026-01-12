@@ -89,7 +89,7 @@ struct ScalarParser final
 
 struct SimpleValueParser final
 {
-    auto operator()(const ArrayT& t, std::string_view text) const
+    auto operator()(const ArrayT& t, std::string_view) const
         -> Value
     {
         common::throw_(
@@ -97,7 +97,7 @@ struct SimpleValueParser final
             " because array types are not supported");
     }
 
-    auto operator()(const CustomT& t, std::string_view text) const
+    auto operator()(const CustomT& t, std::string_view) const
         -> Value
     {
         common::throw_(
@@ -114,7 +114,7 @@ struct SimpleValueParser final
         return v;
     }
 
-    auto operator()(const PathT& t, std::string_view text) const
+    auto operator()(const PathT&, std::string_view text) const
         -> Value
     { return ValuePath::from_string(text); }
 
@@ -122,11 +122,11 @@ struct SimpleValueParser final
         -> Value
     { return t.visit(ScalarParser{}, text); }
 
-    auto operator()(const StringT& t, std::string_view text) const
+    auto operator()(const StringT&, std::string_view text) const
         -> Value
     { return std::string{ text }; }
 
-    auto operator()(const SetT& t, std::string_view text) const
+    auto operator()(const SetT& t, std::string_view) const
         -> Value
     {
         common::throw_(
@@ -144,7 +144,7 @@ struct SimpleValueParser final
         return result;
     }
 
-    auto operator()(const StructT& t, std::string_view text) const
+    auto operator()(const StructT& t, std::string_view) const
         -> Value
     {
         common::throw_(
@@ -152,7 +152,7 @@ struct SimpleValueParser final
             " because struct types are not supported");
     }
 
-    auto operator()(const TupleT& t, std::string_view text) const
+    auto operator()(const TupleT& t, std::string_view) const
         -> Value
     {
         common::throw_(
@@ -160,7 +160,7 @@ struct SimpleValueParser final
             " because tuple types are not supported");
     }
 
-    auto operator()(const VectorT& t, std::string_view text) const
+    auto operator()(const VectorT& t, std::string_view) const
         -> Value
     {
         common::throw_(

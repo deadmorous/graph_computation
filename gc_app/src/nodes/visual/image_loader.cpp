@@ -44,7 +44,7 @@ struct IndexedImage final
 };
 
 // Custom Error Handler (must throw to integrate with C++)
-auto custom_error_fn(png_structp png_ptr, png_const_charp msg) -> void
+auto custom_error_fn(png_structp, png_const_charp msg) -> void
 {
     // Simply throw a C++ exception, triggering stack unwinding
     // (and Defer destructors)
@@ -217,8 +217,8 @@ public:
     auto compute_outputs(
             gc::OutputValues result,
             gc::ConstInputValues inputs,
-            const std::stop_token& stoken,
-            const gc::NodeProgress& progress) const
+            const std::stop_token&,
+            const gc::NodeProgress&) const
         -> bool override
     {
         assert(inputs.size() == 2_gc_ic);

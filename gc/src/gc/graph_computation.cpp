@@ -406,7 +406,7 @@ auto compute(ComputationResult& result,
             grouped = {};
             for (const auto& node : g.nodes)
             {
-                for (auto i : common::index_range<II>(count(*node)))
+                for (auto _ : common::index_range<II>(count(*node)))
                     common::add_to_last_group(grouped, T{});
                 common::next_group(grouped);
             }
@@ -423,10 +423,11 @@ auto compute(ComputationResult& result,
     else
     {
         // Validate result grouped data
-        auto check = [&](auto& grouped, auto count)
+        auto check = [&]([[maybe_unused]] auto& grouped,
+                         [[maybe_unused]] auto count)
         {
             assert (group_count(grouped) == g.nodes.size());
-            for (auto inode : g.nodes.index_range())
+            for ([[maybe_unused]] auto inode : g.nodes.index_range())
                 assert(group(grouped, inode).size() == count(*g.nodes[inode]));
         };
 
@@ -468,9 +469,9 @@ auto compute(ComputationResult& result,
     }
 
     auto nlevels = group_count(instructions->nodes);
-    for (auto level=0; level<nlevels; ++level)
+    for (auto level=0u; level<nlevels; ++level)
     {
-        if (level > 0)
+        if (level > 0u)
         {
             for (const auto& e : group(instructions->edges, level-1))
             {

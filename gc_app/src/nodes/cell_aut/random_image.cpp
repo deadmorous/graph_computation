@@ -64,7 +64,7 @@ public:
     auto compute_outputs(
             gc::OutputValues result,
             gc::ConstInputValues inputs,
-            const std::stop_token& stoken,
+            const std::stop_token&,
             const gc::NodeProgress& progress) const
         -> bool override
     {
@@ -109,7 +109,6 @@ private:
         std::uniform_int_distribution<int8_t> distrib(
             lowest_state, lowest_state + range_size - 1);
 
-        int x, y, y_off = 0;
         auto image = I8Image{
             .size = size,
             .data = std::vector<int8_t>(size.width * size.height, 0)
@@ -162,7 +161,7 @@ private:
 
         if( !map.empty() )
         {
-            if (map.size() != range_size)
+            if (map.size() != static_cast<size_t>(range_size))
                 throw std::invalid_argument(
                     "RandomImage: Map size must be either zero or range_size");
 

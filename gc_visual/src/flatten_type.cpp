@@ -42,7 +42,7 @@ public:
         current_path_ = std::move(root);
     }
 
-    auto operator()(const gc::CustomT& t)
+    auto operator()(const gc::CustomT&)
         -> void
     {
     }
@@ -59,7 +59,7 @@ public:
         -> void
     { result_.push_back({ t.type(), current_path_ }); }
 
-    auto operator()(const gc::SetT& t)
+    auto operator()(const gc::SetT&)
         -> void
     { common::throw_("flatten_type failed: nested sets are not supported"); }
 
@@ -101,7 +101,7 @@ public:
         current_path_ = std::move(root);
     }
 
-    auto operator()(const gc::VectorT& t)
+    auto operator()(const gc::VectorT&)
         -> void
     { common::throw_("flatten_type failed: nested vectors are not supported"); }
 

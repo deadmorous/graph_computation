@@ -30,10 +30,12 @@ auto interned_types()
     return result;
 }
 
+[[maybe_unused]]
 auto type_storage_size(const Type* t)
     -> size_t
 { return static_cast<uint8_t>(t->storage()[0]); }
 
+[[maybe_unused]]
 auto agg_type(const Type* t)
     -> AggregateType
 { return static_cast<AggregateType>(t->storage()[1]); }
@@ -79,7 +81,7 @@ struct AggregatePrinter final
           << ": " << static_cast<uint32_t>(t.id()) << '>';
     }
 
-    auto operator()(const PathT& t)
+    auto operator()(const PathT&)
         -> void
     { s << "Path"; }
 
@@ -203,7 +205,7 @@ Type::Type(std::initializer_list<ByteInitializer> init,
     if (names)
         copy_ptr(names);
 
-    assert(d - storage_.data() == size);
+    assert(d - storage_.data() == static_cast<ptrdiff_t>(size));
     std::fill(d, storage_.data() + storage_.size(), std::byte{});
 }
 

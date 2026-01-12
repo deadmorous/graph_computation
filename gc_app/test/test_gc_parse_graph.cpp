@@ -17,6 +17,8 @@
 #include "gc/graph_computation.hpp"
 #include "gc/yaml/parse_graph.hpp"
 
+#include "common/compiler_diagnostic.hpp"
+
 #include <yaml-cpp/yaml.h>
 
 #include <gtest/gtest.h>
@@ -109,8 +111,12 @@ inputs:
     compute(result, g, instr.get(), provided_inputs);
 
     // Check computation results
+    GCLIB_DIAGNOSTIC_PUSH();
+    GCLIB_DISABLE_DANGLING_REFERENCE();
     const auto& image =
         group(result.outputs, 3_gc_n)[0_gc_o].as<gc_app::ColorImage>();
+    GCLIB_DIAGNOSTIC_POP();
+
     EXPECT_EQ(image.size.width, 600);
     EXPECT_EQ(image.size.height, 500);
     EXPECT_EQ(image.data.size(), 500 * 600);

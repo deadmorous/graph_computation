@@ -46,7 +46,7 @@ public:
 
         namespace a = gc::alg;
 
-        auto lib = alg_lib(s);
+        [[maybe_unused]] auto lib = alg_lib(s);  // TODO: Do we need this?
 
         auto std_array_header =
             s(a::HeaderFile{

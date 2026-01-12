@@ -153,7 +153,7 @@ auto FlagsEditorWidget::summary() const -> std::string
         return "<none>";
     if (size == 1)
         return std::string{names_set.front()};
-    if (size == names.size())
+    if (static_cast<size_t>(size) == names.size())
         return "<all>";
     return common::format(size, " flags");
 }

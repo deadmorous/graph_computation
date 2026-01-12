@@ -67,7 +67,7 @@ struct LinearCoordinateMapping final
                 auto tick_count = count_ticks(end - begin, unit);
                 if (tick_count < 0 || tick_count > n)
                     return {};
-                for (size_t i=0; i<tick_count; ++i, begin+=unit)
+                for (int i=0; i<tick_count; ++i, begin+=unit)
                     buf[i] = begin;
                 return buf.subspan(0, tick_count);
             }
@@ -78,7 +78,7 @@ struct LinearCoordinateMapping final
                 auto tick_count = count_ticks(begin - end, unit);
                 if (tick_count < 0 || tick_count > n)
                     return {};
-                for (size_t i=0; i<tick_count; ++i, begin-=unit)
+                for (int i=0; i<tick_count; ++i, begin-=unit)
                     buf[i] = begin;
                 return buf.subspan(0, tick_count);
             }

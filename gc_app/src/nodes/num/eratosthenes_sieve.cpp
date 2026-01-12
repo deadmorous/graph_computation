@@ -37,7 +37,7 @@ auto sieve(Uint limit,
 
     auto progress_factor = std::log(2.) / std::log(std::max(limit, 2u));
     auto progress_k = 1;
-    auto next_progress = 2;
+    auto next_progress = 2u;
 
     while (prime+1 < limit)
     {

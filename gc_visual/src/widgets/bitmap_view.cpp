@@ -114,18 +114,18 @@ auto blend_impl(common::Const_Tag<mode> mode_tag,
 {
     auto size = img1.size();
     if (factor == 0 || img0.isNull() || img0.size() != size)
-        return std::move(img1);
+        return img1;
     auto result = QImage{size, QImage::Format_ARGB32};
 
-    auto width = size.width();
-    auto height = size.height();
+    auto width = static_cast<size_t>(size.width());
+    auto height = static_cast<size_t>(size.height());
     auto f = Rational{factor};
     for (gc_app::Uint row=0; row<height; ++row)
     {
         const auto* src0 = reinterpret_cast<const QRgb*>(img0.scanLine(row));
         const auto* src1 = reinterpret_cast<const QRgb*>(img1.scanLine(row));
         auto* dst = reinterpret_cast<QRgb*>(result.scanLine(row));
-        for (auto col=0; col<width; ++col, ++src0, ++src1, ++dst)
+        for (auto col=0u; col<width; ++col, ++src0, ++src1, ++dst)
             *dst = interp_color(mode_tag, *src0, *src1, f);
     }
 

@@ -140,7 +140,7 @@ auto read_gen_rules(const std::string& path) -> Cell2dGenRules
     };
 
     f >> I(gen_rules.state_count) >> I(gen_rules.min_state);
-    if(gen_rules.state_count < 1   ||   gen_rules.state_count > 255)
+    if(gen_rules.state_count < 1)
         throw std::invalid_argument("read_gen_rules: Invalid state count");
     read_rtrimmed_line();   // Ignore EOL
 
@@ -242,7 +242,7 @@ public:
     auto compute_outputs(
             gc::OutputValues result,
             gc::ConstInputValues inputs,
-            const std::stop_token& stoken,
+            const std::stop_token&,
             const gc::NodeProgress& progress) const
         -> bool override
     {

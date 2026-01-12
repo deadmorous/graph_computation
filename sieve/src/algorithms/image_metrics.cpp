@@ -83,9 +83,9 @@ auto edge_histogram(const gc_app::I8Image& img, I8Range range)
 
     const auto* prev_row = img.data.data() + (height-1) * width;
     const auto* row = img.data.data();
-    for (auto y=0; y<height; ++y, prev_row=row, row+=width)
+    for (auto y=0u; y<height; ++y, prev_row=row, row+=width)
     {
-        for (auto x=0; x+1<width; ++x)
+        for (auto x=0u; x+1<width; ++x)
         {
             process(row[x], row[x+1]);
             process(prev_row[x], row[x]);

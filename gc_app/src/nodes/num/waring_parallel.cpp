@@ -170,7 +170,7 @@ auto waring_parallel(Uint limit,
 
     // Sum results within each multi-index range
     auto result = UintVec(limit, 0);
-    for (auto p=0; p<thread_count; ++p)
+    for (auto p=0u; p<thread_count; ++p)
     {
         auto local_result = group(local_results, p);
         for (Uint i=0; i<limit; ++i)

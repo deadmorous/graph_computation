@@ -83,7 +83,7 @@ auto ValuePathItem::operator==(const ValuePathItem&) const noexcept
 auto ValuePathItem::from_string(std::string_view s)
     -> ValuePathItem
 {
-    size_t index;
+    size_t index{};
     auto fcres = std::from_chars(s.begin(), s.end(), index);
     if (fcres.ec != std::error_code{} || fcres.ptr != s.end())
         return { std::string{ s } };

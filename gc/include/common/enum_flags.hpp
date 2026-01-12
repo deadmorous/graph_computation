@@ -178,7 +178,7 @@ public:
         auto operator++() noexcept -> const_iterator&
         {
             auto index = std::countr_zero(storage_.to_ullong());
-            assert(index < capacity);
+            assert(static_cast<unsigned int>(index) < capacity);
             storage_.set(index, 0);
             return *this;
         }

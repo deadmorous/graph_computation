@@ -318,7 +318,7 @@ auto activate_node_2_in_1(Context& ctx)
 
 // Node 3 (Replicate)
 
-auto activate_node_3_in_0(Context& ctx)
+auto activate_node_3_in_0(Context&)
     -> void
 {
 }
@@ -334,7 +334,7 @@ auto activate_node_3_in_1(Context& ctx)
 
 // Node 4 (MandelbrotFunc)
 
-auto activate_node_4_in_0(Context& ctx)
+auto activate_node_4_in_0(Context&)
     -> void
 {
 }
@@ -392,7 +392,7 @@ auto activate_node_6_in_0(Context& ctx)
 
 // Node 7 (Replicate)
 
-auto activate_node_7_in_0(Context& ctx)
+auto activate_node_7_in_0(Context&)
     -> void
 {
 }
@@ -408,7 +408,7 @@ auto activate_node_7_in_1(Context& ctx)
 
 // Node 8 (Threshold)
 
-auto activate_node_8_in_0(Context& ctx)
+auto activate_node_8_in_0(Context&)
     -> void
 {
 }
@@ -445,7 +445,7 @@ auto activate_node_9_in_0(Context& ctx)
 
 // Node 10 (Threshold)
 
-auto activate_node_10_in_0(Context& ctx)
+auto activate_node_10_in_0(Context&)
     -> void
 {
 }
@@ -484,7 +484,7 @@ auto activate_node_11_in_0(Context& ctx)
 
 // Node 12 (Replicate)
 
-auto activate_node_12_in_0(Context& ctx)
+auto activate_node_12_in_0(Context&)
     -> void
 {
 }
@@ -500,7 +500,7 @@ auto activate_node_12_in_1(Context& ctx)
 
 // Node 13 (Scale)
 
-auto activate_node_13_in_0(Context& ctx)
+auto activate_node_13_in_0(Context&)
     -> void
 {
 }
@@ -523,6 +523,7 @@ auto activate_node_14_in_0(Context& ctx)
   agc_app_rt::resize_canvas(ctx.var_195, ctx.var_197);
 }
 
+[[maybe_unused]]
 auto activate_node_14_in_1(Context& ctx)
     -> void
 {
@@ -544,6 +545,7 @@ auto activate_node_14_in_3(Context& ctx)
   activate_node_15_in_0(ctx);
 }
 
+[[maybe_unused]]
 auto activate_node_14_in_4(Context& ctx)
     -> void
 {

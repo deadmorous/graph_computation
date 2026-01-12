@@ -5,6 +5,7 @@ namespace build {
 
 namespace {
 
+[[maybe_unused]]
 auto split_string(std::string_view s, char delimiter)
     -> std::vector<std::string>
 {

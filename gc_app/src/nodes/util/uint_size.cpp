@@ -44,8 +44,8 @@ public:
     auto compute_outputs(
             gc::OutputValues result,
             gc::ConstInputValues inputs,
-            const std::stop_token& stoken,
-            const gc::NodeProgress& progress) const
+            const std::stop_token&,
+            const gc::NodeProgress&) const
         -> bool override
     {
         assert(inputs.size() == 2_gc_ic);

@@ -68,15 +68,15 @@ auto ensure_palette(std::optional<gc_app::IndexedPalette>& palette,
 {
     if (palette)
     {
-        if (!strict_palette_match || palette->color_map.size() == state_count)
+        if (!strict_palette_match ||
+            palette->color_map.size() == static_cast<size_t>(state_count))
             return *palette;
     }
 
     auto& pal = palette.emplace();
 
     pal.color_map.reserve(state_count);
-    using C = gc_app::ColorComponent;
-    for (size_t i=0; i<state_count; ++i)
+    for (int i=0; i<state_count; ++i)
     {
         auto qcolor = color_map_func(i, state_count);
         pal.color_map.push_back(gc_visual::color(qcolor));
@@ -192,7 +192,7 @@ auto plot_histogram_metric(const MetricViewData& d,
     auto draw_metric = [&](int x, int index)
     {
         const auto& buf = s.buf;
-        if (index >= buf.size())
+        if (static_cast<size_t>(index) >= buf.size())
             return;
         const auto& m = metric(index);
 
@@ -290,6 +290,7 @@ auto plot_time_series_metric(const MetricViewData& d,
     };
     const auto& axes = axes_painter.axes();
 
+    [[maybe_unused]]
     auto rc = axes_painter.layout().rect(layout::central);
 
     auto& pal = ensure_palette(

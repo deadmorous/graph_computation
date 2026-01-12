@@ -59,8 +59,8 @@ public:
     auto compute_outputs(
             gc::OutputValues result,
             gc::ConstInputValues inputs,
-            const std::stop_token& stoken,
-            const gc::NodeProgress& progress) const
+            const std::stop_token&,
+            const gc::NodeProgress&) const
         -> bool override
     {
         assert(inputs.size() == 3_gc_ic);
@@ -92,7 +92,7 @@ public:
         for (auto _ : common::index_range<size_t>(input_image.data.size()))
         {
             auto in = *input_pixel++ - min_state;
-            auto out = in >= 0 && in < N
+            auto out = in >= 0 && static_cast<size_t>(in) < N
                            ? palette.color_map[in]
                            : palette.overflow_color;
             *output_pixel++ = out;

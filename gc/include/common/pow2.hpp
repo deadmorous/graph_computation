@@ -21,7 +21,6 @@ template <std::unsigned_integral T>
 constexpr auto floor2(Type_Tag<T>, std::type_identity_t<T> x)
     -> T
 {
-    auto result = x;
     auto d = T{1};
     while (x & ~d)
     {

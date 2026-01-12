@@ -156,7 +156,7 @@ TEST(Common_Strong, Ranges)
 
     auto test_range =
         []<typename R, typename I>(
-            R range, common::Type_Tag<I>, size_t begin, size_t size)
+            R range, common::Type_Tag<I>, size_t /* begin */, size_t size)
     {
         auto has_first = false;
         auto iter_count = size_t{};

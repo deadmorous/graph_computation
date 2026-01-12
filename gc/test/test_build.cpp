@@ -150,7 +150,7 @@ int main()
     return 0;
 }
 )";
-    const auto& scratch = scratch_dir.path();
+    [[maybe_unused]] const auto& scratch = scratch_dir.path();
     auto config = build::default_config();
     auto input = scratch_dir.path() / "hw.cpp";
     std::ofstream(input) << hw_src;
@@ -171,7 +171,7 @@ extern "C" int add(int a, int b)
     return a + b;
 }
 )";
-    const auto& scratch = scratch_dir.path();
+    [[maybe_unused]] const auto& scratch = scratch_dir.path();
     auto config = build::default_config();
     auto input = scratch_dir.path() / "hw.cpp";
     std::ofstream(input) << add_src;

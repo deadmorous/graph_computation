@@ -119,7 +119,6 @@ auto GraphBroker::on_computation_finished()
 
     auto& computation = computation_thread_.computation();
     computation_result_ = computation.result;
-    const auto& nodes = computation.graph.nodes;
     const auto& outputs = computation.result.outputs;
 
     for (auto ig : group_indices(outputs))

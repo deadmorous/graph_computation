@@ -51,8 +51,8 @@ public:
 
     auto compute_outputs(gc::OutputValues result,
                          gc::ConstInputValues inputs,
-                         const std::stop_token& stoken,
-                         const gc::NodeProgress& progress) const
+                         const std::stop_token&,
+                         const gc::NodeProgress&) const
         -> bool override
     {
         ++computation_count_;
@@ -437,7 +437,7 @@ TEST(Gc, compute_partially)
         -> std::string
     {
         std::ostringstream s;
-        auto node_count = g.nodes.size();
+        [[maybe_unused]] auto node_count = g.nodes.size();
         for (auto inode : g.nodes.index_range())
         {
             auto gr = group(res.outputs, inode);

@@ -80,7 +80,7 @@ auto read_rules(const std::string& path) -> Cell2dRules
     ignore_comments(f);
     auto rules = Cell2dRules{};
     f >> I(rules.state_count) >> I(rules.min_state);
-    if(rules.state_count < 1   ||   rules.state_count > 255)
+    if(rules.state_count < 1)
         throw std::invalid_argument("read_rules: Invalid state count");
     rules.map9 = std::vector<int8_t>((rules.state_count-1)*9+1, 0);
     rules.map6 = std::vector<int8_t>((rules.state_count-1)*6+1, 0);
@@ -151,7 +151,7 @@ public:
     auto compute_outputs(
             gc::OutputValues result,
             gc::ConstInputValues inputs,
-            const std::stop_token& stoken,
+            const std::stop_token&,
             const gc::NodeProgress& progress) const
         -> bool override
     {

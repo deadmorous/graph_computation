@@ -317,6 +317,7 @@ auto check_source_inputs(const ActivationGraph& g,
 
 // ---
 
+[[maybe_unused]]
 auto template_param_name(size_t index)
     -> std::string
 { return common::format('T', index); }
@@ -326,7 +327,7 @@ auto activation_func_name(const EdgeInputEnd& input)
 { return common::format("activate_node_", input.node, "_", input.port); }
 
 auto render_includes(std::ostream& s,
-                     const ActivationGraph& g,
+                     const ActivationGraph&,
                      const GraphAlgos& algos,
                      std::span<alg::id::HeaderFile> extra_headers,
                      const alg::AlgorithmStorage& alg_storage)
@@ -865,7 +866,7 @@ private:
             return false;
         }
 
-        auto operator()(alg::id::HeaderFile id)
+        auto operator()(alg::id::HeaderFile)
             -> bool
         {
             // const auto& spec = storage_(id);
@@ -902,7 +903,7 @@ private:
             return false;
         }
 
-        auto operator()(alg::id::InputBinding id)
+        auto operator()(alg::id::InputBinding)
             -> bool
         {
             // const auto& spec = storage_(id);
@@ -910,7 +911,7 @@ private:
             return true;
         }
 
-        auto operator()(alg::id::Lib id)
+        auto operator()(alg::id::Lib)
             -> bool
         {
             // const auto& spec = storage_(id);
@@ -947,7 +948,7 @@ private:
             return true;
         }
 
-        auto operator()(alg::id::ReturnOutputActivation id)
+        auto operator()(alg::id::ReturnOutputActivation)
             -> bool
         {
             // const auto& spec = storage_(id);
@@ -962,35 +963,35 @@ private:
             return false;
         }
 
-        auto operator()(alg::id::Symbol id)
+        auto operator()(alg::id::Symbol)
             -> bool
         {
             print("// symbol");
             return true;
         }
 
-        auto operator()(alg::id::Type id)
+        auto operator()(alg::id::Type)
             -> bool
         {
             print("// type");
             return true;
         }
 
-        auto operator()(alg::id::TypeFromBinding id)
+        auto operator()(alg::id::TypeFromBinding)
             -> bool
         {
             print("// type from binding");
             return true;
         }
 
-        auto operator()(alg::id::Var id)
+        auto operator()(alg::id::Var)
             -> bool
         {
             print("// var");
             return true;
         }
 
-        auto operator()(alg::id::Vars id)
+        auto operator()(alg::id::Vars)
             -> bool
         {
             print("// vars");
@@ -1267,7 +1268,7 @@ auto for_each_input_binding(
         g,
         algos,
         [&](NodeIndex node_index,
-            const ActivationNode* node,
+            const ActivationNode*,
             const NodeActivationAlgorithms& node_alg)
         {
             for_each_input_binding(node_index, node_alg, alg_storage, cb);
@@ -1303,7 +1304,7 @@ auto for_each_state_var(
         g,
         algos,
         [&](NodeIndex node_index,
-            const ActivationNode* node,
+            const ActivationNode*,
             const NodeActivationAlgorithms& node_alg)
         {
             for_each_state_var(node_index, node_alg, alg_storage, cb);
@@ -1312,7 +1313,7 @@ auto for_each_state_var(
 
 auto generate_context_util(std::ostream& s,
                            const ActivationGraph& g,
-                           const ActivationGraphSourceTypes& source_types,
+                           const ActivationGraphSourceTypes&,
                            const GraphAlgos& algos,
                            const alg::AlgorithmStorage& alg_storage) -> void
 {
@@ -1421,7 +1422,7 @@ auto get_context_input_var(agc_rt::ContextHandle* h,
         g,
         algos,
         alg_storage,
-        [&](const EdgeInputEnd& input_end, alg::id::Var var)
+        [&](const EdgeInputEnd& input_end, alg::id::Var)
         {
             s << "    case " << compressed_edge_expr(input_end) << ":\n"
               "        value = *" << input_func_name(input_end) << R"((h);
@@ -1479,7 +1480,7 @@ auto get_context_state_var(agc_rt::ContextHandle* h,
         g,
         algos,
         alg_storage,
-        [&](NodeIndex node_index, size_t var_index, alg::id::Var var)
+        [&](NodeIndex node_index, size_t var_index, alg::id::Var)
         {
             s << "    case " << compressed_var_expr(node_index, var_index)
               << ":\n"
@@ -1620,7 +1621,7 @@ private:
             std::visit(*this, s_(id));
         }
 
-        auto operator()(alg::id::Assign id)
+        auto operator()(alg::id::Assign)
             -> void
         {}
 
@@ -1633,7 +1634,7 @@ private:
                 (*this)(statement_id);
         }
 
-        auto operator()(alg::id::FuncInvocation id)
+        auto operator()(alg::id::FuncInvocation)
             -> void
         {}
 

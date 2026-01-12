@@ -58,8 +58,8 @@ public:
     auto compute_outputs(
             gc::OutputValues result,
             gc::ConstInputValues inputs,
-            const std::stop_token& stoken,
-            const gc::NodeProgress& progress) const
+            const std::stop_token&,
+            const gc::NodeProgress&) const
         -> bool override
     {
         assert(inputs.size() == 1_gc_ic);
@@ -70,7 +70,8 @@ public:
     }
 };
 
-auto make_test_sequence(gc::ConstValueSpan arg, const gc::ComputationContext&)
+auto make_test_sequence([[maybe_unused]] gc::ConstValueSpan arg,
+                        const gc::ComputationContext&)
     -> std::shared_ptr<gc::ComputationNode>
 {
     assert(arg.empty());

@@ -62,8 +62,9 @@ auto VectorEditorWidget::maybe_construct(const gc::Value& v) -> void
                 }
         });
 
-    auto on_resize = [this](const QModelIndex &parent, int first, int last)
-    { emit value_changed(model_->value(), {}); };
+    auto on_resize =
+        [this](const QModelIndex& /* parent */, int /* first */, int /* last */)
+        { emit value_changed(model_->value(), {}); };
 
     connect(model_.get(), &VectorItemModel::rowsInserted, this, on_resize);
     connect(model_.get(), &VectorItemModel::rowsRemoved, this, on_resize);
@@ -74,7 +75,7 @@ auto VectorEditorWidget::maybe_construct(const gc::Value& v) -> void
     {
         if (!index.isValid())
             return;
-        if (index.row() == model_->value().size())
+        if (static_cast<size_t>(index.row()) == model_->value().size())
             return;
         auto path = model_->path(index);
         auto v = model_->value().get(path);

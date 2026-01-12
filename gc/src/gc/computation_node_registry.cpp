@@ -13,7 +13,7 @@
 namespace gc {
 
 template<>
-auto populate_gc_node_registry(gc::ComputationNodeRegistry& result)
+auto populate_gc_node_registry(gc::ComputationNodeRegistry&)
     -> void
 {
     // gc does not define any nodes at the moment

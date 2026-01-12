@@ -65,7 +65,7 @@ auto generate_rules(const Cell2dGenRules& gen_rules) -> Cell2dRules
 
     auto test_map = [&](
         const MapVec& map,
-        int nbrs,
+        int /* nbrs */,
         const std::string& context)
     {
         int8_t min = gen_rules.min_state;
@@ -157,7 +157,7 @@ public:
     auto compute_outputs(
             gc::OutputValues result,
             gc::ConstInputValues inputs,
-            const std::stop_token& stoken,
+            const std::stop_token&,
             const gc::NodeProgress& progress) const
         -> bool override
     {

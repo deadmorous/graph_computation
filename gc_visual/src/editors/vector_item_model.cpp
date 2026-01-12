@@ -81,7 +81,7 @@ auto VectorItemModel::flags(const QModelIndex &index) const
 
     auto result = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 
-    if (index.row() == v_.size())
+    if (static_cast<size_t>(index.row()) == v_.size())
         return result;
 
     result |= Qt::ItemIsEditable;
@@ -108,7 +108,7 @@ auto VectorItemModel::data(const QModelIndex &index, int role) const
     {
     case Qt::DisplayRole:
     {
-        if (row == v_.size())
+        if (static_cast<size_t>(row) == v_.size())
             return tr("<new>");
 
         if (field.type == gc::type_of<gc_app::Color>())
@@ -118,7 +118,7 @@ auto VectorItemModel::data(const QModelIndex &index, int role) const
     }
     case Qt::EditRole:
     {
-        if (row == v_.size())
+        if (static_cast<size_t>(row) == v_.size())
             return {};
 
         if (field.type == gc::type_of<gc_app::Color>())
@@ -128,7 +128,7 @@ auto VectorItemModel::data(const QModelIndex &index, int role) const
     }
     case Qt::BackgroundRole:
     {
-        if (row == v_.size())
+        if (static_cast<size_t>(row) == v_.size())
             return {};
 
         if (field.type == gc::type_of<gc_app::Color>())
@@ -157,7 +157,7 @@ auto VectorItemModel::setData(const QModelIndex &index,
     auto row = index.row();
     auto path = gc::ValuePathItem{uint32_t(row)} / field.path;
 
-    if (row == v_.size())
+    if (static_cast<size_t>(row) == v_.size())
         return false;
 
     try {

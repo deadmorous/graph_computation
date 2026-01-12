@@ -78,7 +78,7 @@ auto ColorEditorWidget::paintEvent(QPaintEvent*)
     painter.drawRect(rc.adjusted(1, 0, 0, 0));
 }
 
-auto ColorEditorWidget::mouseReleaseEvent(QMouseEvent *event)
+auto ColorEditorWidget::mouseReleaseEvent(QMouseEvent*)
     -> void
 {
     auto color = gc_visual::qcolor(color_);

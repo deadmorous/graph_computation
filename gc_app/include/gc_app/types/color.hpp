@@ -95,7 +95,7 @@ inline auto blend_colors(Color back, Color front) noexcept
 {
     auto back_components = r_g_b_a(back);
     auto front_components = r_g_b_a(front);
-    uint32_t ba = back_components[3].v;
+    [[maybe_unused]] uint32_t ba = back_components[3].v;
     uint32_t fa = front_components[3].v;
     auto result_components = std::array<ColorComponent, 4>{};
     for (uint32_t i=0; i<4; ++i)

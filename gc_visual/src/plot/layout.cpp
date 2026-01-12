@@ -137,7 +137,7 @@ auto Layout::grid(const GridSpec& grid_spec,
                            item_spec.size.height(),
                            item_spec.margin.height(),
                            item_spec.spacing.height());
-    if (max_h * max_v < item_count.v)
+    if (max_h * static_cast<size_t>(max_v) < item_count.v)
         throw LayoutOutOfSpaceException{};
 
     switch (grid_spec.growth_direction)

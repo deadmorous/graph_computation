@@ -204,7 +204,7 @@ struct ValueComponentAccessImpl final : ValueComponentAccess<Type>
         return ValueComponents<Type, T>::dispatch(
             path,
             unpack<T>(data),
-            [](const auto& v, auto tag) -> size_t
+            [](const auto& v, auto /* tag */) -> size_t
             {
                 if constexpr (requires { std::size(v); })
                     return std::size(v);
@@ -220,7 +220,7 @@ struct ValueComponentAccessImpl final : ValueComponentAccess<Type>
         ValueComponents<Type, T>::dispatch(
             path,
             unpack<T>(data),
-            [&](auto& v, auto tag)
+            [&](auto& v, auto /* tag */)
             {
                 if constexpr (requires { v.resize(size); })
                     v.resize(size);
@@ -285,7 +285,7 @@ struct ValueComponentAccessImpl final : ValueComponentAccess<Type>
                 "Method 'contains' is not supported for objects of this type");
     }
 
-    auto insert(ValuePathView path,
+    auto insert(ValuePathView,
                 std::any& data,
                 const std::any& key) const -> void override
     {
@@ -302,7 +302,7 @@ struct ValueComponentAccessImpl final : ValueComponentAccess<Type>
                 "Method 'insert' is not supported for objects of this type");
     }
 
-    auto remove(ValuePathView path,
+    auto remove(ValuePathView,
                 std::any& data,
                 const std::any& key) const -> void override
     {
@@ -360,7 +360,7 @@ template <typename Type, ScalarType T>
 struct ValueComponents<Type, T> final
 {
     template <common::MaybeConst<T> U, typename F>
-    static auto dispatch(ValuePathView path, U& data, F&& f)
+    static auto dispatch([[maybe_unused]] ValuePathView path, U& data, F&& f)
     {
         assert(path.empty());
         return std::invoke(std::forward<F>(f), data, common::Type<T>);
@@ -371,7 +371,7 @@ template <typename Type, common::detail::SetLikeType T>
 struct ValueComponents<Type, T> final
 {
     template <common::MaybeConst<T> U, typename F>
-    static auto dispatch(ValuePathView path, U& data, F&& f)
+    static auto dispatch([[maybe_unused]] ValuePathView path, U& data, F&& f)
     {
         // NOTE:
         //  Navigation through keys of a set is not possible because
@@ -385,7 +385,7 @@ template <typename Type>
 struct ValueComponents<Type, ValuePath>
 {
     template <common::MaybeConst<ValuePath> U, typename F>
-    static auto dispatch(ValuePathView path, U& data, F&& f)
+    static auto dispatch([[maybe_unused]] ValuePathView path, U& data, F&& f)
     {
         assert(path.empty());
         return std::invoke(std::forward<F>(f), data, common::Type<ValuePath>);
@@ -488,7 +488,7 @@ template <typename Type, RegisteredCustomType T>
 struct ValueComponents<Type, T>
 {
     template <common::MaybeConst<T> U, typename F>
-    static auto dispatch(ValuePathView path, U& data, F&& f)
+    static auto dispatch([[maybe_unused]] ValuePathView path, U& data, F&& f)
     {
         assert(path.empty());
         return std::invoke(std::forward<F>(f), data, common::Type<T>);
@@ -610,7 +610,7 @@ template <typename Type, StringType T>
 struct ValueComponents<Type, T>
 {
     template <common::MaybeConst<T> U, typename F>
-    static auto dispatch(ValuePathView path, U& data, F&& f)
+    static auto dispatch([[maybe_unused]] ValuePathView path, U& data, F&& f)
     {
         assert(path.empty());
         return std::invoke(std::forward<F>(f), data, common::Type<T>);

@@ -24,8 +24,8 @@ struct TextVisualizer::Storage
     QTextEdit* view{};
 };
 
-TextVisualizer::TextVisualizer(GraphBroker* broker,
-                               const YAML::Node& item_node,
+TextVisualizer::TextVisualizer(GraphBroker*,
+                               const YAML::Node&,
                                QWidget* parent):
     VisualizerWidget{ parent },
     storage_{std::make_unique<Storage>()}
@@ -44,7 +44,7 @@ TextVisualizer::TextVisualizer(GraphBroker* broker,
 
 TextVisualizer::~TextVisualizer() = default;
 
-auto TextVisualizer::check_type(const gc::Type* type) -> TypeCheckResult
+auto TextVisualizer::check_type(const gc::Type*) -> TypeCheckResult
 {
     return { .ok = true };
 }

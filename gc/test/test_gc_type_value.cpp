@@ -242,7 +242,9 @@ TEST(Gc, Scalar)
             EXPECT_TRUE(is_int32_t);
             ++visit_count;
             if constexpr (std::is_integral_v<T>)
+            {
                 EXPECT_EQ(val.as<T>(), 123);
+            }
         });
     EXPECT_EQ(visit_count, 1);
 

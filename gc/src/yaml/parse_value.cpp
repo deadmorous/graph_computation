@@ -52,7 +52,7 @@ struct YamlValueParser final
         }
     }
 
-    auto operator()(const CustomT& t, Value& value, const YAML::Node& node) const
+    auto operator()(const CustomT& t, Value&, const YAML::Node&) const
         -> void
     {
         common::throw_(
@@ -121,7 +121,7 @@ struct YamlValueParser final
         -> void
     { value = parse_simple_value(node.as<std::string>(), t.type()); }
 
-    auto operator()(const StructT& t, Value& value, const YAML::Node& node) const
+    auto operator()(const StructT&, Value& value, const YAML::Node& node) const
         -> void
     {
         for (const auto& key: value.path_item_keys())
@@ -167,7 +167,7 @@ struct YamlValueParser final
         }
     }
 
-    auto operator()(const VectorT& t, Value& value, const YAML::Node& node) const
+    auto operator()(const VectorT&, Value& value, const YAML::Node& node) const
         -> void
     {
         value.resize({}, node.size());
@@ -192,7 +192,7 @@ struct YamlValueParser final
 
 auto parse_value(const YAML::Node& node,
                  const Type* type,
-                 const TypeRegistry& type_registry)
+                 const TypeRegistry&)
     -> Value
 {
     auto result = Value::make(type);

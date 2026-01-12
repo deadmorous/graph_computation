@@ -452,6 +452,7 @@ TEST(GcApp_Node, OffsetImage)
     ASSERT_EQ(inputs[1].type(), gc::type_of<int8_t>());
 
     auto& input_image = inputs[0].as<I8Image>();
+    [[maybe_unused]]
     auto& offset = inputs[1].as<int8_t>();
 
     input_image = I8Image{

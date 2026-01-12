@@ -40,7 +40,6 @@ struct Ascending final
 TEST(Gc, NestedSeq)
 {
     using Seq = gc::detail::NestedSequence<unsigned int>;
-    using ScopedSeq = gc::detail::ScopedNestedSequence<unsigned int>;
     using gc::detail::SeqType;
 
     constexpr auto beg_all = gc::detail::BeginSeqMark{ SeqType::AllInOrder };

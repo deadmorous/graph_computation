@@ -52,7 +52,8 @@ auto make_source_types(gc::alg::AlgorithmStorage& alg_storage, Ts...types)
 {
     auto result = gc::ActivationGraphSourceTypes{};
 
-    auto port = gc::InputPort{0};
+    // False positive "unused variable" by gcc 14
+    [[maybe_unused]] auto port = gc::InputPort{0};
     ([&](std::string_view type)
     {
         result.types.push_back(

@@ -73,8 +73,8 @@ public:
     auto compute_outputs(
             gc::OutputValues result,
             gc::ConstInputValues inputs,
-            const std::stop_token& stoken,
-            const gc::NodeProgress& progress) const
+            const std::stop_token&,
+            const gc::NodeProgress&) const
         -> bool override
     {
         assert(inputs.size().v > 0);
@@ -85,7 +85,9 @@ public:
         auto result_value = gc::Value::make(output_type);
         iterate_inputs(
             inputs,
-            [&](size_t index, const gc::Value& path, const gc::Value& value)
+            [&](size_t /* index */,
+                const gc::Value& path,
+                const gc::Value& value)
             {
                 result_value.set(path.as<gc::ValuePath>(), value);
             });

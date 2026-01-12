@@ -226,7 +226,7 @@ auto Cell2dRuleMapView::paintEvent(QPaintEvent*)
     auto min_state = int{min_state_};
     for (int col=0; col<layout_.column_count; ++col)
     {
-        if (col < map_.size())
+        if (static_cast<size_t>(col) < map_.size())
         {
             int row = map_[col];
             if (row == -128)
@@ -272,7 +272,7 @@ auto Cell2dRuleMapView::mouseReleaseEvent(QMouseEvent *event)
             menu_->exec(mapToGlobal(event->pos()));
         },
         [&](const RowCol& item) {
-            if (item.col >= map_.size())
+            if (static_cast<size_t>(item.col) >= map_.size())
                 return;
             auto new_value = ctrl ? -128 : int8_t(item.row) + min_state_;
             auto& current_value = map_[item.col];
@@ -309,7 +309,7 @@ auto Cell2dRuleMapView::calc_layout() -> void
             fm.size(Qt::TextSingleLine, QString::number(max));
         return {
             std::max(min_size.width(), max_size.width()) + 2*h_margin,
-            std::max(min_size.height(), max_size.height()) + 2*h_margin
+            std::max(min_size.height(), max_size.height()) + 2*v_margin
         };
     };
 

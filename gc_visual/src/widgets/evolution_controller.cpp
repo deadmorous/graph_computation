@@ -18,7 +18,7 @@
 
 
 EvolutionController::EvolutionController(
-    const std::string& type,
+    const std::string& /* type */,
     GraphBroker* broker,
     QWidget* parent) :
     QWidget{parent}

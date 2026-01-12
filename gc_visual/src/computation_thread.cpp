@@ -10,6 +10,7 @@
 
 #include "gc_visual/computation_thread.hpp"
 
+#include "common/compiler_diagnostic.hpp"
 #include "common/func_ref.hpp"
 #include "common/overloads.hpp"
 
@@ -213,8 +214,7 @@ auto ComputationThread::run()
     }
     else
     {
-        auto graph_progress =
-            [this](gc::NodeIndex inode, double node_progress)
+        auto graph_progress = [](gc::NodeIndex, double /* node_progress */)
         {};
 
         for (size_t i=0; i<skip_; ++i)
@@ -255,7 +255,12 @@ auto ComputationThread::set_feedback() -> void
     for (auto& fb : evolution_->feedback)
     {
         const auto& src_end = fb.source_output.output;
+
+        GCLIB_DIAGNOSTIC_PUSH();
+        GCLIB_DISABLE_DANGLING_REFERENCE();
         const auto& src_val = group(res.outputs, src_end.node)[src_end.port];
+        GCLIB_DIAGNOSTIC_POP();
+
         for (const auto& dst_end : fb.sink_input.inputs)
         {
             auto& dst_val = group(res.inputs, dst_end.node)[dst_end.port];

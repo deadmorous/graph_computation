@@ -136,7 +136,7 @@ public:
     auto compute_outputs(
             gc::OutputValues result,
             gc::ConstInputValues inputs,
-            const std::stop_token& stoken,
+            const std::stop_token&,
             const gc::NodeProgress& progress) const
         -> bool override
     {
