@@ -24,7 +24,8 @@ namespace sieve {
 enum class ImageMetric : uint8_t
 {
     StateHistogram,
-    EdgeHistogram
+    EdgeHistogram,
+    PlateauAvgSize
 };
 
 using ImageMetricSet = common::EnumFlags<ImageMetric>;
@@ -33,6 +34,7 @@ struct ImageMetrics
 {
     std::vector<double> histogram;
     std::vector<double> edge_histogram;
+    std::vector<double> plateau_avg_size;
 };
 GCLIB_STRUCT_TYPE(ImageMetrics, histogram, edge_histogram);
 

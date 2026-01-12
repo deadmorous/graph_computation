@@ -97,6 +97,80 @@ auto edge_histogram(const gc_app::I8Image& img, I8Range range)
     return normalize(counters, 0.5/img.data.size());
 }
 
+struct ScalarStats final
+{
+    int64_t sum{};
+    int64_t count{};
+};
+
+auto plateau_avg_size(const gc_app::I8Image& img, I8Range range)
+    -> std::vector<double>
+{
+    int length = range.length();
+    if (length == 0)
+        return {};
+
+    int first = range.first();
+    int last = first + length - 1;
+
+    if (img.data.empty())
+        return std::vector<double>(length, 0.);
+
+    std::vector<ScalarStats> stats(length);
+
+    const auto* pix = img.data.data();
+    auto compute_line = [&](size_t i0, size_t i1, size_t stride)
+    {
+        auto v = pix[i0];
+        auto v0 = pix[i0];
+        int64_t s = 1;
+        auto constant = true;
+        for (size_t i=i0; i<i1; i+=stride)
+        {
+            auto v0 = pix[i];
+            if (v0 == v)
+                ++s;
+            else
+            {
+                if (v >= first && v <= last)
+                {
+                    auto& st = stats[v-first];
+                    st.sum += s;
+                    ++st.count;
+                    constant = false;
+                }
+                v = v0;
+                s = 1;
+            }
+        }
+        if (v >= first && v <= last)
+        {
+            auto& st = stats[v-first];
+            st.sum += s;
+            if (constant || v != v0) // Because image is on a tor
+                ++st.count;
+        }
+    };
+
+    auto w = img.size.width;
+    auto h = img.size.height;
+
+    for (size_t row=0, i0=0; row<h; ++row, i0+=w)
+        compute_line(i0, i0+w, 1);
+
+    auto h_w = h*w;
+    for (size_t col=0; col<h; ++col)
+        compute_line(col, col+h_w, w);
+
+    auto result = stats |
+        std::views::transform(
+            [](const ScalarStats& x) {
+                return x.count == 0 ? 0. : static_cast<double>(x.sum) / x.count;
+            });
+
+    return std::vector<double>(result.begin(), result.end());
+}
+
 } // anonymous namespace
 
 
@@ -110,6 +184,8 @@ auto image_metrics(const gc_app::I8Image& img,
         result.histogram = histogram(img, state_range);
     if (metric_types.contains(ImageMetric::EdgeHistogram))
         result.edge_histogram = edge_histogram(img, state_range);
+    if (metric_types.contains(ImageMetric::PlateauAvgSize))
+        result.plateau_avg_size = plateau_avg_size(img, state_range);
     return result;
 }
 

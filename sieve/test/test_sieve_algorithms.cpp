@@ -24,6 +24,7 @@ TEST(Sieve_ImageMetrics, Basic)
         auto metrics = sieve::image_metrics(image, range, all_types);
         EXPECT_EQ(metrics.histogram, expected_metrics.histogram);
         EXPECT_EQ(metrics.edge_histogram, expected_metrics.edge_histogram);
+        // TODO: Test plateau_avg_size
     };
 
     constexpr auto empty_image = gc_app::I8Image{};
