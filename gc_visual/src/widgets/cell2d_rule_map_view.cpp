@@ -13,6 +13,7 @@
 #include "common/format.hpp"
 #include "common/overloads.hpp"
 
+#include <QApplication>
 #include <QBoxLayout>
 #include <QCheckBox>
 #include <QClipboard>
