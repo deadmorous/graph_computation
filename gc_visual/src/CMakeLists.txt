@@ -35,7 +35,6 @@ set(PROJECT_SOURCES
     mainwindow.cpp              ../include/gc_visual/mainwindow.hpp
     parse_graph_binding.cpp
     parse_layout.cpp
-    plot/layout.cpp
     video_recorder.cpp          ../include/gc_visual/video_recorder.hpp
     visualizers/image_metrics_visualizer.cpp    ../include/gc_visual/visualizers/image_metrics_visualizer.hpp
     visualizers/image_visualizer.cpp    ../include/gc_visual/visualizers/image_visualizer.hpp
@@ -85,6 +84,7 @@ target_link_libraries(gc_visual
         Qt${QT_VERSION_MAJOR}::Widgets
         gc_app::lib
         sieve::lib
+        plot_visual::lib
         FFMpeg::Encoder
     )
 

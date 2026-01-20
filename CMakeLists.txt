@@ -28,6 +28,7 @@ add_subdirectory(agc_rt)
 add_subdirectory(gc_app)
 add_subdirectory(gc_cli)
 add_subdirectory(gc_visual)
+add_subdirectory(plot_visual)
 add_subdirectory(hello_gl_plot)
 add_subdirectory(sieve)
 

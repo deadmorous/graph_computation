@@ -11,10 +11,10 @@
 #include "gc_visual/widgets/image_metrics_view.hpp"
 
 #include "gc_visual/color.hpp"
-#include "gc_visual/plot/axis.hpp"
-#include "gc_visual/plot/axes_2d.hpp"
-#include "gc_visual/plot/linear_coordinate_mapping.hpp"
-#include "gc_visual/plot/layout.hpp"
+#include "plot_visual/axis.hpp"
+#include "plot_visual/axes_2d.hpp"
+#include "plot_visual/linear_coordinate_mapping.hpp"
+#include "plot_visual/layout.hpp"
 
 #include "gc/value.hpp"
 

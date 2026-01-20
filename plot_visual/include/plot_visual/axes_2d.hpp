@@ -3,15 +3,15 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2025 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2025-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve.mail.ru>
  */
 
 #pragma once
 
-#include "gc_visual/plot/concepts.hpp"
-#include "gc_visual/plot/layout.hpp"
+#include "plot_visual/concepts.hpp"
+#include "plot_visual/layout.hpp"
 
 #include "common/defer.hpp"
 

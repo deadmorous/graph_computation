@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve.mail.ru>
  */
 
-#include "gc_visual/plot/layout.hpp"
+#include "plot_visual/layout.hpp"
 
 #include <QPainter>
 
