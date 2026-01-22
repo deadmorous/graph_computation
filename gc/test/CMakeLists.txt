@@ -12,6 +12,7 @@ add_executable(
     test_binomial.cpp
     test_enum_flags.cpp
     test_expr_calculator.cpp
+    test_fast_pimpl.cpp
     test_func_ref.cpp
     test_gc.cpp
     test_gc_type_value.cpp
