@@ -68,6 +68,8 @@ public:
         using pointer = ValueType*;
         using reference = ValueType&;
 
+        Iterator() = default;
+
         Iterator(ValueType* data, size_t capacity, size_t index, size_t count)
             : m_data(data),
               m_capacity(capacity),
@@ -75,7 +77,7 @@ public:
               m_count(count) {}
 
         reference operator*() const { return m_data[m_index % m_capacity]; }
-        pointer operator->() { return &m_data[m_index % m_capacity]; }
+        pointer operator->() const { return &m_data[m_index % m_capacity]; }
 
         Iterator& operator++() {
             m_index++;
@@ -97,10 +99,10 @@ public:
         }
 
     private:
-        ValueType* m_data;
-        size_t m_capacity;
-        size_t m_index;
-        size_t m_count;
+        ValueType* m_data{};
+        size_t m_capacity{};
+        size_t m_index{};
+        size_t m_count{};
     };
 
     using iterator = Iterator<T>;
