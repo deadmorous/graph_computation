@@ -19,6 +19,7 @@ add_executable(
     test_nested_seq.cpp
     test_parse_simple_value.cpp
     test_pow2.cpp
+    test_ring_buffer.cpp
     test_strong.cpp)
 
 target_link_libraries(
