@@ -13,6 +13,7 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets OpenGL OpenGLWidgets)
 
 set(PROJECT_SOURCES
     layout.cpp
+    live_time_series.cpp
 )
 
 add_library(plot_visual-lib STATIC
