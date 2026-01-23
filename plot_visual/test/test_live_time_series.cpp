@@ -20,6 +20,7 @@
 namespace {
 
 using dvec = std::vector<double>;
+using drange = plot::CoordinateRange<double>;
 
 auto test_vec(size_t index, size_t size) -> dvec
 {
@@ -55,6 +56,10 @@ TEST(PlotVisual, LiveTimeSeries_Basic)
         size_t first_frame_ordinal =
             index < capacity ? 0 : index - capacity + 1;
 
+        auto expected_total_range = plot::combine_coordinate_range(
+            frames.front().value_range, frames.back().value_range);
+        EXPECT_EQ(ts.value_range(), expected_total_range);
+
         EXPECT_EQ(frames.front().ordinal, first_frame_ordinal);
         EXPECT_EQ(frames.back().ordinal, index);
 
@@ -62,7 +67,11 @@ TEST(PlotVisual, LiveTimeSeries_Basic)
         {
             EXPECT_EQ(frame.ordinal, ordinal);
             auto expected_values = test_vec(ordinal, values_per_frame);
+            auto expected_value_range = drange{
+                .begin = expected_values.front(),
+                .end = expected_values.back() };
             EXPECT_PRED2(std::ranges::equal, frame.values, expected_values);
+            EXPECT_EQ(frame.value_range, expected_value_range);
             ++ordinal;
         }
     }

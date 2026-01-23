@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "plot_visual/coordinate_range.hpp"
+
 #include "common/fast_pimpl.hpp"
 
 #include <memory>
@@ -25,6 +27,7 @@ public:
     {
         size_t ordinal{};
         std::span<const double> values;
+        CoordinateRange<double> value_range;
     };
 
     class Frames
@@ -94,6 +97,8 @@ public:
     auto clear() -> void;
 
     auto frames() const -> Frames;
+
+    auto value_range() const noexcept -> CoordinateRange<double>;
 
 private:
     class Impl;

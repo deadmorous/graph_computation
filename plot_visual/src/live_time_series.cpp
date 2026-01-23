@@ -11,77 +11,13 @@
 #include "plot_visual/live_time_series.hpp"
 
 #include "common/ring_buffer.hpp"
-#include "common/type.hpp"
 
 #include <algorithm>
-#include <limits>
 #include <numeric>
 #include <vector>
 
 
 namespace plot {
-
-namespace {
-
-template <typename T>
-struct MinMax final
-{
-    T min{std::numeric_limits<T>::max()};
-    T max{std::numeric_limits<T>::min()};
-};
-
-template <typename T>
-auto combine(const MinMax<T>& a, const MinMax<T>& b) -> MinMax<T>
-{
-    return {
-        .min = std::min(a.min, b.min),
-        .max = std::max(a.max, b.max)
-    };
-}
-
-template <typename T>
-constexpr auto accum(const MinMax<T>& min_max,
-                     std::type_identity_t<T> value) noexcept
-    -> MinMax<T>
-{
-    return {
-        std::max(min_max.max, value),
-        std::max(min_max.min, value)
-    };
-}
-
-template <typename T>
-constexpr auto init_min_max(
-    std::type_identity_t<T> value, common::Type_Tag<T> = {}) noexcept
-    -> MinMax<T>
-{
-    return {
-        .min = value,
-        .max = value
-    };
-}
-
-template <typename T>
-constexpr auto is_valid(const MinMax<T>& min_max) noexcept -> bool
-{
-    return min_max.min <= min_max.max;
-}
-
-template <typename T>
-constexpr auto compute_min_max(std::span<const T> values) noexcept
-    -> MinMax<T>
-{
-    return std::accumulate(
-        values.begin(),
-        values.end(),
-        MinMax<T>{},
-        [](const MinMax<T>& acc, const T& value)
-            { return accum(acc, value); });
-}
-
-std::vector<double> values;
-
-} // anonymous namespace
 
 class LiveTimeSeries::Impl final
 {
@@ -101,18 +37,17 @@ public:
         values = store(values); // NOTE: Result depends on next_ordinal_
 
         frames_.push_back({
-            .user_frame {
-                .ordinal = next_ordinal_++,
-                .values = values },
-            .min_max = compute_min_max(values)
+            .ordinal = next_ordinal_++,
+            .values = values,
+            .value_range = compute_coordinate_range(values)
         });
 
-        min_max = std::accumulate(
+        value_range_ = std::accumulate(
             frames_.begin(),
             frames_.end(),
-            MinMax<double>{},
-            [](const MinMax<double>& acc, const Frame& frame)
-            { return combine(acc, frame.min_max); });
+            CoordinateRange<double>{},
+            [](const CoordinateRange<double>& acc, const Frame& frame)
+            { return combine_coordinate_range(acc, frame.value_range); });
     }
 
     auto clear() -> void
@@ -123,15 +58,14 @@ public:
         next_ordinal_ = 0;
     }
 
-    struct Frame final
-    {
-        LiveTimeSeries::Frame user_frame;
-        MinMax<double> min_max;
-    };
+    using Frame = LiveTimeSeries::Frame;
     using FrameBuffer = common::RingBuffer<Frame>;
 
     auto frames() noexcept -> const FrameBuffer&
     { return frames_; }
+
+    auto value_range() const noexcept -> CoordinateRange<double>
+    { return value_range_; }
 
 private:
     auto store(std::span<const double> values) -> std::span<const double>
@@ -156,7 +90,7 @@ private:
     std::vector<double> value_buffer_;
     size_t values_per_frame_{};
     FrameBuffer frames_{500};
-    MinMax<double> min_max;
+    CoordinateRange<double> value_range_;
     size_t next_ordinal_{};
 };
 
@@ -171,7 +105,7 @@ public:
     {}
 
     auto frame() const -> const LiveTimeSeries::Frame&
-    { return it_->user_frame; }
+    { return *it_; }
 
     auto increment() -> void
     { ++it_; }
@@ -240,10 +174,10 @@ private:
 LiveTimeSeries::Frames::~Frames() = default;
 
 auto LiveTimeSeries::Frames::front() const -> const Frame&
-{ return impl_->frames().front().user_frame; }
+{ return impl_->frames().front(); }
 
 auto LiveTimeSeries::Frames::back() const -> const Frame&
-{ return impl_->frames().back().user_frame; }
+{ return impl_->frames().back(); }
 
 auto LiveTimeSeries::Frames::begin() const -> const_iterator
 { return const_iterator{ iterator::Impl{ impl_->frames().begin() } }; }
@@ -282,5 +216,8 @@ auto LiveTimeSeries::clear() -> void
 
 auto LiveTimeSeries::frames() const -> Frames
 { return Frames{ Frames::Impl{ impl_->frames() } }; }
+
+auto LiveTimeSeries::value_range() const noexcept -> CoordinateRange<double>
+{ return impl_->value_range(); }
 
 } // namespace plot
