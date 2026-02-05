@@ -76,3 +76,94 @@ TEST(PlotVisual, LiveTimeSeries_Basic)
         }
     }
 }
+
+TEST(PlotVisual, LiveTimeSeries_FrameByIndex)
+{
+    constexpr size_t capacity = 5;
+    constexpr size_t values_per_frame = 3;
+
+    auto ts = plot::LiveTimeSeries{};
+    ts.set_frame_capacity(capacity);
+
+    using Frame = plot::LiveTimeSeries::Frame;
+    auto check_frame = [](const Frame& frame, size_t ordinal)
+    {
+        EXPECT_EQ(frame.ordinal, ordinal);
+        auto expected_values = test_vec(ordinal, values_per_frame);
+        EXPECT_PRED2(std::ranges::equal, frame.values, expected_values);
+    };
+
+    for (size_t index=0; index<3; ++index)
+        ts.add(test_vec(index, values_per_frame));
+
+    {
+        auto frames = ts.frames();
+        check_frame(frames[0], 0);
+        check_frame(frames[1], 1);
+        check_frame(frames[2], 2);
+    }
+
+    for (size_t index=3; index<7; ++index)
+        ts.add(test_vec(index, values_per_frame));
+
+    {
+        auto frames = ts.frames();
+        check_frame(frames[0], 2);
+        check_frame(frames[1], 3);
+        check_frame(frames[2], 4);
+        check_frame(frames[3], 5);
+        check_frame(frames[4], 6);
+    }
+}
+
+TEST(PlotVisual, LiveTimeSeries_History)
+{
+    constexpr size_t capacity = 3;
+    constexpr size_t values_per_frame_1 = 3;
+    constexpr size_t values_per_frame_2 = 4;
+
+    size_t index = 0;
+
+    auto ts = plot::LiveTimeSeries{};
+    ts.set_frame_capacity(capacity);
+
+    auto add_n_frames = [&](size_t n, size_t values_per_frame)
+    {
+        for (size_t _=0; _<n; ++_)
+            ts.add(test_vec(index++, values_per_frame));
+    };
+
+    auto c1 = ts.register_checkpoint();
+    auto c2 = ts.register_checkpoint();
+
+    EXPECT_EQ(ts.checkpoint(c1).frames_added, std::nullopt);
+    add_n_frames(1, values_per_frame_1);
+    EXPECT_EQ(ts.checkpoint(c1).frames_added, std::nullopt);
+
+    add_n_frames(1, values_per_frame_1);
+    EXPECT_EQ(ts.checkpoint(c1).frames_added, std::optional<size_t>{1});
+    EXPECT_EQ(ts.checkpoint(c1).frames_added, std::optional<size_t>{0});
+
+    add_n_frames(2, values_per_frame_1);
+    EXPECT_EQ(ts.checkpoint(c1).frames_added, std::optional<size_t>{2});
+    EXPECT_EQ(ts.checkpoint(c1).frames_added, std::optional<size_t>{0});
+
+    EXPECT_EQ(ts.checkpoint(c2).frames_added, std::nullopt);
+    add_n_frames(2, values_per_frame_1);
+    EXPECT_EQ(ts.checkpoint(c2).frames_added, std::optional<size_t>{2});
+    EXPECT_EQ(ts.checkpoint(c2).frames_added, std::optional<size_t>{0});
+    add_n_frames(1, values_per_frame_1);
+    EXPECT_EQ(ts.checkpoint(c1).frames_added, std::optional<size_t>{3});
+    EXPECT_EQ(ts.checkpoint(c1).frames_added, std::optional<size_t>{0});
+
+    add_n_frames(4, values_per_frame_1);
+    EXPECT_EQ(ts.checkpoint(c1).frames_added, std::nullopt);
+
+    add_n_frames(1, values_per_frame_1);
+    add_n_frames(1, values_per_frame_2);
+    EXPECT_EQ(ts.checkpoint(c1).frames_added, std::nullopt);
+
+    add_n_frames(2, values_per_frame_2);
+    EXPECT_EQ(ts.checkpoint(c1).frames_added, std::optional<size_t>{2});
+    EXPECT_EQ(ts.checkpoint(c1).frames_added, std::optional<size_t>{0});
+}

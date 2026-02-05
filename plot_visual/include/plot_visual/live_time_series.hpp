@@ -13,16 +13,32 @@
 #include "plot_visual/coordinate_range.hpp"
 
 #include "common/fast_pimpl.hpp"
+#include "common/strong.hpp"
 
 #include <memory>
+#include <optional>
 #include <span>
 
 
 namespace plot {
 
+GCLIB_STRONG_TYPE(CheckpointId, uint32_t);
+
 class LiveTimeSeries final
 {
 public:
+    // Describes changes since last checkpoint.
+    // Knowing it in addition to the current state is sufficient
+    // to update any state dependent on the state of this object.
+    struct UpdateHistory final
+    {
+        // If a value is set, it is how many frames, up to frame capacity,
+        // were added since last checkpoint (which is when history was consumed
+        // last time). If not set, indicates that this object changed
+        // completely and dependent state needs to be reloaded / recalculated.
+        std::optional<size_t> frames_added;
+    };
+
     struct Frame
     {
         size_t ordinal{};
@@ -35,9 +51,10 @@ public:
     public:
         class iterator final {
         public:
-            using iterator_category = std::forward_iterator_tag;
+            using iterator_category = std::random_access_iterator_tag;
             using value_type = const Frame;
             using difference_type = std::ptrdiff_t;
+            using index_type = size_t;
             using pointer = const Frame*;
             using reference = const Frame&;
 
@@ -48,11 +65,28 @@ public:
             pointer operator->();
 
             iterator& operator++();
+            iterator& operator--();
 
             iterator operator++(int);
+            iterator operator--(int);
+
+            iterator& operator+=(difference_type d) noexcept;
+            iterator& operator-=(difference_type d) noexcept;
+
+            friend iterator operator+(iterator it, difference_type d) noexcept;
+            friend iterator operator-(iterator it, difference_type d) noexcept;
+
+
+            friend difference_type operator-(iterator lhs,
+                                             iterator rhs) noexcept;
+
+            reference operator[](difference_type d);
+
+            friend auto operator<=>(
+                const iterator& a, const iterator& b) noexcept
+                -> std::strong_ordering;
 
             friend bool operator==(const iterator& a, const iterator& b);
-            friend bool operator!=(const iterator& a, const iterator& b);
 
         private:
             friend class Frames;
@@ -70,6 +104,7 @@ public:
 
         auto front() const -> const Frame&;
         auto back() const -> const Frame&;
+        auto operator[](size_t index) const -> const Frame&;
 
         auto begin() const -> const_iterator;
         auto end() const -> const_iterator;
@@ -99,6 +134,9 @@ public:
     auto frames() const -> Frames;
 
     auto value_range() const noexcept -> CoordinateRange<double>;
+
+    auto register_checkpoint() -> CheckpointId;
+    auto checkpoint(CheckpointId) -> UpdateHistory;
 
 private:
     class Impl;
