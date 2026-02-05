@@ -62,26 +62,42 @@ public:
     template <typename ValueType>
     class Iterator {
     public:
-        using iterator_category = std::forward_iterator_tag;
+        using iterator_category = std::random_access_iterator_tag;
         using value_type = ValueType;
         using difference_type = std::ptrdiff_t;
+        using index_type = size_t;
         using pointer = ValueType*;
         using reference = ValueType&;
 
         Iterator() = default;
 
         Iterator(ValueType* data, size_t capacity, size_t index, size_t count)
-            : m_data(data),
-              m_capacity(capacity),
-              m_index(index),
-              m_count(count) {}
+            : data_(data),
+              capacity_(capacity),
+              index_(index),
+              count_(count) {}
 
-        reference operator*() const { return m_data[m_index % m_capacity]; }
-        pointer operator->() const { return &m_data[m_index % m_capacity]; }
+        reference operator*() const { return data_[index_]; }
+        pointer operator->() const { return &data_[index_]; }
 
         Iterator& operator++() {
-            m_index++;
-            m_count--;
+            assert(count_ > 0);
+            assert(capacity_ > 0);
+            ++index_;
+            if (index_ == capacity_)
+                index_ = 0;
+            --count_;
+            return *this;
+        }
+
+        Iterator& operator--() {
+            assert(count_ < capacity_);
+            assert(capacity_ > 0);
+            if (index_ == 0)
+                index_ = capacity_ - 1;
+            else
+                --index_;
+            ++count_;
             return *this;
         }
 
@@ -91,18 +107,72 @@ public:
             return tmp;
         }
 
-        friend bool operator==(const Iterator& a, const Iterator& b) {
-            return a.m_count == b.m_count;
+        Iterator operator--(int) {
+            Iterator tmp = *this;
+            --(*this);
+            return tmp;
         }
-        friend bool operator!=(const Iterator& a, const Iterator& b) {
-            return !(a == b);
+
+        auto operator+=(difference_type d) noexcept -> Iterator&
+        {
+            assert(static_cast<difference_type>(count_) >= d);
+            index_ = (index_ + d) % capacity_;
+            count_ -= d;
+            return *this;
+        }
+
+        auto operator-=(difference_type d) noexcept -> Iterator&
+        {
+            assert(count_ + d <= capacity_);
+            index_ = (index_ + capacity_ - d) % capacity_;
+            count_ += d;
+            return *this;
+        }
+
+        friend auto operator+(Iterator it, difference_type d) noexcept
+            -> Iterator
+        {
+            it += d;
+            return it;
+        }
+
+        friend auto operator-(Iterator it, difference_type d) noexcept
+            -> Iterator
+        {
+            it -= d;
+            return it;
+        }
+
+        friend auto operator-(Iterator lhs, Iterator rhs) noexcept
+            -> difference_type
+        {
+            return rhs.count_ - lhs.count_;
+        }
+
+        auto operator[](difference_type d) -> reference
+        {
+            return data_[(index_ + d) % capacity_];
+        }
+
+        friend auto operator<=>(
+            const Iterator& a, const Iterator& b) noexcept
+            -> std::strong_ordering
+        {
+            assert(a.data_ == b.data_);
+            return a.count_ <=> b.count_;
+        }
+
+        friend bool operator==(const Iterator& a, const Iterator& b)
+        {
+            assert(a.data_ == b.data_);
+            return a.count_ == b.count_;
         }
 
     private:
-        ValueType* m_data{};
-        size_t m_capacity{};
-        size_t m_index{};
-        size_t m_count{};
+        ValueType* data_{};
+        size_t capacity_{};
+        size_t index_{};
+        size_t count_{};
     };
 
     using iterator = Iterator<T>;
@@ -110,33 +180,50 @@ public:
 
     // --- Constructor ---
     explicit RingBuffer(size_t capacity)
-        : m_capacity(capacity),
-        m_data(std::make_unique<T[]>(capacity)),
-        m_head(0),
-        m_size(0) {
+        : capacity_(capacity),
+        data_(std::make_unique<T[]>(capacity)),
+        head_(0),
+        size_(0) {
         if (capacity == 0) throw std::invalid_argument("Capacity must be > 0");
     }
 
     // --- Accessors ---
-    T& front() { assert(m_size > 0); return m_data[m_head]; }
-    const T& front() const { assert(m_size > 0); return m_data[m_head]; }
+    T& front() { assert(size_ > 0); return data_[head_]; }
+    const T& front() const {
+        assert(size_ > 0);
+        return data_[head_];
+    }
 
     T& back() {
-        assert(m_size > 0); return m_data[(m_head + m_size - 1) % m_capacity]; }
+        assert(size_ > 0);
+        return data_[(head_ + size_ - 1) % capacity_];
+    }
 
     const T& back() const {
-        assert(m_size > 0); return m_data[(m_head + m_size - 1) % m_capacity]; }
+        assert(size_ > 0);
+        return data_[(head_ + size_ - 1) % capacity_];
+    }
+
+    auto operator[](size_t index) -> T& {
+        assert(index < size_);
+        return data_[(head_ + index) % capacity_];
+    }
+
+    auto operator[](size_t index) const -> const T& {
+        assert(index < size_);
+        return data_[(head_ + index) % capacity_];
+    }
 
     // --- Modifiers ---
     void push_back(const T& value) { push_impl(value); }
     void push_back(T&& value) { push_impl(std::move(value)); }
 
     void pop_front() {
-        if (m_size > 0) {
+        if (size_ > 0) {
             // Explicitly overwrite to release resources if T is a complex type
-            m_data[m_head] = T{};
-            m_head = (m_head + 1) % m_capacity;
-            m_size--;
+            data_[head_] = T{};
+            head_ = (head_ + 1) % capacity_;
+            size_--;
         }
     }
 
@@ -145,79 +232,80 @@ public:
         while (!empty()) {
             pop_front();
         }
-        m_head = 0;
-        m_size = 0;
+        head_ = 0;
+        size_ = 0;
     }
 
     // --- Segment Views ---
     std::span<T> first_segment() {
-        if (m_size == 0) return {};
-        size_t count = std::min(m_size, m_capacity - m_head);
-        return {&m_data[m_head], count};
+        if (size_ == 0) return {};
+        size_t count = std::min(size_, capacity_ - head_);
+        return {&data_[head_], count};
     }
 
     std::span<const T> first_segment() const {
-        if (m_size == 0) return {};
-        size_t count = std::min(m_size, m_capacity - m_head);
-        return {&m_data[m_head], count};
+        if (size_ == 0) return {};
+        size_t count = std::min(size_, capacity_ - head_);
+        return {&data_[head_], count};
     }
 
     std::span<T> second_segment() {
-        if (m_size == 0) return {};
-        size_t first_count = std::min(m_size, m_capacity - m_head);
-        size_t second_count = m_size - first_count;
+        if (size_ == 0) return {};
+        size_t first_count = std::min(size_, capacity_ - head_);
+        size_t second_count = size_ - first_count;
         return second_count == 0
                    ? std::span<T>{}
-                   : std::span<T>{&m_data[0], second_count};
+                   : std::span<T>{&data_[0], second_count};
     }
 
     std::span<const T> second_segment() const {
-        if (m_size == 0) return {};
-        size_t first_count = std::min(m_size, m_capacity - m_head);
-        size_t second_count = m_size - first_count;
+        if (size_ == 0) return {};
+        size_t first_count = std::min(size_, capacity_ - head_);
+        size_t second_count = size_ - first_count;
         return second_count == 0
                    ? std::span<const T>{}
-                   : std::span<const T>{&m_data[0], second_count};
+                   : std::span<const T>{&data_[0], second_count};
     }
 
     // --- Iterators ---
     iterator begin() {
-        return iterator(m_data.get(), m_capacity, m_head, m_size);
+        return iterator(data_.get(), capacity_, head_, size_);
     }
 
     iterator end() {
-        return iterator(m_data.get(), m_capacity, m_head + m_size, 0);
+        return iterator(data_.get(), capacity_, (head_ + size_)%capacity_, 0);
     }
 
     const_iterator begin() const {
-        return const_iterator(m_data.get(), m_capacity, m_head, m_size);
+        return const_iterator(data_.get(), capacity_, head_, size_);
     }
 
     const_iterator end() const {
-        return const_iterator(m_data.get(), m_capacity, m_head + m_size, 0);
+        return const_iterator(
+            data_.get(), capacity_, (head_ + size_)%capacity_, 0);
     }
 
     // --- Status ---
-    size_t size() const { return m_size; }
-    size_t capacity() const { return m_capacity; }
-    bool empty() const { return m_size == 0; }
+    size_t size() const { return size_; }
+    size_t capacity() const { return capacity_; }
+    bool empty() const { return size_ == 0; }
 
 private:
     template <typename U>
     void push_impl(U&& value) {
-        size_t index = (m_head + m_size) % m_capacity;
-        m_data[index] = std::forward<U>(value);
-        if (m_size < m_capacity) {
-            m_size++;
+        size_t index = (head_ + size_) % capacity_;
+        data_[index] = std::forward<U>(value);
+        if (size_ < capacity_) {
+            size_++;
         } else {
-            m_head = (m_head + 1) % m_capacity;
+            head_ = (head_ + 1) % capacity_;
         }
     }
 
-    size_t m_capacity;
-    std::unique_ptr<T[]> m_data;
-    size_t m_head;
-    size_t m_size;
+    size_t capacity_;
+    std::unique_ptr<T[]> data_;
+    size_t head_;
+    size_t size_;
 };
 
 } // namespace common
