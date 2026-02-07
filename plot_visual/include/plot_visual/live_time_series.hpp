@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "plot_visual/live_time_series_fwd.hpp"
+
 #include "plot_visual/coordinate_range.hpp"
 
 #include "common/checkpoint.hpp"
