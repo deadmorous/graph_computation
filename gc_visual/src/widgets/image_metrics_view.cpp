@@ -176,7 +176,7 @@ auto plot_histogram_metric(const MetricViewData& d,
     };
     const auto& axes = axes_painter.axes();
 
-    auto rc = axes_painter.layout().rect(layout::central);
+    auto rc = axes_painter.layout().rect(plot::layout::central);
 
     auto metric = [&](size_t index) -> const std::vector<double>&
     {
@@ -291,7 +291,7 @@ auto plot_time_series_metric(const MetricViewData& d,
     const auto& axes = axes_painter.axes();
 
     [[maybe_unused]]
-    auto rc = axes_painter.layout().rect(layout::central);
+    auto rc = axes_painter.layout().rect(plot::layout::central);
 
     auto& pal = ensure_palette(
         s.*(d.palette),

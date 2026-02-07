@@ -14,7 +14,7 @@
 
 #include <cassert>
 
-namespace layout {
+namespace plot::layout {
 
 namespace {
 
@@ -162,4 +162,4 @@ auto draw(const Layout& layout, QPainter& painter) -> void
         painter.drawRect(layout.rect(index));
 }
 
-} // layout
+} // plot::layout

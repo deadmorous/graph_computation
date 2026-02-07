@@ -21,7 +21,7 @@
 
 class QPainter;
 
-namespace layout {
+namespace plot::layout {
 
 GCLIB_STRONG_TYPE(ItemCount, uint32_t, common::StrongCountFeatures);
 GCLIB_STRONG_TYPE(ItemIndex, uint32_t, common::StrongIndexFeatures<ItemCount>);
@@ -116,6 +116,4 @@ private:
 
 auto draw(const Layout&, QPainter&) -> void;
 
-
-
-} // layout
+} // plot::layout
