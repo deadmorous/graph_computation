@@ -41,14 +41,14 @@ public:
 
     using Checkpoint = common::Checkpoint<UpdateHistory>;
 
-    struct Frame
+    struct Frame final
     {
         size_t ordinal{};
         std::span<const double> values;
         CoordinateRange<double> value_range;
     };
 
-    class Frames
+    class Frames final
     {
     public:
         class iterator final {
