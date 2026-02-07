@@ -10,13 +10,11 @@
 
 #include "plot_visual/live_time_series.hpp"
 
-#include "common/detail/hash.hpp"
 #include "common/ring_buffer.hpp"
 
 #include <algorithm>
 #include <numeric>
 #include <vector>
-#include <unordered_map>
 
 
 namespace plot {
@@ -43,7 +41,7 @@ public:
             if (h.frames_added.has_value())
             {
                 if (*h.frames_added == frames_.capacity())
-                    h.frames_added.reset();
+                    h.reset();
                 else
                     ++*h.frames_added;
             }
@@ -82,20 +80,8 @@ public:
     auto value_range() const noexcept -> CoordinateRange<double>
     { return value_range_; }
 
-    auto register_checkpoint() -> CheckpointId
-    {
-        auto result = CheckpointId(checkpoints_.size());
-        checkpoints_.emplace(result, UpdateHistory{});
-        return result;
-    }
-
-    auto checkpoint(CheckpointId id) -> UpdateHistory
-    {
-        auto& checkpoint = checkpoints_.at(id);
-        auto result = checkpoint;
-        checkpoint.frames_added = 0;
-        return result;
-    }
+    auto register_checkpoint(Checkpoint& checkpoint) -> void
+    { checkpoints_.link(checkpoint); }
 
 private:
     auto store(std::span<const double> values) -> std::span<const double>
@@ -120,14 +106,14 @@ private:
 
     auto clear_update_history() noexcept -> void
     {
-        update_checkpoints([](UpdateHistory& h){ h.frames_added.reset(); });
+        update_checkpoints([](UpdateHistory& h){ h.reset(); });
     }
 
     template <std::invocable<UpdateHistory&> F>
     auto update_checkpoints(const F& f) -> void
     {
-        for (auto& [_, checkpoint] : checkpoints_)
-            f(checkpoint);
+        for (auto& checkpoint : checkpoints_)
+            checkpoint->update(f);
     }
 
     std::vector<double> value_buffer_;
@@ -136,8 +122,7 @@ private:
     CoordinateRange<double> value_range_;
     size_t next_ordinal_{};
 
-    std::unordered_map<CheckpointId, UpdateHistory, common::detail::Hash>
-        checkpoints_;
+    common::IntrusiveLinkedList<Checkpoint> checkpoints_;
 };
 
 class LiveTimeSeries::Frames::iterator::Impl final
@@ -316,10 +301,7 @@ auto LiveTimeSeries::frames() const -> Frames
 auto LiveTimeSeries::value_range() const noexcept -> CoordinateRange<double>
 { return impl_->value_range(); }
 
-auto LiveTimeSeries::register_checkpoint() -> CheckpointId
-{ return impl_->register_checkpoint(); }
-
-auto LiveTimeSeries::checkpoint(CheckpointId id) -> UpdateHistory
-{ return impl_->checkpoint(id); }
+auto LiveTimeSeries::register_checkpoint(Checkpoint& checkpoint) -> void
+{ impl_->register_checkpoint(checkpoint); }
 
 } // namespace plot

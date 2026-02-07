@@ -12,8 +12,8 @@
 
 #include "plot_visual/coordinate_range.hpp"
 
+#include "common/checkpoint.hpp"
 #include "common/fast_pimpl.hpp"
-#include "common/strong.hpp"
 
 #include <memory>
 #include <optional>
@@ -21,8 +21,6 @@
 
 
 namespace plot {
-
-GCLIB_STRONG_TYPE(CheckpointId, uint32_t);
 
 class LiveTimeSeries final
 {
@@ -37,7 +35,11 @@ public:
         // last time). If not set, indicates that this object changed
         // completely and dependent state needs to be reloaded / recalculated.
         std::optional<size_t> frames_added;
+        auto clear() -> void { frames_added = 0; }
+        auto reset() -> void { frames_added.reset(); }
     };
+
+    using Checkpoint = common::Checkpoint<UpdateHistory>;
 
     struct Frame
     {
@@ -135,8 +137,7 @@ public:
 
     auto value_range() const noexcept -> CoordinateRange<double>;
 
-    auto register_checkpoint() -> CheckpointId;
-    auto checkpoint(CheckpointId) -> UpdateHistory;
+    auto register_checkpoint(Checkpoint&) -> void;
 
 private:
     class Impl;

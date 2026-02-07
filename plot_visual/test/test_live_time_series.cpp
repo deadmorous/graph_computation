@@ -116,7 +116,7 @@ TEST(PlotVisual, LiveTimeSeries_FrameByIndex)
     }
 }
 
-TEST(PlotVisual, LiveTimeSeries_History)
+TEST(PlotVisual, LiveTimeSeries_Checkpoints)
 {
     constexpr size_t capacity = 3;
     constexpr size_t values_per_frame_1 = 3;
@@ -133,37 +133,40 @@ TEST(PlotVisual, LiveTimeSeries_History)
             ts.add(test_vec(index++, values_per_frame));
     };
 
-    auto c1 = ts.register_checkpoint();
-    auto c2 = ts.register_checkpoint();
+    auto c1 = plot::LiveTimeSeries::Checkpoint{};
+    auto c2 = plot::LiveTimeSeries::Checkpoint{};
 
-    EXPECT_EQ(ts.checkpoint(c1).frames_added, std::nullopt);
+    ts.register_checkpoint(c1);
+    ts.register_checkpoint(c2);
+
+    EXPECT_EQ(c1.sync().frames_added, std::nullopt);
     add_n_frames(1, values_per_frame_1);
-    EXPECT_EQ(ts.checkpoint(c1).frames_added, std::nullopt);
+    EXPECT_EQ(c1.sync().frames_added, std::nullopt);
 
     add_n_frames(1, values_per_frame_1);
-    EXPECT_EQ(ts.checkpoint(c1).frames_added, std::optional<size_t>{1});
-    EXPECT_EQ(ts.checkpoint(c1).frames_added, std::optional<size_t>{0});
+    EXPECT_EQ(c1.sync().frames_added, std::optional<size_t>{1});
+    EXPECT_EQ(c1.sync().frames_added, std::optional<size_t>{0});
 
     add_n_frames(2, values_per_frame_1);
-    EXPECT_EQ(ts.checkpoint(c1).frames_added, std::optional<size_t>{2});
-    EXPECT_EQ(ts.checkpoint(c1).frames_added, std::optional<size_t>{0});
+    EXPECT_EQ(c1.sync().frames_added, std::optional<size_t>{2});
+    EXPECT_EQ(c1.sync().frames_added, std::optional<size_t>{0});
 
-    EXPECT_EQ(ts.checkpoint(c2).frames_added, std::nullopt);
+    EXPECT_EQ(c2.sync().frames_added, std::nullopt);
     add_n_frames(2, values_per_frame_1);
-    EXPECT_EQ(ts.checkpoint(c2).frames_added, std::optional<size_t>{2});
-    EXPECT_EQ(ts.checkpoint(c2).frames_added, std::optional<size_t>{0});
+    EXPECT_EQ(c2.sync().frames_added, std::optional<size_t>{2});
+    EXPECT_EQ(c2.sync().frames_added, std::optional<size_t>{0});
     add_n_frames(1, values_per_frame_1);
-    EXPECT_EQ(ts.checkpoint(c1).frames_added, std::optional<size_t>{3});
-    EXPECT_EQ(ts.checkpoint(c1).frames_added, std::optional<size_t>{0});
+    EXPECT_EQ(c1.sync().frames_added, std::optional<size_t>{3});
+    EXPECT_EQ(c1.sync().frames_added, std::optional<size_t>{0});
 
     add_n_frames(4, values_per_frame_1);
-    EXPECT_EQ(ts.checkpoint(c1).frames_added, std::nullopt);
+    EXPECT_EQ(c1.sync().frames_added, std::nullopt);
 
     add_n_frames(1, values_per_frame_1);
     add_n_frames(1, values_per_frame_2);
-    EXPECT_EQ(ts.checkpoint(c1).frames_added, std::nullopt);
+    EXPECT_EQ(c1.sync().frames_added, std::nullopt);
 
     add_n_frames(2, values_per_frame_2);
-    EXPECT_EQ(ts.checkpoint(c1).frames_added, std::optional<size_t>{2});
-    EXPECT_EQ(ts.checkpoint(c1).frames_added, std::optional<size_t>{0});
+    EXPECT_EQ(c1.sync().frames_added, std::optional<size_t>{2});
+    EXPECT_EQ(c1.sync().frames_added, std::optional<size_t>{0});
 }
