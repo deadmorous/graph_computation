@@ -10,10 +10,7 @@
 
 #include "gc_visual/widgets/image_metrics_view.hpp"
 
-#include "plot_visual/axis.hpp"
-#include "plot_visual/axes_2d.hpp"
 #include "plot_visual/color.hpp"
-#include "plot_visual/linear_coordinate_mapping.hpp"
 #include "plot_visual/layout.hpp"
 #include "plot_visual/painter/time_series_histogram_visualizer.hpp"
 #include "plot_visual/painter/time_series_visualizer.hpp"
@@ -24,55 +21,6 @@
 
 #include <QPainter>
 #include <QPainterPath>
-
-#include <deque>
-
-
-template <typename Visualizer>
-struct VisualizationData
-{
-    explicit VisualizationData(size_t frame_capacity)
-    { ts.set_frame_capacity(frame_capacity); }
-
-    gc_types::LiveTimeSeries ts;
-    Visualizer::Attributes ts_vis_attr;
-    Visualizer ts_vis{ts, ts_vis_attr};
-
-    auto state_count() const noexcept -> size_t
-    {
-        auto frames = ts.frames();
-        return frames.empty() ? 0ull : frames.front().values.size();
-    }
-};
-
-using HistogramVisualizationData =
-    VisualizationData<plot::TimeSeriesHistogramVisualizer>;
-
-using PlotVisualizationData = VisualizationData<plot::TimeSeriesVisualizer>;
-
-struct ImageMetricsView::Storage
-{
-    explicit Storage(size_t frame_capacity) :
-        state_histogram{frame_capacity},
-        edge_histogram{frame_capacity},
-        plateau_avg_size{frame_capacity}
-    {}
-
-    auto clear() -> void
-    {
-        state_histogram.ts.clear();
-        edge_histogram.ts.clear();
-        plateau_avg_size.ts.clear();
-    }
-
-    sieve::ImageMetric type{sieve::ImageMetric::StateHistogram};
-    std::optional<gc_types::IndexedPalette> state_palette;
-    std::optional<gc_types::IndexedPalette> edge_palette;
-
-    HistogramVisualizationData state_histogram;
-    HistogramVisualizationData edge_histogram;
-    PlotVisualizationData plateau_avg_size;
-};
 
 namespace {
 
@@ -123,101 +71,107 @@ auto ensure_palette(std::optional<gc_types::IndexedPalette>& palette,
     return pal;
 }
 
-struct MetricViewData
+// ---
+
+template <typename Visualizer>
+struct VisualizationData
 {
-    std::vector<double> sieve::ImageMetrics::* metric;
-    std::optional<gc_types::IndexedPalette> ImageMetricsView::Storage::* palette;
+    VisualizationData(size_t frame_capacity,
+                      QString x_label,
+                      QString y_label,
+                      QString title,
+                      QColor (*default_palette_color)(int index, int state_count),
+                      bool strict_palette_match) :
+        default_palette_color{default_palette_color},
+        strict_palette_match{strict_palette_match}
+    {
+        ts.set_frame_capacity(frame_capacity);
+        ts_vis_attr.x_label = std::move(x_label);
+        ts_vis_attr.y_label = std::move(y_label);
+        ts_vis_attr.title = std::move(title);
+    }
+
+    gc_types::LiveTimeSeries ts;
+    Visualizer::Attributes ts_vis_attr;
+    Visualizer ts_vis{ts, ts_vis_attr};
+
     QColor (*default_palette_color)(int index, int state_count);
     bool strict_palette_match;
-    QString x_label;
-    QString y_label;
-    QString title;
+
+    auto state_count() const noexcept -> size_t
+    {
+        auto frames = ts.frames();
+        return frames.empty() ? 0ull : frames.front().values.size();
+    }
 };
 
-auto metric_view_data(sieve::ImageMetric type) -> MetricViewData
+using HistogramVisualizationData =
+    VisualizationData<plot::TimeSeriesHistogramVisualizer>;
+
+using PlotVisualizationData = VisualizationData<plot::TimeSeriesVisualizer>;
+
+} // anonymous namespace
+
+struct ImageMetricsView::Storage
 {
-    switch(type)
+    explicit Storage(size_t frame_capacity) :
+        state_histogram{
+            /* frame_capacity */        frame_capacity,
+            /* x_label */               "generation",
+            /* y_label */               "state fraction",
+            /* title */                 "State histogram",
+            /* default_palette_color */ default_hue_color,
+            /* strict_palette_match */  false},
+        edge_histogram{
+            /* frame_capacity */        frame_capacity,
+            /* x_label */               "generation",
+            /* y_label */               "diff. fraction",
+            /* title */                 "Edge histogram",
+            /* default_palette_color */ default_alternating_color,
+            /* strict_palette_match */  true},
+        plateau_avg_size{
+            /* frame_capacity */        frame_capacity,
+            /* x_label */               "generation",
+            /* y_label */               "plateau size",
+            /* title */                 "Average plateau size",
+            /* default_palette_color */ default_hue_color,
+            /* strict_palette_match */  false}
+    {}
+
+    auto clear() -> void
     {
-    case sieve::ImageMetric::StateHistogram:
-        return {
-            .metric = &sieve::ImageMetrics::histogram,
-            .palette = &ImageMetricsView::Storage::state_palette,
-            .default_palette_color = default_hue_color,
-            .strict_palette_match = false,
-            .x_label = "generation",
-            .y_label = "state fraction",
-            .title = "State histogram"
-        };
-    case sieve::ImageMetric::EdgeHistogram:
-        return {
-            .metric = &sieve::ImageMetrics::edge_histogram,
-            .palette = &ImageMetricsView::Storage::edge_palette,
-            .default_palette_color = default_alternating_color,
-            .strict_palette_match = true,
-            .x_label = "generation",
-            .y_label = "diff. fraction",
-            .title = "Edge histogram"
-        };
-    case sieve::ImageMetric::PlateauAvgSize:
-        return {
-            .metric = &sieve::ImageMetrics::plateau_avg_size,
-            .palette = &ImageMetricsView::Storage::state_palette,
-            .default_palette_color = default_hue_color,
-            .strict_palette_match = false,
-            .x_label = "generation",
-            .y_label = "plateau size",
-            .title = "Average plateau size"
-        };
+        state_histogram.ts.clear();
+        edge_histogram.ts.clear();
+        plateau_avg_size.ts.clear();
     }
-    __builtin_unreachable();
-}
 
-auto plot_histogram_metric(const MetricViewData& d,
-                           ImageMetricsView::Storage& s,
-                           HistogramVisualizationData& v,
-                           const QRect& rect,
-                           QPainter& painter)
+    sieve::ImageMetric type{sieve::ImageMetric::StateHistogram};
+    std::optional<gc_types::IndexedPalette> state_palette;
+    std::optional<gc_types::IndexedPalette> edge_palette;
+
+    HistogramVisualizationData state_histogram;
+    HistogramVisualizationData edge_histogram;
+    PlotVisualizationData plateau_avg_size;
+};
+
+namespace {
+
+template <typename Visualizer>
+auto plot_metric(VisualizationData<Visualizer>& v,
+                 std::optional<gc_types::IndexedPalette>& palette,
+                 const QRect& rect,
+                 QPainter& painter)
     -> void
 {
     auto state_count = v.state_count();
     if (state_count == 0)
         return;
 
-    auto& pal = ensure_palette(
-        s.*(d.palette),
+    v.ts_vis_attr.palette = ensure_palette(
+        palette,
         state_count,
-        d.default_palette_color,
-        d.strict_palette_match);
-
-    v.ts_vis_attr.palette = pal;
-    v.ts_vis_attr.x_label = d.x_label;
-    v.ts_vis_attr.y_label = d.y_label;
-    v.ts_vis_attr.title = d.title;
-
-    plot::safe_paint(&v.ts_vis, rect, painter);
-}
-
-auto plot_time_series_metric(const MetricViewData& d,
-                             ImageMetricsView::Storage& s,
-                             PlotVisualizationData& v,
-                             const QRect& rect,
-                             QPainter& painter)
-    -> void
-{
-    auto state_count = v.state_count();
-    if (state_count == 0)
-        return;
-
-    auto& pal = ensure_palette(
-        s.*(d.palette),
-        state_count,
-        d.default_palette_color,
-        d.strict_palette_match);
-
-    v.ts_vis_attr.palette = pal;
-    v.ts_vis_attr.x_label = d.x_label;
-    v.ts_vis_attr.y_label = d.y_label;
-    v.ts_vis_attr.title = d.title;
+        v.default_palette_color,
+        v.strict_palette_match);
 
     plot::safe_paint(&v.ts_vis, rect, painter);
 }
@@ -228,17 +182,16 @@ auto plot_metric(ImageMetricsView::Storage& s,
                  QPainter& painter)
     -> void
 {
-    auto d = metric_view_data(s.type);
     switch (s.type)
     {
     case sieve::ImageMetric::StateHistogram:
-        plot_histogram_metric(d, s, s.state_histogram, rect, painter);
+        plot_metric(s.state_histogram, s.state_palette, rect, painter);
         break;
     case sieve::ImageMetric::EdgeHistogram:
-        plot_histogram_metric(d, s, s.edge_histogram, rect, painter);
+        plot_metric(s.edge_histogram, s.edge_palette, rect, painter);
         break;
     case sieve::ImageMetric::PlateauAvgSize:
-        plot_time_series_metric(d, s, s.plateau_avg_size, rect, painter);
+        plot_metric(s.plateau_avg_size, s.state_palette, rect, painter);
         break;
     }
 }
