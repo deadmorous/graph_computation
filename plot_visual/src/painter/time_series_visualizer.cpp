@@ -15,8 +15,8 @@
 #include "plot_visual/axis.hpp"
 #include "plot_visual/axes_2d.hpp"
 #include "plot_visual/color.hpp"
-#include "plot_visual/linear_coordinate_mapping.hpp"
 #include "plot_visual/layout.hpp"
+#include "plot_visual/linear_coordinate_mapping.hpp"
 
 #include <QPainterPath>
 

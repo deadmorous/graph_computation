@@ -14,6 +14,7 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets OpenGL OpenGLWidgets)
 set(PROJECT_SOURCES
     layout.cpp
     opengl/visualizer.cpp
+    painter/time_series_histogram_visualizer.cpp
     painter/time_series_visualizer.cpp
     painter/visualizer.cpp
 )
