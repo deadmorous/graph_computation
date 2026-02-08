@@ -35,10 +35,3 @@ target_link_libraries(agc_perf-lib
 target_include_directories(agc_perf-lib
 	PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/../include")
-
-if ("${GRAPH_COMPUTATION_LOG_ENGINE}" STREQUAL "GC_LOG_QUILL")
-    target_link_libraries(agc_perf-lib
-        PUBLIC
-            quill::quill)
-endif()
-
