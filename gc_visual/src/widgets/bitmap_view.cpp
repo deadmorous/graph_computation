@@ -10,7 +10,7 @@
 
 #include "gc_visual/widgets/bitmap_view.hpp"
 
-#include "gc_visual/qstr.hpp"
+#include "plot_visual/qstr.hpp"
 
 #include "gc_types/image.hpp"
 
@@ -214,7 +214,7 @@ auto BitmapView::mouseMoveEvent(QMouseEvent *event)
     if (x < img_.width() && y < img_.height())
     {
         auto index = x + y*img_.width();
-        text = format_qstr("index = ", index, "\npos=(", x, ", ", y, ")");
+        text = plot::format_qstr("index = ", index, "\npos=(", x, ", ", y, ")");
     }
 
     QToolTip::showText(globalPos, text, this, {}, 5000);

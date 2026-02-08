@@ -10,7 +10,7 @@
 
 #include "gc_visual/editors/color_editor_widget.hpp"
 
-#include "gc_visual/color.hpp"
+#include "plot_visual/color.hpp"
 
 #include "gc/value.hpp"
 
@@ -60,9 +60,9 @@ auto ColorEditorWidget::paintEvent(QPaintEvent*)
     constexpr auto bg0 = gc_types::ColorComponent(0x54);
     constexpr auto bg1 = gc_types::ColorComponent(0xa8);
 
-    auto c0 = gc_visual::qcolor(gc_types::blend_colors(
+    auto c0 = plot::qcolor(gc_types::blend_colors(
         gc_types::gray_color(bg0), color_));
-    auto c1 = gc_visual::qcolor(gc_types::blend_colors(
+    auto c1 = plot::qcolor(gc_types::blend_colors(
         gc_types::gray_color(bg1), color_));
 
     for (int y=0, iy=0; y<rc.height(); y+=checker_size, ++iy)
@@ -81,7 +81,7 @@ auto ColorEditorWidget::paintEvent(QPaintEvent*)
 auto ColorEditorWidget::mouseReleaseEvent(QMouseEvent*)
     -> void
 {
-    auto color = gc_visual::qcolor(color_);
+    auto color = plot::qcolor(color_);
     auto new_qcolor = QColorDialog::getColor(
         color,
         this,
@@ -89,6 +89,6 @@ auto ColorEditorWidget::mouseReleaseEvent(QMouseEvent*)
         QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog);
     if (!new_qcolor.isValid())
         return;
-    color_ = gc_visual::color(new_qcolor);
+    color_ = plot::color(new_qcolor);
     emit value_changed(color_);
 }

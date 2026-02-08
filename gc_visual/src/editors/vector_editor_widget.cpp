@@ -10,8 +10,8 @@
 
 #include "gc_visual/editors/vector_editor_widget.hpp"
 
-#include "gc_visual/color.hpp"
-#include "gc_visual/qstr.hpp"
+#include "plot_visual/color.hpp"
+#include "plot_visual/qstr.hpp"
 
 #include <QColorDialog>
 #include <QEvent>
@@ -85,14 +85,14 @@ auto VectorEditorWidget::maybe_construct(const gc::Value& v) -> void
         auto color = v.as<gc_types::Color>();
 
         auto new_qcolor = QColorDialog::getColor(
-            gc_visual::qcolor(color),
+            plot::qcolor(color),
             this,
             tr("&Pick color"),
             QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog);
         if (!new_qcolor.isValid())
             return;
-        v = gc_visual::color(new_qcolor);
-        model_->setData(index, format_qstr(v));
+        v = plot::color(new_qcolor);
+        model_->setData(index, plot::format_qstr(v));
     };
 
     connect(view_, &QTableView::activated, this, maybe_edit_color);

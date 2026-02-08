@@ -15,7 +15,7 @@
 #include <QColor>
 
 
-namespace gc_visual {
+namespace plot {
 
 inline auto qcolor(gc_types::Color color)
     -> QColor
@@ -33,4 +33,4 @@ inline auto color(QColor color)
                 gc_types::ColorComponent(color.alpha()));
 }
 
-} // namespace gc_visual
+} // namespace plot

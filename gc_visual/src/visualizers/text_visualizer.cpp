@@ -3,7 +3,7 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2025 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2025-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
@@ -11,7 +11,8 @@
 #include "gc_visual/visualizers/text_visualizer.hpp"
 
 #include "gc_visual/graph_broker.hpp"
-#include "gc_visual/qstr.hpp"
+
+#include "plot_visual/qstr.hpp"
 
 #include <yaml-cpp/yaml.h>
 
@@ -59,13 +60,13 @@ void TextVisualizer::set_value(const gc::Value& v)
     {
         view->clear();
         for (size_t i=0, n=std::min(v.size(), max_lines); i<n; ++i)
-            view->append(format_qstr(i, '\t', v.get(gc::ValuePath{i})));
+            view->append(plot::format_qstr(i, '\t', v.get(gc::ValuePath{i})));
 
         if (v.size() > max_lines)
             view->append("...");
     }
     else
-        view->setText(format_qstr(v));
+        view->setText(plot::format_qstr(v));
 
     auto cursor = view->textCursor();
     cursor.setPosition(0);

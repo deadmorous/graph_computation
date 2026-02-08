@@ -3,7 +3,7 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2024-2025 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2024-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
@@ -11,11 +11,12 @@
 #include "gc_visual/widgets/graph_output_visualizer.hpp"
 
 #include "gc_visual/graph_broker.hpp"
-#include "gc_visual/qstr.hpp"
 #include "gc_visual/visualizers/image_metrics_visualizer.hpp"
 #include "gc_visual/visualizers/image_visualizer.hpp"
 #include "gc_visual/visualizers/text_visualizer.hpp"
 #include "gc_visual/visualizers/visualizer_widget.hpp"
+
+#include "plot_visual/qstr.hpp"
 
 #include "gc/detail/parse_node_port.hpp"
 
@@ -99,7 +100,7 @@ GraphOutputVisualizer::GraphOutputVisualizer(const std::string& type,
 
     auto layout = new QVBoxLayout{};
     setLayout(layout);
-    auto* label = new QLabel(qstr(node_port_str));
+    auto* label = new QLabel(plot::qstr(node_port_str));
     label->setBuddy(visualizer);
     layout->addWidget(label);
     layout->addWidget(visualizer);

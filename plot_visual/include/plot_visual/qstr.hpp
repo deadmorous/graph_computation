@@ -3,7 +3,7 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2024 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2024-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
@@ -15,6 +15,8 @@
 #include <QString>
 
 
+namespace plot {
+
 inline auto qstr(const std::string& s)
     -> QString
 { return QString::fromUtf8(s.c_str()); }
@@ -23,3 +25,5 @@ template <typename... Ts>
 auto format_qstr(Ts&&... args)
     -> QString
 { return qstr(common::format(std::forward<Ts>(args)...)); }
+
+} // namespace plot

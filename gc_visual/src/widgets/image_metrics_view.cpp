@@ -10,9 +10,9 @@
 
 #include "gc_visual/widgets/image_metrics_view.hpp"
 
-#include "gc_visual/color.hpp"
 #include "plot_visual/axis.hpp"
 #include "plot_visual/axes_2d.hpp"
+#include "plot_visual/color.hpp"
 #include "plot_visual/linear_coordinate_mapping.hpp"
 #include "plot_visual/layout.hpp"
 #include "plot_visual/painter/time_series_visualizer.hpp"
@@ -89,7 +89,7 @@ auto ensure_palette(std::optional<gc_types::IndexedPalette>& palette,
     for (int i=0; i<state_count; ++i)
     {
         auto qcolor = color_map_func(i, state_count);
-        pal.color_map.push_back(gc_visual::color(qcolor));
+        pal.color_map.push_back(plot::color(qcolor));
     }
 
     return pal;
@@ -213,7 +213,7 @@ auto plot_histogram_metric(const MetricViewData& d,
         {
             auto p1 = p0 + m[i];
             auto y1 = axes.y.mapping(p1);
-            auto color = gc_visual::qcolor(map_color(pal, i));
+            auto color = plot::qcolor(map_color(pal, i));
             painter.fillRect(x, y0, 1, y1-y0, color);
             p0 = p1;
             y0 = y1;

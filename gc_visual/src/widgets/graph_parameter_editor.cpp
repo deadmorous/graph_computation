@@ -21,7 +21,8 @@
 #include "gc_visual/editors/vector_editor_widget.hpp"
 #include "gc_visual/graph_broker.hpp"
 #include "gc_visual/parse_graph_binding.hpp"
-#include "gc_visual/qstr.hpp"
+
+#include "plot_visual/qstr.hpp"
 
 #include "common/func_ref.hpp"
 #include "common/throw.hpp"
@@ -176,7 +177,7 @@ GraphParameterEditor::GraphParameterEditor(const std::string& type,
     auto layout = new QVBoxLayout{};
     setLayout(layout);
     auto* label =
-        new QLabel(qstr(gc_visual::param_binding_label(binding)));
+        new QLabel(plot::qstr(gc_visual::param_binding_label(binding)));
     label->setBuddy(res_.get());
     layout->addWidget(label);
     layout->addWidget(res_.get());

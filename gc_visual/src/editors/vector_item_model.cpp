@@ -10,10 +10,8 @@
 
 #include "gc_visual/editors/vector_item_model.hpp"
 
-#include "gc_visual/color.hpp"
-#include "gc_visual/qstr.hpp"
-
-#include "gc_types/color.hpp"
+#include "plot_visual/color.hpp"
+#include "plot_visual/qstr.hpp"
 
 #include "gc/parse_simple_value.hpp"
 
@@ -114,7 +112,7 @@ auto VectorItemModel::data(const QModelIndex &index, int role) const
         if (field.type == gc::type_of<gc_types::Color>())
             return "#" + QString::number(v_.get(path).as<gc_types::Color>().v, 16);
 
-        return format_qstr(v_.get(path));
+        return plot::format_qstr(v_.get(path));
     }
     case Qt::EditRole:
     {
@@ -124,7 +122,7 @@ auto VectorItemModel::data(const QModelIndex &index, int role) const
         if (field.type == gc::type_of<gc_types::Color>())
             return "#" + QString::number(v_.get(path).as<gc_types::Color>().v, 16);
 
-        return format_qstr(v_.get(path));
+        return plot::format_qstr(v_.get(path));
     }
     case Qt::BackgroundRole:
     {
@@ -132,7 +130,7 @@ auto VectorItemModel::data(const QModelIndex &index, int role) const
             return {};
 
         if (field.type == gc::type_of<gc_types::Color>())
-            return gc_visual::qcolor(v_.get(path).as<gc_types::Color>());
+            return plot::qcolor(v_.get(path).as<gc_types::Color>());
 
         return {};
     }
@@ -173,7 +171,7 @@ auto VectorItemModel::setData(const QModelIndex &index,
         QMessageBox::critical(
             nullptr,
             tr("Set value"),
-            format_qstr("Failed to set item value: ", e.what()));
+            plot::format_qstr("Failed to set item value: ", e.what()));
         return false;
     }
 }
@@ -196,7 +194,7 @@ auto VectorItemModel::headerData(int section,
         if (path.empty())
             return tr("element");
         else
-            return format_qstr(path).mid(1);    // Skip leading slash
+            return plot::format_qstr(path).mid(1);    // Skip leading slash
     }
     }
     __builtin_unreachable();
