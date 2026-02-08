@@ -3,7 +3,7 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2025 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2025-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
@@ -13,11 +13,11 @@
 #include "sieve/types/i8_range.hpp"
 #include "sieve/types/image_metrics.hpp"
 
-#include "gc_app/types/image.hpp"
+#include "gc_types/image.hpp"
 
 namespace sieve {
 
-auto image_metrics(const gc_app::I8Image& img,
+auto image_metrics(const gc_types::I8Image& img,
                    I8Range state_range,
                    ImageMetricSet metric_types)
     -> ImageMetrics;

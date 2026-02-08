@@ -14,16 +14,16 @@
 #include "plot_visual/axis.hpp"
 #include "plot_visual/axes_2d.hpp"
 #include "plot_visual/linear_coordinate_mapping.hpp"
-#include "plot_visual/live_time_series.hpp"
 #include "plot_visual/layout.hpp"
 #include "plot_visual/painter/time_series_visualizer.hpp"
+
+#include "gc_types/live_time_series.hpp"
 
 #include "gc/value.hpp"
 
 #include <QPainter>
 #include <QPainterPath>
 
-#include <algorithm>
 #include <deque>
 
 
@@ -38,10 +38,10 @@ struct ImageMetricsView::Storage
     size_t buf_size{};
     Buffer buf;
     sieve::ImageMetric type{sieve::ImageMetric::StateHistogram};
-    std::optional<gc_app::IndexedPalette> state_palette;
-    std::optional<gc_app::IndexedPalette> edge_palette;
+    std::optional<gc_types::IndexedPalette> state_palette;
+    std::optional<gc_types::IndexedPalette> edge_palette;
 
-    plot::LiveTimeSeries ts;
+    gc_types::LiveTimeSeries ts;
     plot::TimeSeriesVisualizer::Attributes ts_vis_attr;
     plot::TimeSeriesVisualizer ts_vis{ts, ts_vis_attr};
 };
@@ -71,10 +71,10 @@ auto default_alternating_color(int index, int state_count) -> QColor
         return QColor::fromHslF(1.f, 0.f, p);
 }
 
-auto ensure_palette(std::optional<gc_app::IndexedPalette>& palette,
+auto ensure_palette(std::optional<gc_types::IndexedPalette>& palette,
                     int state_count,
                     auto color_map_func,
-                    bool strict_palette_match) -> gc_app::IndexedPalette&
+                    bool strict_palette_match) -> gc_types::IndexedPalette&
 {
     if (palette)
     {
@@ -105,7 +105,7 @@ struct MetricViewData
 {
     std::vector<double> sieve::ImageMetrics::* metric;
     PlotMode plot_mode;
-    std::optional<gc_app::IndexedPalette> ImageMetricsView::Storage::* palette;
+    std::optional<gc_types::IndexedPalette> ImageMetricsView::Storage::* palette;
     QColor (*default_palette_color)(int index, int state_count);
     bool strict_palette_match;
     QString x_label;
@@ -326,7 +326,7 @@ auto ImageMetricsView::clear() -> void
     update();
 }
 
-auto ImageMetricsView::set_palette(const gc_app::IndexedPalette& palette)
+auto ImageMetricsView::set_palette(const gc_types::IndexedPalette& palette)
     -> void
 {
     storage_->state_palette = palette;

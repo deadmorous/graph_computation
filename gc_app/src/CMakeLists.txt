@@ -28,9 +28,7 @@ add_library(gc_app-lib STATIC
     nodes/visual/image_loader.cpp
     nodes/visual/rect_view.cpp
     nodes/visual/spiral_view.cpp
-    type_registry.cpp
-    types/color.cpp
-    types/palette.cpp)
+    type_registry.cpp)
 
 add_library(gc_app::lib ALIAS gc_app-lib)
 
@@ -50,6 +48,7 @@ endif()
 target_link_libraries(gc_app-lib
     PUBLIC
         gc::lib
+        gc_types::lib
 
     PRIVATE
         PNG::PNG)

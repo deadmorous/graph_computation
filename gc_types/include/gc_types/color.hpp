@@ -3,7 +3,7 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2024-2025 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2024-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
@@ -16,7 +16,7 @@
 #include <cstdint>
 
 
-namespace gc_app {
+namespace gc_types {
 
 GCLIB_STRONG_TYPE(ColorComponent, uint8_t);
 
@@ -108,4 +108,4 @@ inline auto blend_colors(Color back, Color front) noexcept
     return rgba(result_components);
 }
 
-} // namespace gc_app
+} // namespace gc_types

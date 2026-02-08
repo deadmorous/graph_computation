@@ -3,18 +3,18 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2024 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2024-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "gc_app/types/color.hpp"
+#include "gc_types/color.hpp"
 
 #include <algorithm>
 #include <cmath>
 
 
-namespace gc_app {
+namespace gc_types {
 
 namespace {
 
@@ -68,4 +68,4 @@ auto threshold_color(Color color0,
     -> Color
 { return p < threshold ? color0 : color1; }
 
-} // namespace gc_app
+} // namespace gc_types

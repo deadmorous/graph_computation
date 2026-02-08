@@ -3,7 +3,7 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2025 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2025-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
@@ -11,7 +11,7 @@
 #include "sieve/nodes/i8_image_metrics.hpp"
 #include "sieve/types/image_metrics.hpp"
 
-#include "gc_app/types/image.hpp"
+#include "gc_types/image.hpp"
 
 #include "gc/computation_context.hpp"
 #include "gc/computation_node.hpp"
@@ -21,6 +21,7 @@
 #include <gtest/gtest.h>
 
 
+using namespace gc_types;
 using namespace sieve;
 using namespace gc::literals;
 using namespace std::literals;
@@ -45,7 +46,7 @@ TEST(Sieve_Node, ImageMetrics)
     gc::ValueVec outputs(1);
 
     node->default_inputs(inputs);
-    ASSERT_EQ(inputs[0].type(), gc::type_of<gc_app::I8Image>());
+    ASSERT_EQ(inputs[0].type(), gc::type_of<gc_types::I8Image>());
     ASSERT_EQ(inputs[1].type(), gc::type_of<int>());
     ASSERT_EQ(inputs[2].type(), gc::type_of<int>());
     ASSERT_EQ(inputs[3].type(), gc::type_of<ImageMetricSet>());

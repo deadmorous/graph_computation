@@ -14,7 +14,8 @@
 
 #include "gc_app/nodes/cell_aut/generate_cmap.hpp"
 #include "gc_app/types/cell2d_gen_cmap.hpp"
-#include "gc_app/types/palette.hpp"
+
+#include "gc_types/palette.hpp"
 
 #include "gc/computation_context.hpp"
 #include "gc/value.hpp"
@@ -46,7 +47,7 @@ struct Cell2dGenCmapEditorWidget::Storage
     int in_set_value{};
 
     std::shared_ptr<gc::ComputationNode> cmap_generator;
-    std::optional<gc_app::IndexedColorMap> cmap;
+    std::optional<gc_types::IndexedColorMap> cmap;
     std::string cmap_gen_error;
 };
 
@@ -58,7 +59,7 @@ auto generate_cmap(Cell2dGenCmapEditorWidget::Storage& s) -> void
     gc::ValueVec outputs(1);
     try {
         s.cmap_generator->compute_outputs(outputs, inputs, {}, {});
-        s.cmap = outputs[0].as<gc_app::IndexedColorMap>();
+        s.cmap = outputs[0].as<gc_types::IndexedColorMap>();
         s.cmap_gen_error.clear();
     }
     catch(std::exception& e)

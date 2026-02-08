@@ -3,7 +3,7 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2024-2025 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2024-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
@@ -33,7 +33,7 @@ auto ColorEditorWidget::value() const -> gc::Value
 
 auto ColorEditorWidget::check_type(const gc::Type* type) -> TypeCheckResult
 {
-    static auto expected_type = gc::type_of<gc_app::Color>();
+    static auto expected_type = gc::type_of<gc_types::Color>();
 
     if (type == expected_type)
         return { .ok = true };
@@ -46,7 +46,7 @@ auto ColorEditorWidget::check_type(const gc::Type* type) -> TypeCheckResult
 
 void ColorEditorWidget::set_value(const gc::Value& value)
 {
-    color_ = value.as<gc_app::Color>();
+    color_ = value.as<gc_types::Color>();
     update();
 }
 
@@ -57,13 +57,13 @@ auto ColorEditorWidget::paintEvent(QPaintEvent*)
     auto painter = QPainter{this};
     auto rc = rect();
 
-    constexpr auto bg0 = gc_app::ColorComponent(0x54);
-    constexpr auto bg1 = gc_app::ColorComponent(0xa8);
+    constexpr auto bg0 = gc_types::ColorComponent(0x54);
+    constexpr auto bg1 = gc_types::ColorComponent(0xa8);
 
-    auto c0 = gc_visual::qcolor(gc_app::blend_colors(
-        gc_app::gray_color(bg0), color_));
-    auto c1 = gc_visual::qcolor(gc_app::blend_colors(
-        gc_app::gray_color(bg1), color_));
+    auto c0 = gc_visual::qcolor(gc_types::blend_colors(
+        gc_types::gray_color(bg0), color_));
+    auto c1 = gc_visual::qcolor(gc_types::blend_colors(
+        gc_types::gray_color(bg1), color_));
 
     for (int y=0, iy=0; y<rc.height(); y+=checker_size, ++iy)
         for (int x=0, ix=0; x<rc.width(); x+=checker_size, ++ix)

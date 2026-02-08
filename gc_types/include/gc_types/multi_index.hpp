@@ -3,7 +3,7 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2024 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2024-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve.mail.ru>
  */
@@ -19,7 +19,7 @@
 #include <type_traits>
 #include <vector>
 
-namespace gc_app {
+namespace gc_types {
 
 template <typename C, typename T>
 concept MutableIndexedContainerOf =
@@ -145,7 +145,7 @@ auto multi_index_mono_subrange_boundary(std::span<T> result,
 
     auto b = multi_index_mono_range_length(n, result.size()) * k / p;
 
-    ::gc_app::detail::multi_index_mono_subrange_boundary(result, n, b, 0);
+    ::gc_types::detail::multi_index_mono_subrange_boundary(result, n, b, 0);
 }
 
 template <typename T>
@@ -161,4 +161,4 @@ auto multi_index_mono_subrange_boundary(common::Type_Tag<T>,
     return result;
 }
 
-} // namespace gc_app
+} // namespace gc_types

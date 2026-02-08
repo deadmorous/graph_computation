@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve.mail.ru>
  */
 
-#include "plot_visual/live_time_series.hpp"
+#include "gc_types/live_time_series.hpp"
 
 #include "common/ring_buffer.hpp"
 
@@ -17,7 +17,7 @@
 #include <vector>
 
 
-namespace plot {
+namespace gc_types {
 
 class LiveTimeSeries::Impl final
 {
@@ -304,4 +304,4 @@ auto LiveTimeSeries::value_range() const noexcept -> CoordinateRange<double>
 auto LiveTimeSeries::register_checkpoint(Checkpoint& checkpoint) -> void
 { impl_->register_checkpoint(checkpoint); }
 
-} // namespace plot
+} // namespace gc_types

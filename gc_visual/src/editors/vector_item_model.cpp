@@ -3,7 +3,7 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2024 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2024-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
@@ -13,7 +13,7 @@
 #include "gc_visual/color.hpp"
 #include "gc_visual/qstr.hpp"
 
-#include "gc_app/types/color.hpp"
+#include "gc_types/color.hpp"
 
 #include "gc/parse_simple_value.hpp"
 
@@ -111,8 +111,8 @@ auto VectorItemModel::data(const QModelIndex &index, int role) const
         if (static_cast<size_t>(row) == v_.size())
             return tr("<new>");
 
-        if (field.type == gc::type_of<gc_app::Color>())
-            return "#" + QString::number(v_.get(path).as<gc_app::Color>().v, 16);
+        if (field.type == gc::type_of<gc_types::Color>())
+            return "#" + QString::number(v_.get(path).as<gc_types::Color>().v, 16);
 
         return format_qstr(v_.get(path));
     }
@@ -121,8 +121,8 @@ auto VectorItemModel::data(const QModelIndex &index, int role) const
         if (static_cast<size_t>(row) == v_.size())
             return {};
 
-        if (field.type == gc::type_of<gc_app::Color>())
-            return "#" + QString::number(v_.get(path).as<gc_app::Color>().v, 16);
+        if (field.type == gc::type_of<gc_types::Color>())
+            return "#" + QString::number(v_.get(path).as<gc_types::Color>().v, 16);
 
         return format_qstr(v_.get(path));
     }
@@ -131,8 +131,8 @@ auto VectorItemModel::data(const QModelIndex &index, int role) const
         if (static_cast<size_t>(row) == v_.size())
             return {};
 
-        if (field.type == gc::type_of<gc_app::Color>())
-            return gc_visual::qcolor(v_.get(path).as<gc_app::Color>());
+        if (field.type == gc::type_of<gc_types::Color>())
+            return gc_visual::qcolor(v_.get(path).as<gc_types::Color>());
 
         return {};
     }

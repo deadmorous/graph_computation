@@ -3,20 +3,20 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2024-2025 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2024-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
 #pragma once
 
-#include "gc_app/types/color.hpp"
-#include "gc_app/types/uint.hpp"
+#include "gc_types/color.hpp"
+#include "gc_types/uint.hpp"
 
 #include "common/struct_type_macro.hpp"
 
 
-namespace gc_app {
+namespace gc_types {
 
 template <typename T>
 struct Size final
@@ -50,12 +50,12 @@ using U16Image = Image<uint16_t>;
 using I32Image = Image<int32_t>;
 using U32Image = Image<uint32_t>;
 
-} // namespace gc_app
+} // namespace gc_types
 
-GCLIB_REGISTER_CUSTOM_TYPE(gc_app::ColorImage, 1);
-GCLIB_REGISTER_CUSTOM_TYPE(gc_app::I8Image, 2);
-GCLIB_REGISTER_CUSTOM_TYPE(gc_app::U8Image, 3);
-GCLIB_REGISTER_CUSTOM_TYPE(gc_app::I16Image, 4);
-GCLIB_REGISTER_CUSTOM_TYPE(gc_app::U16Image, 5);
-GCLIB_REGISTER_CUSTOM_TYPE(gc_app::I32Image, 6);
-GCLIB_REGISTER_CUSTOM_TYPE(gc_app::U32Image, 7);
+GCLIB_REGISTER_CUSTOM_TYPE(gc_types::ColorImage, 1);
+GCLIB_REGISTER_CUSTOM_TYPE(gc_types::I8Image, 2);
+GCLIB_REGISTER_CUSTOM_TYPE(gc_types::U8Image, 3);
+GCLIB_REGISTER_CUSTOM_TYPE(gc_types::I16Image, 4);
+GCLIB_REGISTER_CUSTOM_TYPE(gc_types::U16Image, 5);
+GCLIB_REGISTER_CUSTOM_TYPE(gc_types::I32Image, 6);
+GCLIB_REGISTER_CUSTOM_TYPE(gc_types::U32Image, 7);

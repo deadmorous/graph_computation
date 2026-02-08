@@ -3,7 +3,7 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2025 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2025-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
@@ -16,7 +16,7 @@
 TEST(Sieve_ImageMetrics, Basic)
 {
     auto check_image_metrics = [](
-        const gc_app::I8Image& image,
+        const gc_types::I8Image& image,
         const sieve::I8Range& range,
         const sieve::ImageMetrics& expected_metrics)
     {
@@ -27,20 +27,20 @@ TEST(Sieve_ImageMetrics, Basic)
         // TODO: Test plateau_avg_size
     };
 
-    constexpr auto empty_image = gc_app::I8Image{};
-    const auto i_4x2_0123_4567 = gc_app::I8Image{
+    constexpr auto empty_image = gc_types::I8Image{};
+    const auto i_4x2_0123_4567 = gc_types::I8Image{
         .size{4, 2},
         .data{0, 1, 2, 3,
               4, 5, 6, 7}};
 
-    const auto i_4x4_checkers_1 = gc_app::I8Image{
+    const auto i_4x4_checkers_1 = gc_types::I8Image{
         .size{4, 4},
         .data{0, 1, 0, 1,
               1, 0, 1, 0,
               0, 1, 0, 1,
               1, 0, 1, 0}};
 
-    const auto i_4x4_checkers_2 = gc_app::I8Image{
+    const auto i_4x4_checkers_2 = gc_types::I8Image{
         .size{4, 4},
         .data{0, 0, 1, 1,
               0, 0, 1, 1,

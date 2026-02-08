@@ -31,7 +31,7 @@ auto test_vec(size_t index, size_t size) -> dvec
 
 } // anonymous namespace
 
-TEST(PlotVisual, LiveTimeSeries_Basic)
+TEST(GcTypes, LiveTimeSeries_Basic)
 {
     constexpr size_t capacity = 5;
     constexpr size_t values_per_frame = 3;
@@ -77,7 +77,7 @@ TEST(PlotVisual, LiveTimeSeries_Basic)
     }
 }
 
-TEST(PlotVisual, LiveTimeSeries_FrameByIndex)
+TEST(GcTypes, LiveTimeSeries_FrameByIndex)
 {
     constexpr size_t capacity = 5;
     constexpr size_t values_per_frame = 3;
@@ -116,7 +116,7 @@ TEST(PlotVisual, LiveTimeSeries_FrameByIndex)
     }
 }
 
-TEST(PlotVisual, LiveTimeSeries_Checkpoints)
+TEST(GcTypes, LiveTimeSeries_Checkpoints)
 {
     constexpr size_t capacity = 3;
     constexpr size_t values_per_frame_1 = 3;

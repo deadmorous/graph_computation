@@ -3,7 +3,7 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2025 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2025-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
@@ -25,7 +25,8 @@ auto normalize(const std::vector<uint32_t>& v, double factor)
     return std::vector<double>(result.begin(), result.end());
 }
 
-auto histogram(const gc_app::I8Image& img, I8Range range) -> std::vector<double>
+auto histogram(const gc_types::I8Image& img, I8Range range)
+    -> std::vector<double>
 {
     int length = range.length();
     if (length == 0)
@@ -51,7 +52,7 @@ auto histogram(const gc_app::I8Image& img, I8Range range) -> std::vector<double>
     return normalize(counters, 1./img.data.size());
 }
 
-auto edge_histogram(const gc_app::I8Image& img, I8Range range)
+auto edge_histogram(const gc_types::I8Image& img, I8Range range)
     -> std::vector<double>
 {
     size_t length = range.length();
@@ -103,7 +104,7 @@ struct ScalarStats final
     int64_t count{};
 };
 
-auto plateau_avg_size(const gc_app::I8Image& img, I8Range range)
+auto plateau_avg_size(const gc_types::I8Image& img, I8Range range)
     -> std::vector<double>
 {
     int length = range.length();
@@ -174,7 +175,7 @@ auto plateau_avg_size(const gc_app::I8Image& img, I8Range range)
 } // anonymous namespace
 
 
-auto image_metrics(const gc_app::I8Image& img,
+auto image_metrics(const gc_types::I8Image& img,
                    I8Range state_range,
                    ImageMetricSet metric_types)
     -> ImageMetrics

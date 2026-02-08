@@ -3,7 +3,7 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2024 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2024-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve.mail.ru>
  */
@@ -12,7 +12,7 @@
 
 #include "gc_visual/qstr.hpp"
 
-#include "gc_app/types/image.hpp"
+#include "gc_types/image.hpp"
 
 #include "common/const.hpp"
 
@@ -24,7 +24,7 @@ namespace {
 
 using BlendMode = BitmapView::BlendMode;
 
-auto to_qimage(const gc_app::ColorImage& image)
+auto to_qimage(const gc_types::ColorImage& image)
     -> QImage
 {
     auto result = QImage{QSize(image.size.width,
@@ -32,7 +32,7 @@ auto to_qimage(const gc_app::ColorImage& image)
                          QImage::Format_ARGB32};
 
     const auto* src = image.data.data();
-    for (gc_app::Uint row=0; row<image.size.height; ++row)
+    for (gc_types::Uint row=0; row<image.size.height; ++row)
     {
         auto* dst = result.scanLine(row);
         memcpy(dst, src, image.size.width*sizeof(uint32_t));
@@ -120,7 +120,7 @@ auto blend_impl(common::Const_Tag<mode> mode_tag,
     auto width = static_cast<size_t>(size.width());
     auto height = static_cast<size_t>(size.height());
     auto f = Rational{factor};
-    for (gc_app::Uint row=0; row<height; ++row)
+    for (gc_types::Uint row=0; row<height; ++row)
     {
         const auto* src0 = reinterpret_cast<const QRgb*>(img0.scanLine(row));
         const auto* src1 = reinterpret_cast<const QRgb*>(img1.scanLine(row));
@@ -172,7 +172,7 @@ auto BitmapView::set_image(const gc::Value& image)
 {
     img_ = blend(
         img_,
-        to_qimage(image.as<gc_app::ColorImage>()),
+        to_qimage(image.as<gc_types::ColorImage>()),
         blend_mode_,
         blend_factor_);
     resize(img_.size() * scale_);

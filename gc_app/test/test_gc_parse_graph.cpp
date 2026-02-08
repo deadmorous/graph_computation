@@ -3,14 +3,15 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2024-2025 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2024-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
 #include "gc_app/node_registry.hpp"
 #include "gc_app/type_registry.hpp"
-#include "gc_app/types/image.hpp"
+
+#include "gc_types/image.hpp"
 
 #include "gc/computation_context.hpp"
 #include "gc/computation_node_registry.hpp"
@@ -24,6 +25,7 @@
 #include <gtest/gtest.h>
 
 
+using namespace gc_types;
 using namespace gc::literals;
 
 TEST(GcApp, ParseGraph)
@@ -114,7 +116,7 @@ inputs:
     GCLIB_DIAGNOSTIC_PUSH();
     GCLIB_DISABLE_DANGLING_REFERENCE();
     const auto& image =
-        group(result.outputs, 3_gc_n)[0_gc_o].as<gc_app::ColorImage>();
+        group(result.outputs, 3_gc_n)[0_gc_o].as<gc_types::ColorImage>();
     GCLIB_DIAGNOSTIC_POP();
 
     EXPECT_EQ(image.size.width, 600);

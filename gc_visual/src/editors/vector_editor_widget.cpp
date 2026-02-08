@@ -3,7 +3,7 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2024-2025 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2024-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
@@ -79,10 +79,10 @@ auto VectorEditorWidget::maybe_construct(const gc::Value& v) -> void
             return;
         auto path = model_->path(index);
         auto v = model_->value().get(path);
-        if (v.type() != gc::type_of<gc_app::Color>())
+        if (v.type() != gc::type_of<gc_types::Color>())
             return;
 
-        auto color = v.as<gc_app::Color>();
+        auto color = v.as<gc_types::Color>();
 
         auto new_qcolor = QColorDialog::getColor(
             gc_visual::qcolor(color),

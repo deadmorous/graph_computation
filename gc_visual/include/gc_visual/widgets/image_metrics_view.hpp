@@ -12,7 +12,7 @@
 
 #include "sieve/types/image_metrics.hpp"
 
-#include "gc_app/types/palette.hpp"
+#include "gc_types/palette.hpp"
 
 #include "gc/value_fwd.hpp"
 
@@ -34,7 +34,7 @@ public:
 public slots:
     auto add_image_metrics(const sieve::ImageMetrics& image_metrics) -> void;
     auto clear() -> void;
-    auto set_palette(const gc_app::IndexedPalette&) -> void;
+    auto set_palette(const gc_types::IndexedPalette&) -> void;
     auto set_type(sieve::ImageMetric) -> void;
     auto set_type(const gc::Value& v) -> void;
 

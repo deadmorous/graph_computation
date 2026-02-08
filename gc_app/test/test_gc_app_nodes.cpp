@@ -3,7 +3,7 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2024 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2024-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
@@ -30,10 +30,11 @@
 #include "gc_app/types/cell2d_gen_cmap.hpp"
 #include "gc_app/types/cell2d_gen_rules.hpp"
 #include "gc_app/types/cell2d_rules.hpp"
-#include "gc_app/types/image.hpp"
-#include "gc_app/types/palette.hpp"
-#include "gc_app/types/uint_vec.hpp"
 #include "gc_app/type_registry.hpp"
+
+#include "gc_types/image.hpp"
+#include "gc_types/palette.hpp"
+#include "gc_types/uint_vec.hpp"
 
 #include "gc/computation_context.hpp"
 #include "gc/computation_node.hpp"
@@ -45,6 +46,7 @@
 
 
 using namespace gc_app;
+using namespace gc_types;
 using namespace gc::literals;
 using namespace std::literals;
 
@@ -889,7 +891,7 @@ TEST(GcApp_Node, UintSizeNode)
     ASSERT_EQ(inputs[0].type(), gc::type_of<Uint>());
     ASSERT_EQ(inputs[1].type(), gc::type_of<Uint>());
 
-    auto expected_size = gc_app::UintSize{ 800, 600 };
+    auto expected_size = gc_types::UintSize{ 800, 600 };
     inputs[0] = expected_size.width;
     inputs[1] = expected_size.height;
 

@@ -3,7 +3,7 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2025 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2025-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve.mail.ru>
  */
@@ -43,7 +43,7 @@ public:
         -> void override
     {
         assert(result.size() == 4_gc_ic);
-        result[0_gc_i] = gc_app::I8Image{};
+        result[0_gc_i] = gc_types::I8Image{};
         result[1_gc_i] = 0;
         result[2_gc_i] = 2;
         result[3_gc_i] = ImageMetricSet::full();
@@ -58,7 +58,7 @@ public:
     {
         assert(inputs.size() == 4_gc_ic);
         assert(result.size() == 1_gc_oc);
-        const auto& image = inputs[0_gc_i].as<gc_app::I8Image>();
+        const auto& image = inputs[0_gc_i].as<gc_types::I8Image>();
         auto min_state = inputs[1_gc_i].convert_to<int>();
         auto state_count = inputs[2_gc_i].convert_to<int>();
         auto metric_types = inputs[3_gc_i].as<ImageMetricSet>();

@@ -17,7 +17,7 @@
 #include <type_traits>
 
 
-namespace plot {
+namespace gc_types {
 
 // NOTE: We deliberately ignore any overflow issues here
 template <typename T>
@@ -93,4 +93,4 @@ constexpr auto compute_coordinate_range(std::span<const T> values) noexcept
         { return accum_coordinate_range(acc, value); });
 }
 
-} // namespace plot
+} // namespace gc_types

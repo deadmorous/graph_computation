@@ -3,15 +3,15 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2024 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2024-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "gc_app/types/palette.hpp"
+#include "gc_types/palette.hpp"
 
 
-namespace gc_app {
+namespace gc_types {
 
 auto map_color(const IndexedPalette& palette, uint32_t value)
     -> Color
@@ -51,4 +51,4 @@ auto average_color(const IndexedPalette& palette, bool with_overflow)
                 ColorComponent(avg_rgba[3]/count));
 }
 
-} // namespace gc_app
+} // namespace gc_types

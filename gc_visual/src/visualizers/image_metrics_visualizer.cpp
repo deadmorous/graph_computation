@@ -64,7 +64,7 @@ ImageMetricsVisualizer::ImageMetricsVisualizer(GraphBroker* broker,
             gc_visual::parse_param_binding(binding_resolver, binding_str);
 
         auto value = broker->get_parameter(palette_binding.param_spec);
-        view->set_palette(value.as<gc_app::IndexedPalette>());
+        view->set_palette(value.as<gc_types::IndexedPalette>());
 
         auto param_spec = palette_binding.param_spec;
         if (holds_alternative<gc::NodeOutputSpec>(param_spec.io))
@@ -77,7 +77,7 @@ ImageMetricsVisualizer::ImageMetricsVisualizer(GraphBroker* broker,
                     if (output != updated)
                         return;
                     auto updated_value = broker->get_parameter(param_spec);
-                    view->set_palette(updated_value.as<gc_app::IndexedPalette>());
+                    view->set_palette(updated_value.as<gc_types::IndexedPalette>());
                 });
         }
     }

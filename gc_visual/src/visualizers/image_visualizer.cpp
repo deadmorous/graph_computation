@@ -3,7 +3,7 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2025 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2025-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
@@ -14,7 +14,7 @@
 #include "gc_visual/video_recorder.hpp"
 #include "gc_visual/widgets/bitmap_view.hpp"
 
-#include "gc_app/types/image.hpp"
+#include "gc_types/image.hpp"
 
 #include <yaml-cpp/yaml.h>
 
@@ -248,7 +248,7 @@ ImageVisualizer::~ImageVisualizer() = default;
 
 auto ImageVisualizer::check_type(const gc::Type* type) -> TypeCheckResult
 {
-    static auto expected_type = gc::type_of<gc_app::ColorImage>();
+    static auto expected_type = gc::type_of<gc_types::ColorImage>();
 
     if (type == expected_type)
         return { .ok = true };

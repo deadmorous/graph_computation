@@ -8,7 +8,6 @@ add_executable(
     gc-app-test
     main.cpp
     test_gc_app_nodes.cpp
-    test_gc_other.cpp
     test_gc_parse_graph.cpp)
 
 target_link_libraries(

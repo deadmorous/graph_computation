@@ -3,16 +3,16 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2025 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2025-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
 #include "gc_app/nodes/visual/image_loader.hpp"
 
-#include "gc_app/types/image.hpp"
-#include "gc_app/types/palette.hpp"
-#include "gc_app/types/uint_vec.hpp"
+#include "gc_types/image.hpp"
+#include "gc_types/palette.hpp"
+#include "gc_types/uint_vec.hpp"
 
 #include "gc/computation_node.hpp"
 #include "gc/expect_n_node_args.hpp"
@@ -31,6 +31,8 @@ using namespace std::literals;
 using namespace gc::literals;
 
 namespace gc_app::visual {
+
+using namespace gc_types;
 
 namespace {
 

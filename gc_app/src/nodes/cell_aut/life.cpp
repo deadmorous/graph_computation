@@ -3,15 +3,15 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2025 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2025-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve.mail.ru>
  */
 
 #include "gc_app/nodes/cell_aut/life.hpp"
 
-#include "gc_app/types/image.hpp"
-#include "gc_app/types/uint.hpp"
+#include "gc_types/image.hpp"
+#include "gc_types/uint.hpp"
 
 #include "gc/expect_n_node_args.hpp"
 #include "gc/computation_node.hpp"
@@ -26,6 +26,8 @@ using namespace std::string_view_literals;
 using namespace gc::literals;
 
 namespace gc_app::cell_aut {
+
+using namespace gc_types;
 
 class Life final :
     public gc::ComputationNode

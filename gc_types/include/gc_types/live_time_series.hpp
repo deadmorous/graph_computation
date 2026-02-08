@@ -10,9 +10,9 @@
 
 #pragma once
 
-#include "plot_visual/live_time_series_fwd.hpp"
+#include "gc_types/live_time_series_fwd.hpp"
 
-#include "plot_visual/coordinate_range.hpp"
+#include "gc_types/coordinate_range.hpp"
 
 #include "common/checkpoint.hpp"
 #include "common/fast_pimpl.hpp"
@@ -22,7 +22,7 @@
 #include <span>
 
 
-namespace plot {
+namespace gc_types {
 
 class LiveTimeSeries final
 {
@@ -146,4 +146,4 @@ private:
     std::unique_ptr<Impl> impl_;
 };
 
-} // namespace plot
+} // namespace gc_types

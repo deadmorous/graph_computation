@@ -3,12 +3,12 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2024 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2024-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve.mail.ru>
  */
 
-#include "gc_app/types/multi_index.hpp"
+#include "gc_types/multi_index.hpp"
 
 // #include "common/format.hpp"
 
@@ -17,9 +17,9 @@
 #include <array>
 
 
-using namespace gc_app;
+using namespace gc_types;
 
-TEST(GcApp, MultiIndex)
+TEST(GcTypes, MultiIndex)
 {
     auto check_inc = [](auto& index, auto n, bool b, auto... i)
     {
@@ -49,7 +49,7 @@ TEST(GcApp, MultiIndex)
     check_inc(index3, 2, false, 2, 0, 0);
 }
 
-TEST(GcApp, MultiIndexMono)
+TEST(GcTypes, MultiIndexMono)
 {
     auto check_inc = [](auto& index, auto n, bool b, auto... i)
     {
@@ -72,7 +72,7 @@ TEST(GcApp, MultiIndexMono)
     check_inc(index3, 2, false, 2, 2, 2);
 }
 
-TEST(GcApp, MultiIndexMonoSubranges)
+TEST(GcTypes, MultiIndexMonoSubranges)
 {
     using MI = std::vector<uint32_t>;
 
@@ -90,12 +90,12 @@ TEST(GcApp, MultiIndexMonoSubranges)
 
     auto check_subranges = [&](uint32_t n, uint32_t s, uint32_t p)
     {
-        auto range_length = gc_app::multi_index_mono_range_length(n, s);
+        auto range_length = gc_types::multi_index_mono_range_length(n, s);
 
         std::vector<std::vector<uint32_t>> srb;
         for (uint32_t k=0; k<=p; ++k)
             srb.push_back(
-                gc_app::multi_index_mono_subrange_boundary(
+                gc_types::multi_index_mono_subrange_boundary(
                     common::Type<uint32_t>, s, n, k, p));
 
         auto subrange_length_sum = uint64_t{};

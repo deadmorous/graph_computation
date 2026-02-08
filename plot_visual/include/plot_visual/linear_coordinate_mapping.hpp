@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "plot_visual/coordinate_range.hpp"
+#include "gc_types/coordinate_range.hpp"
 
 #include <cmath>
 #include <span>
@@ -24,8 +24,8 @@ struct LinearCoordinateMapping final
     using From = From_;
     using To = To_;
 
-    CoordinateRange<From> from;
-    CoordinateRange<To> to;
+    gc_types::CoordinateRange<From> from;
+    gc_types::CoordinateRange<To> to;
 
     auto operator()(From x) const -> To
     {

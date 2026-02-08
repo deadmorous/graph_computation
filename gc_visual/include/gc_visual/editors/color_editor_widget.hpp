@@ -3,7 +3,7 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2024-2025 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2024-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
@@ -12,7 +12,7 @@
 
 #include "gc_visual/editors/parameter_editor_widget.hpp"
 
-#include "gc_app/types/color.hpp"
+#include "gc_types/color.hpp"
 
 
 class ColorEditorWidget final :
@@ -38,5 +38,5 @@ protected:
         -> void override;
 
 private:
-    gc_app::Color color_;
+    gc_types::Color color_;
 };

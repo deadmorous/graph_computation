@@ -10,8 +10,8 @@
 
 #pragma once
 
-namespace plot {
+namespace gc_types {
 
 class LiveTimeSeries;
 
-} // namespace plot
+} // namespace gc_types

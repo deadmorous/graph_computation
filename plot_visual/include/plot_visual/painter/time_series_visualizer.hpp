@@ -10,10 +10,10 @@
 
 #pragma once
 
-#include "plot_visual/live_time_series_fwd.hpp"
 #include "plot_visual/painter/visualizer.hpp"
 
-#include "gc_app/types/palette.hpp"
+#include "gc_types/live_time_series_fwd.hpp"
+#include "gc_types/palette.hpp"
 
 namespace plot {
 
@@ -22,7 +22,7 @@ class TimeSeriesVisualizer final : public PainterVisualizer
 public:
     struct Attributes final
     {
-        gc_app::IndexedPalette palette;
+        gc_types::IndexedPalette palette;
         QString x_label;
         QString y_label;
         QString title;
@@ -31,12 +31,12 @@ public:
     // NOTE
     // Accept non-const LiveTimeSeries& because of checkpointing
     // Accept non-const Attributes& to avoid passing a temporary
-    TimeSeriesVisualizer(LiveTimeSeries&, Attributes& attributes);
+    TimeSeriesVisualizer(gc_types::LiveTimeSeries&, Attributes& attributes);
 
     auto paint(const QRect&, QPainter&) -> void override;
 
 private:
-    LiveTimeSeries* time_series_;
+    gc_types::LiveTimeSeries* time_series_;
     const Attributes* attributes_;
 };
 

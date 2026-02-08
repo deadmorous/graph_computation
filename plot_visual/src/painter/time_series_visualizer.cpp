@@ -10,9 +10,8 @@
 
 #include "plot_visual/painter/time_series_visualizer.hpp"
 
-#include "plot_visual/live_time_series.hpp"
+#include "gc_types/live_time_series.hpp"
 
-// #include "gc_visual/color.hpp"
 #include "plot_visual/axis.hpp"
 #include "plot_visual/axes_2d.hpp"
 #include "plot_visual/linear_coordinate_mapping.hpp"
@@ -20,14 +19,14 @@
 
 #include <QPainterPath>
 
-// #include <cassert>
-
 namespace plot {
+
+using namespace gc_types;
 
 namespace {
 
 // TODO: Move to somewhere; duplicates gc_visual::qcolor
-inline auto qcolor(gc_app::Color color) -> QColor
+inline auto qcolor(gc_types::Color color) -> QColor
 {
     auto [r, g, b, a] = r_g_b_a(color);
     return { r.v, g.v, b.v, a.v };

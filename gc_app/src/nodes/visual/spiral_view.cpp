@@ -3,16 +3,16 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2024 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2024-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
 #include "gc_app/nodes/visual/rect_view.hpp"
 
-#include "gc_app/types/image.hpp"
-#include "gc_app/types/palette.hpp"
-#include "gc_app/types/uint_vec.hpp"
+#include "gc_types/image.hpp"
+#include "gc_types/palette.hpp"
+#include "gc_types/uint_vec.hpp"
 
 #include "gc/expect_n_node_args.hpp"
 #include "gc/computation_node.hpp"
@@ -26,6 +26,8 @@ using namespace std::string_view_literals;
 using namespace gc::literals;
 
 namespace gc_app::visual {
+
+using namespace gc_types;
 
 class SpiralView final :
     public gc::ComputationNode

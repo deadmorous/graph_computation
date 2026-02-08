@@ -3,14 +3,14 @@
  *
  * TODO: More documentation here
  *
- * Copyright (C) 2024-2025 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2024-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
 #pragma once
 
-#include "gc_app/types/color.hpp"
+#include "gc_types/color.hpp"
 
 #include "common/struct_type_macro.hpp"
 #include "common/type.hpp"
@@ -21,7 +21,7 @@
 #include <tuple>
 #include <vector>
 
-namespace gc_app {
+namespace gc_types {
 
 using IndexedColorMap =
     std::vector<Color>;
@@ -41,4 +41,4 @@ auto map_color(const IndexedPalette& palette, uint32_t value)
 auto average_color(const IndexedPalette& palette, bool with_overflow)
     -> Color;
 
-} // namespace gc_app
+} // namespace gc_types
