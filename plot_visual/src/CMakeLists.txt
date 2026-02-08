@@ -14,6 +14,9 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets OpenGL OpenGLWidgets)
 set(PROJECT_SOURCES
     layout.cpp
     live_time_series.cpp
+    opengl/visualizer.cpp
+    painter/time_series_visualizer.cpp
+    painter/visualizer.cpp
 )
 
 add_library(plot_visual-lib STATIC
@@ -27,6 +30,7 @@ target_include_directories(plot_visual-lib
 target_link_libraries(plot_visual-lib
     PUBLIC
         gc::lib
+        gc_app::lib     # gc_app::IndexedPalette
         Qt${QT_VERSION_MAJOR}::Core
         Qt${QT_VERSION_MAJOR}::Gui
         Qt${QT_VERSION_MAJOR}::Widgets

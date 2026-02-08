@@ -14,7 +14,9 @@
 #include "plot_visual/axis.hpp"
 #include "plot_visual/axes_2d.hpp"
 #include "plot_visual/linear_coordinate_mapping.hpp"
+#include "plot_visual/live_time_series.hpp"
 #include "plot_visual/layout.hpp"
+#include "plot_visual/painter/time_series_visualizer.hpp"
 
 #include "gc/value.hpp"
 
@@ -29,11 +31,19 @@ struct ImageMetricsView::Storage
 {
     using Buffer = std::deque<sieve::ImageMetrics>;
 
+    explicit Storage(size_t buf_size) :
+        buf_size{ buf_size }
+    {}
+
     size_t buf_size{};
     Buffer buf;
     sieve::ImageMetric type{sieve::ImageMetric::StateHistogram};
     std::optional<gc_app::IndexedPalette> state_palette;
     std::optional<gc_app::IndexedPalette> edge_palette;
+
+    plot::LiveTimeSeries ts;
+    plot::TimeSeriesVisualizer::Attributes ts_vis_attr;
+    plot::TimeSeriesVisualizer ts_vis{ts, ts_vis_attr};
 };
 
 namespace {
@@ -245,53 +255,12 @@ auto plot_time_series_metric(const MetricViewData& d,
                              QPainter& painter)
     -> void
 {
-    int generation_count = s.buf.size();
-
-    if (generation_count == 0)
+    auto state_count = [&]{
+        auto frames = s.ts.frames();
+        return frames.empty() ? 0ull : frames.front().values.size();
+    }();
+    if (state_count == 0)
         return;
-
-    using CoordMap = plot::LinearCoordinateMapping<double, int>;
-    using Axis = plot::Axis<CoordMap>;
-    using Axes = plot::Axes2d<Axis, Axis>;
-
-    auto metric = [&](size_t index) -> const std::vector<double>&
-    {
-        return s.buf[index].*(d.metric);
-    };
-
-    auto state_count = metric(generation_count-1).size();
-
-    auto y_max = [&]{
-        auto gen_range = common::index_range<size_t>(generation_count);
-        return std::accumulate(
-            gen_range.begin(), gen_range.end(), 0.,
-            [&](double acc, size_t generation){
-                const auto& m = metric(generation);
-                auto n = std::min(m.size(), state_count);
-                auto x = *std::max_element(m.begin(), m.begin()+n);
-                return std::max(acc, x);
-            });
-        }();
-
-    auto axes_painter = plot::AxesPainter{
-        Axes{
-            .x = {
-                .mapping{
-                    .from{
-                        .begin = -static_cast<double>(s.buf_size),
-                        .end = 0}},
-                .label = d.x_label },
-            .y = {
-                .mapping{ .from = { .begin = 0., .end = y_max }},
-                .label = d.y_label },
-            .title = d.title
-        },
-        rect
-    };
-    const auto& axes = axes_painter.axes();
-
-    [[maybe_unused]]
-    auto rc = axes_painter.layout().rect(plot::layout::central);
 
     auto& pal = ensure_palette(
         s.*(d.palette),
@@ -299,50 +268,15 @@ auto plot_time_series_metric(const MetricViewData& d,
         d.default_palette_color,
         d.strict_palette_match);
 
-    painter.setRenderHint(QPainter::Antialiasing);
+    s.ts_vis_attr.palette = pal;
+    s.ts_vis_attr.x_label = d.x_label;
+    s.ts_vis_attr.y_label = d.y_label;
+    s.ts_vis_attr.title = d.title;
 
-    for (size_t state=0; state<state_count; ++state)
-    {
-        auto path = QPainterPath{};
-        auto path_started = false;
-        for (int generation=0; generation<generation_count; ++generation)
-        {
-            const auto& m = metric(generation);
-            if (m.size() <= state)
-                continue;
-            auto px = axes.x.mapping(generation - generation_count);
-            auto py = axes.y.mapping(m[state]);
-            if (path_started)
-                path.lineTo(px, py);
-            else
-            {
-                path.moveTo(px, py);
-                path_started = true;
-            }
-        }
-        if (!path.isEmpty())
-        {
-            constexpr int pen_width = 2;
-            auto pen_color = gc_visual::qcolor(map_color(pal, state));
-            auto pen_style = Qt::SolidLine;
-            auto lightness = pen_color.lightnessF();
-            constexpr auto lightness_threshold = 0.9;   // TODO better
-            if (lightness > lightness_threshold)
-            {
-                lightness /= 2;
-                pen_style = Qt::DashLine;
-                pen_color = QColor::fromHslF(
-                    pen_color.hslHue(), pen_color.hslSaturationF(), lightness);
-            }
-            auto pen =
-                QPen(pen_color, pen_width, pen_style);
-            painter.strokePath(path, pen);
-        }
-    }
-
-    axes_painter.draw(painter);
+    plot::safe_paint(&s.ts_vis, rect, painter);
 }
 
+[[maybe_unused]]
 auto plot_metric(ImageMetricsView::Storage& s,
                  const QRect& rect,
                  QPainter& painter)
@@ -364,7 +298,7 @@ auto plot_metric(ImageMetricsView::Storage& s,
 
 ImageMetricsView::ImageMetricsView(size_t buf_size, QWidget* parent):
     QWidget{ parent },
-    storage_{std::make_unique<Storage>(Storage{.buf_size = buf_size})}
+    storage_{std::make_unique<Storage>(buf_size)}
 {
 }
 
@@ -382,6 +316,7 @@ auto ImageMetricsView::add_image_metrics(
     if (buf.size() == storage_->buf_size)
         buf.pop_front();
     buf.push_back(image_metrics);
+    storage_->ts.add(image_metrics.plateau_avg_size);
     update();
 }
 
