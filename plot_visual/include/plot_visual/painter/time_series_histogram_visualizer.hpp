@@ -15,6 +15,9 @@
 #include "gc_types/live_time_series_fwd.hpp"
 #include "gc_types/palette.hpp"
 
+#include <memory>
+
+
 namespace plot {
 
 class TimeSeriesHistogramVisualizer final : public PainterVisualizer
@@ -28,6 +31,8 @@ public:
         QString title;
     };
 
+    ~TimeSeriesHistogramVisualizer();
+
     // NOTE
     // Accept non-const LiveTimeSeries& because of checkpointing
     // Accept non-const Attributes& to avoid passing a temporary
@@ -37,8 +42,8 @@ public:
     auto paint(const QRect&, QPainter&) -> void override;
 
 private:
-    gc_types::LiveTimeSeries* time_series_;
-    const Attributes* attributes_;
+    struct Storage;
+    std::unique_ptr<Storage> storage_;
 };
 
 } // namespace plot

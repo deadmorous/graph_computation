@@ -18,30 +18,55 @@
 #include "plot_visual/layout.hpp"
 #include "plot_visual/linear_coordinate_mapping.hpp"
 
+#include <QPainter>
+#include <QPixmap>
+
 namespace plot {
 
 using namespace gc_types;
 
+struct TimeSeriesHistogramVisualizer::Storage
+{
+    Storage(LiveTimeSeries& time_series, Attributes& attributes):
+        time_series{time_series},
+        attributes{attributes}
+    {
+        time_series.register_checkpoint(checkpoint);
+    }
+
+    LiveTimeSeries& time_series;
+    const Attributes& attributes;
+    LiveTimeSeries::Checkpoint checkpoint;
+
+    QPixmap cache_image;
+    int cache_end;
+    bool cache_wrapped;
+};
+
+TimeSeriesHistogramVisualizer::~TimeSeriesHistogramVisualizer() = default;
 
 TimeSeriesHistogramVisualizer::TimeSeriesHistogramVisualizer(
         LiveTimeSeries& time_series,
         Attributes& attributes) :
-    time_series_{&time_series},
-    attributes_{&attributes}
+    storage_{std::make_unique<Storage>(time_series, attributes) }
 {}
 
 auto TimeSeriesHistogramVisualizer::paint(
     const QRect& rect, QPainter& painter) -> void
 {
-    auto frames = time_series_->frames();
+    auto& s = *storage_;
+
+    auto frames = s.time_series.frames();
     if (frames.empty())
         return;
 
-    using CoordMap = plot::LinearCoordinateMapping<double, int>;
-    using Axis = plot::Axis<CoordMap>;
-    using Axes = plot::Axes2d<Axis, Axis>;
+    using XCoordMap = plot::LinearCoordinateMapping<int, int>;
+    using YCoordMap = plot::LinearCoordinateMapping<double, int>;
+    using XAxis = plot::Axis<XCoordMap>;
+    using YAxis = plot::Axis<YCoordMap>;
+    using Axes = plot::Axes2d<XAxis, YAxis>;
 
-    auto frame_capacity = time_series_->frame_capacity();
+    int frame_capacity = s.time_series.frame_capacity();
     int frame_count = frames.size();    // NOTE: Signedness is important
 
     auto axes_painter = plot::AxesPainter{
@@ -49,13 +74,13 @@ auto TimeSeriesHistogramVisualizer::paint(
             .x = {
                 .mapping{
                     .from{
-                        .begin = -static_cast<double>(frame_capacity),
+                        .begin = -frame_capacity,
                         .end = 0}},
-                .label = attributes_->x_label },
+                .label = s.attributes.x_label },
             .y = {
                 .mapping{ .from = { .begin = 0., .end = 1. }},
-                .label = attributes_->y_label },
-            .title = attributes_->title
+                .label = s.attributes.y_label },
+            .title = s.attributes.title
         },
         rect
     };
@@ -63,50 +88,100 @@ auto TimeSeriesHistogramVisualizer::paint(
 
     auto rc = axes_painter.layout().rect(plot::layout::central);
 
-    auto draw_metric = [&](int x, int index)
+    auto frames_added = s.checkpoint.sync().frames_added;
+
+    bool cache_valid =
+        !s.cache_image.isNull() && s.cache_image.size() == rc.size();
+
+    if (!cache_valid)
     {
-        if (index >= frame_count)
+        s.cache_image = QPixmap{ rc.size() };
+        s.cache_image.fill();
+        s.cache_end = 0;
+        s.cache_wrapped = false;
+    }
+
+    auto cache_painter = QPainter{ &s.cache_image };
+
+    auto draw_metric = [&](int x, int width, int index)
+    {
+        if (index < 0 || index >= frame_count)
             return;
         const auto& frame = frames[index];
 
         auto p0 = double{0};
-        auto y0 = axes.y.mapping(p0);
+        auto y0 = axes.y.mapping(p0) - rc.top();
         auto n = frame.values.size();
+        std::ignore = x;
+        x = s.cache_end;
+        if (x >= rc.width())
+            x = 0;
+        s.cache_end = x + width;
+        if (s.cache_end >= rc.width())
+        {
+            s.cache_end = 0;
+            s.cache_wrapped = true;
+        }
+
         for (size_t i=0; i<n; ++i)
         {
             auto p1 = p0 + frame.values[i];
-            auto y1 = axes.y.mapping(p1);
-            auto color = plot::qcolor(map_color(attributes_->palette, i));
-            painter.fillRect(x, y0, 1, y1-y0, color);
+            auto y1 = axes.y.mapping(p1) - rc.top();;
+            auto color = plot::qcolor(map_color(s.attributes.palette, i));
+            cache_painter.fillRect(x, y0, width, y1-y0, color);
             p0 = p1;
             y0 = y1;
         }
     };
 
-    auto draw_interpolated_metric = [&](int x, double generation)
-    {
-        auto index_plus_t = frame_count - 1 + generation;
-        if (index_plus_t < 0)
-            return;
+    int first_index = cache_valid && frames_added.has_value()
+        ? frame_count - static_cast<int>(frames_added.value())
+        : 0;
 
-        auto i0 = static_cast<int>(index_plus_t);
-        auto t = index_plus_t - i0;
-        constexpr auto tol = 0.01;
-        if (t < tol)
+    if (frame_capacity <= rc.width())
+    {
+        for (int index=first_index; index<frame_count; ++index)
         {
-            draw_metric(x, i0);
-            return;
+            auto generation = index - frame_count;
+            auto x0 = axes.x.mapping(generation);
+            auto x1 = axes.x.mapping(generation+1);
+            draw_metric(x0, x1-x0, index);
         }
-
-        // TODO
-        draw_metric(x, i0);
-        return;
-    };
-
-    auto x_imap = axes.x.mapping.inverse();
-    for (int x=rc.left(), right=rc.right(); x<right; ++x)
+    }
+    else
     {
-        draw_interpolated_metric(x, x_imap(x));
+        auto x_imap = axes.x.mapping.inverse();
+        for (int index=first_index; index<frame_count;)
+        {
+            auto generation = index - frame_count;
+            auto x = axes.x.mapping(generation);
+            draw_metric(x, 1, index);
+            auto next_generation = std::max(generation+1, x_imap(x+1));
+            index = next_generation + frame_count;
+        }
+    }
+    cache_painter.end();
+
+    if (s.cache_wrapped)
+    {
+        int cache_head_width = s.cache_end;
+        int cache_tail_x = cache_head_width;
+        int cache_tail_width = rc.width() - s.cache_end;
+        if (cache_tail_width > 0)
+            painter.drawPixmap(
+                rc.topLeft(), s.cache_image,
+                QRect{ cache_tail_x, 0, cache_tail_width, rc.height() });
+        if (cache_head_width > 0)
+            painter.drawPixmap(
+                QPoint{ rc.left() + cache_tail_width, rc.top() }, s.cache_image,
+                QRect{ 0, 0, cache_head_width, rc.height() });
+    }
+    else
+    {
+        int cache_head_width = s.cache_end;
+        painter.drawPixmap(
+            QPoint{ rc.right() - cache_head_width, rc.top() }, s.cache_image,
+            QRect{ 0, 0, cache_head_width, rc.height() });
     }
 
     axes_painter.draw(painter);
