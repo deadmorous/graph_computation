@@ -60,6 +60,8 @@ struct LinearCoordinateMapping final
 
         auto try_unit = [&](From unit) -> std::span<From>
         {
+            if (unit == 0)
+                return {};
             if (from.begin < from.end)
             {
                 auto begin = ceil(from.begin, unit);
