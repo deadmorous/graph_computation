@@ -39,8 +39,9 @@ struct TimeSeriesHistogramVisualizer::Storage
     LiveTimeSeries::Checkpoint checkpoint;
 
     QPixmap cache_image;
-    int cache_end;
+    double cache_end;
     bool cache_wrapped;
+    static constexpr double cache_tol = 1e-5;
 };
 
 TimeSeriesHistogramVisualizer::~TimeSeriesHistogramVisualizer() = default;
@@ -60,11 +61,9 @@ auto TimeSeriesHistogramVisualizer::paint(
     if (frames.empty())
         return;
 
-    using XCoordMap = plot::LinearCoordinateMapping<int, int>;
-    using YCoordMap = plot::LinearCoordinateMapping<double, int>;
-    using XAxis = plot::Axis<XCoordMap>;
-    using YAxis = plot::Axis<YCoordMap>;
-    using Axes = plot::Axes2d<XAxis, YAxis>;
+    using CoordMap = plot::LinearCoordinateMapping<double, int>;
+    using Axis = plot::Axis<CoordMap>;
+    using Axes = plot::Axes2d<Axis, Axis>;
 
     int frame_capacity = s.time_series.frame_capacity();
     int frame_count = frames.size();    // NOTE: Signedness is important
@@ -74,7 +73,7 @@ auto TimeSeriesHistogramVisualizer::paint(
             .x = {
                 .mapping{
                     .from{
-                        .begin = -frame_capacity,
+                        .begin = -static_cast<double>(frame_capacity),
                         .end = 0}},
                 .label = s.attributes.x_label },
             .y = {
@@ -103,7 +102,7 @@ auto TimeSeriesHistogramVisualizer::paint(
 
     auto cache_painter = QPainter{ &s.cache_image };
 
-    auto draw_metric = [&](int x, int width, int index)
+    auto draw_metric = [&](double width, int index)
     {
         if (index < 0 || index >= frame_count)
             return;
@@ -112,23 +111,22 @@ auto TimeSeriesHistogramVisualizer::paint(
         auto p0 = double{0};
         auto y0 = axes.y.mapping(p0) - rc.top();
         auto n = frame.values.size();
-        std::ignore = x;
-        x = s.cache_end;
-        if (x >= rc.width())
-            x = 0;
-        s.cache_end = x + width;
-        if (s.cache_end >= rc.width())
+        auto x = s.cache_end;
+        if (x + s.cache_tol > rc.width())
         {
-            s.cache_end = 0;
+            x = 0;
             s.cache_wrapped = true;
         }
+        s.cache_end = x + width;
 
+        auto xi = static_cast<int>(std::floor(x));
+        auto wi = static_cast<int>(std::ceil(width));
         for (size_t i=0; i<n; ++i)
         {
             auto p1 = p0 + frame.values[i];
             auto y1 = axes.y.mapping(p1) - rc.top();;
             auto color = plot::qcolor(map_color(s.attributes.palette, i));
-            cache_painter.fillRect(x, y0, width, y1-y0, color);
+            cache_painter.fillRect(xi, y0, wi, y1-y0, color);
             p0 = p1;
             y0 = y1;
         }
@@ -138,26 +136,23 @@ auto TimeSeriesHistogramVisualizer::paint(
         ? frame_count - static_cast<int>(frames_added.value())
         : 0;
 
+    auto width = static_cast<double>(axes.x.mapping.to.length()) /
+                 axes.x.mapping.from.length();
     if (frame_capacity <= rc.width())
     {
         for (int index=first_index; index<frame_count; ++index)
-        {
-            auto generation = index - frame_count;
-            auto x0 = axes.x.mapping(generation);
-            auto x1 = axes.x.mapping(generation+1);
-            draw_metric(x0, x1-x0, index);
-        }
+            draw_metric(width, index);
     }
     else
     {
         auto x_imap = axes.x.mapping.inverse();
-        for (int index=first_index; index<frame_count;)
+        auto first_generation = first_index - frame_count;
+        auto x = std::lround(axes.x.mapping(first_generation));
+        for (auto right=rc.right(); x<right; ++x)
         {
-            auto generation = index - frame_count;
-            auto x = axes.x.mapping(generation);
-            draw_metric(x, 1, index);
-            auto next_generation = std::max(generation+1, x_imap(x+1));
-            index = next_generation + frame_count;
+            auto generation = x_imap(x);
+            auto index = std::lround(generation + frame_count);
+            draw_metric(width, index);
         }
     }
     cache_painter.end();
