@@ -89,7 +89,7 @@ auto TimeSeriesHistogramVisualizer::paint(
     bool cache_valid = !s.drawing.empty() && s.drawing.size() == rc.size();
 
     if (!cache_valid)
-        s.drawing.resize(rc.size());
+        s.drawing.resize(rc.size(), 1 /* Don't need device pixel ratio */);
 
     using DrawingUpdater = detail::XIncrementalDrawing::Updater;
 
@@ -103,7 +103,7 @@ auto TimeSeriesHistogramVisualizer::paint(
         auto y0 = axes.y.mapping(p0) - rc.top();
         auto n = frame.values.size();
 
-        updater(width, [&](QPainter& drawing_painter, double x){
+        updater(width, false, [&](QPainter& drawing_painter, double x){
             auto xi = static_cast<int>(std::floor(x));
             auto wi = static_cast<int>(std::ceil(width));
             for (size_t i=0; i<n; ++i)

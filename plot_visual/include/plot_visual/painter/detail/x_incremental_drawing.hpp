@@ -30,16 +30,30 @@ public:
     friend class XIncrementalDrawing;
     public:
         template <std::invocable<QPainter&, double> F>
-        auto operator()(double width, F&& update) -> void
+        auto operator()(double width, bool clip, F&& update) -> void
         {
             auto x = drawing_.end_;
-            if (x + drawing_.tol_ > drawing_.pixmap_.width())
+            if (x + width > drawing_.size_.width() + drawing_.tol_)
             {
                 x = 0;
                 drawing_.wrapped_ = true;
             }
             drawing_.end_ = x + width;
+            if (clip)
+            {
+                painter_.setClipRect(QRectF{
+                    x,
+                    0.,
+                    width,
+                    static_cast<double>(drawing_.size_.height())});
+            }
             std::invoke(std::forward<F>(update), painter_, x);
+
+            // Uncomment to debug
+            // painter_.fillRect(x, 0, 2, drawing_.pixmap_.height(), Qt::gray);
+            // painter_.setPen(Qt::black);
+            // painter_.drawText(
+            //     QPointF{x, 20.}, QString::number(static_cast<int>(x)));
         }
 
     private:
@@ -53,9 +67,12 @@ public:
     };
     friend class Updater;
 
-    auto resize(const QSize& size) -> void
+    auto resize(const QSize& size, double dpr) -> void
     {
-        pixmap_ = QPixmap{ size };
+        pixmap_ = QPixmap{ size * dpr };
+        pixmap_.setDevicePixelRatio(dpr);
+        size_ = size;
+        dpr_ = dpr;
         reset();
     }
 
@@ -68,14 +85,10 @@ public:
     }
 
     auto empty() const noexcept -> bool
-    {
-        return pixmap_.isNull();
-    }
+    { return pixmap_.isNull(); }
 
     auto size() const noexcept -> QSize
-    {
-        return pixmap_.size();
-    }
+    { return size_; }
 
     template <std::invocable<Updater&> F>
     auto update(F&& f) -> void
@@ -90,31 +103,40 @@ public:
         {
             int head_width = end_;
             int tail_x = head_width;
-            int tail_width = pixmap_.width() - end_;
+            int tail_width = size_.width() - end_;
             if (tail_width > 0)
                 painter.drawPixmap(
                     top_left,
                     pixmap_,
-                    QRect{ tail_x, 0, tail_width, pixmap_.height() });
+                    QRectF{ tail_x * dpr_,
+                            0.,
+                            tail_width * dpr_,
+                            static_cast<double>(pixmap_.height()) });
             if (head_width > 0)
                 painter.drawPixmap(
                     QPoint{ top_left.x() + tail_width, top_left.y() },
                     pixmap_,
-                    QRect{ 0, 0, head_width, pixmap_.height() });
+                    QRectF{ 0.,
+                            0.,
+                            head_width * dpr_,
+                            static_cast<double>(pixmap_.height()) });
         }
         else
         {
             int head_width = end_;
             painter.drawPixmap(
-                QPoint{ top_left.x() + pixmap_.width() - head_width,
+                QPoint{ top_left.x() + size_.width() - head_width,
                         top_left.y() },
                 pixmap_,
-                QRect{ 0, 0, head_width, pixmap_.height() });
+                QRectF{ 0., 0., head_width * dpr_,
+                        static_cast<double>(pixmap_.height()) });
         }
     }
 
 private:
     QPixmap pixmap_;
+    QSize size_;
+    double dpr_;
     double end_;
     bool wrapped_;
     static constexpr double tol_ = 1e-5;

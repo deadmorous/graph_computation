@@ -26,7 +26,10 @@ public:
         QString x_label;
         QString y_label;
         QString title;
+        bool incremental{true};
     };
+
+    ~TimeSeriesVisualizer();
 
     // NOTE
     // Accept non-const LiveTimeSeries& because of checkpointing
@@ -35,9 +38,10 @@ public:
 
     auto paint(const QRect&, QPainter&) -> void override;
 
+    struct Storage;
+
 private:
-    gc_types::LiveTimeSeries* time_series_;
-    const Attributes* attributes_;
+    std::unique_ptr<Storage> storage_;
 };
 
 } // namespace plot
