@@ -109,7 +109,7 @@ auto TimeSeriesHistogramVisualizer::paint(
             for (size_t i=0; i<n; ++i)
             {
                 auto p1 = p0 + frame.values[i];
-                auto y1 = axes.y.mapping(p1) - rc.top();;
+                auto y1 = axes.y.mapping(p1) - rc.top();
                 auto color = plot::qcolor(map_color(s.attributes.palette, i));
                 drawing_painter.fillRect(xi, y0, wi, y1-y0, color);
                 p0 = p1;
