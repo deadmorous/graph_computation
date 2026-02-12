@@ -92,8 +92,12 @@ public:
         }
 
         auto central_rect = layout_.rect(layout::central);
-        axes_.x.mapping.to = { central_rect.left(), central_rect.right() };
-        axes_.y.mapping.to = { central_rect.bottom(), central_rect.top() };
+        using x_mapped = typename Axes2d::XAxis::CoordinateMapping::To;
+        using y_mapped = typename Axes2d::YAxis::CoordinateMapping::To;
+        axes_.x.mapping.to = { static_cast<x_mapped>(central_rect.left()),
+                               static_cast<x_mapped>(central_rect.right()) };
+        axes_.y.mapping.to = { static_cast<y_mapped>(central_rect.bottom()),
+                               static_cast<y_mapped>(central_rect.top()) };
     }
 
     auto axes() const -> const Axes2d&
@@ -191,7 +195,7 @@ public:
             auto text_size = fm.size(0, text);
 
             auto r = QRect{
-                x - text_size.width() / 2,
+                static_cast<int>(x - text_size.width() / 2),
                 x_label_area_center_y - text_size.height() / 2,
                 text_size.width(),
                 text_size.height()
@@ -213,7 +217,7 @@ public:
 
             auto r = QRect{
                 y_label_area_center_x - text_size.width() / 2,
-                y - text_size.height() / 2,
+                static_cast<int>(y - text_size.height() / 2),
                 text_size.width(),
                 text_size.height()
             };
