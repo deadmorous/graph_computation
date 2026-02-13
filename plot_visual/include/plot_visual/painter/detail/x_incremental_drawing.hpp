@@ -20,7 +20,7 @@
 
 class QPainter;
 
-namespace plot::detail {
+namespace plot::painter::detail {
 
 class XIncrementalDrawing final
 {
@@ -142,4 +142,4 @@ private:
     static constexpr double tol_ = 1e-5;
 };
 
-} // namespace plot::detail
+} // namespace plot::painter::detail

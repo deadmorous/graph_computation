@@ -18,9 +18,9 @@
 #include <memory>
 
 
-namespace plot {
+namespace plot::painter {
 
-class TimeSeriesHistogramVisualizer final : public PainterVisualizer
+class TimeSeriesHistogramVisualizer final : public Visualizer
 {
 public:
     struct Attributes final
@@ -46,4 +46,4 @@ private:
     std::unique_ptr<Storage> storage_;
 };
 
-} // namespace plot
+} // namespace plot::painter

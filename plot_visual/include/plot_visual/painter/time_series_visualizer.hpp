@@ -15,9 +15,9 @@
 #include "gc_types/live_time_series_fwd.hpp"
 #include "gc_types/palette.hpp"
 
-namespace plot {
+namespace plot::painter {
 
-class TimeSeriesVisualizer final : public PainterVisualizer
+class TimeSeriesVisualizer final : public Visualizer
 {
 public:
     struct Attributes final
@@ -44,4 +44,4 @@ private:
     std::unique_ptr<Storage> storage_;
 };
 
-} // namespace plot
+} // namespace plot::painter

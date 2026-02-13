@@ -14,16 +14,16 @@
 
 class QPainter;
 
-namespace plot {
+namespace plot::painter {
 
-class PainterVisualizer
+class Visualizer
 {
 public:
-    virtual ~PainterVisualizer() = default;
+    virtual ~Visualizer() = default;
 
     virtual auto paint(const QRect&, QPainter&) -> void = 0;
 };
 
-auto safe_paint(PainterVisualizer*, const QRect&, QPainter&) -> void;
+auto safe_paint(Visualizer*, const QRect&, QPainter&) -> void;
 
-} // namespace plot
+} // namespace plot::painter

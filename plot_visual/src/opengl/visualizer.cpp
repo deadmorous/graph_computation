@@ -10,42 +10,38 @@
 
 #include "plot_visual/opengl/visualizer.hpp"
 
+#include "plot_visual/detail/draw_error_message.hpp"
+
+#include "common/defer.hpp"
+
+
 #include <QPainter>
 
 #include <cassert>
 
-namespace plot {
+namespace plot::opengl {
 
-namespace {
-} // anonymous namespace
-
-class OpenGLVisualizer::Impl final
+auto safe_paint(Visualizer* visualizer,
+                const QRect& rect,
+                QPainter& painter) -> void
 {
-public:
-    auto bind_data(const gc::Value* data) -> void;
-    auto bind_opengl_widget(QOpenGLWidget& widget,
-                            QOpenGLFunctions_3_3_Core& ogl) -> void;
-    auto paint_3d(const QRect& rect) -> void;
-    auto paint_2d(const QRect& rect, QPainter&) -> void;
-};
+    painter.save();
+    auto restore_painter = common::Defer{ [&]{ painter.restore(); } };
 
-OpenGLVisualizer::OpenGLVisualizer() :
-    impl_{ std::make_unique<Impl>() }
-{}
+    if (visualizer)
+    {
+        try
+        {
+            visualizer->paint_3d(rect);
+            visualizer->paint_2d(rect, painter);
+        }
+        catch(std::exception& e)
+        {
+            detail::draw_error_message(rect, painter, e.what());
+        }
+    }
+    else
+        detail::draw_error_message(rect, painter, "No visualizer");
+}
 
-OpenGLVisualizer::~OpenGLVisualizer() = default;
-
-auto OpenGLVisualizer::bind_data(const gc::Value* data) -> void
-{ impl_->bind_data(data); }
-
-auto OpenGLVisualizer::bind_opengl_widget(
-    QOpenGLWidget& widget, QOpenGLFunctions_3_3_Core& ogl) -> void
-{ impl_->bind_opengl_widget(widget, ogl); }
-
-auto OpenGLVisualizer::paint_3d(const QRect& rect) -> void
-{ impl_->paint_3d(rect); }
-
-auto OpenGLVisualizer::paint_2d(const QRect& rect, QPainter& painter) -> void
-{ impl_->paint_2d(rect, painter); }
-
-} // plot
+} // plot::opengl

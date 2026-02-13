@@ -10,29 +10,17 @@
 
 #include "plot_visual/painter/visualizer.hpp"
 
+#include "plot_visual/detail/draw_error_message.hpp"
+
 #include "common/defer.hpp"
 
 #include <QPainter>
 
 #include <cassert>
 
-namespace plot {
+namespace plot::painter {
 
-namespace {
-
-auto draw_error_message(const QRect& rect,
-                        QPainter& painter,
-                        const char* message) -> void
-{
-    painter.fillRect(rect, Qt::white);
-    painter.setPen(Qt::red);
-    painter.drawText(
-        rect, Qt::AlignHCenter | Qt::AlignVCenter, QString::fromUtf8(message));
-}
-
-} // anonymous namespace
-
-auto safe_paint(PainterVisualizer* visualizer,
+auto safe_paint(Visualizer* visualizer,
                 const QRect& rect,
                 QPainter& painter) -> void
 {
@@ -47,11 +35,11 @@ auto safe_paint(PainterVisualizer* visualizer,
         }
         catch(std::exception& e)
         {
-            draw_error_message(rect, painter, e.what());
+            detail::draw_error_message(rect, painter, e.what());
         }
     }
     else
-        draw_error_message(rect, painter, "No visualizer");
+        detail::draw_error_message(rect, painter, "No visualizer");
 }
 
-} // plot
+} // plot::painter

@@ -22,7 +22,7 @@
 #include <QPainter>
 #include <QPixmap>
 
-namespace plot {
+namespace plot::painter {
 
 using namespace gc_types;
 
@@ -38,7 +38,7 @@ struct TimeSeriesHistogramVisualizer::Storage
     LiveTimeSeries& time_series;
     const Attributes& attributes;
     LiveTimeSeries::Checkpoint checkpoint;
-    plot::detail::XIncrementalDrawing drawing;
+    plot::painter::detail::XIncrementalDrawing drawing;
 };
 
 TimeSeriesHistogramVisualizer::~TimeSeriesHistogramVisualizer() = default;
@@ -149,4 +149,4 @@ auto TimeSeriesHistogramVisualizer::paint(
     axes_painter.draw(painter);
 }
 
-} // namespace plot
+} // namespace plot::painter

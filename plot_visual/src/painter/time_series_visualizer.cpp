@@ -21,7 +21,7 @@
 
 #include <QPainterPath>
 
-namespace plot {
+namespace plot::painter {
 
 using namespace gc_types;
 
@@ -61,7 +61,7 @@ struct TimeSeriesVisualizer::Storage
     const Attributes& attributes;
     LiveTimeSeries::Checkpoint checkpoint;
 
-    plot::detail::XIncrementalDrawing drawing;
+    plot::painter::detail::XIncrementalDrawing drawing;
     CoordinateRange<double> y_range;
 };
 
@@ -282,4 +282,4 @@ auto TimeSeriesVisualizer::paint(const QRect& rect, QPainter& painter) -> void
 
 }
 
-} // namespace plot
+} // namespace plot::painter

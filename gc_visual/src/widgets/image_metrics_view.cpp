@@ -106,9 +106,10 @@ struct VisualizationData
 };
 
 using HistogramVisualizationData =
-    VisualizationData<plot::TimeSeriesHistogramVisualizer>;
+    VisualizationData<plot::painter::TimeSeriesHistogramVisualizer>;
 
-using PlotVisualizationData = VisualizationData<plot::TimeSeriesVisualizer>;
+using PlotVisualizationData =
+    VisualizationData<plot::painter::TimeSeriesVisualizer>;
 
 } // anonymous namespace
 
@@ -173,7 +174,7 @@ auto plot_metric(VisualizationData<Visualizer>& v,
         v.default_palette_color,
         v.strict_palette_match);
 
-    plot::safe_paint(&v.ts_vis, rect, painter);
+    safe_paint(&v.ts_vis, rect, painter);
 }
 
 [[maybe_unused]]

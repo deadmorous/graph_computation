@@ -12,6 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets OpenGL OpenGLWidgets)
 
 set(PROJECT_SOURCES
+    detail/draw_error_message.cpp
     layout.cpp
     opengl/visualizer.cpp
     painter/time_series_histogram_visualizer.cpp
