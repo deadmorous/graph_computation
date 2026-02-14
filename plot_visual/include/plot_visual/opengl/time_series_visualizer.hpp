@@ -35,7 +35,6 @@ public:
     // Accept non-const Attributes& to avoid passing a temporary
     TimeSeriesVisualizer(gc_types::LiveTimeSeries&, Attributes& attributes);
 
-    auto bind_data(const gc::Value* data) -> void override;
     auto bind_opengl_widget(QOpenGLWidget&, OpenGLFunctions&) -> void override;
     auto paint_3d(const QRect&) -> void override;
     auto paint_2d(const QRect&, QPainter&) -> void override;

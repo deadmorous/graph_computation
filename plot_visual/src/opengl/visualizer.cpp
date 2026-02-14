@@ -32,7 +32,9 @@ auto safe_paint(Visualizer* visualizer,
     {
         try
         {
+            painter.beginNativePainting();
             visualizer->paint_3d(rect);
+            painter.endNativePainting();
             visualizer->paint_2d(rect, painter);
         }
         catch(std::exception& e)

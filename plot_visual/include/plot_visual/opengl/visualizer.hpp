@@ -10,8 +10,6 @@
 
 #pragma once
 
-#include "gc/value_fwd.hpp"
-
 #include <QRect>
 
 class QOpenGLWidget;
@@ -27,7 +25,6 @@ public:
 
     virtual ~Visualizer() = default;
 
-    virtual auto bind_data(const gc::Value* data) -> void = 0;
     virtual auto bind_opengl_widget(QOpenGLWidget&,
                                     OpenGLFunctions&) -> void = 0;
     virtual auto paint_3d(const QRect& rect) -> void = 0;

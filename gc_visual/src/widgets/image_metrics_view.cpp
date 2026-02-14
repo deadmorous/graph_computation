@@ -12,6 +12,7 @@
 
 #include "plot_visual/color.hpp"
 #include "plot_visual/layout.hpp"
+#include "plot_visual/opengl/time_series_visualizer.hpp"
 #include "plot_visual/painter/time_series_histogram_visualizer.hpp"
 #include "plot_visual/painter/time_series_visualizer.hpp"
 
@@ -19,6 +20,8 @@
 
 #include "gc/value.hpp"
 
+#include <QOpenGLFunctions_3_3_Core>
+#include <QOpenGLWidget>
 #include <QPainter>
 #include <QPainterPath>
 
@@ -153,6 +156,9 @@ struct ImageMetricsView::Storage
     HistogramVisualizationData state_histogram;
     HistogramVisualizationData edge_histogram;
     PlotVisualizationData plateau_avg_size;
+
+    plot::opengl::TimeSeriesVisualizer::Attributes ogl_attr;
+    QOpenGLWidget* ogl_widget{};
 };
 
 namespace {
@@ -192,10 +198,53 @@ auto plot_metric(ImageMetricsView::Storage& s,
         plot_metric(s.edge_histogram, s.edge_palette, rect, painter);
         break;
     case sieve::ImageMetric::PlateauAvgSize:
+        s.ogl_attr.palette = ensure_palette(
+            s.state_palette,
+            s.plateau_avg_size.state_count(),
+            s.plateau_avg_size.default_palette_color,
+            s.plateau_avg_size.strict_palette_match);
+
         plot_metric(s.plateau_avg_size, s.state_palette, rect, painter);
         break;
     }
 }
+
+class MyOpenGLWidget : public QOpenGLWidget,
+                       protected QOpenGLFunctions_3_3_Core
+{
+public:
+    explicit MyOpenGLWidget(
+                    gc_types::LiveTimeSeries& ts,
+                    plot::opengl::TimeSeriesVisualizer::Attributes& ts_attr,
+                    QWidget* parent = nullptr) :
+        QOpenGLWidget{ parent },
+        ts_{ ts },
+        ts_attr_{ ts_attr }
+    {
+        auto fmt = format();
+        fmt.setSamples(4);
+        setFormat(fmt);
+    }
+
+protected:
+    void initializeGL() override
+    {
+        initializeOpenGLFunctions();
+        tsvis_.bind_opengl_widget(*this, *this);
+    }
+
+    void paintGL() override
+    {
+        QPainter painter{this};
+        painter.setRenderHint(QPainter::Antialiasing);
+        safe_paint(&tsvis_, rect(), painter);
+    }
+
+private:
+    gc_types::LiveTimeSeries& ts_;
+    plot::opengl::TimeSeriesVisualizer::Attributes& ts_attr_;
+    plot::opengl::TimeSeriesVisualizer tsvis_{ ts_, ts_attr_ };
+};
 
 } // anonymous namespace
 
@@ -203,6 +252,11 @@ ImageMetricsView::ImageMetricsView(size_t buf_size, QWidget* parent):
     QWidget{ parent },
     storage_{std::make_unique<Storage>(buf_size)}
 {
+    storage_->ogl_widget = new MyOpenGLWidget(
+        storage_->plateau_avg_size.ts,
+        storage_->ogl_attr,
+        this);
+    storage_->ogl_widget->resize(QSize{300, 100});
 }
 
 ImageMetricsView::~ImageMetricsView() = default;
@@ -247,6 +301,7 @@ auto ImageMetricsView::set_type(const gc::Value& v) -> void
 
 auto ImageMetricsView::paintEvent(QPaintEvent*) -> void
 {
+    storage_->ogl_widget->update();
     auto painter = QPainter(this);
     try {
         plot_metric(*storage_, rect(), painter);
