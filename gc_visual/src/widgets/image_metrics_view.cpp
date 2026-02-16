@@ -11,7 +11,6 @@
 #include "gc_visual/widgets/image_metrics_view.hpp"
 
 #include "plot_visual/color.hpp"
-#include "plot_visual/layout.hpp"
 #include "plot_visual/opengl/time_series_visualizer.hpp"
 #include "plot_visual/painter/time_series_histogram_visualizer.hpp"
 #include "plot_visual/painter/time_series_visualizer.hpp"
@@ -23,7 +22,7 @@
 #include <QOpenGLFunctions_3_3_Core>
 #include <QOpenGLWidget>
 #include <QPainter>
-#include <QPainterPath>
+#include <QStackedLayout>
 
 namespace {
 
@@ -76,27 +75,25 @@ auto ensure_palette(std::optional<gc_types::IndexedPalette>& palette,
 
 // ---
 
-template <typename Visualizer>
-struct VisualizationData
+struct MetricData
 {
-    VisualizationData(size_t frame_capacity,
-                      QString x_label,
-                      QString y_label,
-                      QString title,
-                      QColor (*default_palette_color)(int index, int state_count),
-                      bool strict_palette_match) :
+    MetricData(size_t frame_capacity,
+               QString x_label,
+               QString y_label,
+               QString title,
+               QColor (*default_palette_color)(int index, int state_count),
+               bool strict_palette_match) :
         default_palette_color{default_palette_color},
         strict_palette_match{strict_palette_match}
     {
         ts.set_frame_capacity(frame_capacity);
-        ts_vis_attr.x_label = std::move(x_label);
-        ts_vis_attr.y_label = std::move(y_label);
-        ts_vis_attr.title = std::move(title);
+        vis_attr.x_label = std::move(x_label);
+        vis_attr.y_label = std::move(y_label);
+        vis_attr.title = std::move(title);
     }
 
     gc_types::LiveTimeSeries ts;
-    Visualizer::Attributes ts_vis_attr;
-    Visualizer ts_vis{ts, ts_vis_attr};
+    plot::VisualizerAttributes vis_attr;
 
     QColor (*default_palette_color)(int index, int state_count);
     bool strict_palette_match;
@@ -108,11 +105,96 @@ struct VisualizationData
     }
 };
 
-using HistogramVisualizationData =
-    VisualizationData<plot::painter::TimeSeriesHistogramVisualizer>;
+// ---
 
-using PlotVisualizationData =
-    VisualizationData<plot::painter::TimeSeriesVisualizer>;
+template <typename Visualizer>
+class PainterMetricWidget : public QWidget
+{
+public:
+    template <typename... Args>
+    explicit PainterMetricWidget(
+        MetricData& data,
+        std::optional<gc_types::IndexedPalette>& palette,
+        QWidget* parent,
+        Args&&... args) :
+        QWidget{parent},
+        data_{data},
+        palette_{palette},
+        vis_{data.ts, data.vis_attr, std::forward<Args>(args)...}
+    {}
+
+protected:
+    auto paintEvent(QPaintEvent*) -> void override
+    {
+        auto state_count = data_.state_count();
+        if (state_count == 0)
+            return;
+
+        data_.vis_attr.palette = ensure_palette(
+            palette_,
+            state_count,
+            data_.default_palette_color,
+            data_.strict_palette_match);
+
+        auto painter = QPainter(this);
+        plot::painter::safe_paint(&vis_, rect(), painter);
+    }
+
+private:
+    MetricData& data_;
+    std::optional<gc_types::IndexedPalette>& palette_;
+    Visualizer vis_;
+};
+
+// ---
+
+class OpenGLMetricWidget : public QOpenGLWidget,
+                           protected QOpenGLFunctions_3_3_Core
+{
+public:
+    explicit OpenGLMetricWidget(
+        MetricData& data,
+        std::optional<gc_types::IndexedPalette>& palette,
+        QWidget* parent = nullptr) :
+        QOpenGLWidget{parent},
+        data_{data},
+        palette_{palette},
+        vis_{data.ts, data.vis_attr}
+    {
+        auto fmt = format();
+        fmt.setSamples(4);
+        setFormat(fmt);
+    }
+
+protected:
+    auto initializeGL() -> void override
+    {
+        initializeOpenGLFunctions();
+        vis_.bind_opengl_widget(*this, *this);
+    }
+
+    auto paintGL() -> void override
+    {
+        auto state_count = data_.state_count();
+        if (state_count > 0)
+        {
+            data_.vis_attr.palette = ensure_palette(
+                palette_,
+                state_count,
+                data_.default_palette_color,
+                data_.strict_palette_match);
+        }
+
+        QPainter painter{this};
+        painter.setRenderHint(QPainter::Antialiasing);
+        plot::opengl::safe_paint(&vis_, rect(), painter);
+    }
+
+private:
+    MetricData& data_;
+    std::optional<gc_types::IndexedPalette>& palette_;
+    plot::opengl::TimeSeriesVisualizer vis_;
+};
 
 } // anonymous namespace
 
@@ -157,100 +239,13 @@ struct ImageMetricsView::Storage
     std::optional<gc_types::IndexedPalette> state_palette;
     std::optional<gc_types::IndexedPalette> edge_palette;
 
-    HistogramVisualizationData state_histogram;
-    HistogramVisualizationData edge_histogram;
-    PlotVisualizationData plateau_avg_size;
+    MetricData state_histogram;
+    MetricData edge_histogram;
+    MetricData plateau_avg_size;
 
-    plot::opengl::TimeSeriesVisualizer::Attributes ogl_attr;
-    QOpenGLWidget* ogl_widget{};
+    QWidget* metric_widgets[3]{};
+    QStackedLayout* stack_layout{};
 };
-
-namespace {
-
-template <typename Visualizer>
-auto plot_metric(VisualizationData<Visualizer>& v,
-                 std::optional<gc_types::IndexedPalette>& palette,
-                 const QRect& rect,
-                 QPainter& painter)
-    -> void
-{
-    auto state_count = v.state_count();
-    if (state_count == 0)
-        return;
-
-    v.ts_vis_attr.palette = ensure_palette(
-        palette,
-        state_count,
-        v.default_palette_color,
-        v.strict_palette_match);
-
-    safe_paint(&v.ts_vis, rect, painter);
-}
-
-[[maybe_unused]]
-auto plot_metric(ImageMetricsView::Storage& s,
-                 const QRect& rect,
-                 QPainter& painter)
-    -> void
-{
-    switch (s.type)
-    {
-    case sieve::ImageMetric::StateHistogram:
-        plot_metric(s.state_histogram, s.state_palette, rect, painter);
-        break;
-    case sieve::ImageMetric::EdgeHistogram:
-        plot_metric(s.edge_histogram, s.edge_palette, rect, painter);
-        break;
-    case sieve::ImageMetric::PlateauAvgSize:
-        s.ogl_attr.palette = ensure_palette(
-            s.state_palette,
-            s.plateau_avg_size.state_count(),
-            s.plateau_avg_size.default_palette_color,
-            s.plateau_avg_size.strict_palette_match);
-
-        plot_metric(s.plateau_avg_size, s.state_palette, rect, painter);
-        break;
-    }
-}
-
-class MyOpenGLWidget : public QOpenGLWidget,
-                       protected QOpenGLFunctions_3_3_Core
-{
-public:
-    explicit MyOpenGLWidget(
-                    gc_types::LiveTimeSeries& ts,
-                    plot::opengl::TimeSeriesVisualizer::Attributes& ts_attr,
-                    QWidget* parent = nullptr) :
-        QOpenGLWidget{ parent },
-        ts_{ ts },
-        ts_attr_{ ts_attr }
-    {
-        auto fmt = format();
-        fmt.setSamples(4);
-        setFormat(fmt);
-    }
-
-protected:
-    void initializeGL() override
-    {
-        initializeOpenGLFunctions();
-        tsvis_.bind_opengl_widget(*this, *this);
-    }
-
-    void paintGL() override
-    {
-        QPainter painter{this};
-        painter.setRenderHint(QPainter::Antialiasing);
-        safe_paint(&tsvis_, rect(), painter);
-    }
-
-private:
-    gc_types::LiveTimeSeries& ts_;
-    plot::opengl::TimeSeriesVisualizer::Attributes& ts_attr_;
-    plot::opengl::TimeSeriesVisualizer tsvis_{ ts_, ts_attr_ };
-};
-
-} // anonymous namespace
 
 ImageMetricsView::ImageMetricsView(size_t buf_size,
                                    const MetricRenderers& renderers,
@@ -258,11 +253,45 @@ ImageMetricsView::ImageMetricsView(size_t buf_size,
     QWidget{ parent },
     storage_{std::make_unique<Storage>(buf_size, renderers)}
 {
-    storage_->ogl_widget = new MyOpenGLWidget(
-        storage_->plateau_avg_size.ts,
-        storage_->ogl_attr,
-        this);
-    storage_->ogl_widget->resize(QSize{300, 100});
+    auto* layout = new QStackedLayout(this);
+
+    // StateHistogram widget
+    storage_->metric_widgets[0] =
+        new PainterMetricWidget<plot::painter::TimeSeriesHistogramVisualizer>(
+            storage_->state_histogram, storage_->state_palette, this);
+
+    // EdgeHistogram widget
+    storage_->metric_widgets[1] =
+        new PainterMetricWidget<plot::painter::TimeSeriesHistogramVisualizer>(
+            storage_->edge_histogram, storage_->edge_palette, this);
+
+    // PlateauAvgSize widget — depends on renderer
+    switch (renderers.plateau_avg_size)
+    {
+    case plot::TimeSeriesRenderer::PainterFull:
+        storage_->metric_widgets[2] =
+            new PainterMetricWidget<plot::painter::TimeSeriesVisualizer>(
+                storage_->plateau_avg_size, storage_->state_palette,
+                this, false);
+        break;
+    case plot::TimeSeriesRenderer::PainterIncremental:
+        storage_->metric_widgets[2] =
+            new PainterMetricWidget<plot::painter::TimeSeriesVisualizer>(
+                storage_->plateau_avg_size, storage_->state_palette,
+                this, true);
+        break;
+    case plot::TimeSeriesRenderer::OpenGL:
+        storage_->metric_widgets[2] =
+            new OpenGLMetricWidget(
+                storage_->plateau_avg_size, storage_->state_palette, this);
+        break;
+    }
+
+    for (auto* w : storage_->metric_widgets)
+        layout->addWidget(w);
+
+    layout->setCurrentIndex(static_cast<int>(storage_->type));
+    storage_->stack_layout = layout;
 }
 
 ImageMetricsView::~ImageMetricsView() = default;
@@ -278,42 +307,30 @@ auto ImageMetricsView::add_image_metrics(
     storage_->state_histogram.ts.add(image_metrics.histogram);
     storage_->edge_histogram.ts.add(image_metrics.edge_histogram);
     storage_->plateau_avg_size.ts.add(image_metrics.plateau_avg_size);
-    update();
+    storage_->metric_widgets[storage_->stack_layout->currentIndex()]->update();
 }
 
 auto ImageMetricsView::clear() -> void
 {
     storage_->clear();
-    update();
+    storage_->metric_widgets[storage_->stack_layout->currentIndex()]->update();
 }
 
 auto ImageMetricsView::set_palette(const gc_types::IndexedPalette& palette)
     -> void
 {
     storage_->state_palette = palette;
-    update();
+    storage_->metric_widgets[storage_->stack_layout->currentIndex()]->update();
 }
 
 auto ImageMetricsView::set_type(sieve::ImageMetric type) -> void
 {
     storage_->type = type;
-    update();
+    storage_->stack_layout->setCurrentIndex(static_cast<int>(type));
+    storage_->metric_widgets[static_cast<int>(type)]->update();
 }
 
 auto ImageMetricsView::set_type(const gc::Value& v) -> void
 {
     set_type(v.as<sieve::ImageMetric>());
-}
-
-auto ImageMetricsView::paintEvent(QPaintEvent*) -> void
-{
-    storage_->ogl_widget->update();
-    auto painter = QPainter(this);
-    try {
-        plot_metric(*storage_, rect(), painter);
-    }
-    catch (std::exception& e) {
-        painter.setPen(Qt::red);
-        painter.drawText(rect(), Qt::AlignHCenter | Qt::AlignVCenter, e.what());
-    }
 }

@@ -52,9 +52,6 @@ public slots:
     auto set_type(sieve::ImageMetric) -> void;
     auto set_type(const gc::Value& v) -> void;
 
-protected:
-    auto paintEvent(QPaintEvent*) -> void override;
-
 public:
     struct Storage;
 
