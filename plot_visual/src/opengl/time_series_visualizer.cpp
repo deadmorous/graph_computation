@@ -71,10 +71,24 @@ struct TimeSeriesVisualizer::Storage
     size_t vbo_state_count{};
     size_t vbo_frame_capacity{};
 
+    struct DashState
+    {
+        float cum_dx{};
+        float cum_dy{};
+        float last_ordinal{};
+        float last_value{};
+        bool initialized{false};
+    };
+
+    std::vector<DashState> dash_states;
+    std::vector<bool> is_dashed;
+
     std::optional<PlotAxesPainter> axes_painter;
 };
 
 namespace {
+
+constexpr auto lightness_threshold = 0.9;
 
 auto prepare_ogl(TimeSeriesVisualizer::Storage& s) -> void
 {
@@ -246,40 +260,51 @@ auto set_viewport(TimeSeriesVisualizer::Storage& s, const QRect& rect) -> void
         static_cast<int>(rect.height() * dpr));
 }
 
-auto upload_distances(TimeSeriesVisualizer::Storage& s,
+auto update_distances(TimeSeriesVisualizer::Storage& s,
                       const LiveTimeSeries::Frames& frames,
-                      size_t state,
-                      size_t frame_count,
-                      size_t frame_capacity) -> void
+                      size_t state_count,
+                      size_t frame_capacity,
+                      size_t frames_to_upload) -> void
 {
+    if (frames_to_upload == 0)
+        return;
+
     s.ogl_vbo.bind();
 
-    float cum_dx = 0.0f;
-    float cum_dy = 0.0f;
+    auto frame_count = frames.size();
+    auto first_index = frame_count - frames_to_upload;
 
-    for (size_t i = 0; i < frame_count; ++i)
+    for (size_t state = 0; state < state_count; ++state)
     {
-        const auto& frame = frames[i];
-        auto slot = frame.ordinal % frame_capacity;
+        if (!s.is_dashed[state])
+            continue;
 
-        if (i > 0)
+        auto& ds = s.dash_states[state];
+
+        for (size_t fi = first_index; fi < frame_count; ++fi)
         {
-            const auto& prev = frames[i - 1];
-            cum_dx += std::abs(
-                static_cast<float>(frame.ordinal) -
-                static_cast<float>(prev.ordinal));
-            auto cur_val = (state < frame.values.size())
+            const auto& frame = frames[fi];
+            auto slot = frame.ordinal % frame_capacity;
+            auto ordinal = static_cast<float>(frame.ordinal);
+            auto value = (state < frame.values.size())
                 ? static_cast<float>(frame.values[state]) : 0.0f;
-            auto prev_val = (state < prev.values.size())
-                ? static_cast<float>(prev.values[state]) : 0.0f;
-            cum_dy += std::abs(cur_val - prev_val);
-        }
 
-        float dist[2] = { cum_dx, cum_dy };
-        auto offset = static_cast<int>(
-            (state * frame_capacity + slot) * 4 * sizeof(float)
-            + 2 * sizeof(float));
-        s.ogl_vbo.write(offset, dist, sizeof(dist));
+            if (ds.initialized)
+            {
+                ds.cum_dx += std::abs(ordinal - ds.last_ordinal);
+                ds.cum_dy += std::abs(value - ds.last_value);
+            }
+
+            ds.last_ordinal = ordinal;
+            ds.last_value = value;
+            ds.initialized = true;
+
+            float dist[2] = { ds.cum_dx, ds.cum_dy };
+            auto offset = static_cast<int>(
+                (state * frame_capacity + slot) * 4 * sizeof(float)
+                + 2 * sizeof(float));
+            s.ogl_vbo.write(offset, dist, sizeof(dist));
+        }
     }
 
     s.ogl_vbo.release();
@@ -363,10 +388,31 @@ auto TimeSeriesVisualizer::paint_3d(const QRect& rect) -> void
         full_rebuild = true;
     }
 
+    // Recompute dashed-state flags when state count changes
+    if (s.is_dashed.size() != state_count)
+    {
+        s.is_dashed.resize(state_count);
+        for (size_t i = 0; i < state_count; ++i)
+        {
+            auto color =
+                map_color(s.attributes.palette, static_cast<uint32_t>(i));
+            auto qc = plot::qcolor(color);
+            s.is_dashed[i] = qc.lightnessF() > lightness_threshold;
+        }
+    }
+
+    // Reset accumulated dash distances on full rebuild
+    if (full_rebuild)
+        s.dash_states.assign(state_count, Storage::DashState{});
+
     // Upload frame data to VBO
     auto frames_to_upload = full_rebuild ? frame_count : frames_added;
     if (frames_to_upload > 0)
+    {
         upload_frames(s, frames, state_count, frame_capacity, frames_to_upload);
+        update_distances(
+            s, frames, state_count, frame_capacity, frames_to_upload);
+    }
 
     // Build EBO indices: frames in logical (oldest-to-newest) order
     {
@@ -405,23 +451,17 @@ auto TimeSeriesVisualizer::paint_3d(const QRect& rect) -> void
     s.ogl->glLineWidth(2.0f * dpr);
     s.ogl_vao.bind();
 
-    constexpr auto lightness_threshold = 0.9;
-
     for (size_t state = 0; state < state_count; ++state)
     {
         auto gc_color =
             map_color(s.attributes.palette, static_cast<uint32_t>(state));
-        auto qc = plot::qcolor(gc_color);
-        auto lightness = qc.lightnessF();
 
-        if (lightness > lightness_threshold)
+        if (s.is_dashed[state])
         {
             // Dashed line with halved lightness (matching painter path)
-            upload_distances(s, frames, state, frame_count, frame_capacity);
-
-            lightness /= 2;
+            auto qc = plot::qcolor(gc_color);
             qc = QColor::fromHslF(
-                qc.hslHueF(), qc.hslSaturationF(), lightness);
+                qc.hslHueF(), qc.hslSaturationF(), qc.lightnessF() / 2);
 
             s.ogl_dashed_program.bind();
             s.ogl_dashed_program.setUniformValue(
