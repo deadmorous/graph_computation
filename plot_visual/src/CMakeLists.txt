@@ -19,6 +19,7 @@ set(PROJECT_SOURCES
     painter/time_series_histogram_visualizer.cpp
     painter/time_series_visualizer.cpp
     painter/visualizer.cpp
+    time_series_renderer.cpp
 )
 
 add_library(plot_visual-lib STATIC
