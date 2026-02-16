@@ -13,7 +13,7 @@
 #include "plot_visual/painter/visualizer.hpp"
 
 #include "gc_types/live_time_series_fwd.hpp"
-#include "gc_types/palette.hpp"
+#include "plot_visual/visualizer_attributes.hpp"
 
 #include <memory>
 
@@ -23,13 +23,7 @@ namespace plot::painter {
 class TimeSeriesHistogramVisualizer final : public Visualizer
 {
 public:
-    struct Attributes final
-    {
-        gc_types::IndexedPalette palette;
-        QString x_label;
-        QString y_label;
-        QString title;
-    };
+    using Attributes = plot::VisualizerAttributes;
 
     ~TimeSeriesHistogramVisualizer();
 

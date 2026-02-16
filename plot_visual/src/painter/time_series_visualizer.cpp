@@ -50,15 +50,18 @@ auto make_pen(const IndexedPalette palette, int state) -> QPen
 
 struct TimeSeriesVisualizer::Storage
 {
-    Storage(LiveTimeSeries& time_series, Attributes& attributes):
+    Storage(LiveTimeSeries& time_series, Attributes& attributes,
+            bool incremental):
         time_series{time_series},
-        attributes{attributes}
+        attributes{attributes},
+        incremental{incremental}
     {
         time_series.register_checkpoint(checkpoint);
     }
 
     LiveTimeSeries& time_series;
     const Attributes& attributes;
+    bool incremental;
     LiveTimeSeries::Checkpoint checkpoint;
 
     plot::painter::detail::XIncrementalDrawing drawing;
@@ -267,15 +270,16 @@ auto paint_incremental(
 TimeSeriesVisualizer::~TimeSeriesVisualizer() = default;
 
 TimeSeriesVisualizer::TimeSeriesVisualizer(LiveTimeSeries& time_series,
-                                           Attributes& attributes) :
-    storage_{std::make_unique<Storage>(time_series, attributes) }
+                                           Attributes& attributes,
+                                           bool incremental) :
+    storage_{std::make_unique<Storage>(time_series, attributes, incremental) }
 {}
 
 auto TimeSeriesVisualizer::paint(const QRect& rect, QPainter& painter) -> void
 {
     auto& s = *storage_;
 
-    if (s.attributes.incremental)
+    if (s.incremental)
         paint_incremental(s, rect, painter);
     else
         paint_full(s, rect, painter);

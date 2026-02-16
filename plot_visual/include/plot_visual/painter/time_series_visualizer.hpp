@@ -13,28 +13,22 @@
 #include "plot_visual/painter/visualizer.hpp"
 
 #include "gc_types/live_time_series_fwd.hpp"
-#include "gc_types/palette.hpp"
+#include "plot_visual/visualizer_attributes.hpp"
 
 namespace plot::painter {
 
 class TimeSeriesVisualizer final : public Visualizer
 {
 public:
-    struct Attributes final
-    {
-        gc_types::IndexedPalette palette;
-        QString x_label;
-        QString y_label;
-        QString title;
-        bool incremental{true};
-    };
+    using Attributes = plot::VisualizerAttributes;
 
     ~TimeSeriesVisualizer();
 
     // NOTE
     // Accept non-const LiveTimeSeries& because of checkpointing
     // Accept non-const Attributes& to avoid passing a temporary
-    TimeSeriesVisualizer(gc_types::LiveTimeSeries&, Attributes& attributes);
+    TimeSeriesVisualizer(gc_types::LiveTimeSeries&, Attributes& attributes,
+                         bool incremental = true);
 
     auto paint(const QRect&, QPainter&) -> void override;
 
