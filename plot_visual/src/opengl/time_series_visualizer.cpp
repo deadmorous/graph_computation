@@ -19,6 +19,7 @@
 #include "plot_visual/layout.hpp"
 #include "plot_visual/linear_coordinate_mapping.hpp"
 
+#include <QColor>
 #include <QOpenGLBuffer>
 #include <QOpenGLFunctions_3_3_Core>
 #include <QOpenGLShaderProgram>
@@ -26,6 +27,7 @@
 #include <QOpenGLWidget>
 #include <QMatrix4x4>
 
+#include <cmath>
 #include <optional>
 #include <vector>
 
@@ -56,11 +58,15 @@ struct TimeSeriesVisualizer::Storage
     OpenGLFunctions* ogl{};
     bool ogl_initialized{false};
     QOpenGLShaderProgram ogl_program;
+    QOpenGLShaderProgram ogl_dashed_program;
     QOpenGLBuffer ogl_vbo;
     QOpenGLVertexArrayObject ogl_vao;
     QOpenGLBuffer ogl_ebo{QOpenGLBuffer::IndexBuffer};
     int ogl_mvp_location{-1};
     int ogl_color_location{-1};
+    int ogl_dashed_mvp_location{-1};
+    int ogl_dashed_color_location{-1};
+    int ogl_dashed_scale_location{-1};
 
     size_t vbo_state_count{};
     size_t vbo_frame_capacity{};
@@ -105,6 +111,49 @@ auto prepare_ogl(TimeSeriesVisualizer::Storage& s) -> void
 
     s.ogl_mvp_location = s.ogl_program.uniformLocation("mvp");
     s.ogl_color_location = s.ogl_program.uniformLocation("line_color");
+
+    static const char* dashed_vertex_shader_source = R"(
+        #version 330 core
+        layout (location = 0) in vec2 position;
+        layout (location = 1) in vec2 aDistance;
+        out float vDistance;
+        uniform mat4 mvp;
+        uniform vec2 uScale;
+        void main()
+        {
+            gl_Position = mvp * vec4(position, 0.0, 1.0);
+            vec2 d = uScale * aDistance;
+            vDistance = d.x + d.y;
+        }
+    )";
+
+    static const char* dashed_fragment_shader_source = R"(
+        #version 330 core
+        in float vDistance;
+        uniform vec4 line_color;
+        out vec4 frag_color;
+        void main()
+        {
+            const float uDashSize = 10.0;
+            const float uGapSize = 10.0;
+            if (mod(vDistance, uDashSize + uGapSize) > uDashSize)
+                discard;
+            frag_color = line_color;
+        }
+    )";
+
+    s.ogl_dashed_program.addShaderFromSourceCode(
+        QOpenGLShader::Vertex, dashed_vertex_shader_source);
+    s.ogl_dashed_program.addShaderFromSourceCode(
+        QOpenGLShader::Fragment, dashed_fragment_shader_source);
+    s.ogl_dashed_program.link();
+
+    s.ogl_dashed_mvp_location =
+        s.ogl_dashed_program.uniformLocation("mvp");
+    s.ogl_dashed_color_location =
+        s.ogl_dashed_program.uniformLocation("line_color");
+    s.ogl_dashed_scale_location =
+        s.ogl_dashed_program.uniformLocation("uScale");
 }
 
 auto ensure_buffers(TimeSeriesVisualizer::Storage& s,
@@ -123,7 +172,7 @@ auto ensure_buffers(TimeSeriesVisualizer::Storage& s,
     s.vbo_frame_capacity = frame_capacity;
 
     auto total_vertices = state_count * frame_capacity;
-    auto vbo_bytes = static_cast<int>(total_vertices * 2 * sizeof(float));
+    auto vbo_bytes = static_cast<int>(total_vertices * 4 * sizeof(float));
     auto ebo_bytes = static_cast<int>(frame_capacity * sizeof(uint32_t));
 
     s.ogl_vao.create();
@@ -136,7 +185,11 @@ auto ensure_buffers(TimeSeriesVisualizer::Storage& s,
 
     s.ogl->glEnableVertexAttribArray(0);
     s.ogl->glVertexAttribPointer(
-        0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
+        0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
+    s.ogl->glEnableVertexAttribArray(1);
+    s.ogl->glVertexAttribPointer(
+        1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float),
+        reinterpret_cast<void*>(2 * sizeof(float)));
 
     s.ogl_ebo.create();
     s.ogl_ebo.bind();
@@ -164,14 +217,16 @@ auto upload_frames(TimeSeriesVisualizer::Storage& s,
         auto slot = frame.ordinal % frame_capacity;
         for (size_t state = 0; state < state_count; ++state)
         {
-            float vertex[2] = {
+            float vertex[4] = {
                 static_cast<float>(frame.ordinal),
                 (state < frame.values.size())
                     ? static_cast<float>(frame.values[state])
-                    : 0.0f
+                    : 0.0f,
+                0.0f,
+                0.0f
             };
             auto offset = static_cast<int>(
-                (state * frame_capacity + slot) * 2 * sizeof(float));
+                (state * frame_capacity + slot) * 4 * sizeof(float));
             s.ogl_vbo.write(offset, vertex, sizeof(vertex));
         }
     }
@@ -189,6 +244,45 @@ auto set_viewport(TimeSeriesVisualizer::Storage& s, const QRect& rect) -> void
         widget_height - static_cast<int>((rect.y() + rect.height()) * dpr),
         static_cast<int>(rect.width() * dpr),
         static_cast<int>(rect.height() * dpr));
+}
+
+auto upload_distances(TimeSeriesVisualizer::Storage& s,
+                      const LiveTimeSeries::Frames& frames,
+                      size_t state,
+                      size_t frame_count,
+                      size_t frame_capacity) -> void
+{
+    s.ogl_vbo.bind();
+
+    float cum_dx = 0.0f;
+    float cum_dy = 0.0f;
+
+    for (size_t i = 0; i < frame_count; ++i)
+    {
+        const auto& frame = frames[i];
+        auto slot = frame.ordinal % frame_capacity;
+
+        if (i > 0)
+        {
+            const auto& prev = frames[i - 1];
+            cum_dx += std::abs(
+                static_cast<float>(frame.ordinal) -
+                static_cast<float>(prev.ordinal));
+            auto cur_val = (state < frame.values.size())
+                ? static_cast<float>(frame.values[state]) : 0.0f;
+            auto prev_val = (state < prev.values.size())
+                ? static_cast<float>(prev.values[state]) : 0.0f;
+            cum_dy += std::abs(cur_val - prev_val);
+        }
+
+        float dist[2] = { cum_dx, cum_dy };
+        auto offset = static_cast<int>(
+            (state * frame_capacity + slot) * 4 * sizeof(float)
+            + 2 * sizeof(float));
+        s.ogl_vbo.write(offset, dist, sizeof(dist));
+    }
+
+    s.ogl_vbo.release();
 }
 
 } // anonymous namespace
@@ -307,30 +401,73 @@ auto TimeSeriesVisualizer::paint_3d(const QRect& rect) -> void
     mvp.ortho(x_left, x_right, 0.0f, y_max, -1.0f, 1.0f);
 
     // Draw time series lines
-    s.ogl->glLineWidth(2.0f * s.ogl_widget->devicePixelRatioF());
-    s.ogl_program.bind();
-    s.ogl_program.setUniformValue(s.ogl_mvp_location, mvp);
+    auto dpr = s.ogl_widget->devicePixelRatioF();
+    s.ogl->glLineWidth(2.0f * dpr);
     s.ogl_vao.bind();
+
+    constexpr auto lightness_threshold = 0.9;
 
     for (size_t state = 0; state < state_count; ++state)
     {
-        auto color =
+        auto gc_color =
             map_color(s.attributes.palette, static_cast<uint32_t>(state));
-        auto [r, g, b, a] = r_g_b_a(color);
-        s.ogl_program.setUniformValue(
-            s.ogl_color_location,
-            r.v / 255.0f, g.v / 255.0f, b.v / 255.0f, a.v / 255.0f);
+        auto qc = plot::qcolor(gc_color);
+        auto lightness = qc.lightnessF();
 
-        s.ogl->glDrawElementsBaseVertex(
-            GL_LINE_STRIP,
-            static_cast<GLsizei>(frame_count),
-            GL_UNSIGNED_INT,
-            nullptr,
-            static_cast<GLint>(state * frame_capacity));
+        if (lightness > lightness_threshold)
+        {
+            // Dashed line with halved lightness (matching painter path)
+            upload_distances(s, frames, state, frame_count, frame_capacity);
+
+            lightness /= 2;
+            qc = QColor::fromHslF(
+                qc.hslHueF(), qc.hslSaturationF(), lightness);
+
+            s.ogl_dashed_program.bind();
+            s.ogl_dashed_program.setUniformValue(
+                s.ogl_dashed_mvp_location, mvp);
+            s.ogl_dashed_program.setUniformValue(
+                s.ogl_dashed_color_location,
+                static_cast<float>(qc.redF()),
+                static_cast<float>(qc.greenF()),
+                static_cast<float>(qc.blueF()),
+                static_cast<float>(qc.alphaF()));
+            s.ogl_dashed_program.setUniformValue(
+                s.ogl_dashed_scale_location,
+                static_cast<float>(rc.width() * dpr / (x_right - x_left)),
+                static_cast<float>(rc.height() * dpr / y_max));
+
+            s.ogl->glDrawElementsBaseVertex(
+                GL_LINE_STRIP,
+                static_cast<GLsizei>(frame_count),
+                GL_UNSIGNED_INT,
+                nullptr,
+                static_cast<GLint>(state * frame_capacity));
+
+            s.ogl_dashed_program.release();
+        }
+        else
+        {
+            // Solid line
+            s.ogl_program.bind();
+            s.ogl_program.setUniformValue(s.ogl_mvp_location, mvp);
+            auto [r, g, b, a] = r_g_b_a(gc_color);
+            s.ogl_program.setUniformValue(
+                s.ogl_color_location,
+                r.v / 255.0f, g.v / 255.0f, b.v / 255.0f, a.v / 255.0f);
+
+            s.ogl->glDrawElementsBaseVertex(
+                GL_LINE_STRIP,
+                static_cast<GLsizei>(frame_count),
+                GL_UNSIGNED_INT,
+                nullptr,
+                static_cast<GLint>(state * frame_capacity));
+
+            s.ogl_program.release();
+        }
     }
 
     s.ogl_vao.release();
-    s.ogl_program.release();
 }
 
 auto TimeSeriesVisualizer::paint_2d(const QRect&, QPainter& painter) -> void
