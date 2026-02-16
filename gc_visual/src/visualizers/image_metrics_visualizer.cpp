@@ -48,12 +48,59 @@ ImageMetricsVisualizer::ImageMetricsVisualizer(GraphBroker* broker,
     if (auto lookback_node = item_node["lookback"]; lookback_node.IsDefined())
         lookback = lookback_node.as<size_t>();
 
+    auto renderers = MetricRenderers{};
+    if (auto renderers_node = item_node["renderers"];
+        renderers_node.IsDefined())
+    {
+        for (const auto& entry : renderers_node)
+        {
+            auto key = entry.first.as<std::string>();
+            auto value = entry.second.as<std::string>();
+            auto metric = magic_enum::enum_cast<sieve::ImageMetric>(key);
+            if (!metric)
+                common::throw_("Unknown image metric '", key, "'");
+            switch (*metric)
+            {
+            case sieve::ImageMetric::StateHistogram:
+            {
+                auto r = magic_enum::enum_cast<
+                    plot::TimeSeriesHistogramRenderer>(value);
+                if (!r)
+                    common::throw_(
+                        "Unknown histogram renderer '", value, "'");
+                renderers.state_histogram = *r;
+                break;
+            }
+            case sieve::ImageMetric::EdgeHistogram:
+            {
+                auto r = magic_enum::enum_cast<
+                    plot::TimeSeriesHistogramRenderer>(value);
+                if (!r)
+                    common::throw_(
+                        "Unknown histogram renderer '", value, "'");
+                renderers.edge_histogram = *r;
+                break;
+            }
+            case sieve::ImageMetric::PlateauAvgSize:
+            {
+                auto r = magic_enum::enum_cast<
+                    plot::TimeSeriesRenderer>(value);
+                if (!r)
+                    common::throw_(
+                        "Unknown time series renderer '", value, "'");
+                renderers.plateau_avg_size = *r;
+                break;
+            }
+            }
+        }
+    }
+
     auto* sub_layout = new QHBoxLayout{};
     layout->addLayout(sub_layout);
     auto* type_list = new ListEditorWidget{item_node};
     sub_layout->addWidget(type_list);
 
-    auto* view = storage_->view = new ImageMetricsView{ lookback };
+    auto* view = storage_->view = new ImageMetricsView{ lookback, renderers };
     layout->addWidget(view);
 
     if (auto palette_node = item_node["palette"]; palette_node.IsDefined())

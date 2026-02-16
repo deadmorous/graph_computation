@@ -118,7 +118,9 @@ using PlotVisualizationData =
 
 struct ImageMetricsView::Storage
 {
-    explicit Storage(size_t frame_capacity) :
+    explicit Storage(size_t frame_capacity,
+                     const MetricRenderers& renderers) :
+        renderers{renderers},
         state_histogram{
             /* frame_capacity */        frame_capacity,
             /* x_label */               "generation",
@@ -148,6 +150,8 @@ struct ImageMetricsView::Storage
         edge_histogram.ts.clear();
         plateau_avg_size.ts.clear();
     }
+
+    MetricRenderers renderers;
 
     sieve::ImageMetric type{sieve::ImageMetric::StateHistogram};
     std::optional<gc_types::IndexedPalette> state_palette;
@@ -248,9 +252,11 @@ private:
 
 } // anonymous namespace
 
-ImageMetricsView::ImageMetricsView(size_t buf_size, QWidget* parent):
+ImageMetricsView::ImageMetricsView(size_t buf_size,
+                                   const MetricRenderers& renderers,
+                                   QWidget* parent):
     QWidget{ parent },
-    storage_{std::make_unique<Storage>(buf_size)}
+    storage_{std::make_unique<Storage>(buf_size, renderers)}
 {
     storage_->ogl_widget = new MyOpenGLWidget(
         storage_->plateau_avg_size.ts,

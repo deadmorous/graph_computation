@@ -12,6 +12,8 @@
 
 #include "sieve/types/image_metrics.hpp"
 
+#include "plot_visual/time_series_renderer.hpp"
+
 #include "gc_types/palette.hpp"
 
 #include "gc/value_fwd.hpp"
@@ -19,13 +21,25 @@
 #include <QImage>
 #include <QWidget>
 
+struct MetricRenderers
+{
+    plot::TimeSeriesHistogramRenderer state_histogram
+        {plot::TimeSeriesHistogramRenderer::PainterIncremental};
+    plot::TimeSeriesHistogramRenderer edge_histogram
+        {plot::TimeSeriesHistogramRenderer::PainterIncremental};
+    plot::TimeSeriesRenderer plateau_avg_size
+        {plot::TimeSeriesRenderer::OpenGL};
+};
+
 class ImageMetricsView
     : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit ImageMetricsView(size_t buf_size, QWidget* parent = nullptr);
+    explicit ImageMetricsView(size_t buf_size,
+                              const MetricRenderers& renderers = {},
+                              QWidget* parent = nullptr);
 
     ~ImageMetricsView();
 
