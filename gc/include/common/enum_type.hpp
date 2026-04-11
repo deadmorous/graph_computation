@@ -1,20 +1,8 @@
-/** @file
- * @brief TODO: Brief docstring.
- *
- * TODO: More documentation here
- *
- * Copyright (C) 2025 MPK Software, St.-Petersburg, Russia
- *
- * @author Stepan Orlov <majorsteve@mail.ru>
- */
-
 #pragma once
+// Compatibility shim — use mpk/mix/meta/enum_type.hpp directly in new code.
+#include "mpk/mix/meta/enum_type.hpp"
 
-#include <type_traits>
-
-namespace common {
-
-template <typename E>
-concept EnumType = std::is_enum_v<E>;
-
+namespace common
+{
+using mpk::mix::EnumType;
 } // namespace common

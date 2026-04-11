@@ -74,7 +74,7 @@ auto inc_multi_index_mono(C& multi_index, const T& n) noexcept
 
 inline auto multi_index_mono_range_length(uint32_t n, uint32_t s)
     -> uint64_t
-{ return s > 0 ?   binomial(common::Type<uint64_t>, n + s - 1, s) :   0; };
+{ return s > 0 ?   common::binomial(common::Type<uint64_t>, n + s - 1, s) :   0; };
 
 namespace detail {
 

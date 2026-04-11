@@ -58,7 +58,7 @@ auto waring(Uint limit,
 
     auto index = std::vector<Uint>(s, 0);
 
-    auto iter_count = binomial(common::Type<uint64_t>, tlim+s-1, s);
+    auto iter_count = common::binomial(common::Type<uint64_t>, tlim+s-1, s);
     auto progress_factor = 1. / iter_count;
     auto iter = uint64_t{0};
     auto iter_granularity =

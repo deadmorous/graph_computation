@@ -1,25 +1,9 @@
-/** @file
- * @brief TODO: Brief docstring.
- *
- * TODO: More documentation here
- *
- * Copyright (C) 2024 MPK Software, St.-Petersburg, Russia
- *
- * @author Stepan Orlov <majorsteve@mail.ru>
- */
-
 #pragma once
+// Compatibility shim — use mpk/mix/meta/type_pack.hpp directly in new code.
+#include "mpk/mix/meta/type_pack.hpp"
 
-
-namespace common {
-
-template <typename... Ts>
-struct TypePack_Tag final
+namespace common
 {
-    static constexpr auto size = sizeof...(Ts);
-};
-
-template <typename... Ts>
-constexpr inline auto TypePack = TypePack_Tag<Ts...>{};
-
+using mpk::mix::TypePack_Tag;
+using mpk::mix::TypePack;
 } // namespace common

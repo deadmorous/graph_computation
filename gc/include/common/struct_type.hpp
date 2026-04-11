@@ -1,28 +1,8 @@
-/** @file
- * @brief TODO: Brief docstring.
- *
- * TODO: More documentation here
- *
- * Copyright (C) 2025 MPK Software, St.-Petersburg, Russia
- *
- * @author Stepan Orlov <majorsteve.mail.ru>
- */
-
 #pragma once
+// Compatibility shim — use mpk/mix/struct_type.hpp directly in new code.
+#include "mpk/mix/struct_type.hpp"
 
-#include "common/type.hpp"
-
-
-namespace common {
-
-template <typename T>
-concept StructType =
-    requires(T t, const T ct)
+namespace common
 {
-    fields_of(t);
-    fields_of(ct);
-    tuple_tag_of(Type<T>);
-    field_names_of(Type<T>);
-};
-
+using mpk::mix::StructType;
 } // namespace common
