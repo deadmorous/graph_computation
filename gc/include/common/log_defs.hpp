@@ -19,10 +19,10 @@
 
 
 
-#ifndef GC_LOG_ENGINE
+#ifndef GRAPH_COMPUTATION_LOG_ENGINE
 
 // Use Quill for logging by default;
-// to override, specify -DGC_LOG_ENGINE=... in cmake
+// to override, pass -DGRAPH_COMPUTATION_LOG_ENGINE=... to cmake
 #define GRAPH_COMPUTATION_LOG_ENGINE GC_LOG_QUILL
 
-#endif // !GC_LOG_ENGINE
+#endif // !GRAPH_COMPUTATION_LOG_ENGINE

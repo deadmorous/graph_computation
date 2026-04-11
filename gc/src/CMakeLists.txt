@@ -79,6 +79,7 @@ target_include_directories(gc-lib
 
 target_link_libraries(gc-lib
     PUBLIC
+        mpk_mix::headers
         yaml-cpp::yaml-cpp
         dl)
 
