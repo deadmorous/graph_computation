@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -eu
 
 LIBRARY="$1"
 OUTPUT_YAML_FILE="$2"
@@ -10,9 +10,10 @@ INCLUDE_DIRS="$5"
 BINARY_PATH="$6"
 COMPILE_OPTIONS="$7"
 
-mkdir -p $(dirname "$OUTPUT_FILE")
+mkdir -p $(dirname "$OUTPUT_YAML_FILE")
+mkdir -p $(dirname "$OUTPUT_CPP_FILE")
 
-echo "BUILDING LIB CONFIG FILE $OUTPUT_FILE"
+echo "BUILDING LIB CONFIG FILES '$OUTPUT_YAML_FILE' and '$OUTPUT_CPP_FILE'"
 
 echo "include_dirs:
 $(echo $INCLUDE_DIRS |sed -r "s/;+\$//;s/;+/\n/g" |sed "s/^/  - /")
