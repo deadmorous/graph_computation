@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "common/macro.hpp"
+#include "mpk/mix/macro.hpp"
 #include "common/nil.hpp"
 #include "common/strong_fwd.hpp"
 #include "common/type.hpp"
@@ -292,7 +292,7 @@ constexpr auto raw(const T& x) noexcept -> const typename T::Weak&
     struct Name##_StrongTraits final :                                      \
         common::StrongTraits<                                               \
             Weak_,                                                          \
-            GCLIB_DEFAULT_A0_TO(::common::StrongIdFeatures, ##__VA_ARGS__)> \
+            MPKMIX_DEFAULT_A0_TO(::common::StrongIdFeatures, ##__VA_ARGS__)> \
     {};                                                                     \
     using Name = ::common::Strong<Name##_StrongTraits>
 
@@ -300,7 +300,7 @@ constexpr auto raw(const T& x) noexcept -> const typename T::Weak&
     struct Name##_StrongTraits final :                                      \
         common::StrongWithDefaultTraits<                                    \
             Weak_,                                                          \
-            GCLIB_DEFAULT_A0_TO(::common::StrongIdFeatures, ##__VA_ARGS__), \
+            MPKMIX_DEFAULT_A0_TO(::common::StrongIdFeatures, ##__VA_ARGS__), \
             Default>                                                        \
     {};                                                                     \
     using Name = ::common::Strong<Name##_StrongTraits>

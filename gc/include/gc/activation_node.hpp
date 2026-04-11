@@ -119,7 +119,7 @@ struct ActivationNode
     {                                                                       \
         static auto meta = Meta{                                            \
             .type_name = #TypeName,                                         \
-            .dynamic_algorithm = GCLIB_DEFAULT_A0_TO(false, ##__VA_ARGS__)  \
+            .dynamic_algorithm = MPKMIX_DEFAULT_A0_TO(false, ##__VA_ARGS__)  \
         };                                                                  \
         return meta;                                                        \
     }                                                                       \
