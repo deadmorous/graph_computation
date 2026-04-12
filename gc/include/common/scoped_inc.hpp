@@ -1,37 +1,8 @@
-/** @file
- * @brief TODO: Brief docstring.
- *
- * TODO: More documentation here
- *
- * Copyright (C) 2025 MPK Software, St.-Petersburg, Russia
- *
- * @author Stepan Orlov <majorsteve@mail.ru>
- */
-
 #pragma once
+// Compatibility shim — use mpk/mix/util/scoped_inc.hpp directly in new code.
+#include "mpk/mix/util/scoped_inc.hpp"
 
-
-namespace common {
-
-template <typename T>
-class ScopedInc
+namespace common
 {
-public:
-    explicit ScopedInc(T& value) : value_{value}
-    {
-        ++value_;
-    }
-
-    ~ScopedInc()
-    {
-        --value_;
-    }
-
-    ScopedInc(const ScopedInc&) = delete;
-    auto operator=(const ScopedInc&) -> ScopedInc& = delete;
-
-private:
-    T& value_;
-};
-
+using mpk::mix::ScopedInc;
 } // namespace common

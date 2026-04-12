@@ -1,39 +1,8 @@
 #pragma once
-
-#include <cassert>
-#include <concepts>
-#include <utility>
+// Compatibility shim — use mpk/mix/util/defer.hpp directly in new code.
+#include "mpk/mix/util/defer.hpp"
 
 namespace common
 {
-
-template <std::invocable F>
-class [[nodiscard]] Defer
-{
-public:
-    explicit Defer(F&& f) : f_{std::forward<F>(f)}
-    {
-    }
-
-    Defer(Defer const&) = delete;
-    auto operator=(Defer const&) -> Defer& = delete;
-
-    ~Defer() noexcept(false)
-    {
-        if (!committed_)
-            f_();
-    }
-
-    auto commit() -> void
-    {
-        assert(!committed_);
-        committed_ = true;
-        f_();
-    }
-
-private:
-    F f_;
-    bool committed_{false};
-};
-
-} // common
+using mpk::mix::Defer;
+} // namespace common

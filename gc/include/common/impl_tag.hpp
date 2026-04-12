@@ -1,18 +1,9 @@
-/** @file
- * @brief TODO: Brief docstring.
- *
- * TODO: More documentation here
- *
- * Copyright (C) 2024-2025 MPK Software, St.-Petersburg, Russia
- *
- * @author Stepan Orlov <majorsteve@mail.ru>
- */
-
 #pragma once
+// Compatibility shim — use mpk/mix/util/impl_tag.hpp directly in new code.
+#include "mpk/mix/util/impl_tag.hpp"
 
-
-namespace common {
-
-constexpr inline struct Impl_Tag final {} Impl;
-
+namespace common
+{
+using mpk::mix::Impl;
+using mpk::mix::Impl_Tag;
 } // namespace common
