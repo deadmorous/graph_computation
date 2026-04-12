@@ -1,28 +1,10 @@
-/** @file
- * @brief TODO: Brief docstring.
- *
- * TODO: More documentation here
- *
- * Copyright (C) 2024 MPK Software, St.-Petersburg, Russia
- *
- * @author Stepan Orlov <majorsteve@mail.ru>
- */
-
 #pragma once
+// Compatibility shim — use mpk/mix/util/detail/index_like.hpp directly in new code.
+#include "mpk/mix/util/detail/index_like.hpp"
 
-#include "common/strong_fwd.hpp"
-
-#include <concepts>
-#include <utility>
-
-
-namespace common::detail {
-
-template <typename T>
-concept IndexLikeType =
-    std::integral<T> || StrongIndexType<T>;
-
-template <IndexLikeType T>
-using IndexDiffType = decltype(std::declval<T>() - std::declval<T>());
-
+namespace common::detail
+{
+using mpk::mix::detail::IndexLikeType;
+template <mpk::mix::detail::IndexLikeType T>
+using IndexDiffType = mpk::mix::detail::IndexDiffType<T>;
 } // namespace common::detail

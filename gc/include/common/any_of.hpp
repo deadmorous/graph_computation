@@ -1,20 +1,8 @@
-/** @file
- * @brief TODO: Brief docstring.
- *
- * TODO: More documentation here
- *
- * Copyright (C) 2024 MPK Software, St.-Petersburg, Russia
- *
- * @author Stepan Orlov <majorsteve@mail.ru>
- */
-
 #pragma once
+// Compatibility shim — use mpk/mix/util/any_of.hpp directly in new code.
+#include "mpk/mix/util/any_of.hpp"
 
-#include <concepts>
-
-namespace common {
-
-template <typename T, typename... Ts>
-concept AnyOf = (std::same_as<T, Ts> || ...);
-
+namespace common
+{
+using mpk::mix::AnyOf;
 } // namespace common
