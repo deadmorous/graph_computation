@@ -158,7 +158,7 @@ auto Cell2dRuleEditorWidget::check_type(const gc::Type* type) -> TypeCheckResult
 
     return {
         .ok = false,
-        .expected_type_description = common::format(expected_type)
+        .expected_type_description = std::format("{}", expected_type)
     };
 }
 

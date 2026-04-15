@@ -64,11 +64,12 @@ public:
             !type_check_result.ok)
         {
             common::throw_(
-                "Invalid binding: '", editor_type,
-                "' can only bind to ",
+                "Invalid binding: '{}' can only bind to {},"
+                " whereas the parameter {} is of type {}",
+                editor_type,
                 type_check_result.expected_type_description,
-                ", whereas the parameter ", common::format(binding),
-                " is of type ", value.type());
+                binding,
+                value.type());
         }
 
         auto param_spec = binding.param_spec;

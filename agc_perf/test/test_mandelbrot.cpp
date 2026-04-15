@@ -12,15 +12,19 @@
 #include "agc_perf/mandelbrot.hpp"
 #include "agc_perf/mandelbrot_param.hpp"
 
-#include "common/format.hpp"
+#include "mpk/mix/util/format_streamable.hpp"
 
 #include <gtest/gtest.h>
+
+#include <format>
 
 #include <algorithm>
 #include <cmath>
 
 
 using namespace std::string_view_literals;
+
+MPKMIX_DECL_OSTREAM_FORMATTER(agc_perf::Canvas);
 
 namespace agc_perf {
 namespace {
@@ -45,8 +49,8 @@ TEST(AgcPerf_Mandelbrot, ExpectedResult)
 @@@@@@@%%%%%%%%%%%%%%+%%%%%%
 )"sv;
 
-    auto actual = common::format(mandelbrot_set(MandelbrotRefImpl, param));
-    EXPECT_EQ(common::format(actual), expected);
+    auto actual = std::format("{}", mandelbrot_set(MandelbrotRefImpl, param));
+    EXPECT_EQ(actual, expected);
 }
 
 TEST(AgcPerf_Mandelbrot, SameResult)
@@ -67,5 +71,6 @@ TEST(AgcPerf_Mandelbrot, SameResult)
 }
 
 } // anonymous namespace
+
 } // namespace agc_perf
 

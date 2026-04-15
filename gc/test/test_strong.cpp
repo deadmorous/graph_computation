@@ -8,6 +8,7 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
+#include "common/detail/hash.hpp"
 #include "common/strong.hpp"
 #include "common/index_range.hpp"
 #include "common/strong_grouped.hpp"
@@ -15,9 +16,9 @@
 #include "common/strong_vector.hpp"
 
 #include <gtest/gtest.h>
-#include <unordered_set>
 
-#include "common/detail/hash.hpp"
+#include <format>
+#include <unordered_set>
 
 
 using namespace std::literals;
@@ -318,7 +319,7 @@ TEST(Common_Strong, Grouped)
     add_to_last_group(g, 10'000);
     next_group(g);
 
-    EXPECT_EQ(common::format(g),
+    EXPECT_EQ(std::format("{}", g),
               "[(1,2,3), (10,20), (100,200,300,400), (), (10000)]");
     EXPECT_EQ(group_count(g), Count{5});
 
@@ -351,11 +352,11 @@ TEST(Common_Strong, String)
     static_assert(std::same_as<StrView, Str::View>);
 
     auto strv = StrView{"asd"};
-    EXPECT_EQ(strv.v, common::format(strv));
+    EXPECT_EQ(strv.v, std::format("{}", strv));
     auto s1 = std::string{strv.v};
 
     auto str = Str{"qwe"};
-    EXPECT_EQ(str.v, common::format(str));
+    EXPECT_EQ(str.v, std::format("{}", str));
     auto s2 = std::string{str.v};
 
     auto str_from_v = Str{ strv };

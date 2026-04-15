@@ -28,7 +28,7 @@ struct Module::Impl
         handle{ dlopen(path_.c_str(), flags_) }
     {
         if (!handle)
-            common::throw_("Failed to load module ", path_, ": ", dlerror());
+            common::throw_("Failed to load module {}: {}", path_.string(), dlerror());
     }
 
     Impl(const Impl&) = delete;
@@ -48,8 +48,8 @@ struct Module::Impl
         auto address = dlsym(handle, name_str.c_str());
         if (!address)
             common::throw_(
-                "Failed to find symbol '", name, "' in module ", path_, ": ",
-                dlerror());
+                "Failed to find symbol '{}' in module {}: {}",
+                name, path_.string(), dlerror());
         return { common::Impl, address };
     }
 

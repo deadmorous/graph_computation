@@ -110,20 +110,23 @@ auto compile(const ComputationGraph& g, const SourceInputs& provided_inputs)
     {
         if(!nodes.index_range().contains(ee.node))
             common::throw_<std::out_of_range>(
-                "Edge end ", ee, " refers to a non-existent node");
+                "Edge end {} refers to a non-existent node",
+                ee);
 
         const auto* node = nodes[ee.node];
         if constexpr (std::same_as<Tag, Input_Tag>)
         {
             if (ee.port >= node->input_count())
                 common::throw_<std::invalid_argument>(
-                    "Edge end ", ee, " refers to a non-existent input port");
+                    "Edge end {} refers to a non-existent input port",
+                    ee);
         }
         else
         {
             if (ee.port >= node->output_count())
                 common::throw_<std::invalid_argument>(
-                    "Edge end ", ee, " refers to a non-existent output port");
+                    "Edge end {} refers to a non-existent output port",
+                    ee);
         }
     };
 
@@ -195,8 +198,8 @@ auto compile(const ComputationGraph& g, const SourceInputs& provided_inputs)
         auto& ports = node_data[e1.node].connected_inputs;
         if (ports.at(e1.port))
             common::throw_<std::invalid_argument>(
-                "Edge end ", e1,
-                " is not the only one coming to the input port");
+                "Edge end {} is not the only one coming to the input port",
+                e1);
         ports[e1.port] = true;
 
         add_to_last_group(result->edges, e);
@@ -332,13 +335,13 @@ auto compile(const ComputationGraph& g, const SourceInputs& provided_inputs)
     {
         if(!nodes.index_range().contains(dst.node))
             common::throw_<std::out_of_range>(
-                "Source input destination ", dst,
-                " refers to a non-existent node");
+                "Source input destination {} refers to a non-existent node",
+                dst);
 
         if (dst.port >= InputPort{} + nodes[dst.node]->input_count())
             common::throw_<std::invalid_argument>(
-                "Source input destination ", dst,
-                " refers to a non-existent input port");
+                "Source input destination {} refers to a non-existent input port",
+                dst);
     }
 
     // Check that provided inputs do not specify destinations
@@ -359,9 +362,10 @@ auto compile(const ComputationGraph& g, const SourceInputs& provided_inputs)
             {
                 if (provided)
                     common::throw_<std::invalid_argument>(
-                        "Input for destination ", dst, " is provided,"
+                        "Input for destination {} is provided,"
                         " but an output of another node is"
-                        " connected to the same destination.");
+                        " connected to the same destination.",
+                        dst);
                 continue;
             }
 
@@ -451,11 +455,13 @@ auto compute(ComputationResult& result,
         {
             if (!g.nodes.index_range().contains(d.node))
                 common::throw_<std::out_of_range>(
-                    "Source input ", d, " refers to an inexistent graph node");
+                    "Source input {} refers to an inexistent graph node",
+                    d);
             auto node_inputs = group(result.inputs, d.node);
             if (!node_inputs.index_range().contains(d.port))
                 common::throw_<std::out_of_range>(
-                    "Source input ", d, " refers to an inexistent input port");
+                    "Source input {} refers to an inexistent input port",
+                    d);
             auto& node_input = node_inputs[d.port];
             if (node_input != value)
             {

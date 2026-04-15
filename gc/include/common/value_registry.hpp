@@ -53,8 +53,7 @@ public:
         auto result = maybe_at(name);
         if (result.has_value())
             return *result;
-        throw_<std::domain_error>(
-            "No value is registered for name '", name, "'");
+        throw_<std::domain_error>("No value is registered for name '{}'", name);
     }
 
     auto size() const noexcept

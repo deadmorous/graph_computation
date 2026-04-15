@@ -14,11 +14,15 @@
 #include "gc/type.hpp"
 #include "gc/value.hpp"
 
+#include "gc/ostream_formatter.hpp"
+
 #include "common/throw.hpp"
 
 #include <yaml-cpp/yaml.h>
 
 #include <charconv>
+
+MPKMIX_DECL_OSTREAM_FORMATTER(YAML::Node);
 
 using namespace std::string_view_literals;
 
@@ -33,9 +37,9 @@ struct YamlValueParser final
     {
         if (value.size() != node.size())
             common::throw_(
-                "YamlValueParser: Failed to parse value of type ", t.type(),
-                " because actual array size ", node.size(), " differs from "
-                "expected size ", value.size());
+                "YamlValueParser: Failed to parse value of type {} because"
+                " actual array size {} differs from expected size {}",
+                t.type(), node.size(), value.size());
 
         for (const auto& key: value.path_item_keys())
         {
@@ -56,8 +60,8 @@ struct YamlValueParser final
         -> void
     {
         common::throw_(
-            "YamlValueParser: Failed to parse value of type ", t.type(),
-            " because custom types are not supported");
+            "YamlValueParser: Failed to parse value of type {} because custom types are not supported",
+            t.type());
     }
     auto operator()(const EnumT& t, Value& value, const YAML::Node& node) const
         -> void
@@ -103,14 +107,14 @@ struct YamlValueParser final
             }
             else
                 common::throw_(
-                    "YamlValueParser: Failed to parse value of type ", t.type(),
-                    " - if specified as a scalar, only 'all' is recognized");
+                    "YamlValueParser: Failed to parse value of type {} - if specified as a scalar, only 'all' is recognized",
+                    t.type());
 
         }
         else
             common::throw_(
-                "YamlValueParser: Failed to parse value of type ", t.type(),
-                " - node is neither an array nor a scalar");
+                "YamlValueParser: Failed to parse value of type {} - node is neither an array nor a scalar",
+                t.type());
     }
 
     auto operator()(const StringT& t, Value& value, const YAML::Node& node) const
@@ -149,8 +153,8 @@ struct YamlValueParser final
         auto keys = value.path_item_keys();
         if (node.size() != keys.size())
             common::throw_(
-                "YamlValueParser: Failed to parse value of type ", t.type(),
-                " because of tuple size mismatch");
+                "YamlValueParser: Failed to parse value of type {} because of tuple size mismatch",
+                t.type());
 
         for (const auto& key: keys)
         {
@@ -210,7 +214,7 @@ auto parse_value(const YAML::Node& node,
 
     auto value_node = node["value"];
     if (!value_node)
-        common::throw_("parse_value failed: Value is missing for node\n", node);
+        common::throw_("parse_value failed: Value is missing for node\n{}", node);
 
     return parse_value(value_node, type, type_registry);
 }

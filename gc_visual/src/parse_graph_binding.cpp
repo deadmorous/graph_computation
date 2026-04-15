@@ -13,7 +13,6 @@
 #include "gc/computation_node.hpp"
 #include "gc/detail/parse_node_port.hpp"
 
-#include "common/format.hpp"
 #include "common/throw.hpp"
 
 #include <span>
@@ -132,7 +131,7 @@ auto param_binding_label(const ParamBinding& binding)
 {
     auto result = binding.io_name;
     if (!binding.param_spec.path.empty())
-        result += common::format(binding.param_spec.path);
+        result += std::format("{}", binding.param_spec.path);
     return result;
 }
 

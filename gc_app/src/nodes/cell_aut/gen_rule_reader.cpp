@@ -124,8 +124,7 @@ auto read_gen_rules(const std::string& path) -> Cell2dGenRules
     auto f = std::fstream( path.c_str() );
     if( !f.is_open() )
         throw std::runtime_error(
-            common::format(
-                "read_gen_rules: Can't open rule generation file ", path));
+            std::format("read_gen_rules: Can't open rule generation file {}", path));
     f.exceptions(std::ios::failbit);
     auto count_center_cell = ignore_comments_and_check_for_count_center_cell(f);
     auto gen_rules = Cell2dGenRules{
@@ -154,8 +153,8 @@ auto read_gen_rules(const std::string& path) -> Cell2dGenRules
         }
         catch (std::exception& e) {
             common::throw_(
-                "read_gen_rules: ", context,
-                ": failed to read formula: ", e.what());
+                "read_gen_rules: {}: failed to read formula: {}",
+                context, e.what());
         }
     };
 
@@ -175,7 +174,7 @@ auto read_gen_rules(const std::string& path) -> Cell2dGenRules
         for (size_t overlay_index : common::index_range<size_t>(overlay_count))
         {
             auto overlay_context =
-                common::format(context, ", overlay ", overlay_index);
+                std::format("{}, overlay {}", context, overlay_index);
             auto overlay = Cell2dGenRules::Overlay{};
             f >> overlay.range.min >> overlay.range.max >> overlay.range.step;
             if( overlay.range.max == -1000000 )
@@ -185,8 +184,8 @@ auto read_gen_rules(const std::string& path) -> Cell2dGenRules
             if (!overlay.range.ok(min_sum, max_sum))
             {
                 common::throw_(
-                    "read_gen_rules: ", overlay_context,
-                    ": Invalid range: ", gc::Value{overlay.range});
+                    "read_gen_rules: {}: Invalid range: {}",
+                    overlay_context, gc::Value{overlay.range});
             }
 
             read_rtrimmed_line();   // Ignore EOL

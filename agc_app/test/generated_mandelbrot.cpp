@@ -22,9 +22,12 @@
 #include "agc_app_rt/types/canvas.hpp"
 #include "agc_app_rt/types/grid_2d_spec.hpp"
 
+#include "mpk/mix/util/format_streamable.hpp"
+
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <format>
 
 namespace { // INSERTED MANUALLY
 
@@ -572,6 +575,8 @@ auto entry_point( Context& ctx )
 
 } // anonymous namespace - INSERTED MANUALLY
 
+MPKMIX_DECL_OSTREAM_FORMATTER(agc_app_rt::Canvas<double>);
+
 // -------- GENERATED CODE END --------
 
 
@@ -617,5 +622,5 @@ TEST(AgcApp_GenTest, Mandelbrot)
 @@@@@@@@@@@@@@%%%%%%%+%%%@@@
 )"sv;
 
-    EXPECT_EQ(common::format(ctx.var_195), expected);
+    EXPECT_EQ(std::format("{}", ctx.var_195), expected);
 }

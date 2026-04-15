@@ -25,8 +25,8 @@ auto expect_n_node_args(std::string_view class_name,
         return;
 
     common::throw_<std::invalid_argument>(
-        class_name, ": Expected ", expected_count,
-        " construction arguments, got ", args.size());
+        "{}: Expected {} construction arguments, got {}",
+        class_name, expected_count, args.size());
 }
 
 } // namespace gc

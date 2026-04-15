@@ -12,6 +12,8 @@
 #include "gc/algorithm.hpp"
 #include "gc/algorithm_inspector.hpp"
 
+#include "gc/ostream_formatter.hpp"
+
 #include "common/detail/ind.hpp"
 #include "common/format.hpp"
 
@@ -81,6 +83,10 @@ auto operator<<(std::ostream& s, Prefixed<Id> prefixed)
     alg_id_printer_helper(s, prefixed.id);
     return s;
 }
+
+} // anonymous namespace
+
+namespace {
 
 class AlgPrinter final
 {
@@ -210,9 +216,11 @@ private:
             -> bool
         {
             const auto& spec = storage_(id);
-            nested(
-                common::format("bind ", Prefixed{spec.var}, " <= ", spec.port),
-                [&]{ inspector_(storage_(spec.var)); });
+            {
+                std::ostringstream oss;
+                oss << "bind " << Prefixed{spec.var} << " <= " << spec.port;
+                nested(oss.str(), [&]{ inspector_(storage_(spec.var)); });
+            }
             return false;
         }
 
@@ -251,12 +259,11 @@ private:
             -> bool
         {
             const auto& spec = storage_(id);
-            auto text = common::format("symbol ", spec.name);
+            auto text = std::format("symbol {}", spec.name);
             if (spec.header_file != common::Zero)
             {
                 const auto& h = storage_(spec.header_file);
-                text =
-                    common::format(text, " defined in header '", h.name, '\'');
+                text = std::format("{} defined in header '{}'", text, h.name);
             }
             print(text);
             return false;
@@ -266,12 +273,11 @@ private:
             -> bool
         {
             const auto& spec = storage_(id);
-            auto text = common::format("type '", spec.name, "'");
+            auto text = std::format("type '{}'", spec.name);
             if (spec.header_file != common::Zero)
             {
                 const auto& h = storage_(spec.header_file);
-                text =
-                    common::format(text, " defined in header '", h.name, '\'');
+                text = std::format("{} defined in header '{}'", text, h.name);
             }
             print(text);
             return false;
@@ -337,9 +343,9 @@ private:
         auto print(Ts&&... args) const
             -> void
         {
-            s_ << ind_
-               << common::format(std::forward<Ts>(args)...)
-               << '\n';
+            std::ostringstream oss;
+            (oss << ... << std::forward<Ts>(args));
+            s_ << ind_ << oss.str() << '\n';
         }
 
         Inspector& inspector_;
@@ -373,7 +379,7 @@ private:
             [&]{
                 for (auto port : algorithms.index_range())
                     visitor_.nested(
-                        common::format("port ", port),
+                        std::format("port {}", port),
                         [&]{ print(algorithms[port]); });
             });
     }

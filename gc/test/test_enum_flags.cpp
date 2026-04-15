@@ -14,6 +14,7 @@
 #include <gtest/gtest.h>
 
 #include <cstdint>
+#include <format>
 
 
 namespace {
@@ -37,7 +38,7 @@ TEST(Common_EnumFlags, Basic)
 {
     auto flags = FruitFlags{Fruit::Apple, Fruit::Banana};
 
-    EXPECT_EQ(common::format(flags), "{Apple, Banana}");
+    EXPECT_EQ(std::format("{}", flags), "{Apple, Banana}");
     EXPECT_TRUE(!flags.all());
     EXPECT_TRUE(flags.any());
     EXPECT_EQ(flags.size(), 2);
@@ -47,7 +48,7 @@ TEST(Common_EnumFlags, Basic)
     EXPECT_FALSE(flags & Fruit::Orange);
 
     flags &= ~FruitFlags{Fruit::Apple};
-    EXPECT_EQ(common::format(flags), "{Banana}");
+    EXPECT_EQ(std::format("{}", flags), "{Banana}");
     EXPECT_TRUE(!flags.all());
     EXPECT_TRUE(flags.any());
     EXPECT_EQ(flags.size(), 1);
@@ -57,7 +58,7 @@ TEST(Common_EnumFlags, Basic)
     EXPECT_FALSE(flags & Fruit::Orange);
 
     flags.clear(Fruit::Banana);
-    EXPECT_EQ(common::format(flags), "{}");
+    EXPECT_EQ(std::format("{}", flags), "{}");
     EXPECT_TRUE(!flags.all());
     EXPECT_TRUE(!flags.any());
     EXPECT_EQ(flags.size(), 0);
@@ -68,18 +69,18 @@ TEST(Common_EnumFlags, Basic)
 
     flags ^= Fruit::Orange;
     EXPECT_TRUE(flags & Fruit::Orange);
-    EXPECT_EQ(common::format(flags), "{Orange}");
+    EXPECT_EQ(std::format("{}", flags), "{Orange}");
 
     flags ^= Fruit::Orange;
     EXPECT_FALSE(flags & Fruit::Orange);
-    EXPECT_EQ(common::format(flags), "{}");
+    EXPECT_EQ(std::format("{}", flags), "{}");
 
     flags ^= Fruit::Orange;
     EXPECT_TRUE(flags & Fruit::Orange);
-    EXPECT_EQ(common::format(flags), "{Orange}");
+    EXPECT_EQ(std::format("{}", flags), "{Orange}");
 
     flags |= FruitFlags{Fruit::Apple, Fruit::Banana};
-    EXPECT_EQ(common::format(flags), "{Apple, Banana, Orange}");
+    EXPECT_EQ(std::format("{}", flags), "{Apple, Banana, Orange}");
     EXPECT_TRUE(flags.all());
     EXPECT_TRUE(flags.any());
     EXPECT_EQ(flags.size(), 3);

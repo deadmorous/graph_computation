@@ -71,7 +71,7 @@ auto generate_cmap(const Cell2dGenCmap& gen_cmap) -> IndexedColorMap
             }
         }
         catch(std::exception& e) {
-            common::throw_("generate_cmap: ", context, ": ", e.what());
+            common::throw_("generate_cmap: {}: {}", context, e.what());
         }
     };
 
@@ -103,7 +103,7 @@ auto generate_cmap(const Cell2dGenCmap& gen_cmap) -> IndexedColorMap
         fill_rgb_maps(
             rgb_maps,
             overlay,
-            common::format("overlay ", overlay_index++));
+            std::format("overlay {}", overlay_index++));
 
     auto result = IndexedColorMap(gen_cmap.state_count);
     using C = ColorComponent;

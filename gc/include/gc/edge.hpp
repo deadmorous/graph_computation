@@ -11,6 +11,7 @@
 #pragma once
 
 #include "gc/node_index.hpp"
+#include "gc/ostream_formatter.hpp"
 #include "gc/port.hpp"
 #include "common/struct_type_macro.hpp"
 
@@ -62,3 +63,12 @@ auto operator<<(std::ostream& s, const Edge& e)
     -> std::ostream&;
 
 } // namespace gc
+
+template <>
+struct std::formatter<gc::EdgeInputEnd> : gc::OstreamFormatter<gc::EdgeInputEnd> {};
+
+template <>
+struct std::formatter<gc::EdgeOutputEnd> : gc::OstreamFormatter<gc::EdgeOutputEnd> {};
+
+template <>
+struct std::formatter<gc::Edge> : gc::OstreamFormatter<gc::Edge> {};

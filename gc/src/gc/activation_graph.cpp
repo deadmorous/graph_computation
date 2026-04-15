@@ -312,7 +312,7 @@ auto check_source_inputs(const ActivationGraph& g,
     if (!invalid_ignored_sources.empty())
         s << "\n- some sources are not eligible to be ignored: "
           << common::format_seq(invalid_ignored_sources);
-    common::throw_<std::invalid_argument>(s.str());
+    common::throw_<std::invalid_argument>("{}", s.str());
 }
 
 // ---
@@ -320,11 +320,11 @@ auto check_source_inputs(const ActivationGraph& g,
 [[maybe_unused]]
 auto template_param_name(size_t index)
     -> std::string
-{ return common::format('T', index); }
+{ return std::format("T{}", index); }
 
 auto activation_func_name(const EdgeInputEnd& input)
     -> std::string
-{ return common::format("activate_node_", input.node, "_", input.port); }
+{ return std::format("activate_node_{}_{}", input.node, input.port); }
 
 auto render_includes(std::ostream& s,
                      const ActivationGraph&,
@@ -404,10 +404,9 @@ public:
                 {
                     if (source_type_ != common::Zero)
                         common::throw_(
-                            "Input ",
-                            to_,
-                            " has a source type specified, but its eligibility"
-                            " cannot be checked. Specify Zero here.");
+                            "Input {} has a source type specified, but its"
+                            " eligibility cannot be checked. Specify Zero here.",
+                            to_);
                 },
                 [&](const alg::id::Type& original_type)
                 {
@@ -415,24 +414,21 @@ public:
                         return;
                     if (source_type_ != original_type)
                         common::throw_(
-                            "Input ",
-                            to_,
-                            " has a source type specified conflicting with"
-                            " node-defined type. Specify Zero here.");
+                            "Input {} has a source type specified conflicting"
+                            " with node-defined type. Specify Zero here.",
+                            to_);
                 },
                 [&](const alg::id::TypeFromBinding&)
                 {
                     if (source_type_ == common::Zero)
                         common::throw_(
-                            "Input ",
-                            to_,
-                            " has no source type specified,"
-                            " but a type is required.");
+                            "Input {} has no source type specified,"
+                            " but a type is required.",
+                            to_);
                     if (var_source_types_.contains(input_binding.var))
                         common::throw_(
-                            "Input ",
-                            to_,
-                            " has source type specified more than once");
+                            "Input {} has source type specified more than once",
+                            to_);
                     var_source_types_.emplace(input_binding.var, source_type_);
                 },
             },
@@ -499,7 +495,8 @@ auto resolve_variable_types(const ActivationGraph& g,
             visit_input_bindings_for(to, resolve_type_from_binding);
             if (!used)
                 common::throw_(
-                    "Destination ", to, " for source type was not used");
+                    "Destination {} for source type was not used",
+                    to);
         }
     }
 
@@ -534,7 +531,7 @@ auto resolve_variable_types(const ActivationGraph& g,
         }
         if (i_up_var == n_up_vars)
             common::throw_(
-                "Circular loop in upstream acivations, starting at var ", k);
+                "Circular loop in upstream acivations, starting at var {}", k);
 
         auto spec = std::optional<alg::Var>{};
         for (auto v_ : current_v)
@@ -546,17 +543,15 @@ auto resolve_variable_types(const ActivationGraph& g,
                 auto it = var_source_types.find(v_);
                 if (it == var_source_types.end())
                     common::throw_(
-                        "Variable ", v_,
-                        " of type `TypeFromBinding` is unbound");
+                        "Variable {} of type `TypeFromBinding` is unbound", v_);
                 v_spec = it->second;
             }
             if (!spec.has_value())
                 spec = v_spec;
             else
                 common::throw_(
-                    "Variable ", k, " has ancestors (",
-                    common::format_seq(current_v),
-                    ") some of which have different types");
+                    "Variable {} has ancestors ({}) some of which have different types",
+                    k, common::format_seq(current_v));
         }
         assert(spec.has_value());
         result.emplace(k, *spec);
@@ -576,8 +571,7 @@ auto resolve_variable_types(const ActivationGraph& g,
             result.emplace(id, it->second);
             return false;
         }
-        common::throw_(
-            "Variable ", id, " of type `TypeFromBinding` is unbound");
+        common::throw_("Variable {} of type `TypeFromBinding` is unbound", id);
     };
     visit_all_vars(complete_binding, algos, alg_storage);
 
@@ -1020,9 +1014,9 @@ private:
         auto print(Ts&&... args) const
             -> void
         {
-            s_ << ind_
-              << common::format(std::forward<Ts>(args)...)
-              << '\n';
+            std::ostringstream s;
+            (s << ... << std::forward<Ts>(args));
+            s_ << ind_ << s.str() << '\n';
         }
 
         auto is_block(alg::id::Statement id) const
@@ -1061,10 +1055,10 @@ private:
                 -> std::string
             {
                 if (visitor_.context_vars_.contains(id))
-                    return common::format("ctx.var_", id);
+                    return std::format("ctx.var_{}", id);
 
                 // TODO: Make sure var is found in `scopes_`
-                return common::format("var_", id);
+                return std::format("var_{}", id);
             }
 
             auto operator()(const alg::AssignRhs& rhs) const
@@ -1078,7 +1072,7 @@ private:
                 const auto& f_spec = visitor_.storage_(spec.func);
                 const auto& a_spec = visitor_.storage_(spec.args);
                 return
-                    common::format(f_spec.name, "(") +
+                    std::format("{}(", f_spec.name) +
                     common::format_seq(
                         a_spec,
                         ", ",
@@ -1091,7 +1085,7 @@ private:
                 -> std::string
             {
                 const auto& spec = visitor_.storage_(id);
-                return common::format(spec.name, "{}"); // TODO: Is this always what we need?
+                return spec.name + std::string{"{}"}; // TODO: Is this always what we need?
             }
 
             auto operator()(alg::id::TypeFromBinding) const
@@ -1338,26 +1332,26 @@ auto delete_context(agc_rt::ContextHandle* h) -> void
 
     auto input_func_name = [](const EdgeInputEnd& input)
     {
-        return common::format(
-            "context_input_var_", input.node.v, '_', int{input.port.v});
+        return std::format(
+            "context_input_var_{}_{}", input.node.v, int{input.port.v});
     };
 
     auto compressed_edge_expr = [](const EdgeInputEnd& input)
     {
-        return common::format(
-            "combined_u32_and_u8(", input.node.v, ", ", int{input.port.v}, ')');
+        return std::format(
+            "combined_u32_and_u8({}, {})", input.node.v, int{input.port.v});
     };
 
     auto compressed_var_expr = [](NodeIndex node_index, size_t var_index)
     {
-        return common::format(
-            "combined_u32_and_u8(", node_index.v, ", ", var_index, ')');
+        return std::format(
+            "combined_u32_and_u8({}, {})", node_index.v, var_index);
     };
 
     auto state_func_name = [](NodeIndex node_index, size_t state_index)
     {
-        return common::format(
-            "context_state_var_", node_index.v, '_', state_index);
+        return std::format(
+            "context_state_var_{}_{}", node_index.v, state_index);
     };
 
     for_each_node(

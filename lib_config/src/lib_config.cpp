@@ -26,9 +26,8 @@ auto register_lib_config(std::string_view library, LibConfig lib_config)
     auto& m = lib_config_map();
     if (m.contains(library))
         common::throw_(
-            "register_lib_config failed: Library '",
-            library,
-            "' is already registered");
+            "register_lib_config failed: Library '{}' is already registered",
+            library);
     m.emplace(library, std::move(lib_config));
 }
 
@@ -39,9 +38,7 @@ auto lib_config(std::string_view library)
     auto it = m.find(library);
     if (it == m.end())
         common::throw_(
-            "lib_config failed: Library '",
-            library,
-            "' is not found");
+            "lib_config failed: Library '{}' is not found", library);
     return it->second;
 }
 

@@ -38,7 +38,7 @@ auto default_config()
             .linker_executable = "@CMAKE_LINKER@"
         },
         .compile_flags = {
-            .common = "",
+            .common = "-std=gnu++@CMAKE_CXX_STANDARD@",
             .shared = "@CMAKE_SHARED_LIBRARY_CXX_FLAGS@",
             .debug = "@CMAKE_CXX_FLAGS_DEBUG@",
             .release = "@CMAKE_CXX_FLAGS_RELEASE@"//,

@@ -12,7 +12,6 @@
 
 #include "gc/value.hpp"
 
-#include "common/format.hpp"
 #include "common/scoped_inc.hpp"
 
 #include <QMenu>
@@ -155,5 +154,5 @@ auto FlagsEditorWidget::summary() const -> std::string
         return std::string{names_set.front()};
     if (static_cast<size_t>(size) == names.size())
         return "<all>";
-    return common::format(size, " flags");
+    return std::format("{} flags", size);
 }

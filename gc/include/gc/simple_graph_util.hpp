@@ -41,7 +41,7 @@ auto graph_structure(const SimpleGraph<Node>& g)
         const auto& node = g.nodes[index];
         if (indices.contains(node))
             common::throw_(
-                "Node ", node, " is encountered in the graph more than once");
+                "Node {} is encountered in the graph more than once", node);
         indices[node] = index;
     }
 

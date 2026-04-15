@@ -42,7 +42,7 @@ auto VectorItemModel::on_set_value(gc::Value v)
 {
     const auto* t = v.type();
     if (t->aggregate_type() != gc::AggregateType::Vector)
-        common::throw_("VectorItemModel requires a vector type, got ", t);
+        common::throw_("VectorItemModel requires a vector type, got {}", t);
 
     auto vt = gc::VectorT{ t }.element_type();
     auto element_fields = gc_visual::flatten_type(vt);

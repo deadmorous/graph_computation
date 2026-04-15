@@ -75,8 +75,7 @@ auto topological_sort(const GraphStructure& gs)
 
     if (result.size() != gs.node_count.v)
         common::throw_(
-            "Graph structure does not describe a DAG"
-            " - topological_sort failed");
+            "Graph structure does not describe a DAG - topological_sort failed");
 
     return result;
 }

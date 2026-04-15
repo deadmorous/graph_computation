@@ -12,9 +12,11 @@
 #include "gc/computation_node.hpp"
 #include "gc/node_port_names.hpp"
 
-#include "common/format.hpp"
+#include "mpk/mix/util/format_streamable.hpp"
 
 #include <gtest/gtest.h>
+
+#include <format>
 
 #include <initializer_list>
 #include <numeric>
@@ -23,6 +25,8 @@
 
 using namespace std::literals;
 using namespace gc::literals;
+
+MPKMIX_DECL_OSTREAM_FORMATTER(gc::ComputationInstructions);
 
 namespace {
 
@@ -116,7 +120,7 @@ auto check_comple_graph(const gc::ComputationGraph& g,
 
     // std::cout << "Compiled instructions: " << *instructions << std::endl;
 
-    EXPECT_EQ(common::format(*instructions), expected_formatted_instructions);
+    EXPECT_EQ(std::format("{}", *instructions), expected_formatted_instructions);
     EXPECT_EQ(source_inputs, expected_source_inputs);
 }
 

@@ -15,6 +15,8 @@
 #include "common/strong_fwd.hpp"
 #include "common/strong_span.hpp"
 
+#include "mpk/mix/util/format_streamable.hpp"
+
 #include <cassert>
 #include <limits>
 
@@ -96,3 +98,7 @@ auto operator<<(std::ostream& s, const SG& grouped)
 { return s << grouped.v; }
 
 } // namespace common
+
+template <common::StrongGroupedType SG>
+struct std::formatter<SG> final : ::mpk::mix::OstreamFormatter<SG>
+{};

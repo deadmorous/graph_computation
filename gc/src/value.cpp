@@ -10,8 +10,6 @@
 
 #include "gc/value.hpp"
 
-#include "common/format.hpp"
-
 
 using namespace std::string_view_literals;
 
@@ -28,9 +26,9 @@ public:
         -> std::string
     {
         if constexpr (sizeof(T) == 1)
-            return common::format(v.convert_to<int>());
+            return std::format("{}", v.convert_to<int>());
 
-        return common::format(v.as(tag));
+        return std::format("{}", v.as(tag));
     }
 
     auto operator()(common::Type_Tag<bool> tag, const Value& v) const
@@ -73,7 +71,7 @@ public:
 
     auto operator()(const gc::PathT&, const Value& value) const
         -> std::string
-    { return common::format(value.as<ValuePath>()); }
+    { return std::format("{}", value.as<ValuePath>()); }
 
     auto operator()(const gc::ScalarT& t, const Value& value) const
         -> std::string

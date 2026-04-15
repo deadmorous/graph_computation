@@ -59,7 +59,7 @@ auto generate_rules(const Cell2dGenRules& gen_rules) -> Cell2dRules
             }
         }
         catch(std::exception& e) {
-            common::throw_("generate_rules: ", context, ": ", e.what());
+            common::throw_("generate_rules: {}: {}", context, e.what());
         }
     };
 
@@ -76,8 +76,8 @@ auto generate_rules(const Cell2dGenRules& gen_rules) -> Cell2dRules
             if((map[i] > max || map[i] < min) && map[i] != NoChange)
             {
                 common::throw_(
-                    "generate_rules: ", context, ": Map element ", i,
-                    " is out of range (==", int(map[i]), ")");
+                    "generate_rules: {}: Map element {} is out of range (=={})",
+                    context, i, int(map[i]));
             }
         }
     };
@@ -110,7 +110,7 @@ auto generate_rules(const Cell2dGenRules& gen_rules) -> Cell2dRules
             fill_map(result,
                      overlay,
                      nbrs,
-                     common::format(context, ", overlay ", overlay_index++));
+                     std::format("{}, overlay {}", context, overlay_index++));
 
         test_map(result, nbrs, context);
 

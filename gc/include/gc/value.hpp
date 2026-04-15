@@ -15,6 +15,8 @@
 #include "gc/type.hpp"
 #include "gc/value_path.hpp"
 
+#include "gc/ostream_formatter.hpp"
+
 #include "common/throw.hpp"
 
 #include <any>
@@ -142,7 +144,8 @@ public:
     {
         if(type_->aggregate_type() != gc::AggregateType::Scalar)
             common::throw_<std::invalid_argument>(
-                "Value::convert_to: Expected a scalar argument, got ", type_);
+                "Value::convert_to: Expected a scalar argument, got {}",
+                type_);
 
         return
             gc::ScalarT(type_).visit_numeric(
@@ -156,7 +159,8 @@ public:
     {
         if(type_->aggregate_type() != gc::AggregateType::String)
             common::throw_<std::invalid_argument>(
-                "Value::convert_to: Expected a string argument, got ", type_);
+                "Value::convert_to: Expected a string argument, got {}",
+                type_);
 
         return
             gc::StringT(type_).visit(
@@ -178,3 +182,6 @@ private:
 using ValueVec = std::vector<Value>;
 
 } // namespace gc
+
+template <>
+struct std::formatter<gc::Value> : gc::OstreamFormatter<gc::Value> {};

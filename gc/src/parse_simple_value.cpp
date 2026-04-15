@@ -12,6 +12,7 @@
 
 #include "gc/value.hpp"
 
+
 #include <charconv>
 
 using namespace std::string_view_literals;
@@ -30,19 +31,19 @@ auto parse_as_decimal(common::Type_Tag<T>, std::string_view s, Fcargs... fcargs)
 
     if (fcres.ec == std::errc::invalid_argument)
         common::throw_(
-            "Failed to parse scalar of type ", type_of<T>(),
-            " from string '", s, "' - not a number");
+            "Failed to parse scalar of type {} from string '{}' - not a number",
+            type_of<T>(), s);
 
     else if (fcres.ec == std::errc::result_out_of_range)
         common::throw_(
-            "Failed to parse scalar of type ", type_of<T>(),
-            " from string '", s, "' - out of range");
+            "Failed to parse scalar of type {} from string '{}' - out of range",
+            type_of<T>(), s);
 
     assert (fcres.ec == std::error_code{});
     if(fcres.ptr != s.end())
         common::throw_(
-            "Failed to parse scalar of type ", type_of<T>(),
-            " from string '", s, "' - extra characters remain");
+            "Failed to parse scalar of type {} from string '{}' - extra characters remain",
+            type_of<T>(), s);
 
     return result;
 }
@@ -76,8 +77,7 @@ struct ScalarParser final
         else if (s == "false")
             return false;
         else
-            common::throw_(
-                "Failed to parse boolean scalar from string '", s, "'");
+            common::throw_("Failed to parse boolean scalar from string '{}'", s);
     }
 
     auto operator()(common::Type_Tag<std::byte>, std::string_view) const
@@ -93,16 +93,16 @@ struct SimpleValueParser final
         -> Value
     {
         common::throw_(
-            "SimpleValueParser: Failed to parse value of type ", t.type(),
-            " because array types are not supported");
+            "SimpleValueParser: Failed to parse value of type {} because array types are not supported",
+            t.type());
     }
 
     auto operator()(const CustomT& t, std::string_view) const
         -> Value
     {
         common::throw_(
-            "SimpleValueParser: Failed to parse value of type ", t.type(),
-            " because custom types are not supported");
+            "SimpleValueParser: Failed to parse value of type {} because custom types are not supported",
+            t.type());
     }
 
     auto operator()(const EnumT& t, std::string_view text) const
@@ -130,8 +130,8 @@ struct SimpleValueParser final
         -> Value
     {
         common::throw_(
-            "SimpleValueParser: Failed to parse value of type ", t.type(),
-            " because struct types are not supported");
+            "SimpleValueParser: Failed to parse value of type {} because struct types are not supported",
+            t.type());
     }
 
     auto operator()(const StrongT& t, std::string_view text) const
@@ -148,24 +148,24 @@ struct SimpleValueParser final
         -> Value
     {
         common::throw_(
-            "SimpleValueParser: Failed to parse value of type ", t.type(),
-            " because struct types are not supported");
+            "SimpleValueParser: Failed to parse value of type {} because struct types are not supported",
+            t.type());
     }
 
     auto operator()(const TupleT& t, std::string_view) const
         -> Value
     {
         common::throw_(
-            "SimpleValueParser: Failed to parse value of type ", t.type(),
-            " because tuple types are not supported");
+            "SimpleValueParser: Failed to parse value of type {} because tuple types are not supported",
+            t.type());
     }
 
     auto operator()(const VectorT& t, std::string_view) const
         -> Value
     {
         common::throw_(
-            "SimpleValueParser: Failed to parse value of type ", t.type(),
-            " because vector types are not supported");
+            "SimpleValueParser: Failed to parse value of type {} because vector types are not supported",
+            t.type());
     }
 };
 

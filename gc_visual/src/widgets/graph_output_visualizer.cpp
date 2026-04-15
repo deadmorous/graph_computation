@@ -52,11 +52,12 @@ auto visualizer_factory() -> VisualizerFactoryFunc
             !type_check_result.ok)
         {
             common::throw_(
-                "Invalid binding: '", visualizer_type,
-                "' can only bind to ",
+                "Invalid binding: '{}' can only bind to {},"
+                " whereas the output {} is of type {}",
+                visualizer_type,
                 type_check_result.expected_type_description,
-                ", whereas the output ", common::format(port),
-                " is of type ", value.type());
+                port,
+                value.type());
         }
 
         return new Visualizer(broker, item_node);

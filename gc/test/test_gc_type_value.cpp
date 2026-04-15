@@ -8,13 +8,12 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "gc/value.hpp"
-
-#include "common/format.hpp"
 #include "common/struct_type_macro.hpp"
+#include "gc/value.hpp"
 
 #include <gtest/gtest.h>
 
+#include <format>
 #include <initializer_list>
 
 
@@ -60,22 +59,21 @@ TEST(Gc, Type)
     EXPECT_EQ(gc::Type::of<std::vector<int>>(), t_int_vec);
     EXPECT_EQ(gc::Type::of<MyStruct>(), t_struct);
 
-    using common::format;
-    EXPECT_EQ(format(t_int),
+    EXPECT_EQ(std::format("{}", t_int),
               "Type{I32}");
-    EXPECT_EQ(format(t_int_vec),
+    EXPECT_EQ(std::format("{}", t_int_vec),
               "Type{Vector[I32]}");
-    EXPECT_EQ(format(t_bool),
+    EXPECT_EQ(std::format("{}", t_bool),
               "Type{Bool}");
-    EXPECT_EQ(format(t_int_vec_vec),
+    EXPECT_EQ(std::format("{}", t_int_vec_vec),
               "Type{Vector[Vector[I32]]}");
-    EXPECT_EQ(format(t_tuple),
+    EXPECT_EQ(std::format("{}", t_tuple),
               "Type{Tuple{I32, Bool, Vector[F32]}}");
-    EXPECT_EQ(format(t_struct),
+    EXPECT_EQ(std::format("{}", t_struct),
               "Type{Struct{foo: I32, bar: F64, flags: Vector[U32]}}");
-    EXPECT_EQ(format(t_path),
+    EXPECT_EQ(std::format("{}", t_path),
               "Type{Path}");
-    EXPECT_EQ(format(t_struct_arr_3),
+    EXPECT_EQ(std::format("{}", t_struct_arr_3),
               "Type{Array<3>[Struct{foo: I32, bar: F64, flags: Vector[U32]}]}");
 }
 
@@ -84,8 +82,7 @@ TEST(Gc, Array)
     using A = std::array<int, 3>;
 
     const auto* t_int_arr_3 = gc::Type::of<A>();
-    using common::format;
-    EXPECT_EQ(format(t_int_arr_3), "Type{Array<3>[I32]}");
+    EXPECT_EQ(std::format("{}", t_int_arr_3), "Type{Array<3>[I32]}");
 
     auto a = A{1, 4, 9};
     auto v = gc::Value{a};
@@ -93,14 +90,14 @@ TEST(Gc, Array)
     EXPECT_EQ(v.get(gc::ValuePath{1}), 4);
     EXPECT_EQ(v.get(gc::ValuePath{2}), 9);
 
-    EXPECT_EQ(format(v), "[1,4,9]");
+    EXPECT_EQ(std::format("{}", v), "[1,4,9]");
     EXPECT_EQ(v.size(), 3);
     EXPECT_THROW(v.resize(34), std::invalid_argument);
     EXPECT_EQ(v.size(), 3);
 
     v.set(gc::ValuePath{2}, 49);
     EXPECT_EQ(v.get(gc::ValuePath{2}), 49);
-    EXPECT_EQ(format(v), "[1,4,49]");
+    EXPECT_EQ(std::format("{}", v), "[1,4,49]");
     EXPECT_THROW(v.set(gc::ValuePath{4}, 11), std::out_of_range);
 }
 
@@ -123,7 +120,7 @@ TEST(Gc, EnumType)
     // Type-specific checks
 
     const auto* t_my_enum = gc::Type::of<MyEnum>();
-    EXPECT_EQ(common::format(t_my_enum), "Type{Enum<MyEnum: 1>}");
+    EXPECT_EQ(std::format("{}", t_my_enum), "Type{Enum<MyEnum: 1>}");
 
     auto v0 = gc::Value::make(t_my_enum);
 
@@ -157,7 +154,7 @@ TEST(Gc, EnumType)
     EXPECT_EQ(vn, "Bar"sv);
 
     v.set(gc::ValuePath{ "index"sv }, size_t{1});
-    EXPECT_EQ(common::format(v), "Bar");
+    EXPECT_EQ(std::format("{}", v), "Bar");
 
     v.set(gc::ValuePath{ "name"sv }, "Foo"s);
     EXPECT_EQ(v.as<MyEnum>(), MyEnum::Foo);
@@ -171,7 +168,7 @@ TEST(Gc, EnumFlagsType)
 {
     using MyFlags = common::EnumFlags<MyEnum>;
     const auto* type = gc::Type::of<MyFlags>();
-    EXPECT_EQ(common::format(type), "Type{EnumFlags{Enum<MyEnum: 1>}}");
+    EXPECT_EQ(std::format("{}", type), "Type{EnumFlags{Enum<MyEnum: 1>}}");
 
     auto flags = MyFlags{MyEnum::Foo};
     auto v = gc::Value{flags};
@@ -181,7 +178,7 @@ TEST(Gc, EnumFlagsType)
     EXPECT_TRUE(v.contains(MyEnum::Foo));
     EXPECT_FALSE(v.contains(MyEnum::Bar));
     EXPECT_FALSE(v.contains(MyEnum::Baz));
-    EXPECT_EQ(common::format(v), common::format(flags));
+    EXPECT_EQ(std::format("{}", v), std::format("{}", flags));
 
     flags |= MyEnum::Baz;
     v.insert(MyEnum::Baz);
@@ -190,8 +187,8 @@ TEST(Gc, EnumFlagsType)
     EXPECT_TRUE(v.contains(MyEnum::Foo));
     EXPECT_FALSE(v.contains(MyEnum::Bar));
     EXPECT_TRUE(v.contains(MyEnum::Baz));
-    EXPECT_EQ(common::format(v), common::format(flags));
-    EXPECT_EQ(common::format(flags), "{Foo, Baz}");
+    EXPECT_EQ(std::format("{}", v), std::format("{}", flags));
+    EXPECT_EQ(std::format("{}", flags), "{Foo, Baz}");
 
     {
         auto keys = v.keys();
@@ -203,8 +200,8 @@ TEST(Gc, EnumFlagsType)
     flags &= ~MyFlags{MyEnum::Foo};
     v.remove(MyEnum::Foo);
     EXPECT_EQ(v.as<MyFlags>(), flags);
-    EXPECT_EQ(common::format(v), common::format(flags));
-    EXPECT_EQ(common::format(flags), "{Baz}");
+    EXPECT_EQ(std::format("{}", v), std::format("{}", flags));
+    EXPECT_EQ(std::format("{}", flags), "{Baz}");
 
     {
         auto keys = v.keys();
@@ -225,7 +222,7 @@ GCLIB_REGISTER_CUSTOM_TYPE(MyBlob, 1);
 TEST(Gc, CustomType)
 {
     const auto* t_my_blob = gc::Type::of<MyBlob>();
-    EXPECT_EQ(common::format(t_my_blob), "Type{Custom<MyBlob: 1>}");
+    EXPECT_EQ(std::format("{}", t_my_blob), "Type{Custom<MyBlob: 1>}");
 }
 
 // ---
@@ -385,7 +382,7 @@ TEST(Gc, StrongType)
     static_assert(std::same_as<MyIndex::Weak, uint32_t>);
 
     const auto* type = gc::type_of<MyIndex>();
-    EXPECT_EQ(common::format(type), "Type{Strong{U32}}"sv);
+    EXPECT_EQ(std::format("{}", type), "Type{Strong{U32}}"sv);
 
     auto my_index = MyIndex{123};
     auto v = gc::Value{ my_index };
@@ -404,32 +401,32 @@ TEST(Gc, StrongType)
 
 TEST(Gc, FormatValue)
 {
-    // EXPECT_EQ(common::format(gc::Value(123)), "123");
-    EXPECT_EQ(common::format(gc::Value(common::Type<uint8_t>, 123)), "123");
+    // EXPECT_EQ(std::format("{}", gc::Value(123)), "123");
+    EXPECT_EQ(std::format("{}", gc::Value(common::Type<uint8_t>, 123)), "123");
 
     // int8_t is formatted as int, but it's not the same as char - we don't
     // currently support char
-    EXPECT_EQ(common::format(gc::Value(common::Type<int8_t>, 'A')), "65");
+    EXPECT_EQ(std::format("{}", gc::Value(common::Type<int8_t>, 'A')), "65");
 
     // TODO: Uncomment when we support char
-    // EXPECT_EQ(common::format(gc::Value(common::Type<char>, 'A')), "A");
+    // EXPECT_EQ(std::format("{}", gc::Value(common::Type<char>, 'A')), "A");
 
-    EXPECT_EQ(common::format(gc::Value(-1.23)), "-1.23");
-    EXPECT_EQ(common::format(gc::Value(std::byte{0x9c})), "9c");
+    EXPECT_EQ(std::format("{}", gc::Value(-1.23)), "-1.23");
+    EXPECT_EQ(std::format("{}", gc::Value(std::byte{0x9c})), "9c");
 
-    EXPECT_EQ(common::format(gc::Value(true)), "true");
-    EXPECT_EQ(common::format(gc::Value(false)), "false");
+    EXPECT_EQ(std::format("{}", gc::Value(true)), "true");
+    EXPECT_EQ(std::format("{}", gc::Value(false)), "false");
 
-    EXPECT_EQ(common::format(gc::Value("Hello"sv)), "Hello");
-    EXPECT_EQ(common::format(gc::Value("World"s)), "World");
+    EXPECT_EQ(std::format("{}", gc::Value("Hello"sv)), "Hello");
+    EXPECT_EQ(std::format("{}", gc::Value("World"s)), "World");
 
-    EXPECT_EQ(common::format(gc::Value(MyIndex{534})), "534");
+    EXPECT_EQ(std::format("{}", gc::Value(MyIndex{534})), "534");
 
     auto v = std::vector<int>{9,8,75};
-    EXPECT_EQ(common::format(gc::Value(v)), "[9,8,75]");
+    EXPECT_EQ(std::format("{}", gc::Value(v)), "[9,8,75]");
 
     auto t = std::make_tuple(1, 2.3, true, "hello"sv);
-    EXPECT_EQ(common::format(gc::Value(t)), "{1,2.3,true,hello}");
+    EXPECT_EQ(std::format("{}", gc::Value(t)), "{1,2.3,true,hello}");
 
     auto s = MyStruct
     {
@@ -437,10 +434,10 @@ TEST(Gc, FormatValue)
         .bar = 1.3e11,
         .flags = {1, 3, 7, 13, 23}
     };
-    EXPECT_EQ(common::format(gc::Value(s)),
+    EXPECT_EQ(std::format("{}", gc::Value(s)),
               "{foo=345,bar=1.3e+11,flags=[1,3,7,13,23]}");
 
-    EXPECT_EQ(common::format(gc::Value(MyBlob{})), "custom");
+    EXPECT_EQ(std::format("{}", gc::Value(MyBlob{})), "custom");
 }
 
 TEST(Gc, ValueEquality)

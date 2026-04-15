@@ -1,38 +1,18 @@
 /** @file
- * @brief TODO: Brief docstring.
+ * @brief Compatibility shim — use mpk/mix/util/format_seq.hpp directly in new code.
  *
- * TODO: More documentation here
+ * Copyright (C) 2024-2025 MPK Software, St.-Petersburg, Russia
  *
- * Copyright (C) 2024 MPK Software, St.-Petersburg, Russia
- *
- * @author Stepan Orlov <majorsteve.mail.ru>
+ * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
 #pragma once
 
-#include <sstream>
-#include <string>
-#include <string_view>
-
+#include "mpk/mix/util/format_seq.hpp"
 
 namespace common {
 
-template <typename... Ts>
-auto format(Ts&&... args)
-    -> std::string
-{
-    std::ostringstream s;
-    ((s << args), ...);
-    return s.str();
-}
-
-struct DefaultFormatter
-{
-    template <typename T>
-    auto operator()(std::ostream& s, const T& value) const
-        -> void
-    { s << value; }
-};
+using mpk::mix::DefaultFormatter;
 
 template <typename Seq, typename ElementFormatter = DefaultFormatter>
 auto format_seq(const Seq& seq,
@@ -40,15 +20,7 @@ auto format_seq(const Seq& seq,
                 const ElementFormatter& element_formatter = {})
     -> std::string
 {
-    std::ostringstream s;
-    std::string_view current_delim = "";
-    for (const auto& item : seq)
-    {
-        s << current_delim;
-        element_formatter(s, item);
-        current_delim = delim;
-    }
-    return s.str();
+    return mpk::mix::format_seq(seq, delim, element_formatter);
 }
 
 } // namespace common

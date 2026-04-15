@@ -91,7 +91,7 @@ auto parse_layout_item(GraphBroker* broker,
         else if (type == "invalidate")
             widget = new InvalidateButton(broker, item_node);
         else
-            common::throw_("Unknown layout item type '", type, "'");
+            common::throw_("Unknown layout item type '{}'", type);
 
         if (auto* parent_layout = parent_item->layout())
         {

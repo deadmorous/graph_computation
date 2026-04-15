@@ -76,8 +76,7 @@ auto read_gen_cmap(const std::string& path) -> Cell2dGenCmap
     auto f = std::fstream( path.c_str() );
     if( !f.is_open() )
         throw std::runtime_error(
-            common::format(
-                "read_gen_cmap: Can't open color map generation file ", path));
+            std::format("read_gen_cmap: Can't open color map generation file {}", path));
     f.exceptions(std::ios::failbit);
     ignore_comments(f);
     auto gen_cmap = Cell2dGenCmap{};
@@ -104,8 +103,8 @@ auto read_gen_cmap(const std::string& path) -> Cell2dGenCmap
         }
         catch (std::exception& e) {
             common::throw_(
-                "read_gen_cmap: ", context,
-                ": failed to read formula: ", e.what());
+                "read_gen_cmap: {}: failed to read formula: {}",
+                context, e.what());
         }
     };
 
@@ -122,7 +121,7 @@ auto read_gen_cmap(const std::string& path) -> Cell2dGenCmap
     for (size_t overlay_index : common::index_range<size_t>(overlay_count))
     {
         auto overlay_context =
-            common::format("overlay ", overlay_index);
+            std::format("overlay {}", overlay_index);
         auto overlay = Cell2dGenCmap::Overlay{};
         f >> overlay.range.min >> overlay.range.max >> overlay.range.step;
         if(overlay.range.max < 0)
@@ -132,8 +131,8 @@ auto read_gen_cmap(const std::string& path) -> Cell2dGenCmap
         if (!overlay.range.ok(0, max))
         {
             common::throw_(
-                "read_gen_cmap: ", overlay_context,
-                ": Invalid range: ", gc::Value{overlay.range});
+                "read_gen_cmap: {}: Invalid range: {}",
+                overlay_context, gc::Value{overlay.range});
         }
 
         read_rtrimmed_line();   // Ignore EOL

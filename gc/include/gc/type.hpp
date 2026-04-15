@@ -15,6 +15,8 @@
 #include "gc/detail/value_component_access.hpp"
 #include "gc/value_path.hpp"
 
+#include "gc/ostream_formatter.hpp"
+
 #include "common/impl_tag.hpp"
 #include "common/strong.hpp"
 #include "common/type.hpp"
@@ -557,3 +559,6 @@ auto visit(const Type* type, F&& f, Args&&... args)
 }
 
 } // namespace gc
+
+template <>
+struct std::formatter<const gc::Type*> : gc::OstreamFormatter<const gc::Type*> {};

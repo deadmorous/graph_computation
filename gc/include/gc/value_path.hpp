@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "gc/ostream_formatter.hpp"
+
 #include "common/any_of.hpp"
 
 #include <ostream>
@@ -145,5 +147,9 @@ auto ValuePath::operator/=(const ValuePathLike& p2)
     -> ValuePath&
 { return *this = *this / p2; }
 
-
 } // namespace gc
+
+template <> struct std::formatter<gc::ValuePathView>
+    : gc::OstreamFormatter<gc::ValuePathView> {};
+template <> struct std::formatter<gc::ValuePath>
+    : gc::OstreamFormatter<gc::ValuePath> {};

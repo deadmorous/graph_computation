@@ -83,7 +83,8 @@ ImageVisualizer::ImageVisualizer(GraphBroker* broker,
                 magic_enum::enum_cast<BitmapView::BlendMode>(mode_str);
             if (!opt_blend_mode)
                 common::throw_(
-                    "Invalid blend mode '", mode_str, "', expected one of ",
+                    "Invalid blend mode '{}', expected one of {}",
+                    mode_str,
                     common::format_seq(
                         magic_enum::enum_names<BitmapView::BlendMode>(), ", "));
             blend_mode = *opt_blend_mode;
@@ -255,7 +256,7 @@ auto ImageVisualizer::check_type(const gc::Type* type) -> TypeCheckResult
 
     return {
         .ok = false,
-        .expected_type_description = common::format(expected_type)
+        .expected_type_description = std::format("{}", expected_type)
     };
 }
 

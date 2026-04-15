@@ -11,6 +11,7 @@
 #pragma once
 
 #include "gc/edge.hpp"
+#include "gc/ostream_formatter.hpp"
 #include "gc/param_spec.hpp"
 
 
@@ -36,3 +37,6 @@ struct OutputBinding final
 };
 
 } // namespace gc_visual
+
+template <> struct std::formatter<gc_visual::ParamBinding>
+    : gc::OstreamFormatter<gc_visual::ParamBinding> {};

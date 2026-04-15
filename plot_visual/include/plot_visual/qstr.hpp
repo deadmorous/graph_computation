@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "common/format.hpp"
+#include "mpk/mix/util/format_sep.hpp"
 
 #include <QString>
 
@@ -24,6 +24,6 @@ inline auto qstr(const std::string& s)
 template <typename... Ts>
 auto format_qstr(Ts&&... args)
     -> QString
-{ return qstr(common::format(std::forward<Ts>(args)...)); }
+{ return qstr(mpk::mix::format_sep("", std::forward<Ts>(args)...)); }
 
 } // namespace plot

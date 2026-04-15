@@ -13,6 +13,8 @@
 #include "common/enum_type.hpp"
 #include "common/format.hpp"
 
+#include "mpk/mix/util/format_streamable.hpp"
+
 #include <magic_enum/magic_enum.hpp>
 
 #include <bit>
@@ -335,3 +337,8 @@ auto operator^(const T0& lhs, const T1& rhs) noexcept
 }
 
 } // namespace common
+
+template <common::EnumType E>
+struct std::formatter<common::EnumFlags<E>> final
+    : ::mpk::mix::OstreamFormatter<common::EnumFlags<E>>
+{};

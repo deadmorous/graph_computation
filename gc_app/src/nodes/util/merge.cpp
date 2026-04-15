@@ -40,8 +40,8 @@ public:
         input_names_.push_back("output_type");
         for (auto index : common::index_range<size_t>(input_count))
         {
-            input_names_.push_back(common::format("path_", index));
-            input_names_.push_back(common::format("value_", index));
+            input_names_.push_back(std::format("path_{}", index));
+            input_names_.push_back(std::format("value_{}", index));
         }
 
         input_name_views_.reserve(input_names_.size());

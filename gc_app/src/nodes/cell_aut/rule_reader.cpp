@@ -75,7 +75,7 @@ auto read_rules(const std::string& path) -> Cell2dRules
     auto f = std::fstream( path.c_str() );
     if( !f.is_open() )
         throw std::runtime_error(
-            common::format("read_rules: Can't open rules file ", path));
+            std::format("read_rules: Can't open rules file {}", path));
     f.exceptions(std::ios::failbit);
     ignore_comments(f);
     auto rules = Cell2dRules{};
@@ -94,7 +94,7 @@ auto read_rules(const std::string& path) -> Cell2dRules
             v != NoChange )
         {
             throw std::invalid_argument(
-                common::format(rule_type, " is out of range, pos. ", pos));
+                std::format("{} is out of range, pos. {}", rule_type, pos));
         }
         return v;
     };

@@ -514,7 +514,7 @@ struct ValueComponents<Type, T>
             auto opt_index = me::enum_index(data);
             if (!opt_index)
                 common::throw_(
-                    "Unable to get an index for a value of enumerated type ",
+                    "Unable to get an index for a value of enumerated type {}",
                     Type::template of<T>());
             auto defer = common::Defer{
                 [&]{
@@ -538,8 +538,8 @@ struct ValueComponents<Type, T>
                         auto opt_value = me::enum_cast<T>(underlying);
                         if (!opt_value)
                             common::throw_(
-                                "Unable to convert integer '", underlying,
-                                "' into a value of enumerated type ",
+                                "Unable to convert integer '{}' into a value of enumerated type {}",
+                                underlying,
                                 Type::template of<T>());
                         data = *opt_value;
                     }
@@ -566,11 +566,11 @@ struct ValueComponents<Type, T>
                         auto opt_value = me::enum_cast<T>(name);
                         if (!opt_value)
                             common::throw_(
-                                "Unable to convert string '", name,
-                                "' into a value of enumerated type ",
-                                Type::template of<T>(), ". Valid values are ",
+                                "Unable to convert string '{}' into a value of enumerated type {}. Valid values are {}.",
+                                name,
+                                Type::template of<T>(),
                                 common::format_seq(
-                                    magic_enum::enum_names<T>(), ", "), ".");
+                                    magic_enum::enum_names<T>(), ", "));
                         data = *opt_value;
                     }
                 };
@@ -601,8 +601,8 @@ struct ValueComponents<Type, T>
 
         common::throw_(
             "For an enumerated type, only possible path keys are 'index', "
-            "'name', 'names', 'value', and 'values'. Got '", name,
-            "' for type ", Type::template of<T>());
+            "'name', 'names', 'value', and 'values'. Got '{}' for type {}",
+            name, Type::template of<T>());
     }
 };
 
@@ -630,7 +630,8 @@ struct ValueComponents<Type, T>
         if (name != "v")
             common::throw_(
                 "For a strong type, the only possible path key is 'v'. "
-                "Got '", name, "' for type ", Type::template of<T>());
+                "Got '{}' for type {}",
+                name, Type::template of<T>());
 
         using Weak = typename T::Weak;
         auto& weak = data.v;

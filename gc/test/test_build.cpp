@@ -17,16 +17,21 @@
 #include "dlib/module.hpp"
 #include "dlib/symbol.hpp"
 
-#include "common/format.hpp"
+#include "mpk/mix/util/format_streamable.hpp"
 
 #include <yaml-cpp/yaml.h>
 
 #include <gtest/gtest.h>
 
+#include <format>
+
 #include <fstream>
 
 
 using namespace std::string_literals;
+
+MPKMIX_DECL_OSTREAM_FORMATTER(build::Config);
+MPKMIX_DECL_OSTREAM_FORMATTER(build::LibConfig);
 
 TEST(Build_Config, LoadFromYaml)
 {
@@ -74,7 +79,7 @@ flag_rules:
     EXPECT_EQ(config.flag_rules.include_flag, "-I");
     EXPECT_EQ(config.flag_rules.include_system_flag, "-isystem ");
 
-    EXPECT_EQ(common::format(config), expected_config_str);
+    EXPECT_EQ(std::format("{}", config), expected_config_str);
     // std::cout << config << std::endl;
 }
 
@@ -109,7 +114,7 @@ compile_options: "-foo -bar"
     EXPECT_EQ(lib_config.binary_path, "/path/to/binary.a");
     EXPECT_EQ(lib_config.compile_options, "-foo -bar");
 
-    EXPECT_EQ(common::format(lib_config), expected_lib_config_str);
+    EXPECT_EQ(std::format("{}", lib_config), expected_lib_config_str);
     // std::cout << lib_config << std::endl;
 }
 
