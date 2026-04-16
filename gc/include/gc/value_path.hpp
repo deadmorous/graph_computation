@@ -1,155 +1,23 @@
 /** @file
- * @brief TODO: Brief docstring.
+ * @brief Compatibility shim — redirects to mpk::mix::value value path types.
  *
- * TODO: More documentation here
- *
- * Copyright (C) 2024 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2024-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
 #pragma once
 
-#include "gc/ostream_formatter.hpp"
-
-#include "common/any_of.hpp"
-
-#include <ostream>
-#include <span>
-#include <string_view>
-#include <variant>
-#include <vector>
+#include "mpk/mix/value/value_path.hpp"
 
 
 namespace gc {
 
-struct ValuePathItem final
-{
-public:
-    ValuePathItem();  // Creates zero index
+using mpk::mix::value::ValuePathItem;
+using mpk::mix::value::ValuePathView;
+using mpk::mix::value::ValuePath;
+using mpk::mix::value::ValuePathLikeType;
 
-    /* implicit */ ValuePathItem(size_t index);
-    /* implicit */ ValuePathItem(std::string_view name);
-    /* implicit */ ValuePathItem(std::string name);
-
-    auto is_index() const noexcept
-        -> bool;
-
-    auto is_name() const noexcept
-        -> bool;
-
-    auto index() const
-        -> size_t;
-
-    auto name() const
-        -> std::string_view;
-
-    friend auto operator<<(std::ostream& s, const ValuePathItem& item)
-        -> std::ostream&;
-
-    auto operator==(const ValuePathItem&) const noexcept -> bool;
-
-    static auto from_string(std::string_view s)
-        -> ValuePathItem;
-
-private:
-    using Storage =
-        std::variant<size_t, std::string_view, std::string>;
-
-    Storage storage_;
-};
-
-using ValuePathView = std::span<const ValuePathItem>;
-
-auto operator<<(std::ostream& s, ValuePathView path)
-    -> std::ostream&;
-
-
-class ValuePath;
-
-template <typename T>
-concept ValuePathLikeType = common::AnyOf<T, ValuePathView, ValuePath>;
-
-class ValuePath :
-    public std::vector<ValuePathItem>
-{
-public:
-    using Base = std::vector<ValuePathItem>;
-
-    using Base::Base;
-
-    inline auto operator/=(const ValuePathItem& i2)
-        -> ValuePath&;
-
-    template <ValuePathLikeType ValuePathLike>
-    inline auto operator/=(const ValuePathLike& p2)
-        -> ValuePath&;
-
-    friend auto operator<<(std::ostream& s, const ValuePath& path)
-        -> std::ostream&;
-
-    static auto from_string(std::string_view s)
-        -> ValuePath;
-};
-
-inline auto operator/(ValuePathItem i1, ValuePathItem i2)
-    -> ValuePath;
-
-template <ValuePathLikeType ValuePathLike>
-inline auto operator/(const ValuePathLike& p1, ValuePathItem i2)
-    -> ValuePath;
-
-template <ValuePathLikeType ValuePathLike>
-inline auto operator/(const ValuePathItem& i1, const ValuePath& p2)
-    -> ValuePath;
-
-template <ValuePathLikeType ValuePathLike1, ValuePathLikeType ValuePathLike2>
-inline auto operator/(const ValuePathLike1& p1, const ValuePathLike2& p2)
-    -> ValuePath;
-
-auto operator/(ValuePathItem i1, ValuePathItem i2)
-    -> ValuePath
-{ return ValuePath{ i1, i2 }; }
-
-template <ValuePathLikeType ValuePathLike>
-inline auto operator/(const ValuePathLike& p1, ValuePathItem i2)
-    -> ValuePath
-{
-    auto result = ValuePath{p1};
-    result.push_back( i2 );
-    return result;
-}
-
-template <ValuePathLikeType ValuePathLike>
-inline auto operator/(const ValuePathItem& i1, const ValuePathLike& p2)
-    -> ValuePath
-{
-    auto result = ValuePath{i1};
-    result.insert(result.end(), p2.begin(), p2.end());
-    return result;
-}
-
-template <ValuePathLikeType ValuePathLike1, ValuePathLikeType ValuePathLike2>
-inline auto operator/(const ValuePathLike1& p1, const ValuePathLike2& p2)
-    -> ValuePath
-{
-    auto result = ValuePath{p1};
-    result.insert(result.end(), p2.begin(), p2.end());
-    return result;
-}
-
-auto ValuePath::operator/=(const ValuePathItem& i2)
-    -> ValuePath&
-{ return *this = *this / i2; }
-
-template <ValuePathLikeType ValuePathLike>
-auto ValuePath::operator/=(const ValuePathLike& p2)
-    -> ValuePath&
-{ return *this = *this / p2; }
+using mpk::mix::value::operator/;
 
 } // namespace gc
-
-template <> struct std::formatter<gc::ValuePathView>
-    : gc::OstreamFormatter<gc::ValuePathView> {};
-template <> struct std::formatter<gc::ValuePath>
-    : gc::OstreamFormatter<gc::ValuePath> {};

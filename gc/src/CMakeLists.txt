@@ -33,10 +33,7 @@ add_library(gc-lib STATIC
     gc/source_inputs.cpp
     node_port_names.cpp
     parse_simple_value.cpp
-    type.cpp
     type_registry.cpp
-    value.cpp
-    value_path.cpp
     yaml/parse_graph.cpp
     yaml/parse_value.cpp
     "${CMAKE_CURRENT_BINARY_DIR}/default_config.cpp"
@@ -80,6 +77,7 @@ target_include_directories(gc-lib
 target_link_libraries(gc-lib
     PUBLIC
         mpk_mix::headers
+        mpk_mix::value
         yaml-cpp::yaml-cpp
         dl)
 

@@ -1,22 +1,20 @@
 /** @file
- * @brief TODO: Brief docstring.
+ * @brief Compatibility shim — redirects to mpk::mix::value Value fwd decls.
  *
- * TODO: More documentation here
- *
- * Copyright (C) 2024 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2024-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
 #pragma once
 
-#include <span>
+#include "mpk/mix/value/value_fwd.hpp"
+
 
 namespace gc {
 
-class Value;
-
-using ValueSpan = std::span<Value>;
-using ConstValueSpan = std::span<const Value>;
+using mpk::mix::value::Value;
+using mpk::mix::value::ValueSpan;
+using mpk::mix::value::ConstValueSpan;
 
 } // namespace gc
