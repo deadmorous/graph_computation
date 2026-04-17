@@ -161,7 +161,7 @@ auto VectorItemModel::setData(const QModelIndex &index,
     try {
         auto text = value.toString().toStdString();
 
-        auto item_value = parse_simple_value(text, field.type);
+        auto item_value = gc::parse_simple_value(text, field.type);
         v_.set(path, item_value);
         emit dataChanged(index, index);
         return true;
