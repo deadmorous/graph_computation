@@ -10,14 +10,17 @@ mpkmix_find_or_add(
     SUBDIR  ${CMAKE_CURRENT_LIST_DIR}/mpk_mix)
 
 # googletest goes before benchmark, which lets the latter know about the former.
-# Guard: mpk_mix may have already added googletest from this same source tree.
-if(NOT TARGET gtest)
-    add_subdirectory(googletest)
-endif()
+mpkmix_find_or_add(
+    TARGET  GTest::gtest
+    PACKAGE GTest
+    SUBDIR  ${CMAKE_CURRENT_LIST_DIR}/googletest)
 add_subdirectory(benchmark)
 
 if ("${GRAPH_COMPUTATION_LOG_ENGINE}" STREQUAL "GC_LOG_QUILL")
     add_subdirectory(quill)
 endif()
 
-add_subdirectory(yaml-cpp)
+mpkmix_find_or_add(
+    TARGET  yaml-cpp::yaml-cpp
+    PACKAGE yaml-cpp
+    SUBDIR  ${CMAKE_CURRENT_LIST_DIR}/yaml-cpp)
