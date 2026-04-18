@@ -12,6 +12,8 @@
 
 #include "common/value_registry.hpp"
 
+#include <memory>
+
 
 namespace common {
 

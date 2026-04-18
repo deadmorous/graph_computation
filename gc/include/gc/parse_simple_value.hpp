@@ -1,24 +1,19 @@
 /** @file
- * @brief TODO: Brief docstring.
+ * @brief Compatibility shim — use mpk/mix/value/parse_simple_value.hpp directly
+ *        in new code.
  *
- * TODO: More documentation here
- *
- * Copyright (C) 2024 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2024-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
 #pragma once
 
-#include "gc/type_fwd.hpp"
-#include "gc/value_fwd.hpp"
-
-#include <string_view>
+#include "mpk/mix/value/parse_simple_value.hpp"
 
 
 namespace gc {
 
-auto parse_simple_value(std::string_view, const gc::Type*)
-    -> gc::Value;
+using mpk::mix::value::parse_simple_value;
 
 } // namespace gc

@@ -1,9 +1,8 @@
 /** @file
- * @brief TODO: Brief docstring.
+ * @brief Compatibility shim — use mpk/mix/serial/yaml/parse_value.hpp directly
+ *        in new code.
  *
- * TODO: More documentation here
- *
- * Copyright (C) 2024-2025 MPK Software, St.-Petersburg, Russia
+ * Copyright (C) 2024-2026 MPK Software, St.-Petersburg, Russia
  *
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
@@ -13,18 +12,11 @@
 #include "gc/type_registry.hpp"
 #include "gc/value_fwd.hpp"
 
-#include <yaml-cpp/node/node.h>
+#include "mpk/mix/serial/yaml/parse_value.hpp"
 
 
 namespace gc::yaml {
 
-auto parse_value(const YAML::Node& node,
-                 const TypeRegistry& type_registry)
-    -> Value;
-
-auto parse_value(const YAML::Node& node,
-                 const Type* type,
-                 const TypeRegistry& type_registry)
-    -> Value;
+using mpk::mix::serial::yaml::parse_value;
 
 } // namespace gc::yaml
