@@ -1,30 +1,10 @@
-/** @file
- * @brief TODO: Brief docstring.
- *
- * TODO: More documentation here
- *
- * Copyright (C) 2024 MPK Software, St.-Petersburg, Russia
- *
- * @author Stepan Orlov <majorsteve@mail.ru>
- */
-
 #pragma once
-
+// Compatibility shim — use mpk/mix/util/const_span.hpp directly in new code.
 #include "common/type.hpp"
 #include "common/type_pack.hpp"
+#include "mpk/mix/util/const_span.hpp"
 
-#include <concepts>
-#include <span>
-
-namespace common {
-
-
-template <typename... Ids, typename T, std::same_as<T>... Args>
-auto const_span(TypePack_Tag<Ids...>, Type_Tag<T>,  Args... values)
-    -> std::span<const T>
+namespace common
 {
-    static const std::array<T, sizeof...(Args)> result = { values... };
-    return result;
-}
-
+using mpk::mix::const_span;
 } // namespace common
