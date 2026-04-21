@@ -1,28 +1,9 @@
-/** @file
- * @brief TODO: Brief docstring.
- *
- * TODO: More documentation here
- *
- * Copyright (C) 2024 MPK Software, St.-Petersburg, Russia
- *
- * @author Stepan Orlov <majorsteve@mail.ru>
- */
-
 #pragma once
+// Compatibility shim — use mpk/mix/value/object_registry.hpp directly in new code.
+#include "mpk/mix/value/object_registry.hpp"
 
-#include "common/value_registry.hpp"
-
-#include <memory>
-
-
-namespace common {
-
-template <typename Interface, typename... ConstructionArgs>
-using FactoryFunc = std::shared_ptr<Interface>(*)(ConstructionArgs...);
-
-
-template <typename Interface, typename... ConstructionArgs>
-using ObjectRegistry =
-    ValueRegistry<FactoryFunc<Interface, ConstructionArgs...>>;
-
+namespace common
+{
+using mpk::mix::value::FactoryFunc;
+using mpk::mix::value::ObjectRegistry;
 } // namespace common
