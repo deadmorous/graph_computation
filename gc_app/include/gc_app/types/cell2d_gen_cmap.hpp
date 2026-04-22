@@ -12,7 +12,7 @@
 
 #include "gc_app/types/cell2d_gen_range.hpp"
 
-#include "common/struct_type_macro.hpp"
+#include "mpk/mix/struct_type_macro.hpp"
 
 #include <cstdint>
 #include <string>
@@ -54,13 +54,13 @@ struct Cell2dGenCmap final
     auto operator==(const Cell2dGenCmap&) const noexcept -> bool = default;
 };
 
-GCLIB_STRUCT_TYPE(
+MPKMIX_STRUCT_TYPE(
     Cell2dGenCmap_RgbFormula, r, g, b);
 
-GCLIB_STRUCT_TYPE(
+MPKMIX_STRUCT_TYPE(
     Cell2dGenCmap_Overlay, formula, range);
 
-GCLIB_STRUCT_TYPE(
+MPKMIX_STRUCT_TYPE(
     Cell2dGenCmap,
     state_count, formula, overlays);
 

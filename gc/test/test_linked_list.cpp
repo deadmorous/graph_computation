@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "common/linked_list.hpp"
+#include "mpk/mix/util/linked_list.hpp"
 
 #include <gtest/gtest.h>
 
@@ -17,21 +17,21 @@
 
 namespace {
 
-using IntListItem = common::ValueLinkedListItem<int>;
-using IntList = common::ValueLinkedList<int>;
+using IntListItem = mpk::mix::ValueLinkedListItem<int>;
+using IntList = mpk::mix::ValueLinkedList<int>;
 
 using intvec = std::vector<int>;
 
 auto to_int(int x) -> int { return x; }
 
-struct X : common::IntrusiveLinkedListConnectivity<X>
+struct X : mpk::mix::IntrusiveLinkedListConnectivity<X>
 {
     int v{};
 };
 
 auto to_int(const X& x) -> int { return x.v; }
 
-using XList = common::IntrusiveLinkedList<X>;
+using XList = mpk::mix::IntrusiveLinkedList<X>;
 using xvec = std::vector<X>;
 
 
@@ -48,7 +48,7 @@ auto values(const List& list) -> intvec
     return result;
 };
 
-template <common::LinkedListConnectivityType T>
+template <mpk::mix::LinkedListConnectivityType T>
 auto loop(const T& item) -> intvec
 {
     intvec result;

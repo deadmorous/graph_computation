@@ -18,7 +18,7 @@
 #include "gc/value.hpp"
 #include "gc/yaml/parse_value.hpp"
 
-#include "common/throw.hpp"
+#include "mpk/mix/util/throw.hpp"
 
 #include <yaml-cpp/yaml.h>
 

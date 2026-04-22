@@ -12,7 +12,7 @@
 
 #include "build/config_fwd.hpp"
 
-#include "common/struct_type_macro.hpp"
+#include "mpk/mix/struct_type_macro.hpp"
 
 #include <ostream>
 #include <string>
@@ -27,7 +27,7 @@ struct Paths final
     std::string linker_executable;
 };
 
-GCLIB_STRUCT_TYPE(Paths, cxx_compiler_executable, linker_executable);
+MPKMIX_STRUCT_TYPE(Paths, cxx_compiler_executable, linker_executable);
 
 
 struct CompileFlags final
@@ -38,7 +38,7 @@ struct CompileFlags final
     std::string release;
 };
 
-GCLIB_STRUCT_TYPE(CompileFlags, common, shared, debug, release);
+MPKMIX_STRUCT_TYPE(CompileFlags, common, shared, debug, release);
 
 
 struct LinkFlags final
@@ -48,7 +48,7 @@ struct LinkFlags final
     std::string shared_unwrapped;
 };
 
-GCLIB_STRUCT_TYPE(LinkFlags, common, shared, shared_unwrapped);
+MPKMIX_STRUCT_TYPE(LinkFlags, common, shared, shared_unwrapped);
 
 
 struct FlagRules final
@@ -59,7 +59,7 @@ struct FlagRules final
     std::string include_system_flag;
 };
 
-GCLIB_STRUCT_TYPE(
+MPKMIX_STRUCT_TYPE(
     FlagRules,
     linker_wrapper_flag,
     linker_wrapper_flag_sep,
@@ -75,7 +75,7 @@ struct Config final
     FlagRules flag_rules;
 };
 
-GCLIB_STRUCT_TYPE(Config, paths, compile_flags, link_flags, flag_rules);
+MPKMIX_STRUCT_TYPE(Config, paths, compile_flags, link_flags, flag_rules);
 
 
 auto default_config()

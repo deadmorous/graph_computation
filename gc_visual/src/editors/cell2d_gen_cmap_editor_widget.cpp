@@ -20,8 +20,8 @@
 #include "gc/computation_context.hpp"
 #include "gc/value.hpp"
 
-#include "common/func_ref.hpp"
-#include "common/scoped_inc.hpp"
+#include "mpk/mix/func_ref/func_ref.hpp"
+#include "mpk/mix/util/scoped_inc.hpp"
 
 #include <yaml-cpp/yaml.h>
 
@@ -258,7 +258,7 @@ auto Cell2dGenCmapEditorWidget::check_type(const gc::Type* type)
 void Cell2dGenCmapEditorWidget::set_value(const gc::Value& v)
 {
     auto& s = *storage_;
-    auto inc_in_set_value = common::ScopedInc{s.in_set_value};
+    auto inc_in_set_value = mpk::mix::ScopedInc{s.in_set_value};
 
     auto gen_cmap = v.as<gc_app::Cell2dGenCmap>();
     if (s.gen_cmap == gen_cmap)

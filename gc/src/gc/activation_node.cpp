@@ -15,7 +15,7 @@
 #include "gc/ostream_formatter.hpp"
 
 #include "common/detail/ind.hpp"
-#include "common/format.hpp"
+#include "mpk/mix/util/format_seq.hpp"
 
 
 using namespace std::string_view_literals;
@@ -61,7 +61,7 @@ struct AlgIdPrinterHelper final
         -> void
     {
         s << prefix_for<Id>;
-        if (id == common::Zero)
+        if (id == mpk::mix::Zero)
             s << none;
         else
             s << id;
@@ -102,7 +102,7 @@ public:
     {
         print(algs.input_bindings);
         print(algs.algorithms);
-        if (algs.context != common::Zero)
+        if (algs.context != mpk::mix::Zero)
             visitor_.nested("context", algs.context);
 
         return *this;
@@ -178,7 +178,7 @@ private:
             auto args = storage_(spec.args);
             print("func_invocation: ", func.name,
                   '(',
-                  common::format_seq(args, ", ", alg_id_printer_helper),
+                  mpk::mix::format_seq(args, ", ", alg_id_printer_helper),
                   ')');
             return false;
         }
@@ -206,7 +206,7 @@ private:
                     inspector_(spec.vars);
                     nested("condition", spec.condition);
                     nested("then", spec.then_clause);
-                    if (spec.else_clause != common::Zero)
+                    if (spec.else_clause != mpk::mix::Zero)
                         nested("else", spec.else_clause);
                 });
             return false;
@@ -260,7 +260,7 @@ private:
         {
             const auto& spec = storage_(id);
             auto text = std::format("symbol {}", spec.name);
-            if (spec.header_file != common::Zero)
+            if (spec.header_file != mpk::mix::Zero)
             {
                 const auto& h = storage_(spec.header_file);
                 text = std::format("{} defined in header '{}'", text, h.name);
@@ -274,7 +274,7 @@ private:
         {
             const auto& spec = storage_(id);
             auto text = std::format("type '{}'", spec.name);
-            if (spec.header_file != common::Zero)
+            if (spec.header_file != mpk::mix::Zero)
             {
                 const auto& h = storage_(spec.header_file);
                 text = std::format("{} defined in header '{}'", text, h.name);
@@ -300,7 +300,7 @@ private:
         auto operator()(alg::id::Vars id)
             -> bool
         {
-            print(id == common::Zero? "vars (none)": "vars");
+            print(id == mpk::mix::Zero? "vars (none)": "vars");
             return true;
         }
 
@@ -367,7 +367,7 @@ private:
         -> void
     {
         visitor_.print(
-            "required inputs: {", common::format_seq(a.required_inputs), '}');
+            "required inputs: {", mpk::mix::format_seq(a.required_inputs), '}');
         visitor_.nested("activate", a.activate);
     }
 

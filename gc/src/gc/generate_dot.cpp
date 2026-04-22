@@ -12,7 +12,7 @@
 
 #include "gc/activation_node.hpp"
 
-#include "common/throw.hpp"
+#include "mpk/mix/util/throw.hpp"
 
 
 namespace gc {
@@ -40,14 +40,14 @@ auto generate_dot(std::ostream& s,
     {
         auto from_port_names = g.nodes.at(e.from.node)->output_names();
         if (!from_port_names.index_range().contains(e.from.port))
-            common::throw_(
+            mpk::mix::throw_(
                 "Invalid 'from' port in edge {} - must be less than {}",
                 e, int(from_port_names.size().v));
         auto from_port_name = from_port_names[e.from.port];
 
         auto to_port_names = g.nodes.at(e.to.node)->input_names();
         if (!to_port_names.index_range().contains(e.to.port))
-            common::throw_(
+            mpk::mix::throw_(
                 "Invalid 'to' port in edge {} - must be less than {}",
                 e, int(to_port_names.size().v));
         auto to_port_name = to_port_names[e.to.port];

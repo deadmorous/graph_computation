@@ -8,10 +8,10 @@
 
 #pragma once
 
-#include "common/enum_flags.hpp"
-#include "common/enum_type.hpp"
-#include "common/struct_type.hpp"
-#include "common/type.hpp"
+#include "mpk/mix/enum_flags.hpp"
+#include "mpk/mix/meta/enum_type.hpp"
+#include "mpk/mix/struct_type.hpp"
+#include "mpk/mix/meta/type.hpp"
 
 #include "mpk/mix/value/type_fwd.hpp"
 

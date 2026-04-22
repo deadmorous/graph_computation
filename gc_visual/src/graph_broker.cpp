@@ -12,7 +12,7 @@
 
 namespace {
 
-template<common::StrongGroupedType SG, typename Port>
+template<mpk::mix::StrongGroupedType SG, typename Port>
 auto group_value(gc::NodeIndex node_index,
                  Port port_index,
                  const SG& groups)

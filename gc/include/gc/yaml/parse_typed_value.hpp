@@ -18,7 +18,7 @@ namespace gc::yaml {
 template <typename T>
 auto parse_typed_value(const YAML::Node& node,
                  const TypeRegistry& type_registry = {},
-                 common::Type_Tag<T> = {})
+                 mpk::mix::Type_Tag<T> = {})
     -> T
 {
     const auto* type = type_of<T>();

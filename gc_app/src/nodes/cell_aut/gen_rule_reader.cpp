@@ -18,7 +18,7 @@
 #include "gc/value.hpp"
 
 #include "common/expr_calculator.hpp"
-#include "common/func_ref.hpp"
+#include "mpk/mix/func_ref/func_ref.hpp"
 
 #include <algorithm>
 #include <cctype> // For std::tolower/std::toupper
@@ -152,7 +152,7 @@ auto read_gen_rules(const std::string& path) -> Cell2dGenRules
             return formula;
         }
         catch (std::exception& e) {
-            common::throw_(
+            mpk::mix::throw_(
                 "read_gen_rules: {}: failed to read formula: {}",
                 context, e.what());
         }
@@ -171,7 +171,7 @@ auto read_gen_rules(const std::string& path) -> Cell2dGenRules
         f >> overlay_count;
         read_rtrimmed_line();   // Ignore EOL
 
-        for (size_t overlay_index : common::index_range<size_t>(overlay_count))
+        for (size_t overlay_index : mpk::mix::index_range<size_t>(overlay_count))
         {
             auto overlay_context =
                 std::format("{}, overlay {}", context, overlay_index);
@@ -183,7 +183,7 @@ auto read_gen_rules(const std::string& path) -> Cell2dGenRules
                 overlay.range.min  = map_length - 1;
             if (!overlay.range.ok(min_sum, max_sum))
             {
-                common::throw_(
+                mpk::mix::throw_(
                     "read_gen_rules: {}: Invalid range: {}",
                     overlay_context, gc::Value{overlay.range});
             }

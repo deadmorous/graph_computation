@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "common/struct_type_macro.hpp"
+#include "mpk/mix/struct_type_macro.hpp"
 
 #include <cstdint>
 #include <vector>
@@ -30,7 +30,7 @@ struct Cell2dRules final
 
     auto operator==(const Cell2dRules&) const noexcept -> bool = default;
 };
-GCLIB_STRUCT_TYPE(
+MPKMIX_STRUCT_TYPE(
     Cell2dRules,
     state_count, min_state, tor, count_self, map9, map6, map4);
 

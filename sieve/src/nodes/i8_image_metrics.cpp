@@ -17,7 +17,7 @@
 #include "gc/node_port_names.hpp"
 #include "gc/value.hpp"
 
-#include "common/func_ref.hpp"
+#include "mpk/mix/func_ref/func_ref.hpp"
 
 using namespace std::literals;
 using namespace gc::literals;

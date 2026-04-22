@@ -21,7 +21,7 @@
 #include "gc/value.hpp"
 
 #include "common/expr_calculator.hpp"
-#include "common/func_ref.hpp"
+#include "mpk/mix/func_ref/func_ref.hpp"
 
 #include <cassert>
 #include <cstring>
@@ -71,7 +71,7 @@ auto generate_cmap(const Cell2dGenCmap& gen_cmap) -> IndexedColorMap
             }
         }
         catch(std::exception& e) {
-            common::throw_("generate_cmap: {}: {}", context, e.what());
+            mpk::mix::throw_("generate_cmap: {}: {}", context, e.what());
         }
     };
 
@@ -107,7 +107,7 @@ auto generate_cmap(const Cell2dGenCmap& gen_cmap) -> IndexedColorMap
 
     auto result = IndexedColorMap(gen_cmap.state_count);
     using C = ColorComponent;
-    for (auto i : common::index_range<size_t>(gen_cmap.state_count))
+    for (auto i : mpk::mix::index_range<size_t>(gen_cmap.state_count))
         result[i] = rgba(C{rgb_maps.r[i]}, C{rgb_maps.g[i]}, C{rgb_maps.b[i]});
 
     return result;

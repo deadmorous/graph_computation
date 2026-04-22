@@ -61,7 +61,7 @@ public:
 
     auto operator()(const gc::SetT&)
         -> void
-    { common::throw_("flatten_type failed: nested sets are not supported"); }
+    { mpk::mix::throw_("flatten_type failed: nested sets are not supported"); }
 
     auto operator()(const gc::StringT& t)
         -> void
@@ -103,7 +103,7 @@ public:
 
     auto operator()(const gc::VectorT&)
         -> void
-    { common::throw_("flatten_type failed: nested vectors are not supported"); }
+    { mpk::mix::throw_("flatten_type failed: nested vectors are not supported"); }
 
 
 private:

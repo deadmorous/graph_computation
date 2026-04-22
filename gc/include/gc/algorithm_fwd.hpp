@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "common/strong.hpp"
+#include "mpk/mix/strong/strong.hpp"
 
 #include <cstddef>
 
@@ -20,24 +20,24 @@ using WeakId = size_t;
 
 namespace id {
 
-GCLIB_STRONG_TYPE(Assign, WeakId);
-GCLIB_STRONG_TYPE(Block, WeakId);
-GCLIB_STRONG_TYPE(Do, WeakId);
-GCLIB_STRONG_TYPE(For, WeakId);
-GCLIB_STRONG_TYPE(FuncInvocation, WeakId);
-GCLIB_STRONG_TYPE(HeaderFile, WeakId);
-GCLIB_STRONG_TYPE(If, WeakId);
-GCLIB_STRONG_TYPE(InputBinding, WeakId);
-GCLIB_STRONG_TYPE(Lib, WeakId);
-GCLIB_STRONG_TYPE(OutputActivation, WeakId);
-GCLIB_STRONG_TYPE(ReturnOutputActivation, WeakId);
-GCLIB_STRONG_TYPE(Statement, WeakId);
-GCLIB_STRONG_TYPE(Symbol, WeakId);
-GCLIB_STRONG_TYPE(Type, WeakId);
-GCLIB_STRONG_TYPE(TypeFromBinding, WeakId);
-GCLIB_STRONG_TYPE(Var, WeakId);
-GCLIB_STRONG_TYPE(Vars, WeakId);
-GCLIB_STRONG_TYPE(While, WeakId);
+MPKMIX_STRONG_TYPE(Assign, WeakId);
+MPKMIX_STRONG_TYPE(Block, WeakId);
+MPKMIX_STRONG_TYPE(Do, WeakId);
+MPKMIX_STRONG_TYPE(For, WeakId);
+MPKMIX_STRONG_TYPE(FuncInvocation, WeakId);
+MPKMIX_STRONG_TYPE(HeaderFile, WeakId);
+MPKMIX_STRONG_TYPE(If, WeakId);
+MPKMIX_STRONG_TYPE(InputBinding, WeakId);
+MPKMIX_STRONG_TYPE(Lib, WeakId);
+MPKMIX_STRONG_TYPE(OutputActivation, WeakId);
+MPKMIX_STRONG_TYPE(ReturnOutputActivation, WeakId);
+MPKMIX_STRONG_TYPE(Statement, WeakId);
+MPKMIX_STRONG_TYPE(Symbol, WeakId);
+MPKMIX_STRONG_TYPE(Type, WeakId);
+MPKMIX_STRONG_TYPE(TypeFromBinding, WeakId);
+MPKMIX_STRONG_TYPE(Var, WeakId);
+MPKMIX_STRONG_TYPE(Vars, WeakId);
+MPKMIX_STRONG_TYPE(While, WeakId);
 
 } // namespace id
 

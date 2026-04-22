@@ -38,7 +38,7 @@ public:
         auto input_count = input_count_value.convert_to<size_t>();
         input_names_.reserve(1 + 2*input_count);
         input_names_.push_back("output_type");
-        for (auto index : common::index_range<size_t>(input_count))
+        for (auto index : mpk::mix::index_range<size_t>(input_count))
         {
             input_names_.push_back(std::format("path_{}", index));
             input_names_.push_back(std::format("value_{}", index));
@@ -103,7 +103,7 @@ private:
     {
         assert(inputs.size().v & 1u);
         auto input_count = inputs.size().v / 2;
-        for (auto index : common::index_range<int32_t>(input_count))
+        for (auto index : mpk::mix::index_range<int32_t>(input_count))
         {
             auto& path = inputs[gc::InputPort(1u + 2u*index)];
             auto& value = inputs[gc::InputPort(1u + 2u*index + 1u)];

@@ -10,8 +10,8 @@
 
 #pragma once
 
-#include "common/enum_flags.hpp"
-#include "common/struct_type_macro.hpp"
+#include "mpk/mix/enum_flags.hpp"
+#include "mpk/mix/struct_type_macro.hpp"
 
 #include "gc/type.hpp"
 
@@ -28,7 +28,7 @@ enum class ImageMetric : uint8_t
     PlateauAvgSize
 };
 
-using ImageMetricSet = common::EnumFlags<ImageMetric>;
+using ImageMetricSet = mpk::mix::EnumFlags<ImageMetric>;
 
 struct ImageMetrics
 {
@@ -36,7 +36,7 @@ struct ImageMetrics
     std::vector<double> edge_histogram;
     std::vector<double> plateau_avg_size;
 };
-GCLIB_STRUCT_TYPE(ImageMetrics, histogram, edge_histogram);
+MPKMIX_STRUCT_TYPE(ImageMetrics, histogram, edge_histogram);
 
 auto operator<<(std::ostream&, const ImageMetrics&) -> std::ostream&;
 

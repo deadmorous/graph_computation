@@ -14,7 +14,7 @@
 
 #include "gc/value.hpp"
 
-#include "common/scoped_inc.hpp"
+#include "mpk/mix/util/scoped_inc.hpp"
 
 #include <yaml-cpp/yaml.h>
 
@@ -164,7 +164,7 @@ auto Cell2dRuleEditorWidget::check_type(const gc::Type* type) -> TypeCheckResult
 
 void Cell2dRuleEditorWidget::set_value(const gc::Value& v)
 {
-    auto inc_in_set_value = common::ScopedInc{in_set_value_};
+    auto inc_in_set_value = mpk::mix::ScopedInc{in_set_value_};
 
     rules_ = v.as<gc_app::Cell2dRules>();
 

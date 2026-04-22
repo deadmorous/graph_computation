@@ -10,7 +10,7 @@
 
 #include "sieve/types/i8_range.hpp"
 
-#include "common/throw.hpp"
+#include "mpk/mix/util/throw.hpp"
 
 #include <limits>
 
@@ -40,7 +40,7 @@ auto I8Range::enforce_invariants() -> void
 
     auto end = min_state_ + state_count_;
     if (min_state_ < min || state_count_ < 0 || end > max+1)
-        common::throw_<std::range_error>(
+        mpk::mix::throw_<std::range_error>(
             "Range [", min_state_, ", ", end, ") is invalid");
 }
 

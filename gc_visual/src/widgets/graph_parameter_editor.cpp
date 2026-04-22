@@ -24,8 +24,8 @@
 
 #include "plot_visual/qstr.hpp"
 
-#include "common/func_ref.hpp"
-#include "common/throw.hpp"
+#include "mpk/mix/func_ref/func_ref.hpp"
+#include "mpk/mix/util/throw.hpp"
 
 #include <yaml-cpp/yaml.h>
 
@@ -63,7 +63,7 @@ public:
         if (auto type_check_result = EditorWidget::check_type(value.type());
             !type_check_result.ok)
         {
-            common::throw_(
+            mpk::mix::throw_(
                 "Invalid binding: '{}' can only bind to {},"
                 " whereas the parameter {} is of type {}",
                 editor_type,
@@ -114,7 +114,7 @@ private:
 };
 
 using EditorFactoryFunc =
-    common::FuncRef<std::shared_ptr<QWidget>(
+    mpk::mix::FuncRef<std::shared_ptr<QWidget>(
         const std::string&,
         const ParamBinding&,
         GraphBroker*,

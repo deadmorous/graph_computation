@@ -96,7 +96,7 @@ TEST(GcTypes, MultiIndexMonoSubranges)
         for (uint32_t k=0; k<=p; ++k)
             srb.push_back(
                 gc_types::multi_index_mono_subrange_boundary(
-                    common::Type<uint32_t>, s, n, k, p));
+                    mpk::mix::Type<uint32_t>, s, n, k, p));
 
         auto subrange_length_sum = uint64_t{};
         auto sr_len_min = uint64_t{};
@@ -117,8 +117,8 @@ TEST(GcTypes, MultiIndexMonoSubranges)
             }
             // std::cout
             //     << "subrange " << k << "/" << p << ": "
-            //     << common::format_seq(srb[k]) << " - "
-            //     << common::format_seq(srb[k+1])
+            //     << mpk::mix::format_seq(srb[k]) << " - "
+            //     << mpk::mix::format_seq(srb[k+1])
             //     << "; length = " << sr_len
             //     << std::endl;
             subrange_length_sum += sr_len;

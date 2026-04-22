@@ -10,8 +10,8 @@
 
 #include "gc_visual/widgets/cell2d_rule_map_view.hpp"
 
-#include "common/format.hpp"
-#include "common/overloads.hpp"
+#include "mpk/mix/util/format_seq.hpp"
+#include "mpk/mix/util/overloads.hpp"
 
 #include <QApplication>
 #include <QBoxLayout>
@@ -96,7 +96,7 @@ Cell2dRuleMapView::Cell2dRuleMapView(uint8_t max_neighborhood_size,
                 auto m = std::vector<int>{};
                 m.assign(map_.begin(), map_.end());
                 m.resize(map_size(), 0);
-                auto text = common::format_seq(m, " ");
+                auto text = mpk::mix::format_seq(m, " ");
                 qApp->clipboard()->setText(QString::fromUtf8(text));
             });
 
@@ -266,7 +266,7 @@ auto Cell2dRuleMapView::mouseReleaseEvent(QMouseEvent *event)
     if (event->button() != Qt::LeftButton)
         return;
     auto ctrl = (event->modifiers() & Qt::ControlModifier) != 0;
-    visit(common::Overloads{
+    visit(mpk::mix::Overloads{
         [](NoItem) {},
         [&](MenuBtn) {
             paste_action_->setDisabled(qApp->clipboard()->text().isEmpty());

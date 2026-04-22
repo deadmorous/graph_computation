@@ -183,7 +183,7 @@ TEST(AgcApp_Node, Printer)
     auto node = make_printer({}, {});
     EXPECT_EQ(node->input_count(), 1_gc_ic);
     EXPECT_EQ(node->input_names()[0_gc_i], "value"sv);
-    EXPECT_EQ(node->output_count(), common::Zero);
+    EXPECT_EQ(node->output_count(), mpk::mix::Zero);
 
     print_node_algos(node.get());
     print_node_source_code(node, "int"sv);

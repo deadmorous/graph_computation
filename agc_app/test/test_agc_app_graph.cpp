@@ -120,7 +120,7 @@ inputs:
     auto source_types =
         gc::ActivationGraphSourceTypes{};
 
-    source_types.types.push_back(common::Zero);
+    source_types.types.push_back(mpk::mix::Zero);
     add_to_last_group(
         source_types.destinations,
         gc::EdgeInputEnd{ 0_gc_n, 0_gc_i });
@@ -178,10 +178,10 @@ inputs:
     auto* context = create_context();
 
     const auto& destinations = provided_inputs.destinations;
-    for (auto index : common::group_indices(destinations))
+    for (auto index : mpk::mix::group_indices(destinations))
     {
         const auto& value = provided_inputs.values.at(index);
-        for (const auto& to : common::group(destinations, index))
+        for (const auto& to : mpk::mix::group(destinations, index))
             set_input_var(context, to.compressed(), value.data());
     }
 
@@ -358,7 +358,7 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
     auto source_types =
         gc::ActivationGraphSourceTypes{};
 
-    source_types.types.push_back(common::Zero);
+    source_types.types.push_back(mpk::mix::Zero);
     add_to_last_group(
         source_types.destinations,
         gc::EdgeInputEnd{ 0_gc_n, 0_gc_i });

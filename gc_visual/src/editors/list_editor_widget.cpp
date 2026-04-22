@@ -12,7 +12,7 @@
 
 #include "gc/value.hpp"
 
-#include "common/scoped_inc.hpp"
+#include "mpk/mix/util/scoped_inc.hpp"
 
 
 using namespace std::string_view_literals;
@@ -55,7 +55,7 @@ auto ListEditorWidget::check_type(const gc::Type* type) -> TypeCheckResult
 
 void ListEditorWidget::set_value(const gc::Value& value)
 {
-    auto inc_in_set_value = common::ScopedInc{in_set_value_};
+    auto inc_in_set_value = mpk::mix::ScopedInc{in_set_value_};
 
     auto type = value.type();
     if (type_ != type)

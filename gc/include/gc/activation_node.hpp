@@ -15,9 +15,9 @@
 #include "gc/port_values.hpp"
 #include "gc/alg_type_literal.hpp"
 
-#include "common/detail/hash.hpp"
-#include "common/index_set.hpp"
-#include "common/strong_vector.hpp"
+#include "mpk/mix/util/detail/hash.hpp"
+#include "mpk/mix/util/index_set.hpp"
+#include "mpk/mix/strong/vector.hpp"
 
 #include <cassert>
 #include <unordered_map>
@@ -29,7 +29,7 @@ constexpr inline auto max_ports = WeakPort{8};
 
 struct Ports_Tag final {};
 
-using InputPorts = common::IndexSet<InputPort>;
+using InputPorts = mpk::mix::IndexSet<InputPort>;
 
 struct PortActivationAlgorithm final
 {
@@ -41,7 +41,7 @@ using InputBindingVec =
     std::vector<alg::id::InputBinding>;
 
 using PortActivationAlgorithmVec =
-    common::StrongVector<PortActivationAlgorithm, InputPort>;
+    mpk::mix::StrongVector<PortActivationAlgorithm, InputPort>;
 
 struct NodeActivationAlgorithms
 {
@@ -60,7 +60,7 @@ auto operator<<(std::ostream&, const PrintableNodeActivationAlgorithms&)
     -> std::ostream&;
 
 using ExportedTypes =
-    std::unordered_map<alg::TypeLiteral, alg::id::Type, common::detail::Hash>;
+    std::unordered_map<alg::TypeLiteral, alg::id::Type, mpk::mix::detail::Hash>;
 
 struct ActivationNode
 {

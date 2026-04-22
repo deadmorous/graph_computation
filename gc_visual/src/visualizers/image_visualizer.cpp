@@ -82,10 +82,10 @@ ImageVisualizer::ImageVisualizer(GraphBroker* broker,
             auto opt_blend_mode =
                 magic_enum::enum_cast<BitmapView::BlendMode>(mode_str);
             if (!opt_blend_mode)
-                common::throw_(
+                mpk::mix::throw_(
                     "Invalid blend mode '{}', expected one of {}",
                     mode_str,
-                    common::format_seq(
+                    mpk::mix::format_seq(
                         magic_enum::enum_names<BitmapView::BlendMode>(), ", "));
             blend_mode = *opt_blend_mode;
         }

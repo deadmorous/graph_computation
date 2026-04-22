@@ -13,7 +13,7 @@
 #include "gc/node_index.hpp"
 #include "gc/ostream_formatter.hpp"
 #include "gc/port.hpp"
-#include "common/struct_type_macro.hpp"
+#include "mpk/mix/struct_type_macro.hpp"
 
 #include <compare>
 
@@ -34,10 +34,10 @@ struct EdgeEnd final
 };
 
 using EdgeInputEnd = EdgeEnd<Input_Tag>;
-GCLIB_STRUCT_TYPE(EdgeInputEnd, node, port);
+MPKMIX_STRUCT_TYPE(EdgeInputEnd, node, port);
 
 using EdgeOutputEnd = EdgeEnd<Output_Tag>;
-GCLIB_STRUCT_TYPE(EdgeOutputEnd, node, port);
+MPKMIX_STRUCT_TYPE(EdgeOutputEnd, node, port);
 
 struct Edge
 {
@@ -47,7 +47,7 @@ struct Edge
     auto operator<=>(const Edge&) const noexcept
         -> std::strong_ordering = default;
 };
-GCLIB_STRUCT_TYPE(Edge, from, to);
+MPKMIX_STRUCT_TYPE(Edge, from, to);
 
 inline auto edge(EdgeOutputEnd from, EdgeInputEnd to)
     -> Edge

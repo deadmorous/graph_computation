@@ -10,7 +10,7 @@
 
 #include "gc_types/live_time_series.hpp"
 
-#include <common/index_range.hpp>
+#include <mpk/mix/util/index_range.hpp>
 
 #include <gtest/gtest.h>
 
@@ -43,7 +43,7 @@ TEST(PlotVisual, LiveTimeSeries_Basic)
 
     EXPECT_TRUE(ts.frames().empty());
 
-    for (auto index : common::index_range<size_t>(2*capacity))
+    for (auto index : mpk::mix::index_range<size_t>(2*capacity))
     {
         auto v = test_vec(index, values_per_frame);
         ts.add(v);

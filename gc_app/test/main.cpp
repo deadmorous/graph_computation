@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve.mail.ru>
  */
 
-#include "common/log.hpp"
+#include "mpk/mix/log.hpp"
 
 #include <gtest/gtest.h>
 
@@ -16,9 +16,9 @@ int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);
 
-    common::start_logging();
+    mpk::mix::start_logging();
 
-    common::set_log_level(common::LogLevel::Debug);
+    mpk::mix::set_log_level(mpk::mix::LogLevel::Debug);
 
     return RUN_ALL_TESTS();
 }

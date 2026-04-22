@@ -19,8 +19,8 @@
 #include "gc/computation_context.hpp"
 #include "gc/value.hpp"
 
-#include "common/func_ref.hpp"
-#include "common/scoped_inc.hpp"
+#include "mpk/mix/func_ref/func_ref.hpp"
+#include "mpk/mix/util/scoped_inc.hpp"
 
 #include <yaml-cpp/yaml.h>
 
@@ -341,7 +341,7 @@ auto Cell2dGenRuleEditorWidget::check_type(const gc::Type* type)
 void Cell2dGenRuleEditorWidget::set_value(const gc::Value& v)
 {
     auto& s = *storage_;
-    auto inc_in_set_value = common::ScopedInc{s.in_set_value};
+    auto inc_in_set_value = mpk::mix::ScopedInc{s.in_set_value};
 
     auto gen_rules = v.as<gc_app::Cell2dGenRules>();
     if (s.gen_rules == gen_rules)

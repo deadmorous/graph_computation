@@ -22,7 +22,7 @@ class ScalarFormatter final
 public:
     template <typename T>
     requires (std::is_integral_v<T> || std::is_floating_point_v<T>)
-    auto operator()(common::Type_Tag<T> tag, const Value& v) const
+    auto operator()(mpk::mix::Type_Tag<T> tag, const Value& v) const
         -> std::string
     {
         if constexpr (sizeof(T) == 1)
@@ -31,14 +31,14 @@ public:
         return std::format("{}", v.as(tag));
     }
 
-    auto operator()(common::Type_Tag<bool> tag, const Value& v) const
+    auto operator()(mpk::mix::Type_Tag<bool> tag, const Value& v) const
         -> std::string
     {
         auto b = v.as(tag);
         return b ? "true" : "false";
     }
 
-    auto operator()(common::Type_Tag<std::byte>tag, const Value& v) const
+    auto operator()(mpk::mix::Type_Tag<std::byte>tag, const Value& v) const
         -> std::string
     {
         auto b = static_cast<uint8_t>(v.as(tag));
@@ -79,7 +79,7 @@ public:
 
     auto operator()(const gc::SetT&, const Value& value) const
         -> std::string
-    { return '{' + common::format_seq(value.keys(), ", ") + '}'; }
+    { return '{' + mpk::mix::format_seq(value.keys(), ", ") + '}'; }
 
     auto operator()(const gc::StringT&, const Value& value) const
         -> std::string
@@ -152,7 +152,7 @@ private:
 
 Value::Value() noexcept = default;
 
-Value::Value(common::Type_Tag<std::string> tag, std::string_view value) :
+Value::Value(mpk::mix::Type_Tag<std::string> tag, std::string_view value) :
     Value(tag, std::string(value))
 {}
 

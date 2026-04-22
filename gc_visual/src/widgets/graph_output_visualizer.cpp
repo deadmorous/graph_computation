@@ -20,8 +20,8 @@
 
 #include "gc/detail/parse_node_port.hpp"
 
-#include "common/func_ref.hpp"
-#include "common/throw.hpp"
+#include "mpk/mix/func_ref/func_ref.hpp"
+#include "mpk/mix/util/throw.hpp"
 
 #include <QBoxLayout>
 #include <QLabel>
@@ -32,7 +32,7 @@ using namespace std::string_view_literals;
 namespace {
 
 using VisualizerFactoryFunc =
-    common::FuncRef<VisualizerWidget*(
+    mpk::mix::FuncRef<VisualizerWidget*(
         const std::string&,
         const gc::EdgeOutputEnd&,
         GraphBroker*,
@@ -51,7 +51,7 @@ auto visualizer_factory() -> VisualizerFactoryFunc
         if (auto type_check_result = Visualizer::check_type(value.type());
             !type_check_result.ok)
         {
-            common::throw_(
+            mpk::mix::throw_(
                 "Invalid binding: '{}' can only bind to {},"
                 " whereas the output {} is of type {}",
                 visualizer_type,

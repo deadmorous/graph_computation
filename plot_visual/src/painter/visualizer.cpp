@@ -12,7 +12,7 @@
 
 #include "plot_visual/detail/draw_error_message.hpp"
 
-#include "common/defer.hpp"
+#include "mpk/mix/util/defer.hpp"
 
 #include <QPainter>
 
@@ -25,7 +25,7 @@ auto safe_paint(Visualizer* visualizer,
                 QPainter& painter) -> void
 {
     painter.save();
-    auto restore_painter = common::Defer{ [&]{ painter.restore(); } };
+    auto restore_painter = mpk::mix::Defer{ [&]{ painter.restore(); } };
 
     if (visualizer)
     {

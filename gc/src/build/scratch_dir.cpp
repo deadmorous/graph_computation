@@ -10,7 +10,7 @@
 
 #include "build/scratch_dir.hpp"
 
-#include "common/throw.hpp"
+#include "mpk/mix/util/throw.hpp"
 
 #include <cassert>
 #include <format>
@@ -54,7 +54,7 @@ ScratchDir::ScratchDir(const fs::path& parent_dir,
             return;
         }
     }
-    common::throw_(
+    mpk::mix::throw_(
         "Failed to create a unique temporary directory after several attempts.");
 }
 

@@ -18,7 +18,7 @@
 #include "gc/value.hpp"
 
 #include "common/expr_calculator.hpp"
-#include "common/func_ref.hpp"
+#include "mpk/mix/func_ref/func_ref.hpp"
 
 #include <algorithm>
 #include <cctype> // For std::tolower/std::toupper
@@ -102,7 +102,7 @@ auto read_gen_cmap(const std::string& path) -> Cell2dGenCmap
             return formula;
         }
         catch (std::exception& e) {
-            common::throw_(
+            mpk::mix::throw_(
                 "read_gen_cmap: {}: failed to read formula: {}",
                 context, e.what());
         }
@@ -118,7 +118,7 @@ auto read_gen_cmap(const std::string& path) -> Cell2dGenCmap
 
     auto max = gen_cmap.state_count - 1;
 
-    for (size_t overlay_index : common::index_range<size_t>(overlay_count))
+    for (size_t overlay_index : mpk::mix::index_range<size_t>(overlay_count))
     {
         auto overlay_context =
             std::format("overlay {}", overlay_index);
@@ -130,7 +130,7 @@ auto read_gen_cmap(const std::string& path) -> Cell2dGenCmap
             overlay.range.min = max;
         if (!overlay.range.ok(0, max))
         {
-            common::throw_(
+            mpk::mix::throw_(
                 "read_gen_cmap: {}: Invalid range: {}",
                 overlay_context, gc::Value{overlay.range});
         }

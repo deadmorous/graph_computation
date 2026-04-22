@@ -12,8 +12,8 @@
 #include "gc/type.hpp"
 #include "gc/value_path.hpp"
 
-#include "common/throw.hpp"
-#include "common/type.hpp"
+#include "mpk/mix/util/throw.hpp"
+#include "mpk/mix/meta/type.hpp"
 
 #include "mpk/mix/value/value.hpp"
 

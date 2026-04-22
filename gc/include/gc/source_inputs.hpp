@@ -13,7 +13,7 @@
 #include "gc/edge.hpp"
 #include "gc/value.hpp"
 
-#include "common/grouped.hpp"
+#include "mpk/mix/strong/grouped.hpp"
 
 #include <ostream>
 
@@ -23,7 +23,7 @@ namespace gc {
 struct SourceInputs final
 {
     ValueVec values;
-    common::Grouped<EdgeInputEnd> destinations;
+    mpk::mix::Grouped<EdgeInputEnd> destinations;
 
     auto operator==(const SourceInputs&) const noexcept -> bool = default;
 };

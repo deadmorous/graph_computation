@@ -12,7 +12,7 @@
 
 #include "gc/edge.hpp"
 
-#include "common/strong_vector.hpp"
+#include "mpk/mix/strong/vector.hpp"
 
 
 namespace gc {
@@ -22,7 +22,7 @@ struct Graph final
 {
     using Node = Node_;
     using Edge = Edge_;
-    using NodeVec = common::StrongVector<Node, NodeIndex>;
+    using NodeVec = mpk::mix::StrongVector<Node, NodeIndex>;
     using EdgeVec = std::vector<Edge>;
 
     NodeVec nodes;

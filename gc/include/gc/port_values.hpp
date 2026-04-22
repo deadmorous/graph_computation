@@ -13,7 +13,7 @@
 #include "gc/port.hpp"
 #include "gc/value_fwd.hpp"
 
-#include "common/strong_span.hpp"
+#include "mpk/mix/strong/span.hpp"
 
 #include <string_view>
 
@@ -21,18 +21,18 @@
 namespace gc {
 
 using InputNames =
-    common::StrongSpan<const std::string_view, InputPort>;
+    mpk::mix::StrongSpan<const std::string_view, InputPort>;
 
 using OutputNames =
-    common::StrongSpan<const std::string_view, OutputPort>;
+    mpk::mix::StrongSpan<const std::string_view, OutputPort>;
 
 using OutputValues =
-    common::StrongSpan<Value, OutputPort>;
+    mpk::mix::StrongSpan<Value, OutputPort>;
 
 using InputValues =
-    common::StrongSpan<Value, InputPort>;
+    mpk::mix::StrongSpan<Value, InputPort>;
 
 using ConstInputValues =
-    common::StrongSpan<const Value, InputPort>;
+    mpk::mix::StrongSpan<const Value, InputPort>;
 
 } // namespace gc

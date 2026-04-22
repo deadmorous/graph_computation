@@ -218,7 +218,7 @@ auto Type::intern(
 {
     auto& types = interned_types();
     auto [it, inserted] = types.emplace(
-        common::Impl, init, bases, names);
+        mpk::mix::Impl, init, bases, names);
 
     const auto* result = &*it;
 

@@ -14,7 +14,7 @@
 
 #include "gc_types/image.hpp"
 
-#include "common/const.hpp"
+#include "mpk/mix/func_ref/tags.hpp"
 
 #include <QMouseEvent>
 #include <QPainter>
@@ -75,7 +75,7 @@ auto is_light(QRgb c) -> bool
 }
 
 auto interp_color(
-    common::Const_Tag<BlendMode::all>,
+    mpk::mix::Const_Tag<BlendMode::all>,
     QRgb c0, QRgb c1, const Rational& f) -> QRgb
 {
     auto r = interp_color_component(qRed(c0), qRed(c1), f);
@@ -86,27 +86,27 @@ auto interp_color(
 }
 
 auto interp_color(
-    common::Const_Tag<BlendMode::light>,
+    mpk::mix::Const_Tag<BlendMode::light>,
     QRgb c0, QRgb c1, const Rational& f) -> QRgb
 {
     if (!is_light(c1))
         return c1;
 
-    return interp_color(common::Const<BlendMode::all>, c0, c1, f);
+    return interp_color(mpk::mix::Const<BlendMode::all>, c0, c1, f);
 }
 
 auto interp_color(
-    common::Const_Tag<BlendMode::dark>,
+    mpk::mix::Const_Tag<BlendMode::dark>,
     QRgb c0, QRgb c1, const Rational& f) -> QRgb
 {
     if (is_light(c1))
         return c1;
 
-    return interp_color(common::Const<BlendMode::all>, c0, c1, f);
+    return interp_color(mpk::mix::Const<BlendMode::all>, c0, c1, f);
 }
 
 template <BlendMode mode>
-auto blend_impl(common::Const_Tag<mode> mode_tag,
+auto blend_impl(mpk::mix::Const_Tag<mode> mode_tag,
                 const QImage& img0,
                 QImage img1,
                 double factor)
@@ -140,11 +140,11 @@ auto blend(const QImage& img0, QImage img1, BlendMode mode, double factor)
     case BlendMode::none:
         return img1;
     case BlendMode::all:
-        return blend_impl(common::Const<BlendMode::all>, img0, img1, factor);
+        return blend_impl(mpk::mix::Const<BlendMode::all>, img0, img1, factor);
     case BlendMode::light:
-        return blend_impl(common::Const<BlendMode::light>, img0, img1, factor);
+        return blend_impl(mpk::mix::Const<BlendMode::light>, img0, img1, factor);
     case BlendMode::dark:
-        return blend_impl(common::Const<BlendMode::dark>, img0, img1, factor);
+        return blend_impl(mpk::mix::Const<BlendMode::dark>, img0, img1, factor);
     }
     __builtin_unreachable();
 }

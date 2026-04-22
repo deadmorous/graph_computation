@@ -20,7 +20,7 @@ auto populate_node_registry(gc::NodeRegistry<Node>&)
     -> void;
 
 template <typename Node>
-auto node_registry(common::Type_Tag<Node> = {})
+auto node_registry(mpk::mix::Type_Tag<Node> = {})
     -> gc::NodeRegistry<Node>
 {
     auto result = gc::NodeRegistry<Node>{};

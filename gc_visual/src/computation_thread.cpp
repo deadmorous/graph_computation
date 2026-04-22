@@ -11,8 +11,8 @@
 #include "gc_visual/computation_thread.hpp"
 
 #include "common/compiler_diagnostic.hpp"
-#include "common/func_ref.hpp"
-#include "common/overloads.hpp"
+#include "mpk/mix/func_ref/func_ref.hpp"
+#include "mpk/mix/util/overloads.hpp"
 
 #include <QtGlobal>
 
@@ -36,7 +36,7 @@ auto ComputationThread::get_parameter(const gc::ParameterSpec& spec) const
     -> gc::Value
 {
     return visit(
-        common::Overloads{
+        mpk::mix::Overloads{
             [&](const gc::ExternalInputSpec& i) -> gc::Value
             {
                 return computation_
@@ -110,7 +110,7 @@ auto ComputationThread::set_parameter(const gc::ParameterSpec& spec,
     skip_ = 0;
 
     visit(
-        common::Overloads{
+        mpk::mix::Overloads{
             [&](const gc::ExternalInputSpec& i)
             {
                 computation_.source_inputs
@@ -148,7 +148,7 @@ auto ComputationThread::invalidate_input(const gc::ParameterSpec& spec)
     auto& res = computation_.result;
 
     visit(
-        common::Overloads{
+        mpk::mix::Overloads{
             [&](const gc::ExternalInputSpec& i)
             {
                 for (const auto& dst :

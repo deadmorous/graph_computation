@@ -13,7 +13,7 @@
 #include "gc_types/color.hpp"
 #include "gc_types/uint.hpp"
 
-#include "common/struct_type_macro.hpp"
+#include "mpk/mix/struct_type_macro.hpp"
 
 
 namespace gc_types {
@@ -29,7 +29,7 @@ struct Size final
 
 using UintSize = Size<Uint>;
 
-GCLIB_STRUCT_TYPE(UintSize, width, height);
+MPKMIX_STRUCT_TYPE(UintSize, width, height);
 
 
 using ColorVec =

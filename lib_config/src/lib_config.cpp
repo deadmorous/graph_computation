@@ -1,6 +1,6 @@
 #include "lib_config/lib_config.hpp"
 
-#include "common/throw.hpp"
+#include "mpk/mix/util/throw.hpp"
 
 #include <cassert>
 #include <unordered_map>
@@ -25,7 +25,7 @@ auto register_lib_config(std::string_view library, LibConfig lib_config)
 {
     auto& m = lib_config_map();
     if (m.contains(library))
-        common::throw_(
+        mpk::mix::throw_(
             "register_lib_config failed: Library '{}' is already registered",
             library);
     m.emplace(library, std::move(lib_config));
@@ -37,7 +37,7 @@ auto lib_config(std::string_view library)
     auto& m = lib_config_map();
     auto it = m.find(library);
     if (it == m.end())
-        common::throw_(
+        mpk::mix::throw_(
             "lib_config failed: Library '{}' is not found", library);
     return it->second;
 }

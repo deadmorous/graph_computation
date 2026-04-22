@@ -12,9 +12,9 @@
 
 #include "gc/simple_graph.hpp"
 
-#include "common/detail/hash.hpp"
-#include "common/grouped.hpp"
-#include "common/throw.hpp"
+#include "mpk/mix/util/detail/hash.hpp"
+#include "mpk/mix/strong/grouped.hpp"
+#include "mpk/mix/util/throw.hpp"
 
 #include <algorithm>
 #include <unordered_map>
@@ -35,12 +35,12 @@ template <typename Node>
 auto graph_structure(const SimpleGraph<Node>& g)
     ->GraphStructure
 {
-    std::unordered_map<Node, NodeIndex, common::detail::Hash> indices;
+    std::unordered_map<Node, NodeIndex, mpk::mix::detail::Hash> indices;
     for (auto index : g.nodes.index_range())
     {
         const auto& node = g.nodes[index];
         if (indices.contains(node))
-            common::throw_(
+            mpk::mix::throw_(
                 "Node {} is encountered in the graph more than once", node);
         indices[node] = index;
     }

@@ -14,8 +14,8 @@
 
 #include "gc_types/coordinate_range.hpp"
 
-#include "common/checkpoint.hpp"
-#include "common/fast_pimpl.hpp"
+#include "mpk/mix/util/checkpoint.hpp"
+#include "mpk/mix/util/fast_pimpl.hpp"
 
 #include <memory>
 #include <optional>
@@ -41,7 +41,7 @@ public:
         auto reset() -> void { frames_added.reset(); }
     };
 
-    using Checkpoint = common::Checkpoint<UpdateHistory>;
+    using Checkpoint = mpk::mix::Checkpoint<UpdateHistory>;
 
     struct Frame final
     {
@@ -98,7 +98,7 @@ public:
 
             explicit iterator(Impl);
 
-            common::FastPimpl<Impl, 32> impl_;
+            mpk::mix::FastPimpl<Impl, 32> impl_;
         };
 
         using const_iterator = iterator;
@@ -121,7 +121,7 @@ public:
 
         explicit Frames(Impl);
 
-        common::FastPimpl<Impl, 8> impl_;
+        mpk::mix::FastPimpl<Impl, 8> impl_;
     };
 
 

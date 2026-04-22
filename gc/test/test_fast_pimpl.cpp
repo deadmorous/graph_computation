@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve.mail.ru>
  */
 
-#include "common/fast_pimpl.hpp"
+#include "mpk/mix/util/fast_pimpl.hpp"
 
 #include <string>
 #include <vector>
@@ -46,7 +46,7 @@ private:
     static constexpr size_t kImplSize = 128;
     static constexpr size_t kImplAlign = 8;
 
-    common::FastPimpl<WidgetImpl, kImplSize, kImplAlign> pimpl;
+    mpk::mix::FastPimpl<WidgetImpl, kImplSize, kImplAlign> pimpl;
 };
 
 // =========================================================================
@@ -161,7 +161,7 @@ TEST_F(FastPimplTest, ArrowOperator) {
     // (Simulating internal usage)
 
     struct TinyImpl { int x; };
-    common::FastPimpl<TinyImpl, sizeof(TinyImpl)> wrapper;
+    mpk::mix::FastPimpl<TinyImpl, sizeof(TinyImpl)> wrapper;
 
     wrapper.emplace(TinyImpl{42});
 
@@ -175,7 +175,7 @@ TEST_F(FastPimplTest, ArrowOperator) {
 TEST(FastPimplTest, FailsCompilationIfTooSmall) {
     struct BigStruct { char data[100]; };
     // Trying to fit 100 bytes into 10 bytes:
-    common::FastPimpl<BigStruct, 10> willFail;
+    mpk::mix::FastPimpl<BigStruct, 10> willFail;
     willFail.emplace(); // static_assert triggers here
 }
 //*/

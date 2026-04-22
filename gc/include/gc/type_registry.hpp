@@ -12,12 +12,12 @@
 
 #include "gc/type_fwd.hpp"
 
-#include "common/value_registry.hpp"
+#include "mpk/mix/value/value_registry.hpp"
 
 namespace gc {
 
 using TypeRegistry =
-    common::ValueRegistry<const Type*>;
+    mpk::mix::value::ValueRegistry<const Type*>;
 
 auto populate_gc_type_registry(TypeRegistry&)
     -> void;

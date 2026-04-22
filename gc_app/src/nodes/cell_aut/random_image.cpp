@@ -16,7 +16,7 @@
 #include "gc/computation_node.hpp"
 #include "gc/node_port_names.hpp"
 
-#include "common/func_ref.hpp"
+#include "mpk/mix/func_ref/func_ref.hpp"
 
 #include <cassert>
 #include <random>
@@ -126,7 +126,7 @@ private:
                     return Shape::circle;
                 if (shape_str == "rectangle")
                     return Shape::rectangle;
-                common::throw_<std::invalid_argument>(
+                mpk::mix::throw_<std::invalid_argument>(
                     "Invalid shape '", shape_str, "'");
             }();
 

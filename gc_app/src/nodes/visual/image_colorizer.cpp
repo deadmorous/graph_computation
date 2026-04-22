@@ -91,7 +91,7 @@ public:
         const auto* input_pixel = input_image.data.data();
         auto* output_pixel = output_image.data.data();
         auto N = palette.color_map.size();
-        for (auto _ : common::index_range<size_t>(input_image.data.size()))
+        for (auto _ : mpk::mix::index_range<size_t>(input_image.data.size()))
         {
             auto in = *input_pixel++ - min_state;
             auto out = in >= 0 && static_cast<size_t>(in) < N

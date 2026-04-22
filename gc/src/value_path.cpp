@@ -10,8 +10,8 @@
 
 #include "gc/value_path.hpp"
 
-#include "common/format.hpp"
-#include "common/throw.hpp"
+#include "mpk/mix/util/format_seq.hpp"
+#include "mpk/mix/util/throw.hpp"
 
 #include <charconv>
 
@@ -23,7 +23,7 @@ namespace {
 template <ValuePathLikeType ValuePathLike>
 auto print_path(std::ostream& s, const ValuePathLike& path)
     -> void
-{ s << '/' << common::format_seq(path, "/"); }
+{ s << '/' << mpk::mix::format_seq(path, "/"); }
 
 } // anonymous namespace
 
@@ -110,7 +110,7 @@ auto ValuePath::from_string(std::string_view s)
     -> ValuePath
 {
     if (s.empty() || s[0] != '/')
-        common::throw_<std::invalid_argument>(
+        mpk::mix::throw_<std::invalid_argument>(
             "Failed to parse ValuePath from string '", s,
             "' - must start with '/'");
 

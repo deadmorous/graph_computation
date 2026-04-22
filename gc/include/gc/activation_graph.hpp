@@ -14,7 +14,7 @@
 #include "gc/algorithm_fwd.hpp"
 #include "gc/graph.hpp"
 
-#include "common/grouped.hpp"
+#include "mpk/mix/strong/grouped.hpp"
 
 #include <iostream>
 #include <memory>
@@ -29,7 +29,7 @@ using ActivationGraph = Graph<std::shared_ptr<ActivationNode>>;
 struct ActivationGraphSourceTypes final
 {
     std::vector<alg::id::Type> types;
-    common::Grouped<EdgeInputEnd> destinations;
+    mpk::mix::Grouped<EdgeInputEnd> destinations;
 
     auto operator==(const ActivationGraphSourceTypes&) const noexcept
         -> bool = default;

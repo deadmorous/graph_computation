@@ -17,10 +17,10 @@
 #include "gc/computation_node.hpp"
 #include "gc/node_port_names.hpp"
 
-#include "common/binomial.hpp"
-#include "common/func_ref.hpp"
-#include "common/grouped.hpp"
-#include "common/pow2.hpp"
+#include "mpk/mix/util/binomial.hpp"
+#include "mpk/mix/func_ref/func_ref.hpp"
+#include "mpk/mix/strong/grouped.hpp"
+#include "mpk/mix/util/pow2.hpp"
 
 #include <atomic>
 #include <cmath>
@@ -47,7 +47,7 @@ auto waring_parallel(Uint limit,
     assert(s > 0);
     assert(k > 1);
 
-    auto local_results = common::Grouped<Uint>{};
+    auto local_results = mpk::mix::Grouped<Uint>{};
     local_results.values.reserve(limit*thread_count);
     for (Uint p=0; p<thread_count; ++p)
     {
@@ -68,7 +68,7 @@ auto waring_parallel(Uint limit,
     }
 
     // Partition multi-index range
-    auto mi_ranges = common::Grouped<Uint>{};
+    auto mi_ranges = mpk::mix::Grouped<Uint>{};
     mi_ranges.values.reserve(s * (thread_count+1));
     for (Uint p=0; p<=thread_count; ++p)
     {
@@ -83,7 +83,7 @@ auto waring_parallel(Uint limit,
     auto progress_factor = 1. / iter_count;
     auto iter = std::atomic<uint64_t>{0};
     auto iter_granularity =
-        std::max(2ul, common::ceil2(iter_count / (100*thread_count))) - 1;
+        std::max(2ul, mpk::mix::ceil2(iter_count / (100*thread_count))) - 1;
 
     auto threads_succeeded = Uint{};
 

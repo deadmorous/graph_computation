@@ -16,7 +16,7 @@
 #include "gc/computation_context.hpp"
 #include "gc/computation_node.hpp"
 
-#include "common/func_ref.hpp"
+#include "mpk/mix/func_ref/func_ref.hpp"
 
 #include <gtest/gtest.h>
 

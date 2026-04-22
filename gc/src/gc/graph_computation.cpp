@@ -12,10 +12,10 @@
 #include "gc/computation_node.hpp"
 #include "gc/strong_index.hpp"
 
-#include "common/func_ref.hpp"
-#include "common/index_range.hpp"
-#include "common/log.hpp"
-#include "common/throw.hpp"
+#include "mpk/mix/func_ref/func_ref.hpp"
+#include "mpk/mix/util/index_range.hpp"
+#include "mpk/mix/log.hpp"
+#include "mpk/mix/util/throw.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -35,22 +35,22 @@ namespace gc {
 struct ComputationInstructions final
 {
     // i-th group contains node indices of i-th graph level
-    common::Grouped<NodeIndex>      nodes;
+    mpk::mix::Grouped<NodeIndex>      nodes;
 
     // i-th group contains edges from nodes of level i
     // to nodes of level i+1
-    common::Grouped<Edge>           edges;
+    mpk::mix::Grouped<Edge>           edges;
 
     // i-th group contains indices of nodes supplying data
     // to the i-th node
-    common::StrongGrouped<NodeIndex, NodeIndex, Index>  sources;
+    mpk::mix::StrongGrouped<NodeIndex, NodeIndex, Index>  sources;
 };
 
 auto operator<<(std::ostream& s, const ComputationInstructions& instr)
     -> std::ostream&
 {
     auto print_group = [&](const auto& grouped, auto ig)
-        { s << '(' << common::format_seq(group(grouped, ig)) << ')'; };
+        { s << '(' << mpk::mix::format_seq(group(grouped, ig)) << ')'; };
 
     auto n = group_count(instr.nodes);
     assert(group_count(instr.edges) + 1 == n ||
@@ -93,7 +93,7 @@ auto compile(const ComputationGraph& g, const SourceInputs& provided_inputs)
 
     // Create a vector of raw pointers to graph nodes
     // TODO: Get rid of it?
-    auto nodes = common::StrongVector<const ComputationNode*, NodeIndex>{};
+    auto nodes = mpk::mix::StrongVector<const ComputationNode*, NodeIndex>{};
     nodes.reserve(g.nodes.size());
     std::ranges::transform(
         g.nodes,
@@ -109,7 +109,7 @@ auto compile(const ComputationGraph& g, const SourceInputs& provided_inputs)
     auto check_edge_end = [&]<typename Tag>(const EdgeEnd<Tag>& ee)
     {
         if(!nodes.index_range().contains(ee.node))
-            common::throw_<std::out_of_range>(
+            mpk::mix::throw_<std::out_of_range>(
                 "Edge end {} refers to a non-existent node",
                 ee);
 
@@ -117,14 +117,14 @@ auto compile(const ComputationGraph& g, const SourceInputs& provided_inputs)
         if constexpr (std::same_as<Tag, Input_Tag>)
         {
             if (ee.port >= node->input_count())
-                common::throw_<std::invalid_argument>(
+                mpk::mix::throw_<std::invalid_argument>(
                     "Edge end {} refers to a non-existent input port",
                     ee);
         }
         else
         {
             if (ee.port >= node->output_count())
-                common::throw_<std::invalid_argument>(
+                mpk::mix::throw_<std::invalid_argument>(
                     "Edge end {} refers to a non-existent output port",
                     ee);
         }
@@ -138,7 +138,7 @@ auto compile(const ComputationGraph& g, const SourceInputs& provided_inputs)
 
     std::ranges::for_each(g.edges, check_edge);
 
-    using BitVec = common::StrongVector<bool, InputPort>;
+    using BitVec = mpk::mix::StrongVector<bool, InputPort>;
 
     // Obtain information on node input and output counts.
     struct NodeData
@@ -153,7 +153,7 @@ auto compile(const ComputationGraph& g, const SourceInputs& provided_inputs)
         // Number of inputs connected to outputs of other nodes with graph edges
         InputPortCount connected_input_count{};
     };
-    auto node_data = common::StrongVector<NodeData, NodeIndex>{};
+    auto node_data = mpk::mix::StrongVector<NodeData, NodeIndex>{};
     node_data.reserve(nodes.size());
     std::ranges::transform(
         nodes,
@@ -161,7 +161,7 @@ auto compile(const ComputationGraph& g, const SourceInputs& provided_inputs)
         [](const ComputationNode* node) -> NodeData
             { return { node->input_count(),
                        node->output_count(),
-                       common::Zero,
+                       mpk::mix::Zero,
                        BitVec(node->input_count(), false) }; } );
 
     for (const auto& e : g.edges)
@@ -197,7 +197,7 @@ auto compile(const ComputationGraph& g, const SourceInputs& provided_inputs)
         assert (node_data.index_range().contains(e1.node));
         auto& ports = node_data[e1.node].connected_inputs;
         if (ports.at(e1.port))
-            common::throw_<std::invalid_argument>(
+            mpk::mix::throw_<std::invalid_argument>(
                 "Edge end {} is not the only one coming to the input port",
                 e1);
         ports[e1.port] = true;
@@ -262,9 +262,9 @@ auto compile(const ComputationGraph& g, const SourceInputs& provided_inputs)
                 [&](gc::NodeIndex inode)
                     { return !known.contains(inode); } );
 
-            common::throw_<std::invalid_argument>(
+            mpk::mix::throw_<std::invalid_argument>(
                 "Graph is not connected. Unreachable nodes are ",
-                common::format_seq(unreachable));
+                mpk::mix::format_seq(unreachable));
         }
 
         std::ranges::copy(next_level, std::inserter(known, known.end()));
@@ -289,10 +289,10 @@ auto compile(const ComputationGraph& g, const SourceInputs& provided_inputs)
             std::inserter(unprocessed_edges, unprocessed_edges.end()),
             is_edge_unprocessed);
 
-        common::throw_<std::invalid_argument>(
+        mpk::mix::throw_<std::invalid_argument>(
             "The following edges are not processed because"
             " the graph has a cycle: ",
-            common::format_seq(unprocessed_edges));
+            mpk::mix::format_seq(unprocessed_edges));
     }
 
     // Build source map
@@ -334,12 +334,12 @@ auto compile(const ComputationGraph& g, const SourceInputs& provided_inputs)
     for (const auto& dst : input_dst)
     {
         if(!nodes.index_range().contains(dst.node))
-            common::throw_<std::out_of_range>(
+            mpk::mix::throw_<std::out_of_range>(
                 "Source input destination {} refers to a non-existent node",
                 dst);
 
         if (dst.port >= InputPort{} + nodes[dst.node]->input_count())
-            common::throw_<std::invalid_argument>(
+            mpk::mix::throw_<std::invalid_argument>(
                 "Source input destination {} refers to a non-existent input port",
                 dst);
     }
@@ -351,7 +351,7 @@ auto compile(const ComputationGraph& g, const SourceInputs& provided_inputs)
     {
         const auto& nd = node_data[i];
         const auto* node = nodes[i];
-        using InputValueVec = common::StrongVector<Value, InputPort>;
+        using InputValueVec = mpk::mix::StrongVector<Value, InputPort>;
         auto default_inputs = InputValueVec(node->input_count());
         nodes[i]->default_inputs(default_inputs);
         for (auto port : default_inputs.index_range())
@@ -361,7 +361,7 @@ auto compile(const ComputationGraph& g, const SourceInputs& provided_inputs)
             if (nd.connected_inputs[port])
             {
                 if (provided)
-                    common::throw_<std::invalid_argument>(
+                    mpk::mix::throw_<std::invalid_argument>(
                         "Input for destination {} is provided,"
                         " but an output of another node is"
                         " connected to the same destination.",
@@ -405,14 +405,14 @@ auto compute(ComputationResult& result,
     {
         // Allocate result grouped data
         auto fill = [&]<typename T, typename IO, typename II>(
-                        common::StrongGrouped<T, IO, II>& grouped, auto count)
+                        mpk::mix::StrongGrouped<T, IO, II>& grouped, auto count)
         {
             grouped = {};
             for (const auto& node : g.nodes)
             {
-                for (auto _ : common::index_range<II>(count(*node)))
-                    common::add_to_last_group(grouped, T{});
-                common::next_group(grouped);
+                for (auto _ : mpk::mix::index_range<II>(count(*node)))
+                    mpk::mix::add_to_last_group(grouped, T{});
+                mpk::mix::next_group(grouped);
             }
         };
 
@@ -420,7 +420,7 @@ auto compute(ComputationResult& result,
         fill(result.outputs, output_count);
         fill(result.prev_source_outputs, output_count);
         result.node_ts =
-            common::StrongVector<Timestamp, NodeIndex>(g.nodes.size(), 0);
+            mpk::mix::StrongVector<Timestamp, NodeIndex>(g.nodes.size(), 0);
         result.computation_ts = 0;
     }
 
@@ -444,7 +444,7 @@ auto compute(ComputationResult& result,
     ++result.computation_ts;
 
     auto source_updated =
-        common::StrongVector<bool, NodeIndex>(g.nodes.size(), false);
+        mpk::mix::StrongVector<bool, NodeIndex>(g.nodes.size(), false);
 
     // Set external inputs
     for (size_t i=0, n=source_inputs.values.size(); i<n; ++i)
@@ -454,12 +454,12 @@ auto compute(ComputationResult& result,
         for (auto d : group(source_inputs.destinations, i))
         {
             if (!g.nodes.index_range().contains(d.node))
-                common::throw_<std::out_of_range>(
+                mpk::mix::throw_<std::out_of_range>(
                     "Source input {} refers to an inexistent graph node",
                     d);
             auto node_inputs = group(result.inputs, d.node);
             if (!node_inputs.index_range().contains(d.port))
-                common::throw_<std::out_of_range>(
+                mpk::mix::throw_<std::out_of_range>(
                     "Source input {} refers to an inexistent input port",
                     d);
             auto& node_input = node_inputs[d.port];

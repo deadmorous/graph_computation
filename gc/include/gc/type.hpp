@@ -11,8 +11,8 @@
 #include "gc/type_fwd.hpp"
 #include "gc/detail/value_component_access.hpp"
 
-#include "common/impl_tag.hpp"
-#include "common/strong.hpp"
+#include "mpk/mix/util/impl_tag.hpp"
+#include "mpk/mix/strong/strong.hpp"
 
 #include "mpk/mix/value/type.hpp"
 

@@ -18,7 +18,7 @@
 
 #include "gc/yaml/parse_value.hpp"
 
-#include "common/throw.hpp"
+#include "mpk/mix/util/throw.hpp"
 
 #include <yaml-cpp/yaml.h>
 
@@ -58,7 +58,7 @@ ImageMetricsVisualizer::ImageMetricsVisualizer(GraphBroker* broker,
             auto value = entry.second.as<std::string>();
             auto metric = magic_enum::enum_cast<sieve::ImageMetric>(key);
             if (!metric)
-                common::throw_("Unknown image metric '{}'", key);
+                mpk::mix::throw_("Unknown image metric '{}'", key);
             switch (*metric)
             {
             case sieve::ImageMetric::StateHistogram:
@@ -66,7 +66,7 @@ ImageMetricsVisualizer::ImageMetricsVisualizer(GraphBroker* broker,
                 auto r = magic_enum::enum_cast<
                     plot::TimeSeriesHistogramRenderer>(value);
                 if (!r)
-                    common::throw_("Unknown histogram renderer '{}'", value);
+                    mpk::mix::throw_("Unknown histogram renderer '{}'", value);
                 renderers.state_histogram = *r;
                 break;
             }
@@ -75,7 +75,7 @@ ImageMetricsVisualizer::ImageMetricsVisualizer(GraphBroker* broker,
                 auto r = magic_enum::enum_cast<
                     plot::TimeSeriesHistogramRenderer>(value);
                 if (!r)
-                    common::throw_("Unknown histogram renderer '{}'", value);
+                    mpk::mix::throw_("Unknown histogram renderer '{}'", value);
                 renderers.edge_histogram = *r;
                 break;
             }
@@ -84,7 +84,7 @@ ImageMetricsVisualizer::ImageMetricsVisualizer(GraphBroker* broker,
                 auto r = magic_enum::enum_cast<
                     plot::TimeSeriesRenderer>(value);
                 if (!r)
-                    common::throw_("Unknown time series renderer '{}'", value);
+                    mpk::mix::throw_("Unknown time series renderer '{}'", value);
                 renderers.plateau_avg_size = *r;
                 break;
             }

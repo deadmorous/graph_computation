@@ -44,7 +44,7 @@ struct AlgorithmInspector final
             return;
         if (!visitor(id))
             return;
-        if (id == common::Zero)
+        if (id == mpk::mix::Zero)
             return;
         visitor(StepIn);
         const auto& spec = storage(id);

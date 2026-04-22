@@ -65,7 +65,7 @@ public:
 
         auto out_count = output_count();
 
-        if (out_count == common::Zero)
+        if (out_count == mpk::mix::Zero)
             return true;
 
         auto output_index = 0_gc_o;
@@ -378,7 +378,7 @@ TEST(Gc, compute_2)
                 gr,
                 [](const gc::Value& v)
                 { return v.as<int>(); });
-            s << inode << ": (" << common::format_seq(seq) << ')' << std::endl;
+            s << inode << ": (" << mpk::mix::format_seq(seq) << ')' << std::endl;
         }
         return s.str();
     };
@@ -451,7 +451,7 @@ TEST(Gc, compute_partially)
                 { return v.as<int>(); });
             const auto* node =
                 static_cast<const TestNode*>(g.nodes.at(inode).get());
-            s << inode << ": (" << common::format_seq(seq)
+            s << inode << ": (" << mpk::mix::format_seq(seq)
               << ") - ts: " << res.node_ts.at(inode)
               << ", computed: " << node->computation_count()
               << std::endl;

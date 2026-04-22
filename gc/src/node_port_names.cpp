@@ -38,7 +38,7 @@ auto DynamicNames::resize(WeakPort count)
 }
 
 auto DynamicNames::operator()() const
-    -> common::ConstNameSpan
+    -> mpk::mix::ConstNameSpan
 {
     return name_views_;
 }

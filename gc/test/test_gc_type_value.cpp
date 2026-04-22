@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "common/struct_type_macro.hpp"
+#include "mpk/mix/struct_type_macro.hpp"
 #include "gc/value.hpp"
 
 #include <gtest/gtest.h>
@@ -28,9 +28,9 @@ struct MyStruct
     std::vector<unsigned int> flags;
 };
 
-GCLIB_STRUCT_TYPE(MyStruct, foo, bar, flags);
+MPKMIX_STRUCT_TYPE(MyStruct, foo, bar, flags);
 
-GCLIB_STRONG_TYPE(MyIndex, uint32_t);
+MPKMIX_STRONG_TYPE(MyIndex, uint32_t);
 
 } // anonymous namespace
 
@@ -160,13 +160,13 @@ TEST(Gc, EnumType)
     EXPECT_EQ(v.as<MyEnum>(), MyEnum::Foo);
 
     v.set(gc::ValuePath{ "value"sv },
-          gc::Value{ common::Type<Underlying>, 6 });
+          gc::Value{ mpk::mix::Type<Underlying>, 6 });
     EXPECT_EQ(v.as<MyEnum>(), MyEnum::Baz);
 }
 
 TEST(Gc, EnumFlagsType)
 {
-    using MyFlags = common::EnumFlags<MyEnum>;
+    using MyFlags = mpk::mix::EnumFlags<MyEnum>;
     const auto* type = gc::Type::of<MyFlags>();
     EXPECT_EQ(std::format("{}", type), "Type{EnumFlags{Enum<MyEnum: 1>}}");
 
@@ -229,11 +229,11 @@ TEST(Gc, CustomType)
 
 TEST(Gc, Scalar)
 {
-    auto val = gc::Value(common::Type<int32_t>, 123);
+    auto val = gc::Value(mpk::mix::Type<int32_t>, 123);
 
     size_t visit_count{};
     gc::ScalarT{ val.type() }.visit(
-        [&]<typename T>(common::Type_Tag<T>)
+        [&]<typename T>(mpk::mix::Type_Tag<T>)
         {
             constexpr auto is_int32_t = std::is_same_v<T, int32_t>;
             EXPECT_TRUE(is_int32_t);
@@ -269,8 +269,8 @@ TEST(Gc, String)
         EXPECT_THROW(val.convert_to<int>(), std::invalid_argument);
     };
 
-    constexpr auto ts = common::Type<std::string>;
-    constexpr auto tsv = common::Type<std::string_view>;
+    constexpr auto ts = mpk::mix::Type<std::string>;
+    constexpr auto tsv = mpk::mix::Type<std::string_view>;
     constexpr auto sv1 = "asd"sv;
     constexpr auto sv2 = "qwe"sv;
 
@@ -402,14 +402,14 @@ TEST(Gc, StrongType)
 TEST(Gc, FormatValue)
 {
     // EXPECT_EQ(std::format("{}", gc::Value(123)), "123");
-    EXPECT_EQ(std::format("{}", gc::Value(common::Type<uint8_t>, 123)), "123");
+    EXPECT_EQ(std::format("{}", gc::Value(mpk::mix::Type<uint8_t>, 123)), "123");
 
     // int8_t is formatted as int, but it's not the same as char - we don't
     // currently support char
-    EXPECT_EQ(std::format("{}", gc::Value(common::Type<int8_t>, 'A')), "65");
+    EXPECT_EQ(std::format("{}", gc::Value(mpk::mix::Type<int8_t>, 'A')), "65");
 
     // TODO: Uncomment when we support char
-    // EXPECT_EQ(std::format("{}", gc::Value(common::Type<char>, 'A')), "A");
+    // EXPECT_EQ(std::format("{}", gc::Value(mpk::mix::Type<char>, 'A')), "A");
 
     EXPECT_EQ(std::format("{}", gc::Value(-1.23)), "-1.23");
     EXPECT_EQ(std::format("{}", gc::Value(std::byte{0x9c})), "9c");

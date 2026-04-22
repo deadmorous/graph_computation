@@ -10,7 +10,7 @@
 
 #include "gc_types/live_time_series.hpp"
 
-#include "common/ring_buffer.hpp"
+#include "mpk/mix/util/ring_buffer.hpp"
 
 #include <algorithm>
 #include <numeric>
@@ -29,7 +29,7 @@ public:
 
     auto set_frame_capacity(size_t capacity) -> void
     {
-        frames_ = common::RingBuffer<Frame>{capacity};
+        frames_ = mpk::mix::RingBuffer<Frame>{capacity};
         clear_update_history();
     }
 
@@ -72,7 +72,7 @@ public:
     }
 
     using Frame = LiveTimeSeries::Frame;
-    using FrameBuffer = common::RingBuffer<Frame>;
+    using FrameBuffer = mpk::mix::RingBuffer<Frame>;
 
     auto frames() noexcept -> const FrameBuffer&
     { return frames_; }
@@ -122,7 +122,7 @@ private:
     CoordinateRange<double> value_range_;
     size_t next_ordinal_{};
 
-    common::IntrusiveLinkedList<Checkpoint> checkpoints_;
+    mpk::mix::IntrusiveLinkedList<Checkpoint> checkpoints_;
 };
 
 class LiveTimeSeries::Frames::iterator::Impl final

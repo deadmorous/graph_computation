@@ -19,7 +19,7 @@
 #include "gc/value.hpp"
 
 #include "common/expr_calculator.hpp"
-#include "common/func_ref.hpp"
+#include "mpk/mix/func_ref/func_ref.hpp"
 
 #include <cassert>
 #include <cstring>
@@ -59,7 +59,7 @@ auto generate_rules(const Cell2dGenRules& gen_rules) -> Cell2dRules
             }
         }
         catch(std::exception& e) {
-            common::throw_("generate_rules: {}: {}", context, e.what());
+            mpk::mix::throw_("generate_rules: {}: {}", context, e.what());
         }
     };
 
@@ -71,11 +71,11 @@ auto generate_rules(const Cell2dGenRules& gen_rules) -> Cell2dRules
         int8_t min = gen_rules.min_state;
         int8_t max = gen_rules.min_state + (gen_rules.state_count - 1);
 
-        for(auto i : common::index_range<size_t>(map.size()))
+        for(auto i : mpk::mix::index_range<size_t>(map.size()))
         {
             if((map[i] > max || map[i] < min) && map[i] != NoChange)
             {
-                common::throw_(
+                mpk::mix::throw_(
                     "generate_rules: {}: Map element {} is out of range (=={})",
                     context, i, int(map[i]));
             }

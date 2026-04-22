@@ -12,7 +12,7 @@
 
 #include "gc/value.hpp"
 
-#include "common/scoped_inc.hpp"
+#include "mpk/mix/util/scoped_inc.hpp"
 
 #include <QMenu>
 
@@ -85,7 +85,7 @@ void FlagsEditorWidget::set_value(const gc::Value& value)
     if (value_ == value)
         return;
 
-    auto inc_in_set_value = common::ScopedInc{in_set_value_};
+    auto inc_in_set_value = mpk::mix::ScopedInc{in_set_value_};
 
     auto* menu = widget_->menu();
 

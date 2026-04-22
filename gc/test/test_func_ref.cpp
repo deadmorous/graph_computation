@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "common/func_ref.hpp"
+#include "mpk/mix/func_ref/func_ref.hpp"
 
 #include <gtest/gtest.h>
 
@@ -46,7 +46,7 @@ struct AddFunctor
 
 TEST(Common_FuncRef, FreeFunc)
 {
-    using namespace common;
+    using namespace mpk::mix;
 
     auto iref = FuncRef{ Const<add> };
     EXPECT_EQ(iref(3, 4), 7);
@@ -57,7 +57,7 @@ TEST(Common_FuncRef, FreeFunc)
 
 TEST(Common_FuncRef, FreeFuncPtr)
 {
-    using namespace common;
+    using namespace mpk::mix;
 
     auto iref = FuncRef{ Indirect, add };
     EXPECT_EQ(iref(3, 4), 7);
@@ -65,7 +65,7 @@ TEST(Common_FuncRef, FreeFuncPtr)
 
 TEST(Common_FuncRef, FreeFuncWitihContext)
 {
-    using namespace common;
+    using namespace mpk::mix;
 
     auto v = std::vector{ 1, 2, 3 };
     auto iref = FuncRef{ Const<sum_vec>, &v };
@@ -75,7 +75,7 @@ TEST(Common_FuncRef, FreeFuncWitihContext)
 
 TEST(Common_FuncRef, ClassMethod)
 {
-    using namespace common;
+    using namespace mpk::mix;
 
     auto summator = ClassWithAddMethod{};
     auto iref = FuncRef{ Const<&ClassWithAddMethod::add>, &summator };
@@ -85,7 +85,7 @@ TEST(Common_FuncRef, ClassMethod)
 
 TEST(Common_FuncRef, Functor)
 {
-    using namespace common;
+    using namespace mpk::mix;
 
     auto summator = AddFunctor{};
     auto iref = FuncRef{ &summator };
@@ -94,7 +94,7 @@ TEST(Common_FuncRef, Functor)
 
 TEST(Common_FuncRef, CapturelessDecayedLambda)
 {
-    using namespace common;
+    using namespace mpk::mix;
 
     auto decayed_lambda =
         +[](int a, int b) { return a + b; };
@@ -105,7 +105,7 @@ TEST(Common_FuncRef, CapturelessDecayedLambda)
 
 TEST(Common_FuncRef, CapturelessLambda)
 {
-    using namespace common;
+    using namespace mpk::mix;
 
     auto lambda = [](int a, int b) { return a + b; };
 
@@ -115,7 +115,7 @@ TEST(Common_FuncRef, CapturelessLambda)
 
 TEST(Common_FuncRef, LambdaWithCapture)
 {
-    using namespace common;
+    using namespace mpk::mix;
 
     auto five = 5;
     auto lambda = [five](int a) { return a + five; };
@@ -126,7 +126,7 @@ TEST(Common_FuncRef, LambdaWithCapture)
 
 TEST(Common_FuncRef, Empty)
 {
-    using namespace common;
+    using namespace mpk::mix;
 
     auto iref = FuncRef{ Const<add> };
     EXPECT_TRUE(iref);

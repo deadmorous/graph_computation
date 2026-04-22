@@ -12,7 +12,7 @@
 
 #include "build/lib_config_fwd.hpp"
 
-#include "common/struct_type_macro.hpp"
+#include "mpk/mix/struct_type_macro.hpp"
 
 #include <ostream>
 #include <string>
@@ -28,7 +28,7 @@ struct LibConfig final
     std::string compile_options;
 };
 
-GCLIB_STRUCT_TYPE(LibConfig, include_dirs, binary_path, compile_options);
+MPKMIX_STRUCT_TYPE(LibConfig, include_dirs, binary_path, compile_options);
 
 auto operator<<(std::ostream&, const LibConfig&)
     -> std::ostream&;

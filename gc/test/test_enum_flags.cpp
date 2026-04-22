@@ -8,8 +8,8 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "common/detail/set_like.hpp"
-#include "common/enum_flags.hpp"
+#include "mpk/mix/detail/set_like.hpp"
+#include "mpk/mix/enum_flags.hpp"
 
 #include <gtest/gtest.h>
 
@@ -26,10 +26,10 @@ enum class Fruit : uint8_t
     Orange
 };
 
-using FruitFlags = common::EnumFlags<Fruit>;
+using FruitFlags = mpk::mix::EnumFlags<Fruit>;
 
-static_assert(common::EnumFlagsType<FruitFlags>);
-static_assert(common::detail::SetLikeType<FruitFlags>);
+static_assert(mpk::mix::EnumFlagsType<FruitFlags>);
+static_assert(mpk::mix::detail::SetLikeType<FruitFlags>);
 
 } // anonymous namespace
 

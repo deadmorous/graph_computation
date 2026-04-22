@@ -16,7 +16,7 @@ mpkmix_find_or_add(
     SUBDIR  ${CMAKE_CURRENT_LIST_DIR}/googletest)
 add_subdirectory(benchmark)
 
-if ("${GRAPH_COMPUTATION_LOG_ENGINE}" STREQUAL "GC_LOG_QUILL")
+if ("${MPKMIX_LOG_ENGINE}" STREQUAL "MPKMIX_LOG_QUILL")
     add_subdirectory(quill)
 endif()
 

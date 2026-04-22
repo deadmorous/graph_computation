@@ -10,9 +10,9 @@
 
 #pragma once
 
-#include "common/unsafe.hpp"
-#include "common/strong.hpp"
-#include "common/strong_vector.hpp"
+#include "mpk/mix/func_ref/tags.hpp"
+#include "mpk/mix/strong/strong.hpp"
+#include "mpk/mix/strong/vector.hpp"
 
 #include <QRect>
 
@@ -23,10 +23,10 @@ class QPainter;
 
 namespace plot::layout {
 
-GCLIB_STRONG_TYPE(ItemCount, uint32_t, common::StrongCountFeatures);
-GCLIB_STRONG_TYPE(ItemIndex, uint32_t, common::StrongIndexFeatures<ItemCount>);
+MPKMIX_STRONG_TYPE(ItemCount, uint32_t, mpk::mix::StrongCountFeatures);
+MPKMIX_STRONG_TYPE(ItemIndex, uint32_t, mpk::mix::StrongIndexFeatures<ItemCount>);
 
-using ItemIndexRange = common::IndexRange<ItemIndex>;
+using ItemIndexRange = mpk::mix::IndexRange<ItemIndex>;
 
 constexpr inline auto central = ItemIndex{};
 
@@ -58,7 +58,7 @@ enum class Dimension : uint8_t
     Vertical
 };
 
-using ItemVec = common::StrongVector<QRect, ItemIndex>;
+using ItemVec = mpk::mix::StrongVector<QRect, ItemIndex>;
 
 class LayoutOutOfSpaceException : public std::exception
 {
@@ -106,7 +106,7 @@ public:
     auto grid(const GridSpec&, const GridItemSpec&, ItemCount) -> Grid;
 
 private:
-    Layout(common::Unsafe_Tag, const QRect& entire_area);
+    Layout(mpk::mix::Unsafe_Tag, const QRect& entire_area);
 
     QRect entire_area_;
     ItemVec items_;

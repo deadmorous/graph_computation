@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "common/ring_buffer.hpp"
+#include "mpk/mix/util/ring_buffer.hpp"
 
 #include <gtest/gtest.h>
 
@@ -16,7 +16,7 @@
 
 
 TEST(RingBufferTest, PopFrontWorks) {
-    common::RingBuffer<int> rb(3);
+    mpk::mix::RingBuffer<int> rb(3);
     rb.push_back(10);
     rb.push_back(20);
     rb.push_back(30);
@@ -33,7 +33,7 @@ TEST(RingBufferTest, PopFrontWorks) {
 }
 
 TEST(RingBufferTest, PopFrontAfterWrap) {
-    common::RingBuffer<int> rb(2);
+    mpk::mix::RingBuffer<int> rb(2);
     rb.push_back(1);
     rb.push_back(2);
     rb.push_back(3); // Overwrites 1. Buffer: [3, 2], head at index 1 (val 2)
@@ -52,7 +52,7 @@ TEST(RingBufferTest, ComplexTypeResourceRelease) {
     };
 
     {
-        common::RingBuffer<Probe> rb(5);
+        mpk::mix::RingBuffer<Probe> rb(5);
         rb.push_back(Probe{true});
         rb.push_back(Probe{true});
         rb.pop_front();
@@ -62,7 +62,7 @@ TEST(RingBufferTest, ComplexTypeResourceRelease) {
 }
 
 TEST(RingBufferTest, FullIteratorTraversal) {
-    common::RingBuffer<int> rb(5);
+    mpk::mix::RingBuffer<int> rb(5);
     for(int i=0; i<8; ++i) rb.push_back(i); // 0..7, capacity 5 -> [3, 4, 5, 6, 7]
 
     std::vector<int> vals;
@@ -76,7 +76,7 @@ TEST(RingBufferTest, FullIteratorTraversal) {
 }
 
 TEST(RingBufferTest, SegmentsEmptyOnPop) {
-    common::RingBuffer<int> rb(3);
+    mpk::mix::RingBuffer<int> rb(3);
     rb.push_back(1);
     rb.push_back(2);
     rb.pop_front();
@@ -88,7 +88,7 @@ TEST(RingBufferTest, SegmentsEmptyOnPop) {
 
 TEST(RingBufferTest, BackwardIteratorTraversal)
 {
-    common::RingBuffer<int> rb(5);
+    mpk::mix::RingBuffer<int> rb(5);
     for(int i=0; i<8; ++i) rb.push_back(i); // 0..7, capacity 5 -> [3, 4, 5, 6, 7]
 
     std::vector<int> vals;
@@ -104,7 +104,7 @@ TEST(RingBufferTest, BackwardIteratorTraversal)
 
 TEST(RingBufferTest, IndexAccess)
 {
-    common::RingBuffer<int> rb(5);
+    mpk::mix::RingBuffer<int> rb(5);
     for(int i=0; i<8; ++i) rb.push_back(i); // 0..7, capacity 5 -> [3, 4, 5, 6, 7]
 
     EXPECT_EQ(rb[0], 3);

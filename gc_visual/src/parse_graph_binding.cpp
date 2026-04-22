@@ -13,7 +13,7 @@
 #include "gc/computation_node.hpp"
 #include "gc/detail/parse_node_port.hpp"
 
-#include "common/throw.hpp"
+#include "mpk/mix/util/throw.hpp"
 
 #include <span>
 
@@ -47,7 +47,7 @@ auto BindingResolver::io_spec(const std::string& io_name) const
             std::find(input_names_.begin(), input_names_.end(), io_name);
 
         if (it == input_names_.end())
-            common::throw_<std::invalid_argument>(
+            mpk::mix::throw_<std::invalid_argument>(
                 "Input with name '", io_name, "' is not found");
 
         return gc::ExternalInputSpec{
@@ -60,7 +60,7 @@ auto BindingResolver::io_spec(const std::string& io_name) const
         auto it_node = node_map_.find(node_name);
 
         if (it_node == node_map_.end())
-            common::throw_<std::invalid_argument>(
+            mpk::mix::throw_<std::invalid_argument>(
                 "Output with name '", io_name,
                 "' is not found - no node '", node_name, "'");
 
@@ -71,7 +71,7 @@ auto BindingResolver::io_spec(const std::string& io_name) const
             std::ranges::find(output_names, std::string_view{port_name});
 
         if (it_port == output_names.end())
-            common::throw_<std::invalid_argument>(
+            mpk::mix::throw_<std::invalid_argument>(
                 "Output with name '", io_name,
                 "' is not found - node '", node_name,
                 "' has no port '", port_name, "'");

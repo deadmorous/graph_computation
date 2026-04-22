@@ -15,8 +15,8 @@
 #include "build/lib_config.hpp"
 #include "build/scratch_dir.hpp"
 
-#include "common/format.hpp"
-#include "common/throw.hpp"
+#include "mpk/mix/util/format_seq.hpp"
+#include "mpk/mix/util/throw.hpp"
 
 #include "sys/wait.h"
 
@@ -45,22 +45,22 @@ auto checked_system(const std::string& cmdln)
         auto exit_status = WEXITSTATUS(status);
         if (exit_status == 0)
             return;
-        common::throw_(
+        mpk::mix::throw_(
             "The following command exited with status {}:\n{}",
             exit_status, cmdln);
     }
 
     if (WIFSIGNALED(status))
-        common::throw_(
+        mpk::mix::throw_(
             "The following command was killed with signal {}:\n{}",
             WTERMSIG(status), cmdln);
 
     if (WIFSIGNALED(status))
-        common::throw_(
+        mpk::mix::throw_(
             "The following command was stopped with signal {}:\n{}",
             WSTOPSIG(status), cmdln);
 
-    common::throw_(
+    mpk::mix::throw_(
         "Unexpected status {} for the following command:\n{}",
         status, cmdln);
 }
@@ -151,7 +151,7 @@ auto build(const Config& config,
           << ' ' << config.compile_flags.shared
           << ' ' << link_flags
           << " -o " << output
-          << ' ' << common::format_seq(obj_outputs, " ");
+          << ' ' << mpk::mix::format_seq(obj_outputs, " ");
         return s.str();
     }();
     checked_system(link_cmdln);

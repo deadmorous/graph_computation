@@ -56,7 +56,7 @@ auto SpinEditorWidget::maybe_construct(const gc::Value& value) -> void
 
     auto t = gc::ScalarT{ value.type() };
     t.visit_numeric(
-        [&]<typename T>(common::Type_Tag<T>)
+        [&]<typename T>(mpk::mix::Type_Tag<T>)
         {
             auto range_min = config_["range"][0].as<T>();
             auto range_max = config_["range"][1].as<T>();

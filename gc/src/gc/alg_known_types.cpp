@@ -12,7 +12,7 @@
 
 #include "gc/algorithm.hpp"
 
-#include "common/throw.hpp"
+#include "mpk/mix/util/throw.hpp"
 
 #include <algorithm>
 
@@ -37,7 +37,7 @@ auto index(TypeLiteral t)
         size_t_type };
     auto it = std::find(std::begin(literals), std::end(literals), t);
     if (it == std::end(literals))
-        common::throw_<std::invalid_argument>(
+        mpk::mix::throw_<std::invalid_argument>(
             "Type literal '", t, "' is not well-known");
     return static_cast<TypeIndex>(it - std::begin(literals));
 }
