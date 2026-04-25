@@ -11,7 +11,7 @@
 #pragma once
 
 #include "gc/port.hpp"
-#include "gc/value_fwd.hpp"
+#include "mpk/mix/value/value_fwd.hpp"
 
 #include "mpk/mix/strong/span.hpp"
 
@@ -27,12 +27,12 @@ using OutputNames =
     mpk::mix::StrongSpan<const std::string_view, OutputPort>;
 
 using OutputValues =
-    mpk::mix::StrongSpan<Value, OutputPort>;
+    mpk::mix::StrongSpan<mpk::mix::value::Value, OutputPort>;
 
 using InputValues =
-    mpk::mix::StrongSpan<Value, InputPort>;
+    mpk::mix::StrongSpan<mpk::mix::value::Value, InputPort>;
 
 using ConstInputValues =
-    mpk::mix::StrongSpan<const Value, InputPort>;
+    mpk::mix::StrongSpan<const mpk::mix::value::Value, InputPort>;
 
 } // namespace gc

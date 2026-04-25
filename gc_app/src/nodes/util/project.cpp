@@ -15,7 +15,7 @@
 #include "gc/expect_n_node_args.hpp"
 #include "gc/computation_node.hpp"
 #include "gc/node_port_names.hpp"
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
 
 using namespace std::string_view_literals;
@@ -42,7 +42,7 @@ public:
     {
         assert(result.size() == 2_gc_ic);
         result[0_gc_i] = uint_vec_val({10, 20});
-        result[1_gc_i] = gc::ValuePath{} / 0u;
+        result[1_gc_i] = mpk::mix::value::ValuePath{} / 0u;
     }
 
     auto compute_outputs(
@@ -54,12 +54,12 @@ public:
     {
         assert(inputs.size() == 2_gc_ic);
         assert(result.size() == 1_gc_oc);
-        result.front() = inputs[0_gc_i].get(inputs[1_gc_i].as<gc::ValuePath>());
+        result.front() = inputs[0_gc_i].get(inputs[1_gc_i].as<mpk::mix::value::ValuePath>());
         return true;
     }
 };
 
-auto make_project(gc::ConstValueSpan args, const gc::ComputationContext&)
+auto make_project(mpk::mix::value::ConstValueSpan args, const gc::ComputationContext&)
     -> std::shared_ptr<gc::ComputationNode>
 {
     gc::expect_no_node_args("Project", args);

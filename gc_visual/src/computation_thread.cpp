@@ -33,16 +33,16 @@ auto ComputationThread::computation()
 { return computation_; }
 
 auto ComputationThread::get_parameter(const gc::ParameterSpec& spec) const
-    -> gc::Value
+    -> mpk::mix::value::Value
 {
     return visit(
         mpk::mix::Overloads{
-            [&](const gc::ExternalInputSpec& i) -> gc::Value
+            [&](const gc::ExternalInputSpec& i) -> mpk::mix::value::Value
             {
                 return computation_
                     .source_inputs.values[i.input].get(spec.path);
             },
-                [&](const gc::NodeOutputSpec& o) -> gc::Value
+                [&](const gc::NodeOutputSpec& o) -> mpk::mix::value::Value
             {
                 const auto& res = computation_.result;
                 auto node_outputs = group(res.outputs, o.output.node);
@@ -103,7 +103,7 @@ auto ComputationThread::set_graph(gc::ComputationGraph g,
 }
 
 auto ComputationThread::set_parameter(const gc::ParameterSpec& spec,
-                                      const gc::Value& value)
+                                      const mpk::mix::value::Value& value)
     -> void
 {
     stop();

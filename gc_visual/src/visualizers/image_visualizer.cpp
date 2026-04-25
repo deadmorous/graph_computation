@@ -247,9 +247,9 @@ ImageVisualizer::ImageVisualizer(GraphBroker* broker,
 
 ImageVisualizer::~ImageVisualizer() = default;
 
-auto ImageVisualizer::check_type(const gc::Type* type) -> TypeCheckResult
+auto ImageVisualizer::check_type(const mpk::mix::value::Type* type) -> TypeCheckResult
 {
-    static auto expected_type = gc::type_of<gc_types::ColorImage>();
+    static auto expected_type = mpk::mix::value::type_of<gc_types::ColorImage>();
 
     if (type == expected_type)
         return { .ok = true };
@@ -260,7 +260,7 @@ auto ImageVisualizer::check_type(const gc::Type* type) -> TypeCheckResult
     };
 }
 
-void ImageVisualizer::set_value(const gc::Value& v)
+void ImageVisualizer::set_value(const mpk::mix::value::Value& v)
 {
     storage_->bitmap_view->set_image(v);
 }

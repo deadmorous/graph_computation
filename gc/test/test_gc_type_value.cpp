@@ -9,7 +9,7 @@
  */
 
 #include "mpk/mix/struct_type_macro.hpp"
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
 #include <gtest/gtest.h>
 
@@ -39,25 +39,25 @@ TEST(Gc, ActuallyEqualityComparable)
 {
     using Vs = std::vector<MyStruct>;
     using Vi = std::vector<int>;
-    static_assert(!gc::detail::actually_equality_comparable<MyStruct>);
-    static_assert(!gc::detail::actually_equality_comparable<Vs>);
-    static_assert(gc::detail::actually_equality_comparable<Vi>);
-    static_assert(gc::detail::actually_equality_comparable<int>);
+    static_assert(!mpk::mix::value::detail::actually_equality_comparable<MyStruct>);
+    static_assert(!mpk::mix::value::detail::actually_equality_comparable<Vs>);
+    static_assert(mpk::mix::value::detail::actually_equality_comparable<Vi>);
+    static_assert(mpk::mix::value::detail::actually_equality_comparable<int>);
 }
 
 TEST(Gc, Type)
 {
-    const auto* t_int = gc::Type::of<int>();
-    const auto* t_int_vec = gc::Type::of<std::vector<int>>();
-    const auto* t_bool = gc::Type::of<bool>();
-    const auto* t_int_vec_vec = gc::Type::of<std::vector<std::vector<int>>>();
-    const auto* t_tuple = gc::Type::of<std::tuple<int, bool, std::vector<float>>>();
-    const auto* t_struct = gc::Type::of<MyStruct>();
-    const auto* t_path = gc::Type::of<gc::ValuePath>();
-    const auto* t_struct_arr_3 = gc::Type::of<std::array<MyStruct, 3>>();
+    const auto* t_int = mpk::mix::value::Type::of<int>();
+    const auto* t_int_vec = mpk::mix::value::Type::of<std::vector<int>>();
+    const auto* t_bool = mpk::mix::value::Type::of<bool>();
+    const auto* t_int_vec_vec = mpk::mix::value::Type::of<std::vector<std::vector<int>>>();
+    const auto* t_tuple = mpk::mix::value::Type::of<std::tuple<int, bool, std::vector<float>>>();
+    const auto* t_struct = mpk::mix::value::Type::of<MyStruct>();
+    const auto* t_path = mpk::mix::value::Type::of<mpk::mix::value::ValuePath>();
+    const auto* t_struct_arr_3 = mpk::mix::value::Type::of<std::array<MyStruct, 3>>();
 
-    EXPECT_EQ(gc::Type::of<std::vector<int>>(), t_int_vec);
-    EXPECT_EQ(gc::Type::of<MyStruct>(), t_struct);
+    EXPECT_EQ(mpk::mix::value::Type::of<std::vector<int>>(), t_int_vec);
+    EXPECT_EQ(mpk::mix::value::Type::of<MyStruct>(), t_struct);
 
     EXPECT_EQ(std::format("{}", t_int),
               "Type{I32}");
@@ -81,24 +81,24 @@ TEST(Gc, Array)
 {
     using A = std::array<int, 3>;
 
-    const auto* t_int_arr_3 = gc::Type::of<A>();
+    const auto* t_int_arr_3 = mpk::mix::value::Type::of<A>();
     EXPECT_EQ(std::format("{}", t_int_arr_3), "Type{Array<3>[I32]}");
 
     auto a = A{1, 4, 9};
-    auto v = gc::Value{a};
-    EXPECT_EQ(v.get(gc::ValuePath{0}), 1);
-    EXPECT_EQ(v.get(gc::ValuePath{1}), 4);
-    EXPECT_EQ(v.get(gc::ValuePath{2}), 9);
+    auto v = mpk::mix::value::Value{a};
+    EXPECT_EQ(v.get(mpk::mix::value::ValuePath{0}), 1);
+    EXPECT_EQ(v.get(mpk::mix::value::ValuePath{1}), 4);
+    EXPECT_EQ(v.get(mpk::mix::value::ValuePath{2}), 9);
 
     EXPECT_EQ(std::format("{}", v), "[1,4,9]");
     EXPECT_EQ(v.size(), 3);
     EXPECT_THROW(v.resize(34), std::invalid_argument);
     EXPECT_EQ(v.size(), 3);
 
-    v.set(gc::ValuePath{2}, 49);
-    EXPECT_EQ(v.get(gc::ValuePath{2}), 49);
+    v.set(mpk::mix::value::ValuePath{2}, 49);
+    EXPECT_EQ(v.get(mpk::mix::value::ValuePath{2}), 49);
     EXPECT_EQ(std::format("{}", v), "[1,4,49]");
-    EXPECT_THROW(v.set(gc::ValuePath{4}, 11), std::out_of_range);
+    EXPECT_THROW(v.set(mpk::mix::value::ValuePath{4}, 11), std::out_of_range);
 }
 
 
@@ -109,7 +109,7 @@ enum class MyEnum : uint8_t
     Baz
 };
 
-GCLIB_REGISTER_ENUM_TYPE(MyEnum, 1);
+MPKMIX_VALUE_REGISTER_ENUM_TYPE(MyEnum, 1);
 
 TEST(Gc, EnumType)
 {
@@ -119,24 +119,24 @@ TEST(Gc, EnumType)
 
     // Type-specific checks
 
-    const auto* t_my_enum = gc::Type::of<MyEnum>();
+    const auto* t_my_enum = mpk::mix::value::Type::of<MyEnum>();
     EXPECT_EQ(std::format("{}", t_my_enum), "Type{Enum<MyEnum: 1>}");
 
-    auto v0 = gc::Value::make(t_my_enum);
+    auto v0 = mpk::mix::value::Value::make(t_my_enum);
 
     auto names =
-        v0.get(gc::ValuePath{ "names"sv }).as<StringViewVec>();
+        v0.get(mpk::mix::value::ValuePath{ "names"sv }).as<StringViewVec>();
     auto expected_names = StringViewVec{ "Foo"sv, "Bar"sv, "Baz"sv };
     EXPECT_EQ(names, expected_names);
 
     auto values =
-        v0.get(gc::ValuePath{ "values"sv }).as<UnderlyingVec>();
+        v0.get(mpk::mix::value::ValuePath{ "values"sv }).as<UnderlyingVec>();
     auto expected_values = UnderlyingVec{ 0, 5, 6 };
     EXPECT_EQ(values, expected_values);
 
     // Value-specific checks
 
-    auto v = gc::Value{MyEnum::Baz};
+    auto v = mpk::mix::value::Value{MyEnum::Baz};
 
     auto e = v.as<MyEnum>();
     EXPECT_EQ(e, MyEnum::Baz);
@@ -144,34 +144,34 @@ TEST(Gc, EnumType)
     v.set({}, MyEnum::Bar);
     EXPECT_EQ(v, MyEnum::Bar);
 
-    auto vi = v.get(gc::ValuePath{ "index"sv }).as<size_t>();
+    auto vi = v.get(mpk::mix::value::ValuePath{ "index"sv }).as<size_t>();
     EXPECT_EQ(vi, magic_enum::enum_index(MyEnum::Bar));
 
-    auto vv = v.get(gc::ValuePath{ "value"sv }).as<Underlying>();
+    auto vv = v.get(mpk::mix::value::ValuePath{ "value"sv }).as<Underlying>();
     EXPECT_EQ(vv, magic_enum::enum_integer(MyEnum::Bar));
 
-    auto vn = v.get(gc::ValuePath{ "name"sv }).as<std::string_view>();
+    auto vn = v.get(mpk::mix::value::ValuePath{ "name"sv }).as<std::string_view>();
     EXPECT_EQ(vn, "Bar"sv);
 
-    v.set(gc::ValuePath{ "index"sv }, size_t{1});
+    v.set(mpk::mix::value::ValuePath{ "index"sv }, size_t{1});
     EXPECT_EQ(std::format("{}", v), "Bar");
 
-    v.set(gc::ValuePath{ "name"sv }, "Foo"s);
+    v.set(mpk::mix::value::ValuePath{ "name"sv }, "Foo"s);
     EXPECT_EQ(v.as<MyEnum>(), MyEnum::Foo);
 
-    v.set(gc::ValuePath{ "value"sv },
-          gc::Value{ mpk::mix::Type<Underlying>, 6 });
+    v.set(mpk::mix::value::ValuePath{ "value"sv },
+          mpk::mix::value::Value{ mpk::mix::Type<Underlying>, 6 });
     EXPECT_EQ(v.as<MyEnum>(), MyEnum::Baz);
 }
 
 TEST(Gc, EnumFlagsType)
 {
     using MyFlags = mpk::mix::EnumFlags<MyEnum>;
-    const auto* type = gc::Type::of<MyFlags>();
+    const auto* type = mpk::mix::value::Type::of<MyFlags>();
     EXPECT_EQ(std::format("{}", type), "Type{EnumFlags{Enum<MyEnum: 1>}}");
 
     auto flags = MyFlags{MyEnum::Foo};
-    auto v = gc::Value{flags};
+    auto v = mpk::mix::value::Value{flags};
 
     EXPECT_EQ(v.as<MyFlags>(), flags);
     EXPECT_EQ(v.size(), 1);
@@ -217,11 +217,11 @@ TEST(Gc, EnumFlagsType)
 class MyBlob final
 {};
 
-GCLIB_REGISTER_CUSTOM_TYPE(MyBlob, 1);
+MPKMIX_VALUE_REGISTER_CUSTOM_TYPE(MyBlob, 1);
 
 TEST(Gc, CustomType)
 {
-    const auto* t_my_blob = gc::Type::of<MyBlob>();
+    const auto* t_my_blob = mpk::mix::value::Type::of<MyBlob>();
     EXPECT_EQ(std::format("{}", t_my_blob), "Type{Custom<MyBlob: 1>}");
 }
 
@@ -229,10 +229,10 @@ TEST(Gc, CustomType)
 
 TEST(Gc, Scalar)
 {
-    auto val = gc::Value(mpk::mix::Type<int32_t>, 123);
+    auto val = mpk::mix::value::Value(mpk::mix::Type<int32_t>, 123);
 
     size_t visit_count{};
-    gc::ScalarT{ val.type() }.visit(
+    mpk::mix::value::ScalarT{ val.type() }.visit(
         [&]<typename T>(mpk::mix::Type_Tag<T>)
         {
             constexpr auto is_int32_t = std::is_same_v<T, int32_t>;
@@ -251,11 +251,11 @@ TEST(Gc, Scalar)
 
 TEST(Gc, String)
 {
-    auto check = [](const gc::Value& val,
+    auto check = [](const mpk::mix::value::Value& val,
                     auto tag,
                     std::string_view expected_val)
     {
-        EXPECT_EQ(val.type(), gc::type_of(tag));
+        EXPECT_EQ(val.type(), mpk::mix::value::type_of(tag));
         EXPECT_EQ(val.as(tag), expected_val);
 
         auto as_s = val.convert_to<std::string>();
@@ -274,14 +274,14 @@ TEST(Gc, String)
     constexpr auto sv1 = "asd"sv;
     constexpr auto sv2 = "qwe"sv;
 
-    auto v1_s_from_s = gc::Value(ts, std::string(sv1));
-    auto v2_sv_from_sv = gc::Value(tsv, sv2);
+    auto v1_s_from_s = mpk::mix::value::Value(ts, std::string(sv1));
+    auto v2_sv_from_sv = mpk::mix::value::Value(tsv, sv2);
 
     // Should NOT compile
-    // auto v2_sv_from_s = gc::Value(tsv, std::string(sv2));
+    // auto v2_sv_from_s = mpk::mix::value::Value(tsv, std::string(sv2));
 
     // Should compile
-    auto v2_s_from_sv = gc::Value(ts, sv2);
+    auto v2_s_from_sv = mpk::mix::value::Value(ts, sv2);
 
     check(v1_s_from_s, ts, sv1);
     check(v2_sv_from_sv, tsv, sv2);
@@ -290,51 +290,51 @@ TEST(Gc, String)
 
 TEST(Gc, DynamicValueAccess)
 {
-    auto v_int = gc::Value(123);
+    auto v_int = mpk::mix::value::Value(123);
     EXPECT_EQ(v_int.get({}).as<int>(), 123);
 
-    auto v_vec_double = gc::Value(std::vector<double>{ 1.2, 3.4, 5.6 });
-    EXPECT_EQ(v_vec_double.get(gc::ValuePath{} / 1ul).as<double>(), 3.4);
+    auto v_vec_double = mpk::mix::value::Value(std::vector<double>{ 1.2, 3.4, 5.6 });
+    EXPECT_EQ(v_vec_double.get(mpk::mix::value::ValuePath{} / 1ul).as<double>(), 3.4);
 
-    auto v_struct  = gc::Value(MyStruct{
+    auto v_struct  = mpk::mix::value::Value(MyStruct{
         .foo = 123,
         .bar = 4.56,
         .flags = {12, 34, 56, 78, 90}
     });
-    EXPECT_EQ(v_struct.get(gc::ValuePath{} / "foo"sv).as<int>(), 123);
-    EXPECT_EQ(v_struct.get(gc::ValuePath{} / "bar"sv).as<double>(), 4.56);
+    EXPECT_EQ(v_struct.get(mpk::mix::value::ValuePath{} / "foo"sv).as<int>(), 123);
+    EXPECT_EQ(v_struct.get(mpk::mix::value::ValuePath{} / "bar"sv).as<double>(), 4.56);
 
     auto actual_flags =
-        v_struct.get(gc::ValuePath{} / "flags"sv)
+        v_struct.get(mpk::mix::value::ValuePath{} / "flags"sv)
                 .as<std::vector<unsigned int>>();
     auto expected_flags =
         std::vector<unsigned int>{12, 34, 56, 78, 90};
     EXPECT_EQ(actual_flags, expected_flags);
 
-    EXPECT_EQ(v_struct.get(gc::ValuePath{} / "flags"sv / 0u).as<unsigned>(),
+    EXPECT_EQ(v_struct.get(mpk::mix::value::ValuePath{} / "flags"sv / 0u).as<unsigned>(),
               12);
-    EXPECT_EQ(v_struct.get(gc::ValuePath{} / "flags"sv / 3u).as<unsigned>(),
+    EXPECT_EQ(v_struct.get(mpk::mix::value::ValuePath{} / "flags"sv / 3u).as<unsigned>(),
               78);
-    EXPECT_EQ(v_struct.get(gc::ValuePath{} / "flags"sv / 4u).as<unsigned>(),
+    EXPECT_EQ(v_struct.get(mpk::mix::value::ValuePath{} / "flags"sv / 4u).as<unsigned>(),
               90);
 
     // vector::_M_range_check: __n (which is 5) >= this->size() (which is 5)
-    EXPECT_THROW(v_struct.get(gc::ValuePath{} / "flags"sv / 5u),
+    EXPECT_THROW(v_struct.get(mpk::mix::value::ValuePath{} / "flags"sv / 5u),
                  std::out_of_range);
 
-    v_struct.set(gc::ValuePath{} / "flags"sv / 3u, 912u);
-    EXPECT_EQ(v_struct.get(gc::ValuePath{} / "flags"sv / 3u).as<unsigned>(),
+    v_struct.set(mpk::mix::value::ValuePath{} / "flags"sv / 3u, 912u);
+    EXPECT_EQ(v_struct.get(mpk::mix::value::ValuePath{} / "flags"sv / 3u).as<unsigned>(),
               912);
 
-    v_struct.resize(gc::ValuePath{} / "flags"sv, 6);
-    v_struct.set(gc::ValuePath{} / "flags"sv / 5u, 144u);
-    EXPECT_EQ(v_struct.get(gc::ValuePath{} / "flags"sv / 5u).as<unsigned>(),
+    v_struct.resize(mpk::mix::value::ValuePath{} / "flags"sv, 6);
+    v_struct.set(mpk::mix::value::ValuePath{} / "flags"sv / 5u, 144u);
+    EXPECT_EQ(v_struct.get(mpk::mix::value::ValuePath{} / "flags"sv / 5u).as<unsigned>(),
               144);
 }
 
 TEST(Gc, ValueReflection)
 {
-    auto v_struct  = gc::Value(MyStruct{
+    auto v_struct  = mpk::mix::value::Value(MyStruct{
         .foo = 123,
         .bar = 4.56,
         .flags = {12, 34, 56, 78, 90}
@@ -343,27 +343,27 @@ TEST(Gc, ValueReflection)
     // Key extraction
     auto struct_keys = v_struct.path_item_keys();
     EXPECT_EQ(struct_keys.size(), 3);
-    EXPECT_EQ(struct_keys[0], gc::ValuePathItem("foo"sv));
-    EXPECT_EQ(struct_keys[1], gc::ValuePathItem("bar"sv));
-    EXPECT_EQ(struct_keys[2], gc::ValuePathItem("flags"sv));
+    EXPECT_EQ(struct_keys[0], mpk::mix::value::ValuePathItem("foo"sv));
+    EXPECT_EQ(struct_keys[1], mpk::mix::value::ValuePathItem("bar"sv));
+    EXPECT_EQ(struct_keys[2], mpk::mix::value::ValuePathItem("flags"sv));
 
-    auto v_flags = v_struct.get(gc::ValuePath{} / "flags"sv);
+    auto v_flags = v_struct.get(mpk::mix::value::ValuePath{} / "flags"sv);
     auto flags_keys = v_flags.path_item_keys();
     EXPECT_EQ(flags_keys.size(), 5);
-    EXPECT_EQ(flags_keys[0], gc::ValuePathItem(0u));
-    EXPECT_EQ(flags_keys[1], gc::ValuePathItem(1u));
-    EXPECT_EQ(flags_keys[2], gc::ValuePathItem(2u));
-    EXPECT_EQ(flags_keys[3], gc::ValuePathItem(3u));
-    EXPECT_EQ(flags_keys[4], gc::ValuePathItem(4u));
+    EXPECT_EQ(flags_keys[0], mpk::mix::value::ValuePathItem(0u));
+    EXPECT_EQ(flags_keys[1], mpk::mix::value::ValuePathItem(1u));
+    EXPECT_EQ(flags_keys[2], mpk::mix::value::ValuePathItem(2u));
+    EXPECT_EQ(flags_keys[3], mpk::mix::value::ValuePathItem(3u));
+    EXPECT_EQ(flags_keys[4], mpk::mix::value::ValuePathItem(4u));
 
-    auto v_tuple = gc::Value(std::make_tuple(1, 2.3));
+    auto v_tuple = mpk::mix::value::Value(std::make_tuple(1, 2.3));
     auto tuple_keys = v_tuple.path_item_keys();
     EXPECT_EQ(tuple_keys.size(), 2);
-    EXPECT_EQ(tuple_keys[0], gc::ValuePathItem(0u));
-    EXPECT_EQ(tuple_keys[1], gc::ValuePathItem(1u));
+    EXPECT_EQ(tuple_keys[0], mpk::mix::value::ValuePathItem(0u));
+    EXPECT_EQ(tuple_keys[1], mpk::mix::value::ValuePathItem(1u));
 
     // Dynamic construction of default value from type
-    auto v_struct2 = gc::Value::make(v_struct.type());
+    auto v_struct2 = mpk::mix::value::Value::make(v_struct.type());
     EXPECT_EQ(v_struct2.type(), v_struct.type());
     auto typed_struct2 = v_struct2.as<MyStruct>();
     EXPECT_EQ(typed_struct2.foo, 0);
@@ -372,61 +372,61 @@ TEST(Gc, ValueReflection)
 
     auto struct2_keys = v_struct2.path_item_keys();
     EXPECT_EQ(struct2_keys.size(), 3);
-    EXPECT_EQ(struct2_keys[0], gc::ValuePathItem("foo"sv));
-    EXPECT_EQ(struct2_keys[1], gc::ValuePathItem("bar"sv));
-    EXPECT_EQ(struct2_keys[2], gc::ValuePathItem("flags"sv));
+    EXPECT_EQ(struct2_keys[0], mpk::mix::value::ValuePathItem("foo"sv));
+    EXPECT_EQ(struct2_keys[1], mpk::mix::value::ValuePathItem("bar"sv));
+    EXPECT_EQ(struct2_keys[2], mpk::mix::value::ValuePathItem("flags"sv));
 }
 
 TEST(Gc, StrongType)
 {
     static_assert(std::same_as<MyIndex::Weak, uint32_t>);
 
-    const auto* type = gc::type_of<MyIndex>();
+    const auto* type = mpk::mix::value::type_of<MyIndex>();
     EXPECT_EQ(std::format("{}", type), "Type{Strong{U32}}"sv);
 
     auto my_index = MyIndex{123};
-    auto v = gc::Value{ my_index };
+    auto v = mpk::mix::value::Value{ my_index };
     EXPECT_EQ(v.as<MyIndex>(), my_index);
 
-    const auto path = gc::ValuePath{} / "v"sv;
+    const auto path = mpk::mix::value::ValuePath{} / "v"sv;
     EXPECT_EQ(v.get(path).as<MyIndex::Weak>(), my_index.v);
 
     v.set(path, MyIndex::Weak{456});
     EXPECT_EQ(v.get(path).as<MyIndex::Weak>(), 456);
     EXPECT_EQ(v.as<MyIndex>(), MyIndex{456});
 
-    auto v1 = gc::Value::make(type);
+    auto v1 = mpk::mix::value::Value::make(type);
     EXPECT_EQ(v1.as<MyIndex>(), MyIndex{0});
 }
 
 TEST(Gc, FormatValue)
 {
-    // EXPECT_EQ(std::format("{}", gc::Value(123)), "123");
-    EXPECT_EQ(std::format("{}", gc::Value(mpk::mix::Type<uint8_t>, 123)), "123");
+    // EXPECT_EQ(std::format("{}", mpk::mix::value::Value(123)), "123");
+    EXPECT_EQ(std::format("{}", mpk::mix::value::Value(mpk::mix::Type<uint8_t>, 123)), "123");
 
     // int8_t is formatted as int, but it's not the same as char - we don't
     // currently support char
-    EXPECT_EQ(std::format("{}", gc::Value(mpk::mix::Type<int8_t>, 'A')), "65");
+    EXPECT_EQ(std::format("{}", mpk::mix::value::Value(mpk::mix::Type<int8_t>, 'A')), "65");
 
     // TODO: Uncomment when we support char
-    // EXPECT_EQ(std::format("{}", gc::Value(mpk::mix::Type<char>, 'A')), "A");
+    // EXPECT_EQ(std::format("{}", mpk::mix::value::Value(mpk::mix::Type<char>, 'A')), "A");
 
-    EXPECT_EQ(std::format("{}", gc::Value(-1.23)), "-1.23");
-    EXPECT_EQ(std::format("{}", gc::Value(std::byte{0x9c})), "9c");
+    EXPECT_EQ(std::format("{}", mpk::mix::value::Value(-1.23)), "-1.23");
+    EXPECT_EQ(std::format("{}", mpk::mix::value::Value(std::byte{0x9c})), "9c");
 
-    EXPECT_EQ(std::format("{}", gc::Value(true)), "true");
-    EXPECT_EQ(std::format("{}", gc::Value(false)), "false");
+    EXPECT_EQ(std::format("{}", mpk::mix::value::Value(true)), "true");
+    EXPECT_EQ(std::format("{}", mpk::mix::value::Value(false)), "false");
 
-    EXPECT_EQ(std::format("{}", gc::Value("Hello"sv)), "Hello");
-    EXPECT_EQ(std::format("{}", gc::Value("World"s)), "World");
+    EXPECT_EQ(std::format("{}", mpk::mix::value::Value("Hello"sv)), "Hello");
+    EXPECT_EQ(std::format("{}", mpk::mix::value::Value("World"s)), "World");
 
-    EXPECT_EQ(std::format("{}", gc::Value(MyIndex{534})), "534");
+    EXPECT_EQ(std::format("{}", mpk::mix::value::Value(MyIndex{534})), "534");
 
     auto v = std::vector<int>{9,8,75};
-    EXPECT_EQ(std::format("{}", gc::Value(v)), "[9,8,75]");
+    EXPECT_EQ(std::format("{}", mpk::mix::value::Value(v)), "[9,8,75]");
 
     auto t = std::make_tuple(1, 2.3, true, "hello"sv);
-    EXPECT_EQ(std::format("{}", gc::Value(t)), "{1,2.3,true,hello}");
+    EXPECT_EQ(std::format("{}", mpk::mix::value::Value(t)), "{1,2.3,true,hello}");
 
     auto s = MyStruct
     {
@@ -434,17 +434,17 @@ TEST(Gc, FormatValue)
         .bar = 1.3e11,
         .flags = {1, 3, 7, 13, 23}
     };
-    EXPECT_EQ(std::format("{}", gc::Value(s)),
+    EXPECT_EQ(std::format("{}", mpk::mix::value::Value(s)),
               "{foo=345,bar=1.3e+11,flags=[1,3,7,13,23]}");
 
-    EXPECT_EQ(std::format("{}", gc::Value(MyBlob{})), "custom");
+    EXPECT_EQ(std::format("{}", mpk::mix::value::Value(MyBlob{})), "custom");
 }
 
 TEST(Gc, ValueEquality)
 {
-    EXPECT_EQ(gc::Value{123}, gc::Value{123});
-    EXPECT_NE(gc::Value{123}, gc::Value{123u});
-    EXPECT_NE(gc::Value{123}, gc::Value{456});
+    EXPECT_EQ(mpk::mix::value::Value{123}, mpk::mix::value::Value{123});
+    EXPECT_NE(mpk::mix::value::Value{123}, mpk::mix::value::Value{123u});
+    EXPECT_NE(mpk::mix::value::Value{123}, mpk::mix::value::Value{456});
     auto myval_1a = MyStruct{
         .foo = 1,
         .bar = 2.34,
@@ -456,6 +456,6 @@ TEST(Gc, ValueEquality)
         .bar = 2.34,
         .flags = {4, 8, 16}
     };
-    EXPECT_EQ(gc::Value{myval_1a}, gc::Value{myval_1b});
-    EXPECT_NE(gc::Value{myval_1a}, gc::Value{myval_2});
+    EXPECT_EQ(mpk::mix::value::Value{myval_1a}, mpk::mix::value::Value{myval_1b});
+    EXPECT_NE(mpk::mix::value::Value{myval_1a}, mpk::mix::value::Value{myval_2});
 }

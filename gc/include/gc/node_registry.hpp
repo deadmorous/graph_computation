@@ -11,7 +11,7 @@
 #pragma once
 
 #include "gc/context_fwd.hpp"
-#include "gc/value_fwd.hpp"
+#include "mpk/mix/value/value_fwd.hpp"
 
 #include "mpk/mix/value/object_registry.hpp"
 #include "mpk/mix/meta/type.hpp"
@@ -21,7 +21,7 @@ namespace gc {
 
 template <typename Node>
 using NodeRegistry =
-    mpk::mix::value::ObjectRegistry<Node, ConstValueSpan, const Context<Node>&>;
+    mpk::mix::value::ObjectRegistry<Node, mpk::mix::value::ConstValueSpan, const Context<Node>&>;
 
 template <typename Node>
 auto populate_gc_node_registry(NodeRegistry<Node>&)

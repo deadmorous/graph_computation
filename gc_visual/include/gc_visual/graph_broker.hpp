@@ -17,8 +17,8 @@
 
 #include "gc/detail/named_computation_nodes.hpp"
 #include "gc/node_port_tags.hpp"
-#include "gc/value_fwd.hpp"
-#include "gc/value_path.hpp"
+#include "mpk/mix/value/value_fwd.hpp"
+#include "mpk/mix/value/value_path.hpp"
 
 #include <QObject>
 
@@ -50,13 +50,13 @@ public:
         -> gc::IoSpec;
 
     auto get_parameter(const gc::ParameterSpec&) const
-        -> gc::Value;
+        -> mpk::mix::value::Value;
 
     auto get_port_value(gc::EdgeOutputEnd port) const
-        -> const gc::Value&;
+        -> const mpk::mix::value::Value&;
 
     auto get_port_value(gc::EdgeInputEnd port) const
-        -> const gc::Value&;
+        -> const mpk::mix::value::Value&;
 
     auto evolution() const
         -> std::optional<gc_visual::GraphEvolution>;
@@ -76,7 +76,7 @@ public slots:
     auto advance_evolution(size_t skip = 0)
         -> void;
 
-    auto set_parameter(const gc::ParameterSpec&, const gc::Value&)
+    auto set_parameter(const gc::ParameterSpec&, const mpk::mix::value::Value&)
         -> void;
 
     auto invalidate_input(const gc::ParameterSpec&)

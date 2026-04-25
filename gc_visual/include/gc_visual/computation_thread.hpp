@@ -29,7 +29,7 @@ public:
         -> gc::Computation&;
 
     auto get_parameter(const gc::ParameterSpec&) const
-        -> gc::Value;
+        -> mpk::mix::value::Value;
 
     auto ok()
         -> bool;
@@ -61,7 +61,7 @@ public slots:
                    const gc::SourceInputs& provided_inputs)
         -> void;
 
-    auto set_parameter(const gc::ParameterSpec&, const gc::Value&)
+    auto set_parameter(const gc::ParameterSpec&, const mpk::mix::value::Value&)
         -> void;
 
     auto invalidate_input(const gc::ParameterSpec&)

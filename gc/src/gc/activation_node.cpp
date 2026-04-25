@@ -12,7 +12,7 @@
 #include "gc/algorithm.hpp"
 #include "gc/algorithm_inspector.hpp"
 
-#include "gc/ostream_formatter.hpp"
+#include "mpk/mix/util/format_streamable.hpp"
 
 #include "common/detail/ind.hpp"
 #include "mpk/mix/util/format_seq.hpp"

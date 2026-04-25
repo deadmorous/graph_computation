@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "gc/value_path.hpp"
+#include "mpk/mix/value/value_path.hpp"
 
 #include "mpk/mix/util/format_seq.hpp"
 #include "mpk/mix/util/throw.hpp"

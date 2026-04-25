@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "gc/value_path.hpp"
+#include "mpk/mix/value/value_path.hpp"
 #include "gc/edge.hpp"
 
 #include <variant>
@@ -32,7 +32,7 @@ using IoSpec = std::variant<ExternalInputSpec, NodeOutputSpec>;
 struct ParameterSpec final
 {
     IoSpec io;
-    gc::ValuePath   path;
+    mpk::mix::value::ValuePath   path;
 };
 
 } // namespace gc

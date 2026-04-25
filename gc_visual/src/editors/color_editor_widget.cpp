@@ -12,7 +12,7 @@
 
 #include "plot_visual/color.hpp"
 
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
 #include <QColorDialog>
 #include <QPainter>
@@ -28,12 +28,12 @@ ColorEditorWidget::ColorEditorWidget(const YAML::Node&, QWidget* parent) :
     setCursor(Qt::PointingHandCursor);
 }
 
-auto ColorEditorWidget::value() const -> gc::Value
+auto ColorEditorWidget::value() const -> mpk::mix::value::Value
 { return color_; }
 
-auto ColorEditorWidget::check_type(const gc::Type* type) -> TypeCheckResult
+auto ColorEditorWidget::check_type(const mpk::mix::value::Type* type) -> TypeCheckResult
 {
-    static auto expected_type = gc::type_of<gc_types::Color>();
+    static auto expected_type = mpk::mix::value::type_of<gc_types::Color>();
 
     if (type == expected_type)
         return { .ok = true };
@@ -44,7 +44,7 @@ auto ColorEditorWidget::check_type(const gc::Type* type) -> TypeCheckResult
     };
 }
 
-void ColorEditorWidget::set_value(const gc::Value& value)
+void ColorEditorWidget::set_value(const mpk::mix::value::Value& value)
 {
     color_ = value.as<gc_types::Color>();
     update();

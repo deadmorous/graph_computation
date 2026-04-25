@@ -12,7 +12,7 @@
 
 #include "gc/computation_graph.hpp"
 #include "gc/source_inputs.hpp"
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
 #include "mpk/mix/func_ref/fwd.hpp"
 #include "mpk/mix/strong/grouped.hpp"
@@ -40,9 +40,9 @@ using Timestamp = uint64_t;
 
 struct ComputationResult final
 {
-    mpk::mix::StrongGrouped<Value, NodeIndex, InputPort> inputs;
-    mpk::mix::StrongGrouped<Value, NodeIndex, OutputPort> outputs;
-    mpk::mix::StrongGrouped<Value, NodeIndex, OutputPort> prev_source_outputs;
+    mpk::mix::StrongGrouped<mpk::mix::value::Value, NodeIndex, InputPort> inputs;
+    mpk::mix::StrongGrouped<mpk::mix::value::Value, NodeIndex, OutputPort> outputs;
+    mpk::mix::StrongGrouped<mpk::mix::value::Value, NodeIndex, OutputPort> prev_source_outputs;
     mpk::mix::StrongVector<Timestamp, NodeIndex> node_ts;
     Timestamp computation_ts{};
 

@@ -16,7 +16,7 @@
 
 #include "sieve/types/image_metrics.hpp"
 
-#include "gc/yaml/parse_value.hpp"
+#include "mpk/mix/serial/yaml/parse_value.hpp"
 
 #include "mpk/mix/util/throw.hpp"
 
@@ -128,15 +128,15 @@ ImageMetricsVisualizer::ImageMetricsVisualizer(GraphBroker* broker,
 
     QObject::connect(
         type_list, &ListEditorWidget::value_changed,
-        view, qOverload<const gc::Value&>(&ImageMetricsView::set_type));
+        view, qOverload<const mpk::mix::value::Value&>(&ImageMetricsView::set_type));
 
-    auto metric_type = [&]() -> gc::Value {
+    auto metric_type = [&]() -> mpk::mix::value::Value {
         auto type_node = item_node["metric"];
         if (!type_node.IsDefined())
             return sieve::ImageMetric::StateHistogram;
 
-        return gc::yaml::parse_value(
-            type_node, gc::type_of<sieve::ImageMetric>(), {});
+        return mpk::mix::serial::yaml::parse_value(
+            type_node, mpk::mix::value::type_of<sieve::ImageMetric>(), {});
     }();
     type_list->set_value(metric_type);
     view->set_type(metric_type);
@@ -144,9 +144,9 @@ ImageMetricsVisualizer::ImageMetricsVisualizer(GraphBroker* broker,
 
 ImageMetricsVisualizer::~ImageMetricsVisualizer() = default;
 
-auto ImageMetricsVisualizer::check_type(const gc::Type* type) -> TypeCheckResult
+auto ImageMetricsVisualizer::check_type(const mpk::mix::value::Type* type) -> TypeCheckResult
 {
-    static auto expected_type = gc::type_of<sieve::ImageMetrics>();
+    static auto expected_type = mpk::mix::value::type_of<sieve::ImageMetrics>();
 
     if (type == expected_type)
         return { .ok = true };
@@ -157,7 +157,7 @@ auto ImageMetricsVisualizer::check_type(const gc::Type* type) -> TypeCheckResult
     };
 }
 
-void ImageMetricsVisualizer::set_value(const gc::Value& v)
+void ImageMetricsVisualizer::set_value(const mpk::mix::value::Value& v)
 {
     storage_->view->add_image_metrics(v.as<const sieve::ImageMetrics&>());
 }

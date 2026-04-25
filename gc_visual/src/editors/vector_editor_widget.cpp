@@ -26,7 +26,7 @@ VectorEditorWidget::VectorEditorWidget(const YAML::Node&, QWidget* parent) :
 {}
 
 
-auto VectorEditorWidget::maybe_construct(const gc::Value& v) -> void
+auto VectorEditorWidget::maybe_construct(const mpk::mix::value::Value& v) -> void
 
 {
     if (model_)
@@ -79,7 +79,7 @@ auto VectorEditorWidget::maybe_construct(const gc::Value& v) -> void
             return;
         auto path = model_->path(index);
         auto v = model_->value().get(path);
-        if (v.type() != gc::type_of<gc_types::Color>())
+        if (v.type() != mpk::mix::value::type_of<gc_types::Color>())
             return;
 
         auto color = v.as<gc_types::Color>();
@@ -140,7 +140,7 @@ auto VectorEditorWidget::eventFilter(QObject *obj, QEvent *event)
     return false;
 }
 
-auto VectorEditorWidget::value() const -> gc::Value
+auto VectorEditorWidget::value() const -> mpk::mix::value::Value
 {
     if (!model_)
         return {};
@@ -148,9 +148,9 @@ auto VectorEditorWidget::value() const -> gc::Value
     return model_->value();
 }
 
-auto VectorEditorWidget::check_type(const gc::Type* type) -> TypeCheckResult
+auto VectorEditorWidget::check_type(const mpk::mix::value::Type* type) -> TypeCheckResult
 {
-    if (type->aggregate_type() == gc::AggregateType::Vector)
+    if (type->aggregate_type() == mpk::mix::value::AggregateType::Vector)
         return { .ok = true };
 
     return {
@@ -159,7 +159,7 @@ auto VectorEditorWidget::check_type(const gc::Type* type) -> TypeCheckResult
     };
 }
 
-auto VectorEditorWidget::set_value(const gc::Value& v) -> void
+auto VectorEditorWidget::set_value(const mpk::mix::value::Value& v) -> void
 {
     maybe_construct(v);
     model_->setValue(v);

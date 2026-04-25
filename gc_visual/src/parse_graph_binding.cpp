@@ -139,11 +139,11 @@ auto parse_param_binding(const BindingResolver& resolver,
                          std::string io_name)
     -> ParamBinding
 {
-    auto path = gc::ValuePath{};
+    auto path = mpk::mix::value::ValuePath{};
     auto path_pos = io_name.find_first_of('/');
     if (path_pos != std::string::npos)
     {
-        path = gc::ValuePath::from_string(io_name.substr(path_pos));
+        path = mpk::mix::value::ValuePath::from_string(io_name.substr(path_pos));
         io_name = io_name.substr(0, path_pos);
     }
 

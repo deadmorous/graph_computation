@@ -81,7 +81,7 @@ public:
             widget_,
             &EditorWidget::value_changed,
             broker,
-            [=](const gc::Value& v, gc::ValuePathView path)
+            [=](const mpk::mix::value::Value& v, mpk::mix::value::ValuePathView path)
             {
                 auto subspec = param_spec;
                 subspec.path /= path;

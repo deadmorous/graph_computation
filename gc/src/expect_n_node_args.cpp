@@ -10,14 +10,14 @@
 
 #include "gc/expect_n_node_args.hpp"
 
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
 #include "mpk/mix/util/throw.hpp"
 
 namespace gc {
 
 auto expect_n_node_args(std::string_view class_name,
-                        ConstValueSpan args,
+                        mpk::mix::value::ConstValueSpan args,
                         uint32_t expected_count)
     -> void
 {

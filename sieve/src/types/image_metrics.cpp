@@ -10,13 +10,13 @@
 
 #include "sieve/types/image_metrics.hpp"
 
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
 namespace sieve {
 
 auto operator<<(std::ostream& s, const ImageMetrics& m) -> std::ostream&
 {
-    return s << gc::Value{m};
+    return s << mpk::mix::value::Value{m};
 }
 
 } // namespace sieve

@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
 
 namespace gc_types {
@@ -18,14 +18,14 @@ namespace gc_types {
 using Uint = uint32_t;
 
 inline auto uint_val(Uint value)
-    -> gc::Value
+    -> mpk::mix::value::Value
 { return value; }
 
-inline auto uint_val(gc::Value& value)
+inline auto uint_val(mpk::mix::value::Value& value)
     -> Uint&
 { return value.as<Uint>(); }
 
-inline auto uint_val(const gc::Value& value)
+inline auto uint_val(const mpk::mix::value::Value& value)
     -> const Uint&
 { return value.as<Uint>(); }
 

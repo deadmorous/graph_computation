@@ -12,7 +12,7 @@
 
 #include "gc_visual/flatten_type.hpp"
 
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
 #include <QAbstractListModel>
 
@@ -21,13 +21,13 @@ class VectorItemModel final :
 {
     Q_OBJECT
 public:
-    VectorItemModel(gc::Value v, QObject* parent = nullptr);
+    VectorItemModel(mpk::mix::value::Value v, QObject* parent = nullptr);
 
     auto path(const QModelIndex& index) const
-        -> gc::ValuePath;
+        -> mpk::mix::value::ValuePath;
 
     auto value() const noexcept
-        -> const gc::Value&;
+        -> const mpk::mix::value::Value&;
 
     auto rowCount(const QModelIndex &parent = QModelIndex()) const
         -> int override;
@@ -62,12 +62,12 @@ public:
         -> bool override;
 
 public slots:
-    auto setValue(gc::Value v) -> void;
+    auto setValue(mpk::mix::value::Value v) -> void;
 
 private:
-    auto on_set_value(gc::Value v)
+    auto on_set_value(mpk::mix::value::Value v)
         -> void;
 
-    gc::Value v_;
+    mpk::mix::value::Value v_;
     gc_visual::TypeComponentVec element_fields_;
 };

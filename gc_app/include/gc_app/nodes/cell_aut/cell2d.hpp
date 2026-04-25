@@ -12,11 +12,11 @@
 
 #include "gc/computation_node_fwd.hpp"
 #include "gc/computation_context_fwd.hpp"
-#include "gc/value_fwd.hpp"
+#include "mpk/mix/value/value_fwd.hpp"
 
 namespace gc_app::cell_aut {
 
-auto make_cell2d(gc::ConstValueSpan, const gc::ComputationContext&)
+auto make_cell2d(mpk::mix::value::ConstValueSpan, const gc::ComputationContext&)
     -> std::shared_ptr<gc::ComputationNode>;
 
 } // namespace gc_app::cell_aut

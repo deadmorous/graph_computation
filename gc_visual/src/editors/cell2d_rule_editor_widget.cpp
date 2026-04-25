@@ -12,7 +12,7 @@
 
 #include "gc_visual/widgets/cell2d_rule_map_view.hpp"
 
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
 #include "mpk/mix/util/scoped_inc.hpp"
 
@@ -146,12 +146,12 @@ Cell2dRuleEditorWidget::Cell2dRuleEditorWidget(const YAML::Node&,
 }
 
 auto Cell2dRuleEditorWidget::value() const
-    -> gc::Value
+    -> mpk::mix::value::Value
 { return rules_; }
 
-auto Cell2dRuleEditorWidget::check_type(const gc::Type* type) -> TypeCheckResult
+auto Cell2dRuleEditorWidget::check_type(const mpk::mix::value::Type* type) -> TypeCheckResult
 {
-    static auto expected_type = gc::type_of<gc_app::Cell2dRules>();
+    static auto expected_type = mpk::mix::value::type_of<gc_app::Cell2dRules>();
 
     if (type == expected_type)
         return { .ok = true };
@@ -162,7 +162,7 @@ auto Cell2dRuleEditorWidget::check_type(const gc::Type* type) -> TypeCheckResult
     };
 }
 
-void Cell2dRuleEditorWidget::set_value(const gc::Value& v)
+void Cell2dRuleEditorWidget::set_value(const mpk::mix::value::Value& v)
 {
     auto inc_in_set_value = mpk::mix::ScopedInc{in_set_value_};
 

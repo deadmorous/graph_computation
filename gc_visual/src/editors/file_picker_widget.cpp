@@ -10,7 +10,7 @@
 
 #include "gc_visual/editors/file_picker_widget.hpp"
 
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
 #include <yaml-cpp/yaml.h>
 
@@ -40,7 +40,7 @@ FilePickerWidget::FilePickerWidget(const YAML::Node& config,
         &QLineEdit::textChanged,
         [this](const QString& v)
         {
-            auto gc_val = gc::Value(v.toUtf8().toStdString());
+            auto gc_val = mpk::mix::value::Value(v.toUtf8().toStdString());
             emit value_changed(gc_val);
         });
 
@@ -50,14 +50,14 @@ FilePickerWidget::FilePickerWidget(const YAML::Node& config,
 
 }
 
-auto FilePickerWidget::value() const -> gc::Value
+auto FilePickerWidget::value() const -> mpk::mix::value::Value
 {
     return text_input_->text().toUtf8().toStdString();
 }
 
-auto FilePickerWidget::check_type(const gc::Type* type) -> TypeCheckResult
+auto FilePickerWidget::check_type(const mpk::mix::value::Type* type) -> TypeCheckResult
 {
-    if (type->aggregate_type() == gc::AggregateType::String)
+    if (type->aggregate_type() == mpk::mix::value::AggregateType::String)
         return { .ok = true };
 
     return {
@@ -66,7 +66,7 @@ auto FilePickerWidget::check_type(const gc::Type* type) -> TypeCheckResult
     };
 }
 
-void FilePickerWidget::set_value(const gc::Value& value)
+void FilePickerWidget::set_value(const mpk::mix::value::Value& value)
 {
     text_input_->setText(QString::fromUtf8(value.as<std::string>()));
 }

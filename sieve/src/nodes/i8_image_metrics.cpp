@@ -15,7 +15,7 @@
 #include "gc/expect_n_node_args.hpp"
 #include "gc/computation_node.hpp"
 #include "gc/node_port_names.hpp"
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
 #include "mpk/mix/func_ref/func_ref.hpp"
 
@@ -72,7 +72,7 @@ public:
     }
 };
 
-auto make_i8_image_metrics(gc::ConstValueSpan args,
+auto make_i8_image_metrics(mpk::mix::value::ConstValueSpan args,
                            const gc::ComputationContext&)
     -> std::shared_ptr<gc::ComputationNode>
 {

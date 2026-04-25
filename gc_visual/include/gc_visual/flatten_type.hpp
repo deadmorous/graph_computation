@@ -10,8 +10,8 @@
 
 #pragma once
 
-#include "gc/type_fwd.hpp"
-#include "gc/value_path.hpp"
+#include "mpk/mix/value/type_fwd.hpp"
+#include "mpk/mix/value/value_path.hpp"
 
 #include <vector>
 
@@ -20,13 +20,13 @@ namespace gc_visual {
 
 struct TypeComponent final
 {
-    const gc::Type* type;
-    gc::ValuePath path;
+    const mpk::mix::value::Type* type;
+    mpk::mix::value::ValuePath path;
 };
 
 using TypeComponentVec = std::vector<TypeComponent>;
 
-auto flatten_type(const gc::Type* t)
+auto flatten_type(const mpk::mix::value::Type* t)
     -> std::vector<TypeComponent>;
 
 } // namespace gc_visual

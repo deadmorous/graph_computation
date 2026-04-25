@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve.mail.ru>
  */
 
-#include "gc/type.hpp"
+#include "mpk/mix/value/type.hpp"
 
 #include "magic_enum/magic_enum.hpp"
 
@@ -20,6 +20,8 @@
 using namespace std::string_view_literals;
 
 namespace gc {
+
+using namespace mpk::mix::value;
 
 namespace {
 
@@ -74,7 +76,7 @@ struct AggregatePrinter final
           << ": " << static_cast<uint32_t>(t.id()) << '>';
     }
 
-    auto operator()(const gc::EnumT& t) const
+    auto operator()(const mpk::mix::value::EnumT& t) const
         -> void
     {
         s << "Enum<" << t.name()

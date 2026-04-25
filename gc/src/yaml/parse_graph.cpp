@@ -15,14 +15,16 @@
 #include "gc/computation_context_fwd.hpp"
 #include "gc/computation_node_registry.hpp"
 #include "gc/detail/parse_node_port.hpp"
-#include "gc/value.hpp"
-#include "gc/yaml/parse_value.hpp"
+#include "mpk/mix/value/value.hpp"
+#include "mpk/mix/serial/yaml/parse_value.hpp"
 
 #include "mpk/mix/util/throw.hpp"
 
 #include <yaml-cpp/yaml.h>
 
 namespace gc::yaml {
+
+using mpk::mix::serial::yaml::parse_value;
 
 template <typename Node>
 auto parse_graph(const YAML::Node& config, const Context<Node>& context)
@@ -36,7 +38,7 @@ auto parse_graph(const YAML::Node& config, const Context<Node>& context)
         auto name = node["name"].as<std::string>();
         auto type = node["type"].as<std::string>();
 
-        auto init = gc::ValueVec{};
+        auto init = mpk::mix::value::ValueVec{};
         if (auto init_ = node["init"])
             for (auto element_ : init_)
             {

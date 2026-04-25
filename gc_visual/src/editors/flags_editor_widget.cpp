@@ -10,7 +10,7 @@
 
 #include "gc_visual/editors/flags_editor_widget.hpp"
 
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
 #include "mpk/mix/util/scoped_inc.hpp"
 
@@ -23,30 +23,30 @@ using namespace std::string_view_literals;
 
 namespace {
 
-auto make_key(const gc::Type* key_type, std::string_view name) -> gc::Value
+auto make_key(const mpk::mix::value::Type* key_type, std::string_view name) -> mpk::mix::value::Value
 {
-    auto k = gc::Value::make(key_type);
-    k.set(gc::ValuePath{"name"sv}, std::string(name));
+    auto k = mpk::mix::value::Value::make(key_type);
+    k.set(mpk::mix::value::ValuePath{"name"sv}, std::string(name));
     return k;
 }
 
-auto make_key(const gc::Type* key_type, size_t index) -> gc::Value
+auto make_key(const mpk::mix::value::Type* key_type, size_t index) -> mpk::mix::value::Value
 {
-    auto k = gc::Value::make(key_type);
-    k.set(gc::ValuePath{"index"sv}, index);
+    auto k = mpk::mix::value::Value::make(key_type);
+    k.set(mpk::mix::value::ValuePath{"index"sv}, index);
     return k;
 }
 
-auto flag_names(const gc::Type* key_type) -> std::vector<std::string_view>
+auto flag_names(const mpk::mix::value::Type* key_type) -> std::vector<std::string_view>
 {
-    auto k = gc::Value::make(key_type);
-    return k.get(gc::ValuePath{"names"sv})
+    auto k = mpk::mix::value::Value::make(key_type);
+    return k.get(mpk::mix::value::ValuePath{"names"sv})
         .as<std::vector<std::string_view>>();
 }
 
-auto key_type(const gc::Type* type) -> const gc::Type*
+auto key_type(const mpk::mix::value::Type* type) -> const mpk::mix::value::Type*
 {
-    return gc::SetT{type}.key_type();
+    return mpk::mix::value::SetT{type}.key_type();
 }
 
 } // anonymous namespace
@@ -60,17 +60,17 @@ FlagsEditorWidget::FlagsEditorWidget(const YAML::Node&, QWidget* parent) :
     widget_->setMenu(menu);
 }
 
-auto FlagsEditorWidget::value() const -> gc::Value
+auto FlagsEditorWidget::value() const -> mpk::mix::value::Value
 {
     return value_;
 }
 
-auto FlagsEditorWidget::check_type(const gc::Type* type) -> TypeCheckResult
+auto FlagsEditorWidget::check_type(const mpk::mix::value::Type* type) -> TypeCheckResult
 {
-    if (type->aggregate_type() == gc::AggregateType::Set)
+    if (type->aggregate_type() == mpk::mix::value::AggregateType::Set)
     {
-        const auto* key_type = gc::SetT{type}.key_type();
-        if (key_type->aggregate_type() == gc::AggregateType::Enum)
+        const auto* key_type = mpk::mix::value::SetT{type}.key_type();
+        if (key_type->aggregate_type() == mpk::mix::value::AggregateType::Enum)
             return { .ok = true };
     }
 
@@ -80,7 +80,7 @@ auto FlagsEditorWidget::check_type(const gc::Type* type) -> TypeCheckResult
     };
 }
 
-void FlagsEditorWidget::set_value(const gc::Value& value)
+void FlagsEditorWidget::set_value(const mpk::mix::value::Value& value)
 {
     if (value_ == value)
         return;
@@ -96,8 +96,8 @@ void FlagsEditorWidget::set_value(const gc::Value& value)
         menu->clear();
 
         auto names = [&]{
-            auto k = gc::Value::make(k_type);
-            return k.get(gc::ValuePath{"names"sv})
+            auto k = mpk::mix::value::Value::make(k_type);
+            return k.get(mpk::mix::value::ValuePath{"names"sv})
                 .as<std::vector<std::string_view>>();
         }();
 

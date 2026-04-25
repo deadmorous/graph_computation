@@ -32,6 +32,8 @@ using namespace std::string_view_literals;
 
 namespace gc {
 
+using namespace mpk::mix::value;
+
 struct ComputationInstructions final
 {
     // i-th group contains node indices of i-th graph level

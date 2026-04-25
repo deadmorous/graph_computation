@@ -14,11 +14,11 @@
 #include "gc/activation_node_fwd.hpp"
 #include "gc/alg_type_literal.hpp"
 #include "gc/decl_literal.hpp"
-#include "gc/value_fwd.hpp"
+#include "mpk/mix/value/value_fwd.hpp"
 
 namespace agc_app {
 
-auto make_canvas(gc::ConstValueSpan, const gc::ActivationContext&)
+auto make_canvas(mpk::mix::value::ConstValueSpan, const gc::ActivationContext&)
     -> std::shared_ptr<gc::ActivationNode>;
 
 GCLIB_DECL_LITERAL(gc::alg::TypeLiteral, canvas_type);

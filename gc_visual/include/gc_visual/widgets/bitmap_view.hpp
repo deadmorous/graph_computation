@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "gc/value_fwd.hpp"
+#include "mpk/mix/value/value_fwd.hpp"
 
 #include <QImage>
 #include <QWidget>
@@ -36,7 +36,7 @@ public:
     auto qimage() const -> QImage;
 
 public slots:
-    auto set_image(const gc::Value& image)
+    auto set_image(const mpk::mix::value::Value& image)
         -> void;
 
     auto set_scale(double scale)

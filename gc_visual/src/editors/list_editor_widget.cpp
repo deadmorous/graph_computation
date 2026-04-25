@@ -10,7 +10,7 @@
 
 #include "gc_visual/editors/list_editor_widget.hpp"
 
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
 #include "mpk/mix/util/scoped_inc.hpp"
 
@@ -28,23 +28,23 @@ ListEditorWidget::ListEditorWidget(const YAML::Node&, QWidget* parent) :
             });
 }
 
-auto ListEditorWidget::value() const -> gc::Value
+auto ListEditorWidget::value() const -> mpk::mix::value::Value
 {
     if (!type_)
         return {};
 
-    auto result = gc::Value::make(type_);
+    auto result = mpk::mix::value::Value::make(type_);
     auto index = widget_->currentIndex();
     if (index < 0)
         return result;
 
-    result.set(gc::ValuePath{"index"sv}, size_t(index));
+    result.set(mpk::mix::value::ValuePath{"index"sv}, size_t(index));
     return result;
 }
 
-auto ListEditorWidget::check_type(const gc::Type* type) -> TypeCheckResult
+auto ListEditorWidget::check_type(const mpk::mix::value::Type* type) -> TypeCheckResult
 {
-    if (type->aggregate_type() == gc::AggregateType::Enum)
+    if (type->aggregate_type() == mpk::mix::value::AggregateType::Enum)
         return { .ok = true };
 
     return {
@@ -53,7 +53,7 @@ auto ListEditorWidget::check_type(const gc::Type* type) -> TypeCheckResult
     };
 }
 
-void ListEditorWidget::set_value(const gc::Value& value)
+void ListEditorWidget::set_value(const mpk::mix::value::Value& value)
 {
     auto inc_in_set_value = mpk::mix::ScopedInc{in_set_value_};
 
@@ -62,7 +62,7 @@ void ListEditorWidget::set_value(const gc::Value& value)
     {
         widget_->clear();
         auto names =
-            value.get(gc::ValuePath{"names"sv})
+            value.get(mpk::mix::value::ValuePath{"names"sv})
                 .as<std::vector<std::string_view>>();
 
         for (auto name : names)
@@ -71,6 +71,6 @@ void ListEditorWidget::set_value(const gc::Value& value)
         type_ = type;
     }
 
-    auto index = value.get(gc::ValuePath{"index"sv}).convert_to<int>();
+    auto index = value.get(mpk::mix::value::ValuePath{"index"sv}).convert_to<int>();
     widget_->setCurrentIndex(index);
 }

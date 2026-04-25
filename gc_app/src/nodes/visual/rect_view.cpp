@@ -86,7 +86,7 @@ public:
     }
 };
 
-auto make_rect_view(gc::ConstValueSpan args, const gc::ComputationContext&)
+auto make_rect_view(mpk::mix::value::ConstValueSpan args, const gc::ComputationContext&)
     -> std::shared_ptr<gc::ComputationNode>
 {
     gc::expect_no_node_args("RectView", args);

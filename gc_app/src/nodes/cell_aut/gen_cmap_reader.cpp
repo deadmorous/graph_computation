@@ -15,7 +15,7 @@
 #include "gc/expect_n_node_args.hpp"
 #include "gc/computation_node.hpp"
 #include "gc/node_port_names.hpp"
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
 #include "common/expr_calculator.hpp"
 #include "mpk/mix/func_ref/func_ref.hpp"
@@ -132,7 +132,7 @@ auto read_gen_cmap(const std::string& path) -> Cell2dGenCmap
         {
             mpk::mix::throw_(
                 "read_gen_cmap: {}: Invalid range: {}",
-                overlay_context, gc::Value{overlay.range});
+                overlay_context, mpk::mix::value::Value{overlay.range});
         }
 
         read_rtrimmed_line();   // Ignore EOL
@@ -186,7 +186,7 @@ public:
     }
 };
 
-auto make_gen_cmap_reader(gc::ConstValueSpan args, const gc::ComputationContext&)
+auto make_gen_cmap_reader(mpk::mix::value::ConstValueSpan args, const gc::ComputationContext&)
     -> std::shared_ptr<gc::ComputationNode>
 {
     gc::expect_no_node_args("GenCmapReader", args);

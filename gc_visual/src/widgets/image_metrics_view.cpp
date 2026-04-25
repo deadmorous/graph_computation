@@ -17,7 +17,7 @@
 
 #include "gc_types/live_time_series.hpp"
 
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
 #include <QOpenGLFunctions_3_3_Core>
 #include <QOpenGLWidget>
@@ -330,7 +330,7 @@ auto ImageMetricsView::set_type(sieve::ImageMetric type) -> void
     storage_->metric_widgets[static_cast<int>(type)]->update();
 }
 
-auto ImageMetricsView::set_type(const gc::Value& v) -> void
+auto ImageMetricsView::set_type(const mpk::mix::value::Value& v) -> void
 {
     set_type(v.as<sieve::ImageMetric>());
 }

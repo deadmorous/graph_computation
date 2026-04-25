@@ -15,7 +15,7 @@
 
 #include "gc/expect_n_node_args.hpp"
 #include "gc/node_port_names.hpp"
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
 
 using namespace gc::literals;
@@ -84,7 +84,7 @@ public:
 } // anonymous namespace
 
 
-auto make_replicate(gc::ConstValueSpan args, const gc::ActivationContext&)
+auto make_replicate(mpk::mix::value::ConstValueSpan args, const gc::ActivationContext&)
     -> std::shared_ptr<gc::ActivationNode>
 {
     gc::expect_no_node_args(Replicate::static_meta().type_name, args);

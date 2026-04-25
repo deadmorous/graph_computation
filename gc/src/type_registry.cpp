@@ -10,12 +10,14 @@
 
 #include "gc/type_registry.hpp"
 
-#include "gc/type.hpp"
-#include "gc/value_path.hpp"
+#include "mpk/mix/value/type.hpp"
+#include "mpk/mix/value/value_path.hpp"
 
 #include <iostream>
 
 namespace gc {
+
+using namespace mpk::mix::value;
 
 auto populate_gc_type_registry(gc::TypeRegistry& result)
     -> void

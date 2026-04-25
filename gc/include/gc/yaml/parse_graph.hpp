@@ -17,7 +17,7 @@
 #include "gc/source_inputs.hpp"
 #include "gc/node_registry.hpp"
 #include "gc/type_registry.hpp"
-#include "gc/value_fwd.hpp"
+#include "mpk/mix/value/value_fwd.hpp"
 
 #include <yaml-cpp/node/node.h>
 

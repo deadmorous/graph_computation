@@ -72,7 +72,7 @@ public:
     }
 };
 
-auto make_test_sequence([[maybe_unused]] gc::ConstValueSpan arg,
+auto make_test_sequence([[maybe_unused]] mpk::mix::value::ConstValueSpan arg,
                         const gc::ComputationContext&)
     -> std::shared_ptr<gc::ComputationNode>
 {

@@ -70,7 +70,7 @@ public:
 
         auto& output_image = [&]() -> I8Image&
         {
-            static const auto* I8Image_type = gc::type_of<I8Image>();
+            static const auto* I8Image_type = mpk::mix::value::type_of<I8Image>();
             auto& out = result.front();
             if (out.type() == I8Image_type)
             {
@@ -137,7 +137,7 @@ private:
 
 };
 
-auto make_offset_image(gc::ConstValueSpan args, const gc::ComputationContext&)
+auto make_offset_image(mpk::mix::value::ConstValueSpan args, const gc::ComputationContext&)
     -> std::shared_ptr<gc::ComputationNode>
 {
     gc::expect_no_node_args("OffsetImage", args);

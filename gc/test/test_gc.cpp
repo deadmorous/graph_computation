@@ -166,7 +166,7 @@ struct SourceInput final
 {
     gc::NodeIndex node;
     gc::InputPort port;
-    gc::Value value;
+    mpk::mix::value::Value value;
 };
 
 auto make_source_inputs(std::initializer_list<SourceInput> inputs)
@@ -376,7 +376,7 @@ TEST(Gc, compute_2)
             auto gr = group(res.outputs, inode);
             auto seq = std::ranges::transform_view(
                 gr,
-                [](const gc::Value& v)
+                [](const mpk::mix::value::Value& v)
                 { return v.as<int>(); });
             s << inode << ": (" << mpk::mix::format_seq(seq) << ')' << std::endl;
         }
@@ -447,7 +447,7 @@ TEST(Gc, compute_partially)
             auto gr = group(res.outputs, inode);
             auto seq = std::ranges::transform_view(
                 gr,
-                [](const gc::Value& v)
+                [](const mpk::mix::value::Value& v)
                 { return v.as<int>(); });
             const auto* node =
                 static_cast<const TestNode*>(g.nodes.at(inode).get());

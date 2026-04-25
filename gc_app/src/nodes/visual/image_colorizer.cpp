@@ -73,7 +73,7 @@ public:
 
         auto& output_image = [&]() -> ColorImage&
         {
-            static const auto* ColorImage_type = gc::type_of<ColorImage>();
+            static const auto* ColorImage_type = mpk::mix::value::type_of<ColorImage>();
             auto& out = result.front();
             if (out.type() == ColorImage_type)
             {
@@ -103,7 +103,7 @@ public:
     }
 };
 
-auto make_image_colorizer(gc::ConstValueSpan args,
+auto make_image_colorizer(mpk::mix::value::ConstValueSpan args,
                           const gc::ComputationContext&)
     -> std::shared_ptr<gc::ComputationNode>
 {

@@ -232,7 +232,7 @@ private:
     Uint thread_count_;
 };
 
-auto make_waring_parallel(gc::ConstValueSpan args,
+auto make_waring_parallel(mpk::mix::value::ConstValueSpan args,
                           const gc::ComputationContext&)
     -> std::shared_ptr<gc::ComputationNode>
 {

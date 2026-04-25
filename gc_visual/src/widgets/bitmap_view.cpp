@@ -167,7 +167,7 @@ auto BitmapView::qimage() const -> QImage
     return img_;
 }
 
-auto BitmapView::set_image(const gc::Value& image)
+auto BitmapView::set_image(const mpk::mix::value::Value& image)
     -> void
 {
     img_ = blend(

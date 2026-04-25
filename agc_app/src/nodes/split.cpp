@@ -15,7 +15,7 @@
 
 #include "gc/expect_n_node_args.hpp"
 #include "gc/node_port_names.hpp"
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
 
 using namespace gc::literals;
@@ -90,7 +90,7 @@ private:
 } // anonymous namespace
 
 
-auto make_split(gc::ConstValueSpan args, const gc::ActivationContext&)
+auto make_split(mpk::mix::value::ConstValueSpan args, const gc::ActivationContext&)
     -> std::shared_ptr<gc::ActivationNode>
 {
     gc::expect_n_node_args(Split::static_meta().type_name, args, 1);

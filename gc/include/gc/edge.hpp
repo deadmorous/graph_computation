@@ -11,7 +11,7 @@
 #pragma once
 
 #include "gc/node_index.hpp"
-#include "gc/ostream_formatter.hpp"
+#include "mpk/mix/util/format_streamable.hpp"
 #include "gc/port.hpp"
 #include "mpk/mix/struct_type_macro.hpp"
 
@@ -65,10 +65,10 @@ auto operator<<(std::ostream& s, const Edge& e)
 } // namespace gc
 
 template <>
-struct std::formatter<gc::EdgeInputEnd> : gc::OstreamFormatter<gc::EdgeInputEnd> {};
+struct std::formatter<gc::EdgeInputEnd> : mpk::mix::OstreamFormatter<gc::EdgeInputEnd> {};
 
 template <>
-struct std::formatter<gc::EdgeOutputEnd> : gc::OstreamFormatter<gc::EdgeOutputEnd> {};
+struct std::formatter<gc::EdgeOutputEnd> : mpk::mix::OstreamFormatter<gc::EdgeOutputEnd> {};
 
 template <>
-struct std::formatter<gc::Edge> : gc::OstreamFormatter<gc::Edge> {};
+struct std::formatter<gc::Edge> : mpk::mix::OstreamFormatter<gc::Edge> {};

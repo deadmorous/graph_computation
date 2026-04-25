@@ -14,7 +14,7 @@
 
 // edge.hpp defines formatters for EdgeInputEnd, EdgeOutputEnd, Edge
 #include "gc/edge.hpp"
-// type.hpp defines formatter for const gc::Type*
-#include "gc/type.hpp"
-// value.hpp defines formatter for gc::Value
-#include "gc/value.hpp"
+// type.hpp defines formatter for const mpk::mix::value::Type*
+#include "mpk/mix/value/type.hpp"
+// value.hpp defines formatter for mpk::mix::value::Value
+#include "mpk/mix/value/value.hpp"

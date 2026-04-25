@@ -45,22 +45,22 @@ TextVisualizer::TextVisualizer(GraphBroker*,
 
 TextVisualizer::~TextVisualizer() = default;
 
-auto TextVisualizer::check_type(const gc::Type*) -> TypeCheckResult
+auto TextVisualizer::check_type(const mpk::mix::value::Type*) -> TypeCheckResult
 {
     return { .ok = true };
 }
 
-void TextVisualizer::set_value(const gc::Value& v)
+void TextVisualizer::set_value(const mpk::mix::value::Value& v)
 {
     constexpr auto max_lines = 1000ul;
 
     auto* view = storage_->view;
 
-    if (v.type()->aggregate_type() == gc::AggregateType::Vector)
+    if (v.type()->aggregate_type() == mpk::mix::value::AggregateType::Vector)
     {
         view->clear();
         for (size_t i=0, n=std::min(v.size(), max_lines); i<n; ++i)
-            view->append(plot::format_qstr(i, '\t', v.get(gc::ValuePath{i})));
+            view->append(plot::format_qstr(i, '\t', v.get(mpk::mix::value::ValuePath{i})));
 
         if (v.size() > max_lines)
             view->append("...");

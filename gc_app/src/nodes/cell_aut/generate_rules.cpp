@@ -16,7 +16,7 @@
 #include "gc/expect_n_node_args.hpp"
 #include "gc/computation_node.hpp"
 #include "gc/node_port_names.hpp"
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
 #include "common/expr_calculator.hpp"
 #include "mpk/mix/func_ref/func_ref.hpp"
@@ -173,7 +173,7 @@ public:
     }
 };
 
-auto make_generate_rules(gc::ConstValueSpan args, const gc::ComputationContext&)
+auto make_generate_rules(mpk::mix::value::ConstValueSpan args, const gc::ComputationContext&)
     -> std::shared_ptr<gc::ComputationNode>
 {
     gc::expect_no_node_args("GenerateRules", args);

@@ -177,7 +177,7 @@ private:
 
 };
 
-auto make_random_image(gc::ConstValueSpan args, const gc::ComputationContext&)
+auto make_random_image(mpk::mix::value::ConstValueSpan args, const gc::ComputationContext&)
     -> std::shared_ptr<gc::ComputationNode>
 {
     gc::expect_no_node_args("RandomImage", args);

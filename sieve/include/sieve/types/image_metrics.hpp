@@ -13,7 +13,7 @@
 #include "mpk/mix/enum_flags.hpp"
 #include "mpk/mix/struct_type_macro.hpp"
 
-#include "gc/type.hpp"
+#include "mpk/mix/value/type.hpp"
 
 #include <cstdint>
 #include <iostream>
@@ -42,4 +42,4 @@ auto operator<<(std::ostream&, const ImageMetrics&) -> std::ostream&;
 
 } // namespace sieve
 
-GCLIB_REGISTER_ENUM_TYPE(sieve::ImageMetric, 1);
+MPKMIX_VALUE_REGISTER_ENUM_TYPE(sieve::ImageMetric, 1);
