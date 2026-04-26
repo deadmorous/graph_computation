@@ -16,10 +16,10 @@
 #include "gc/expect_n_node_args.hpp"
 #include "gc/computation_node.hpp"
 #include "gc/node_port_names.hpp"
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
 #include "common/expr_calculator.hpp"
-#include "common/func_ref.hpp"
+#include "mpk/mix/func_ref/func_ref.hpp"
 
 #include <cassert>
 #include <cstring>
@@ -59,7 +59,7 @@ auto generate_rules(const Cell2dGenRules& gen_rules) -> Cell2dRules
             }
         }
         catch(std::exception& e) {
-            common::throw_("generate_rules: ", context, ": ", e.what());
+            mpk::mix::throw_("generate_rules: {}: {}", context, e.what());
         }
     };
 
@@ -71,13 +71,13 @@ auto generate_rules(const Cell2dGenRules& gen_rules) -> Cell2dRules
         int8_t min = gen_rules.min_state;
         int8_t max = gen_rules.min_state + (gen_rules.state_count - 1);
 
-        for(auto i : common::index_range<size_t>(map.size()))
+        for(auto i : mpk::mix::index_range<size_t>(map.size()))
         {
             if((map[i] > max || map[i] < min) && map[i] != NoChange)
             {
-                common::throw_(
-                    "generate_rules: ", context, ": Map element ", i,
-                    " is out of range (==", int(map[i]), ")");
+                mpk::mix::throw_(
+                    "generate_rules: {}: Map element {} is out of range (=={})",
+                    context, i, int(map[i]));
             }
         }
     };
@@ -110,7 +110,7 @@ auto generate_rules(const Cell2dGenRules& gen_rules) -> Cell2dRules
             fill_map(result,
                      overlay,
                      nbrs,
-                     common::format(context, ", overlay ", overlay_index++));
+                     std::format("{}, overlay {}", context, overlay_index++));
 
         test_map(result, nbrs, context);
 
@@ -173,7 +173,7 @@ public:
     }
 };
 
-auto make_generate_rules(gc::ConstValueSpan args, const gc::ComputationContext&)
+auto make_generate_rules(mpk::mix::value::ConstValueSpan args, const gc::ComputationContext&)
     -> std::shared_ptr<gc::ComputationNode>
 {
     gc::expect_no_node_args("GenerateRules", args);

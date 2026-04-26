@@ -56,8 +56,8 @@ public:
         assert(result.size() == 1_gc_oc);
         auto type = inputs[0_gc_i].type();
         assert(type == inputs[1_gc_i].type());
-        assert(type->aggregate_type() == gc::AggregateType::Scalar);
-        gc::ScalarT(type).visit_numeric(
+        assert(type->aggregate_type() == mpk::mix::value::AggregateType::Scalar);
+        mpk::mix::value::ScalarT(type).visit_numeric(
             [&](auto tag)
             {
                 result.front() =
@@ -67,7 +67,7 @@ public:
     }
 };
 
-auto make_multiply(gc::ConstValueSpan args, const gc::ComputationContext&)
+auto make_multiply(mpk::mix::value::ConstValueSpan args, const gc::ComputationContext&)
     -> std::shared_ptr<gc::ComputationNode>
 {
     gc::expect_no_node_args("Multiply", args);

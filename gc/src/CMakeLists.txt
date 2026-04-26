@@ -32,13 +32,8 @@ add_library(gc-lib STATIC
     gc/simple_graph_util.cpp
     gc/source_inputs.cpp
     node_port_names.cpp
-    parse_simple_value.cpp
-    type.cpp
     type_registry.cpp
-    value.cpp
-    value_path.cpp
     yaml/parse_graph.cpp
-    yaml/parse_value.cpp
     "${CMAKE_CURRENT_BINARY_DIR}/default_config.cpp"
     "${GENERATED_CONFIG_TYPE_FILE}")
 
@@ -46,17 +41,17 @@ add_library(gc::lib ALIAS gc-lib)
 
 
 
-set(GRAPH_COMPUTATION_LOG_ENGINE "GC_LOG_QUILL" CACHE STRING
+set(MPKMIX_LOG_ENGINE "MPKMIX_LOG_QUILL" CACHE STRING
     "Logging engine")
 
 set_property(
-    CACHE GRAPH_COMPUTATION_LOG_ENGINE PROPERTY STRINGS
-    GC_LOG_NONE
-    GC_LOG_QUILL)
+    CACHE MPKMIX_LOG_ENGINE PROPERTY STRINGS
+    MPKMIX_LOG_NONE
+    MPKMIX_LOG_QUILL)
 
 target_compile_definitions(gc-lib
     PUBLIC
-        -DGRAPH_COMPUTATION_LOG_ENGINE=${GRAPH_COMPUTATION_LOG_ENGINE})
+        -DMPKMIX_LOG_ENGINE=${MPKMIX_LOG_ENGINE})
 
 
 if (GRAPH_COMPUTATION_SANITIZE_ADDRESS)
@@ -79,10 +74,13 @@ target_include_directories(gc-lib
 
 target_link_libraries(gc-lib
     PUBLIC
+        mpk_mix::log
+        mpk_mix::value
+        mpk_mix::serial
         yaml-cpp::yaml-cpp
         dl)
 
-if ("${GRAPH_COMPUTATION_LOG_ENGINE}" STREQUAL "GC_LOG_QUILL")
+if ("${MPKMIX_LOG_ENGINE}" STREQUAL "MPKMIX_LOG_QUILL")
     target_link_libraries(gc-lib
         PUBLIC
             quill::quill)

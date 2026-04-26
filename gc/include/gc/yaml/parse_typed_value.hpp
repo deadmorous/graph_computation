@@ -10,19 +10,19 @@
 
 #pragma once
 
-#include "gc/value.hpp"
-#include "gc/yaml/parse_value.hpp"
+#include "mpk/mix/value/value.hpp"
+#include "mpk/mix/serial/yaml/parse_value.hpp"
 
 namespace gc::yaml {
 
 template <typename T>
 auto parse_typed_value(const YAML::Node& node,
                  const TypeRegistry& type_registry = {},
-                 common::Type_Tag<T> = {})
+                 mpk::mix::Type_Tag<T> = {})
     -> T
 {
     const auto* type = type_of<T>();
-    auto value = gc::yaml::parse_value(node, type, type_registry);
+    auto value = mpk::mix::serial::yaml::parse_value(node, type, type_registry);
     return value.template as<T>();
 }
 

@@ -43,11 +43,11 @@ auto topological_sort(const GraphStructure& gs)
     auto result = std::vector<NodeIndex>{};
     result.reserve(gs.node_count.v);
 
-    if (gs.node_count == common::Zero && gs.edges.empty())
+    if (gs.node_count == mpk::mix::Zero && gs.edges.empty())
         return result;
 
     auto input_counts =
-        common::StrongVector<uint32_t, NodeIndex>(gs.node_count, 0);
+        mpk::mix::StrongVector<uint32_t, NodeIndex>(gs.node_count, 0);
 
     for (const auto& e : gs.edges)
         ++input_counts.at(e.to);
@@ -74,9 +74,8 @@ auto topological_sort(const GraphStructure& gs)
     }
 
     if (result.size() != gs.node_count.v)
-        common::throw_(
-            "Graph structure does not describe a DAG"
-            " - topological_sort failed");
+        mpk::mix::throw_(
+            "Graph structure does not describe a DAG - topological_sort failed");
 
     return result;
 }

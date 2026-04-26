@@ -13,28 +13,28 @@
 #include "gc/node_port_tags.hpp"
 #include "gc/weak_port.hpp"
 
-#include "common/strong.hpp"
+#include "mpk/mix/strong/strong.hpp"
 
 #include <ostream>
 
 
 namespace gc {
 
-GCLIB_STRONG_TYPE(InputPortCount, WeakPort, common::StrongCountFeatures);
+MPKMIX_STRONG_TYPE(InputPortCount, WeakPort, mpk::mix::StrongCountFeatures);
 
-GCLIB_STRONG_TYPE(OutputPortCount, WeakPort, common::StrongCountFeatures);
+MPKMIX_STRONG_TYPE(OutputPortCount, WeakPort, mpk::mix::StrongCountFeatures);
 
-GCLIB_STRONG_TYPE(
-    InputPort, WeakPort, common::StrongIndexFeatures<InputPortCount>);
+MPKMIX_STRONG_TYPE(
+    InputPort, WeakPort, mpk::mix::StrongIndexFeatures<InputPortCount>);
 
-GCLIB_STRONG_TYPE(
-    OutputPort, WeakPort, common::StrongIndexFeatures<OutputPortCount>);
+MPKMIX_STRONG_TYPE(
+    OutputPort, WeakPort, mpk::mix::StrongIndexFeatures<OutputPortCount>);
 
 namespace literals {
-GCLIB_STRONG_LITERAL_SUFFIX(InputPortCount, _gc_ic);
-GCLIB_STRONG_LITERAL_SUFFIX(InputPort, _gc_i);
-GCLIB_STRONG_LITERAL_SUFFIX(OutputPortCount, _gc_oc);
-GCLIB_STRONG_LITERAL_SUFFIX(OutputPort, _gc_o);
+MPKMIX_STRONG_LITERAL_SUFFIX(InputPortCount, _gc_ic);
+MPKMIX_STRONG_LITERAL_SUFFIX(InputPort, _gc_i);
+MPKMIX_STRONG_LITERAL_SUFFIX(OutputPortCount, _gc_oc);
+MPKMIX_STRONG_LITERAL_SUFFIX(OutputPort, _gc_o);
 } // namespace literals
 
 template <PortTagType Tag>

@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "common/struct_type_macro.hpp"
+#include "mpk/mix/struct_type_macro.hpp"
 
 #include <cstdint>
 
@@ -24,6 +24,6 @@ struct LinSpaceSpec final
     uint32_t    count{11};
 };
 
-GCLIB_STRUCT_TYPE(LinSpaceSpec, first, last, count);
+MPKMIX_STRUCT_TYPE(LinSpaceSpec, first, last, count);
 
 } // namespace agc_app_rt

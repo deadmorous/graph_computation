@@ -8,14 +8,14 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "gc/value.hpp"
-
-#include "common/format.hpp"
+#include "mpk/mix/value/value.hpp"
 
 
 using namespace std::string_view_literals;
 
 namespace gc {
+
+using namespace mpk::mix::value;
 
 namespace {
 
@@ -24,23 +24,23 @@ class ScalarFormatter final
 public:
     template <typename T>
     requires (std::is_integral_v<T> || std::is_floating_point_v<T>)
-    auto operator()(common::Type_Tag<T> tag, const Value& v) const
+    auto operator()(mpk::mix::Type_Tag<T> tag, const Value& v) const
         -> std::string
     {
         if constexpr (sizeof(T) == 1)
-            return common::format(v.convert_to<int>());
+            return std::format("{}", v.convert_to<int>());
 
-        return common::format(v.as(tag));
+        return std::format("{}", v.as(tag));
     }
 
-    auto operator()(common::Type_Tag<bool> tag, const Value& v) const
+    auto operator()(mpk::mix::Type_Tag<bool> tag, const Value& v) const
         -> std::string
     {
         auto b = v.as(tag);
         return b ? "true" : "false";
     }
 
-    auto operator()(common::Type_Tag<std::byte>tag, const Value& v) const
+    auto operator()(mpk::mix::Type_Tag<std::byte>tag, const Value& v) const
         -> std::string
     {
         auto b = static_cast<uint8_t>(v.as(tag));
@@ -59,42 +59,42 @@ public:
         result_{ value.type() ? visit(value.type(), *this, value) : "<empty>" }
     {}
 
-    auto operator()(const gc::ArrayT& t, const Value& value) const
+    auto operator()(const mpk::mix::value::ArrayT& t, const Value& value) const
         -> std::string
     { return format_seq( t, value, value.size(), '[', ']' ); }
 
-    auto operator()(const gc::CustomT&, const Value&) const
+    auto operator()(const mpk::mix::value::CustomT&, const Value&) const
         -> std::string
     { return "custom"; }
 
-    auto operator()(const gc::EnumT&, const Value& value) const
+    auto operator()(const mpk::mix::value::EnumT&, const Value& value) const
         -> std::string
     { return value.get(ValuePath{ "name"sv }).convert_to<std::string>(); }
 
-    auto operator()(const gc::PathT&, const Value& value) const
+    auto operator()(const mpk::mix::value::PathT&, const Value& value) const
         -> std::string
-    { return common::format(value.as<ValuePath>()); }
+    { return std::format("{}", value.as<ValuePath>()); }
 
-    auto operator()(const gc::ScalarT& t, const Value& value) const
+    auto operator()(const mpk::mix::value::ScalarT& t, const Value& value) const
         -> std::string
     { return t.visit(ScalarFormatter{}, value); }
 
-    auto operator()(const gc::SetT&, const Value& value) const
+    auto operator()(const mpk::mix::value::SetT&, const Value& value) const
         -> std::string
-    { return '{' + common::format_seq(value.keys(), ", ") + '}'; }
+    { return '{' + mpk::mix::format_seq(value.keys(), ", ") + '}'; }
 
-    auto operator()(const gc::StringT&, const Value& value) const
+    auto operator()(const mpk::mix::value::StringT&, const Value& value) const
         -> std::string
     { return value.convert_to<std::string>(); }
 
-    auto operator()(const gc::StrongT&, const Value& value) const
+    auto operator()(const mpk::mix::value::StrongT&, const Value& value) const
         -> std::string
     {
         // Format as weakly-typed value - TODO better
         return ValueFormatter{ value.get( ValuePath{ "v"sv } ) };
     }
 
-    auto operator()(const gc::StructT& t, const Value& value) const
+    auto operator()(const mpk::mix::value::StructT& t, const Value& value) const
         -> std::string
     {
         auto field_names = t.field_names();
@@ -114,11 +114,11 @@ public:
         return s.str();
     }
 
-    auto operator()(const gc::TupleT& t, const Value& value) const
+    auto operator()(const mpk::mix::value::TupleT& t, const Value& value) const
         -> std::string
     { return format_seq( t, value, t.element_count(), '{', '}' ); }
 
-    auto operator()(const gc::VectorT& t, const Value& value) const
+    auto operator()(const mpk::mix::value::VectorT& t, const Value& value) const
         -> std::string
     { return format_seq( t, value, value.size(), '[', ']' ); }
 
@@ -154,7 +154,7 @@ private:
 
 Value::Value() noexcept = default;
 
-Value::Value(common::Type_Tag<std::string> tag, std::string_view value) :
+Value::Value(mpk::mix::Type_Tag<std::string> tag, std::string_view value) :
     Value(tag, std::string(value))
 {}
 

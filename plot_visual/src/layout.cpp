@@ -40,10 +40,10 @@ auto LayoutOutOfSpaceException::what() const noexcept -> const char*
 Layout::Layout() = default;
 
 Layout::Layout(const QRect& entire_area):
-    Layout{common::Unsafe, checked_rect(entire_area)}
+    Layout{mpk::mix::Unsafe, checked_rect(entire_area)}
 {}
 
-Layout::Layout(common::Unsafe_Tag, const QRect& entire_area):
+Layout::Layout(mpk::mix::Unsafe_Tag, const QRect& entire_area):
     entire_area_{entire_area},
     items_{entire_area}
 {}
@@ -151,7 +151,7 @@ auto Layout::grid(const GridSpec& grid_spec,
     // TODO
     return {
         .rect={},
-        .items=common::index_range(ItemIndex{0}, ItemIndex{0})
+        .items=mpk::mix::index_range(ItemIndex{0}, ItemIndex{0})
     };
 }
 

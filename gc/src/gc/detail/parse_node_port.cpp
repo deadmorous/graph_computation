@@ -17,7 +17,8 @@
 #include "gc/detail/named_activation_nodes.hpp"
 #include "gc/detail/named_computation_nodes.hpp"
 
-#include "common/throw.hpp"
+#include "mpk/mix/util/format_seq.hpp"
+#include "mpk/mix/util/throw.hpp"
 
 #include <algorithm>
 #include <charconv>
@@ -49,14 +50,13 @@ auto parse_node_port_impl(Tag,
     // Find graph node referenced by edge end
     auto node_it = node_map.find(node_name);
     if (node_it == node_map.end())
-        common::throw_("Node '", node_name, "' is not found");
+        mpk::mix::throw_("Node '{}' is not found", node_name);
     const auto* node = node_it->second;
 
     // Get node port names
     auto pnames = port_names(node);
     if (pnames.empty())
-        common::throw_(
-            "Edge end '", ee_str, "' is invalid because node has no ports");
+        mpk::mix::throw_("Edge end '{}' is invalid because node has no ports", ee_str);
 
     // Resolve port index
     auto port = WeakPort{0};
@@ -64,9 +64,9 @@ auto parse_node_port_impl(Tag,
     {
         // Default index 0 can only be used if there is exactly one port
         if (pnames.size().v != 1)
-            common::throw_(
-                "Port name must be specified for node ", node_name,
-                ": please specify one of ", common::format_seq(pnames));
+            mpk::mix::throw_(
+                "Port name must be specified for node {}: please specify one of {}",
+                node_name, mpk::mix::format_seq(pnames));
     }
     else if (
         // Try parsing as number, treat `port_name` as a name if that fails
@@ -78,16 +78,16 @@ auto parse_node_port_impl(Tag,
         auto it = std::find(pnames.begin(), pnames.end(), port_name);
         if (it == pnames.end())
             // No such port
-            common::throw_(
-                "Node ", node_name, " does not have port ", port_name,
-                ": please specify one of ", common::format_seq(pnames));
+            mpk::mix::throw_(
+                "Node {} does not have port {}: please specify one of {}",
+                node_name, port_name, mpk::mix::format_seq(pnames));
         port = it - pnames.begin();
     }
     else if (port >= pnames.size().v)
         // Check port index bounds
-        common::throw_(
-            "Number of ports in node ", node_name, " is ", pnames.size(),
-            ", port index ", port, " is out of range");
+        mpk::mix::throw_(
+            "Number of ports in node {} is {}, port index {} is out of range",
+            node_name, pnames.size(), port);
     return {node_indices.at(node), Port<Tag>{port}};
 }
 

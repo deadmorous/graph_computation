@@ -10,23 +10,23 @@
 
 #include "gc/expect_n_node_args.hpp"
 
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
-#include "common/throw.hpp"
+#include "mpk/mix/util/throw.hpp"
 
 namespace gc {
 
 auto expect_n_node_args(std::string_view class_name,
-                        ConstValueSpan args,
+                        mpk::mix::value::ConstValueSpan args,
                         uint32_t expected_count)
     -> void
 {
     if (args.size() == expected_count)
         return;
 
-    common::throw_<std::invalid_argument>(
-        class_name, ": Expected ", expected_count,
-        " construction arguments, got ", args.size());
+    mpk::mix::throw_<std::invalid_argument>(
+        "{}: Expected {} construction arguments, got {}",
+        class_name, expected_count, args.size());
 }
 
 } // namespace gc

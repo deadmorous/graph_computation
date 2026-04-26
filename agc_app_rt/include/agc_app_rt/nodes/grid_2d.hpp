@@ -13,7 +13,7 @@
 #include "agc_app_rt/types/grid_2d_spec.hpp"
 #include "agc_app_rt/types/point_2d.hpp"
 
-#include "common/throw.hpp"
+#include "mpk/mix/util/throw.hpp"
 
 #include <cmath>
 
@@ -42,7 +42,7 @@ auto grid_2d_init_iter(const Grid2dSpec& spec)
 {
     auto size = grid_2d_size(spec);
     if (size[0] == 0 || size[1] == 0)
-        common::throw_<std::invalid_argument>("Empty grid");
+        mpk::mix::throw_<std::invalid_argument>("Empty grid");
 
     auto origin = Point2d_d{ spec.rect[0].begin, spec.rect[1].begin };
 

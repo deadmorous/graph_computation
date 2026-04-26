@@ -16,7 +16,7 @@
 #include "gc/computation_context.hpp"
 #include "gc/computation_node.hpp"
 
-#include "common/func_ref.hpp"
+#include "mpk/mix/func_ref/func_ref.hpp"
 
 #include <gtest/gtest.h>
 
@@ -42,15 +42,15 @@ TEST(Sieve_Node, ImageMetrics)
     ASSERT_EQ(node->output_names().size(), 1_gc_oc);
     ASSERT_EQ(node->output_names()[0_gc_o], "image_metrics");
 
-    gc::ValueVec inputs(4);
-    gc::ValueVec outputs(1);
+    mpk::mix::value::ValueVec inputs(4);
+    mpk::mix::value::ValueVec outputs(1);
 
     node->default_inputs(inputs);
-    ASSERT_EQ(inputs[0].type(), gc::type_of<gc_types::I8Image>());
-    ASSERT_EQ(inputs[1].type(), gc::type_of<int>());
-    ASSERT_EQ(inputs[2].type(), gc::type_of<int>());
-    ASSERT_EQ(inputs[3].type(), gc::type_of<ImageMetricSet>());
+    ASSERT_EQ(inputs[0].type(), mpk::mix::value::type_of<gc_types::I8Image>());
+    ASSERT_EQ(inputs[1].type(), mpk::mix::value::type_of<int>());
+    ASSERT_EQ(inputs[2].type(), mpk::mix::value::type_of<int>());
+    ASSERT_EQ(inputs[3].type(), mpk::mix::value::type_of<ImageMetricSet>());
 
     node->compute_outputs(outputs, inputs, {}, {});
-    ASSERT_EQ(outputs[0].type(), gc::type_of<ImageMetrics>());
+    ASSERT_EQ(outputs[0].type(), mpk::mix::value::type_of<ImageMetrics>());
 }

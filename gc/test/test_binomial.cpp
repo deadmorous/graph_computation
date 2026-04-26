@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "common/binomial.hpp"
+#include "mpk/mix/util/binomial.hpp"
 
 #include <gtest/gtest.h>
 
@@ -17,7 +17,7 @@ TEST(Common_Binomial, Basic)
     using T = uint64_t;
 
     auto check = [](T n, T k, T expected_result)
-    { EXPECT_EQ(common::binomial(common::Type<T>, n, k), expected_result); };
+    { EXPECT_EQ(mpk::mix::binomial(mpk::mix::Type<T>, n, k), expected_result); };
 
     check(0, 0, 1);
 

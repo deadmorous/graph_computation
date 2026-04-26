@@ -12,7 +12,7 @@
 
 #include "agc_app_rt/types/point_2d.hpp"
 
-#include "common/struct_type_macro.hpp"
+#include "mpk/mix/struct_type_macro.hpp"
 
 #include <ostream>
 #include <vector>
@@ -31,7 +31,7 @@ struct Canvas
     size_t pos{};
 };
 
-GCLIB_STRUCT_TYPE(Canvas<double>, size, pixels, pos);
+MPKMIX_STRUCT_TYPE(Canvas<double>, size, pixels, pos);
 
 
 template <typename T>
@@ -41,7 +41,7 @@ struct CanvasPixel
     T value;
 };
 
-GCLIB_STRUCT_TYPE(CanvasPixel<double>, pos, value);
+MPKMIX_STRUCT_TYPE(CanvasPixel<double>, pos, value);
 
 auto operator<<(std::ostream& s, const Canvas<double>& canvas)
     -> std::ostream&;

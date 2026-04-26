@@ -12,9 +12,9 @@
 
 #include "gc_visual/type_check_result.hpp"
 
-#include "gc/type_fwd.hpp"
-#include "gc/value_fwd.hpp"
-#include "gc/value_path.hpp"
+#include "mpk/mix/value/type_fwd.hpp"
+#include "mpk/mix/value/value_fwd.hpp"
+#include "mpk/mix/value/value_path.hpp"
 
 #include <yaml-cpp/node/node.h>
 
@@ -32,5 +32,5 @@ public:
     virtual ~VisualizerWidget() = default;
 
 public slots:
-    virtual void set_value(const gc::Value&) = 0;
+    virtual void set_value(const mpk::mix::value::Value&) = 0;
 };

@@ -10,7 +10,7 @@
 
 #include "gc_visual/editors/spin_editor_widget.hpp"
 
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
 #include <yaml-cpp/yaml.h>
 
@@ -24,7 +24,7 @@ SpinEditorWidget::SpinEditorWidget(const YAML::Node& config,
     config_{ config }
 {}
 
-auto SpinEditorWidget::value() const -> gc::Value
+auto SpinEditorWidget::value() const -> mpk::mix::value::Value
 {
     if (!value_proxy_)
         return {};
@@ -32,9 +32,9 @@ auto SpinEditorWidget::value() const -> gc::Value
     return value_proxy_->get();
 }
 
-auto SpinEditorWidget::check_type(const gc::Type* type) -> TypeCheckResult
+auto SpinEditorWidget::check_type(const mpk::mix::value::Type* type) -> TypeCheckResult
 {
-    if (type->aggregate_type() == gc::AggregateType::Scalar)
+    if (type->aggregate_type() == mpk::mix::value::AggregateType::Scalar)
         return { .ok = true };
 
     return {
@@ -43,20 +43,20 @@ auto SpinEditorWidget::check_type(const gc::Type* type) -> TypeCheckResult
     };
 }
 
-void SpinEditorWidget::set_value(const gc::Value& value)
+void SpinEditorWidget::set_value(const mpk::mix::value::Value& value)
 {
     maybe_construct(value);
     value_proxy_->set(value);
 }
 
-auto SpinEditorWidget::maybe_construct(const gc::Value& value) -> void
+auto SpinEditorWidget::maybe_construct(const mpk::mix::value::Value& value) -> void
 {
     if (value_proxy_)
         return;
 
-    auto t = gc::ScalarT{ value.type() };
+    auto t = mpk::mix::value::ScalarT{ value.type() };
     t.visit_numeric(
-        [&]<typename T>(common::Type_Tag<T>)
+        [&]<typename T>(mpk::mix::Type_Tag<T>)
         {
             auto range_min = config_["range"][0].as<T>();
             auto range_max = config_["range"][1].as<T>();
@@ -76,10 +76,10 @@ auto SpinEditorWidget::maybe_construct(const gc::Value& value) -> void
                     widget_{widget}
                 {}
 
-                auto set(const gc::Value& v) -> void
+                auto set(const mpk::mix::value::Value& v) -> void
                 { widget_->setValue(v.convert_to<T>()); }
 
-                auto get() -> gc::Value
+                auto get() -> mpk::mix::value::Value
                 { return widget_->value(); }
 
                 EditorWidgetType* widget_;

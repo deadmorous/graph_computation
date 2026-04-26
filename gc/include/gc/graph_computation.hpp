@@ -12,12 +12,12 @@
 
 #include "gc/computation_graph.hpp"
 #include "gc/source_inputs.hpp"
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
-#include "common/func_ref_fwd.hpp"
-#include "common/strong_grouped.hpp"
-#include "common/strong_vector.hpp"
-#include "common/detail/hash.hpp"
+#include "mpk/mix/func_ref/fwd.hpp"
+#include "mpk/mix/strong/grouped.hpp"
+#include "mpk/mix/strong/vector.hpp"
+#include "mpk/mix/util/detail/hash.hpp"
 
 #include <stop_token>
 #include <unordered_set>
@@ -40,14 +40,14 @@ using Timestamp = uint64_t;
 
 struct ComputationResult final
 {
-    common::StrongGrouped<Value, NodeIndex, InputPort> inputs;
-    common::StrongGrouped<Value, NodeIndex, OutputPort> outputs;
-    common::StrongGrouped<Value, NodeIndex, OutputPort> prev_source_outputs;
-    common::StrongVector<Timestamp, NodeIndex> node_ts;
+    mpk::mix::StrongGrouped<mpk::mix::value::Value, NodeIndex, InputPort> inputs;
+    mpk::mix::StrongGrouped<mpk::mix::value::Value, NodeIndex, OutputPort> outputs;
+    mpk::mix::StrongGrouped<mpk::mix::value::Value, NodeIndex, OutputPort> prev_source_outputs;
+    mpk::mix::StrongVector<Timestamp, NodeIndex> node_ts;
     Timestamp computation_ts{};
 
     // Used when there is a feedback determining state evolution
-    std::unordered_set<EdgeInputEnd, common::detail::Hash> updated_inputs;
+    std::unordered_set<EdgeInputEnd, mpk::mix::detail::Hash> updated_inputs;
 };
 
 auto compute(ComputationResult& result,
@@ -57,7 +57,7 @@ auto compute(ComputationResult& result,
     -> void;
 
 using GraphProgress =
-    common::FuncRef<void(NodeIndex inode, double node_progress)>;
+    mpk::mix::FuncRef<void(NodeIndex inode, double node_progress)>;
 
 auto compute(ComputationResult& result,
              const ComputationGraph& g,

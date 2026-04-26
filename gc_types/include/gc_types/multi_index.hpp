@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "common/binomial.hpp"
+#include "mpk/mix/util/binomial.hpp"
 
 #include <algorithm>
 #include <concepts>
@@ -74,7 +74,7 @@ auto inc_multi_index_mono(C& multi_index, const T& n) noexcept
 
 inline auto multi_index_mono_range_length(uint32_t n, uint32_t s)
     -> uint64_t
-{ return s > 0 ?   binomial(common::Type<uint64_t>, n + s - 1, s) :   0; };
+{ return s > 0 ?   mpk::mix::binomial(mpk::mix::Type<uint64_t>, n + s - 1, s) :   0; };
 
 namespace detail {
 
@@ -149,7 +149,7 @@ auto multi_index_mono_subrange_boundary(std::span<T> result,
 }
 
 template <typename T>
-auto multi_index_mono_subrange_boundary(common::Type_Tag<T>,
+auto multi_index_mono_subrange_boundary(mpk::mix::Type_Tag<T>,
                                         uint32_t s,
                                         std::type_identity_t<T> n,
                                         uint32_t k,

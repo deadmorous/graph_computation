@@ -10,7 +10,7 @@
 
 #include "common/expr_calculator.hpp"
 
-#include "common/throw.hpp"
+#include "mpk/mix/util/throw.hpp"
 
 #include <algorithm>
 #include <charconv>
@@ -345,7 +345,7 @@ public:
         }
 
         if (value_stack_pos != 1)
-            throw_<std::runtime_error>("Expression leaves ", value_stack_pos,
+            mpk::mix::throw_<std::runtime_error>("Expression leaves ", value_stack_pos,
                                        " elements on the value stack");
 
     }

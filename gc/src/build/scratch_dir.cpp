@@ -10,29 +10,16 @@
 
 #include "build/scratch_dir.hpp"
 
-#include "common/format.hpp"
-#include "common/throw.hpp"
+#include "mpk/mix/util/throw.hpp"
 
 #include <cassert>
+#include <format>
 #include <iomanip>
 #include <iostream>
 #include <random>
 
 
 namespace build {
-
-namespace {
-
-struct Hex final
-{
-    unsigned int value;
-};
-
-auto operator<<(std::ostream& s, Hex h)
-    -> std::ostream&
-{ return s << std::hex << h.value; }
-
-} // anonymous namespace
 
 namespace fs = std::filesystem;
 
@@ -57,7 +44,7 @@ ScratchDir::ScratchDir(const fs::path& parent_dir,
     // Retry a few times
     for (int i = 0; i < 10; ++i)
     {
-        auto subdir_name = common::format(name_prefix, '_', Hex{dis(gen)});
+        auto subdir_name = std::format("{}_{:x}", name_prefix, dis(gen));
         fs::path unique_dir = temp_dir / subdir_name;
         if (fs::create_directories(unique_dir))
         {
@@ -67,9 +54,8 @@ ScratchDir::ScratchDir(const fs::path& parent_dir,
             return;
         }
     }
-    common::throw_(
-        "Failed to create a unique temporary directory "
-        "after several attempts.");
+    mpk::mix::throw_(
+        "Failed to create a unique temporary directory after several attempts.");
 }
 
 ScratchDir::~ScratchDir()

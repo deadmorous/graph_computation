@@ -15,10 +15,10 @@
 #include "gc/expect_n_node_args.hpp"
 #include "gc/computation_node.hpp"
 #include "gc/node_port_names.hpp"
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
 #include "common/expr_calculator.hpp"
-#include "common/func_ref.hpp"
+#include "mpk/mix/func_ref/func_ref.hpp"
 
 #include <algorithm>
 #include <cctype> // For std::tolower/std::toupper
@@ -76,8 +76,7 @@ auto read_gen_cmap(const std::string& path) -> Cell2dGenCmap
     auto f = std::fstream( path.c_str() );
     if( !f.is_open() )
         throw std::runtime_error(
-            common::format(
-                "read_gen_cmap: Can't open color map generation file ", path));
+            std::format("read_gen_cmap: Can't open color map generation file {}", path));
     f.exceptions(std::ios::failbit);
     ignore_comments(f);
     auto gen_cmap = Cell2dGenCmap{};
@@ -103,9 +102,9 @@ auto read_gen_cmap(const std::string& path) -> Cell2dGenCmap
             return formula;
         }
         catch (std::exception& e) {
-            common::throw_(
-                "read_gen_cmap: ", context,
-                ": failed to read formula: ", e.what());
+            mpk::mix::throw_(
+                "read_gen_cmap: {}: failed to read formula: {}",
+                context, e.what());
         }
     };
 
@@ -119,10 +118,10 @@ auto read_gen_cmap(const std::string& path) -> Cell2dGenCmap
 
     auto max = gen_cmap.state_count - 1;
 
-    for (size_t overlay_index : common::index_range<size_t>(overlay_count))
+    for (size_t overlay_index : mpk::mix::index_range<size_t>(overlay_count))
     {
         auto overlay_context =
-            common::format("overlay ", overlay_index);
+            std::format("overlay {}", overlay_index);
         auto overlay = Cell2dGenCmap::Overlay{};
         f >> overlay.range.min >> overlay.range.max >> overlay.range.step;
         if(overlay.range.max < 0)
@@ -131,9 +130,9 @@ auto read_gen_cmap(const std::string& path) -> Cell2dGenCmap
             overlay.range.min = max;
         if (!overlay.range.ok(0, max))
         {
-            common::throw_(
-                "read_gen_cmap: ", overlay_context,
-                ": Invalid range: ", gc::Value{overlay.range});
+            mpk::mix::throw_(
+                "read_gen_cmap: {}: Invalid range: {}",
+                overlay_context, mpk::mix::value::Value{overlay.range});
         }
 
         read_rtrimmed_line();   // Ignore EOL
@@ -187,7 +186,7 @@ public:
     }
 };
 
-auto make_gen_cmap_reader(gc::ConstValueSpan args, const gc::ComputationContext&)
+auto make_gen_cmap_reader(mpk::mix::value::ConstValueSpan args, const gc::ComputationContext&)
     -> std::shared_ptr<gc::ComputationNode>
 {
     gc::expect_no_node_args("GenCmapReader", args);

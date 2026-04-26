@@ -10,7 +10,7 @@
 
 #include "gc_visual/flatten_type.hpp"
 
-#include "gc/type.hpp"
+#include "mpk/mix/value/type.hpp"
 
 
 namespace gc_visual {
@@ -20,7 +20,7 @@ namespace {
 class TypeFlattener final
 {
 public:
-    explicit TypeFlattener(const gc::Type* type)
+    explicit TypeFlattener(const mpk::mix::value::Type* type)
     {
         visit(type, *this);
     }
@@ -28,7 +28,7 @@ public:
     operator TypeComponentVec() &&
     { return std::move(result_); }
 
-    auto operator()(const gc::ArrayT& t)
+    auto operator()(const mpk::mix::value::ArrayT& t)
         -> void
     {
         const auto* element_type = t.element_type();
@@ -42,36 +42,36 @@ public:
         current_path_ = std::move(root);
     }
 
-    auto operator()(const gc::CustomT&)
+    auto operator()(const mpk::mix::value::CustomT&)
         -> void
     {
     }
 
-    auto operator()(const gc::EnumT& t)
+    auto operator()(const mpk::mix::value::EnumT& t)
         -> void
     { result_.push_back({ t.type(), current_path_ }); }
 
-    auto operator()(const gc::PathT& t)
+    auto operator()(const mpk::mix::value::PathT& t)
         -> void
     { result_.push_back({ t.type(), current_path_ }); }
 
-    auto operator()(const gc::ScalarT& t)
+    auto operator()(const mpk::mix::value::ScalarT& t)
         -> void
     { result_.push_back({ t.type(), current_path_ }); }
 
-    auto operator()(const gc::SetT&)
+    auto operator()(const mpk::mix::value::SetT&)
         -> void
-    { common::throw_("flatten_type failed: nested sets are not supported"); }
+    { mpk::mix::throw_("flatten_type failed: nested sets are not supported"); }
 
-    auto operator()(const gc::StringT& t)
-        -> void
-    { result_.push_back({ t.type(), current_path_ }); }
-
-    auto operator()(const gc::StrongT& t)
+    auto operator()(const mpk::mix::value::StringT& t)
         -> void
     { result_.push_back({ t.type(), current_path_ }); }
 
-    auto operator()(const gc::StructT& t)
+    auto operator()(const mpk::mix::value::StrongT& t)
+        -> void
+    { result_.push_back({ t.type(), current_path_ }); }
+
+    auto operator()(const mpk::mix::value::StructT& t)
         -> void
     {
         auto field_names = t.field_names();
@@ -87,7 +87,7 @@ public:
         current_path_ = std::move(root);
     }
 
-    auto operator()(const gc::TupleT& t)
+    auto operator()(const mpk::mix::value::TupleT& t)
         -> void
     {
         auto field_types = t.element_types();
@@ -101,21 +101,21 @@ public:
         current_path_ = std::move(root);
     }
 
-    auto operator()(const gc::VectorT&)
+    auto operator()(const mpk::mix::value::VectorT&)
         -> void
-    { common::throw_("flatten_type failed: nested vectors are not supported"); }
+    { mpk::mix::throw_("flatten_type failed: nested vectors are not supported"); }
 
 
 private:
     TypeComponentVec result_;
 
-    gc::ValuePath current_path_;
+    mpk::mix::value::ValuePath current_path_;
 };
 
 } // anonymous namespace
 
 
-auto flatten_type(const gc::Type* t)
+auto flatten_type(const mpk::mix::value::Type* t)
     -> std::vector<TypeComponent>
 { return TypeFlattener{t}; }
 

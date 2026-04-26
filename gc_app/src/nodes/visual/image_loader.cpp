@@ -18,7 +18,7 @@
 #include "gc/expect_n_node_args.hpp"
 #include "gc/node_port_names.hpp"
 
-#include "common/defer.hpp"
+#include "mpk/mix/util/defer.hpp"
 
 #include <png.h>
 
@@ -36,7 +36,7 @@ using namespace gc_types;
 
 namespace {
 
-using common::Defer;
+using mpk::mix::Defer;
 
 // Simple struct to hold the resulting image data
 struct IndexedImage final
@@ -140,7 +140,7 @@ auto load_indexed_png(const std::string& path) -> IndexedImage
 
     // Copy the palette data into our result struct
     result.color_map.reserve(num_palette);
-    for (auto i: common::index_range<size_t>(num_palette))
+    for (auto i: mpk::mix::index_range<size_t>(num_palette))
     {
         auto& c = palette_ptr[i];
         result.color_map.push_back(rgba(
@@ -244,7 +244,7 @@ private:
     };
 };
 
-auto make_image_loader(gc::ConstValueSpan args, const gc::ComputationContext&)
+auto make_image_loader(mpk::mix::value::ConstValueSpan args, const gc::ComputationContext&)
     -> std::shared_ptr<gc::ComputationNode>
 {
     gc::expect_no_node_args("ImageLoader", args);

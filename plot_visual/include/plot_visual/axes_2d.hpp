@@ -13,7 +13,7 @@
 #include "plot_visual/concepts.hpp"
 #include "plot_visual/layout.hpp"
 
-#include "common/defer.hpp"
+#include "mpk/mix/util/defer.hpp"
 
 #include <QFontMetrics>
 #include <QPainter>
@@ -118,7 +118,7 @@ public:
     auto draw(QPainter& painter)
     {
         painter.save();
-        auto restore_painter = common::Defer{ [&] { painter.restore(); } };
+        auto restore_painter = mpk::mix::Defer{ [&] { painter.restore(); } };
 
         auto h_line_painter = [&](int x0, int x1)
         {
@@ -234,7 +234,7 @@ public:
 
         if (!axes_.y.label.isEmpty())
         {
-            auto restore_transform = common::Defer{
+            auto restore_transform = mpk::mix::Defer{
                 [&, t = painter.transform()]{ painter.setTransform(t); } };
 
             auto t = painter.transform();

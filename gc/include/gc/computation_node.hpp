@@ -13,8 +13,8 @@
 #include "gc/computation_node_fwd.hpp"
 #include "gc/port_values.hpp"
 
-#include "common/const_name_span.hpp"
-#include "common/func_ref_fwd.hpp"
+#include "mpk/mix/util/const_name_span.hpp"
+#include "mpk/mix/func_ref/fwd.hpp"
 
 #include <cassert>
 #include <limits>
@@ -24,7 +24,7 @@
 namespace gc {
 
 using NodeProgress =
-    common::FuncRef<void(double)>;
+    mpk::mix::FuncRef<void(double)>;
 
 struct ComputationNode
 {

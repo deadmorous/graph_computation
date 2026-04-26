@@ -12,8 +12,10 @@
 #include "gc/algorithm.hpp"
 #include "gc/algorithm_inspector.hpp"
 
+#include "mpk/mix/util/format_streamable.hpp"
+
 #include "common/detail/ind.hpp"
-#include "common/format.hpp"
+#include "mpk/mix/util/format_seq.hpp"
 
 
 using namespace std::string_view_literals;
@@ -59,7 +61,7 @@ struct AlgIdPrinterHelper final
         -> void
     {
         s << prefix_for<Id>;
-        if (id == common::Zero)
+        if (id == mpk::mix::Zero)
             s << none;
         else
             s << id;
@@ -82,6 +84,10 @@ auto operator<<(std::ostream& s, Prefixed<Id> prefixed)
     return s;
 }
 
+} // anonymous namespace
+
+namespace {
+
 class AlgPrinter final
 {
 public:
@@ -96,7 +102,7 @@ public:
     {
         print(algs.input_bindings);
         print(algs.algorithms);
-        if (algs.context != common::Zero)
+        if (algs.context != mpk::mix::Zero)
             visitor_.nested("context", algs.context);
 
         return *this;
@@ -172,7 +178,7 @@ private:
             auto args = storage_(spec.args);
             print("func_invocation: ", func.name,
                   '(',
-                  common::format_seq(args, ", ", alg_id_printer_helper),
+                  mpk::mix::format_seq(args, ", ", alg_id_printer_helper),
                   ')');
             return false;
         }
@@ -200,7 +206,7 @@ private:
                     inspector_(spec.vars);
                     nested("condition", spec.condition);
                     nested("then", spec.then_clause);
-                    if (spec.else_clause != common::Zero)
+                    if (spec.else_clause != mpk::mix::Zero)
                         nested("else", spec.else_clause);
                 });
             return false;
@@ -210,9 +216,11 @@ private:
             -> bool
         {
             const auto& spec = storage_(id);
-            nested(
-                common::format("bind ", Prefixed{spec.var}, " <= ", spec.port),
-                [&]{ inspector_(storage_(spec.var)); });
+            {
+                std::ostringstream oss;
+                oss << "bind " << Prefixed{spec.var} << " <= " << spec.port;
+                nested(oss.str(), [&]{ inspector_(storage_(spec.var)); });
+            }
             return false;
         }
 
@@ -251,12 +259,11 @@ private:
             -> bool
         {
             const auto& spec = storage_(id);
-            auto text = common::format("symbol ", spec.name);
-            if (spec.header_file != common::Zero)
+            auto text = std::format("symbol {}", spec.name);
+            if (spec.header_file != mpk::mix::Zero)
             {
                 const auto& h = storage_(spec.header_file);
-                text =
-                    common::format(text, " defined in header '", h.name, '\'');
+                text = std::format("{} defined in header '{}'", text, h.name);
             }
             print(text);
             return false;
@@ -266,12 +273,11 @@ private:
             -> bool
         {
             const auto& spec = storage_(id);
-            auto text = common::format("type '", spec.name, "'");
-            if (spec.header_file != common::Zero)
+            auto text = std::format("type '{}'", spec.name);
+            if (spec.header_file != mpk::mix::Zero)
             {
                 const auto& h = storage_(spec.header_file);
-                text =
-                    common::format(text, " defined in header '", h.name, '\'');
+                text = std::format("{} defined in header '{}'", text, h.name);
             }
             print(text);
             return false;
@@ -294,7 +300,7 @@ private:
         auto operator()(alg::id::Vars id)
             -> bool
         {
-            print(id == common::Zero? "vars (none)": "vars");
+            print(id == mpk::mix::Zero? "vars (none)": "vars");
             return true;
         }
 
@@ -337,9 +343,9 @@ private:
         auto print(Ts&&... args) const
             -> void
         {
-            s_ << ind_
-               << common::format(std::forward<Ts>(args)...)
-               << '\n';
+            std::ostringstream oss;
+            (oss << ... << std::forward<Ts>(args));
+            s_ << ind_ << oss.str() << '\n';
         }
 
         Inspector& inspector_;
@@ -361,7 +367,7 @@ private:
         -> void
     {
         visitor_.print(
-            "required inputs: {", common::format_seq(a.required_inputs), '}');
+            "required inputs: {", mpk::mix::format_seq(a.required_inputs), '}');
         visitor_.nested("activate", a.activate);
     }
 
@@ -373,7 +379,7 @@ private:
             [&]{
                 for (auto port : algorithms.index_range())
                     visitor_.nested(
-                        common::format("port ", port),
+                        std::format("port {}", port),
                         [&]{ print(algorithms[port]); });
             });
     }

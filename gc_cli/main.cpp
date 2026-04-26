@@ -8,7 +8,7 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "common/throw.hpp"
+#include "mpk/mix/util/throw.hpp"
 
 #include "gc_app/node_registry.hpp"
 #include "gc_app/type_registry.hpp"
@@ -27,7 +27,7 @@ auto run(int argc, char* argv[])
     -> void
 {
     if (argc != 2)
-        common::throw_("Usage: gc_cli gc-file");
+        mpk::mix::throw_("Usage: gc_cli gc-file");
 
     // Initialize node registry and type registry
     auto context = gc::ComputationContext{

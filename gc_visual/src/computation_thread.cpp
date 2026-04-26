@@ -11,8 +11,8 @@
 #include "gc_visual/computation_thread.hpp"
 
 #include "common/compiler_diagnostic.hpp"
-#include "common/func_ref.hpp"
-#include "common/overloads.hpp"
+#include "mpk/mix/func_ref/func_ref.hpp"
+#include "mpk/mix/util/overloads.hpp"
 
 #include <QtGlobal>
 
@@ -33,16 +33,16 @@ auto ComputationThread::computation()
 { return computation_; }
 
 auto ComputationThread::get_parameter(const gc::ParameterSpec& spec) const
-    -> gc::Value
+    -> mpk::mix::value::Value
 {
     return visit(
-        common::Overloads{
-            [&](const gc::ExternalInputSpec& i) -> gc::Value
+        mpk::mix::Overloads{
+            [&](const gc::ExternalInputSpec& i) -> mpk::mix::value::Value
             {
                 return computation_
                     .source_inputs.values[i.input].get(spec.path);
             },
-                [&](const gc::NodeOutputSpec& o) -> gc::Value
+                [&](const gc::NodeOutputSpec& o) -> mpk::mix::value::Value
             {
                 const auto& res = computation_.result;
                 auto node_outputs = group(res.outputs, o.output.node);
@@ -103,14 +103,14 @@ auto ComputationThread::set_graph(gc::ComputationGraph g,
 }
 
 auto ComputationThread::set_parameter(const gc::ParameterSpec& spec,
-                                      const gc::Value& value)
+                                      const mpk::mix::value::Value& value)
     -> void
 {
     stop();
     skip_ = 0;
 
     visit(
-        common::Overloads{
+        mpk::mix::Overloads{
             [&](const gc::ExternalInputSpec& i)
             {
                 computation_.source_inputs
@@ -148,7 +148,7 @@ auto ComputationThread::invalidate_input(const gc::ParameterSpec& spec)
     auto& res = computation_.result;
 
     visit(
-        common::Overloads{
+        mpk::mix::Overloads{
             [&](const gc::ExternalInputSpec& i)
             {
                 for (const auto& dst :

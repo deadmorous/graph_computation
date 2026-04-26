@@ -8,9 +8,9 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "gc/parse_simple_value.hpp"
-#include "gc/type.hpp"
-#include "gc/value.hpp"
+#include "mpk/mix/value/parse_simple_value.hpp"
+#include "mpk/mix/value/type.hpp"
+#include "mpk/mix/value/value.hpp"
 
 #include <gtest/gtest.h>
 
@@ -28,16 +28,16 @@ enum class MyEnum : uint8_t
 
 }
 
-GCLIB_REGISTER_ENUM_TYPE(MyEnum, 1);
+MPKMIX_VALUE_REGISTER_ENUM_TYPE(MyEnum, 1);
 
 TEST(Gc_ParseSimpleValue, Enum)
 {
-    const auto* type = gc::Type::of<MyEnum>();
+    const auto* type = mpk::mix::value::Type::of<MyEnum>();
 
-    EXPECT_EQ(gc::parse_simple_value("Foo"sv, type).as<MyEnum>(), MyEnum::Foo);
-    EXPECT_EQ(gc::parse_simple_value("Bar"sv, type).as<MyEnum>(), MyEnum::Bar);
-    EXPECT_EQ(gc::parse_simple_value("Baz"sv, type).as<MyEnum>(), MyEnum::Baz);
-    EXPECT_THROW(gc::parse_simple_value("asd"sv, type), std::runtime_error);
+    EXPECT_EQ(mpk::mix::value::parse_simple_value("Foo"sv, type).as<MyEnum>(), MyEnum::Foo);
+    EXPECT_EQ(mpk::mix::value::parse_simple_value("Bar"sv, type).as<MyEnum>(), MyEnum::Bar);
+    EXPECT_EQ(mpk::mix::value::parse_simple_value("Baz"sv, type).as<MyEnum>(), MyEnum::Baz);
+    EXPECT_THROW(mpk::mix::value::parse_simple_value("asd"sv, type), std::runtime_error);
 }
 
 // TODO: Add more tests here

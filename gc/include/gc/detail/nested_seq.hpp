@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "common/throw.hpp"
+#include "mpk/mix/util/throw.hpp"
 
 #include <cassert>
 #include <concepts>
@@ -58,11 +58,11 @@ auto test_sequence_impl(NestedSequenceView<T> avail, P& p)
     -> std::pair<size_t, bool>
 {
     if(avail.size() <= 1)
-        common::throw_<std::invalid_argument>(
+        mpk::mix::throw_<std::invalid_argument>(
             "test_sequence() expects an input sequence "
             "of at least two elements");
     if(!std::holds_alternative<BeginSeqMark>(avail.front()))
-        common::throw_<std::invalid_argument>(
+        mpk::mix::throw_<std::invalid_argument>(
             "test_sequence() expects an input sequence "
             "starting with a BeginSeqMark");
     auto type = std::get<BeginSeqMark>(avail.front()).type;
@@ -93,7 +93,7 @@ auto test_sequence_impl(NestedSequenceView<T> avail, P& p)
             p = p_backup;
     }
 
-    common::throw_<std::invalid_argument>(
+    mpk::mix::throw_<std::invalid_argument>(
         "test_sequence() expects an input sequence "
         "ending with an EndSeqMark");
 }

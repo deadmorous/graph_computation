@@ -12,11 +12,11 @@
 
 namespace {
 
-template<common::StrongGroupedType SG, typename Port>
+template<mpk::mix::StrongGroupedType SG, typename Port>
 auto group_value(gc::NodeIndex node_index,
                  Port port_index,
                  const SG& groups)
-    -> const gc::Value&
+    -> const mpk::mix::value::Value&
 {
     auto values =
         group(groups, node_index);
@@ -72,15 +72,15 @@ auto GraphBroker::io_spec(const std::string& io_name) const
 { return binding_resolver_.io_spec(io_name); }
 
 auto GraphBroker::get_parameter(const gc::ParameterSpec& spec) const
-    -> gc::Value
+    -> mpk::mix::value::Value
 { return computation_thread_.get_parameter(spec); }
 
 auto GraphBroker::get_port_value(gc::EdgeOutputEnd port) const
-    -> const gc::Value&
+    -> const mpk::mix::value::Value&
 { return group_value(port.node, port.port, computation_result_.outputs); }
 
 auto GraphBroker::get_port_value(gc::EdgeInputEnd port) const
-    -> const gc::Value&
+    -> const mpk::mix::value::Value&
 { return group_value(port.node, port.port, computation_result_.inputs); }
 
 auto GraphBroker::evolution() const
@@ -96,7 +96,7 @@ auto GraphBroker::reset_computation()
 { computation_thread_.reset_computation(); }
 
 auto GraphBroker::set_parameter(const gc::ParameterSpec& spec,
-                                const gc::Value& value)
+                                const mpk::mix::value::Value& value)
     -> void
 {
     computation_thread_.set_parameter(spec, value);

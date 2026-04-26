@@ -16,7 +16,7 @@
 #include "gc_visual/widgets/graph_parameter_editor.hpp"
 #include "gc_visual/widgets/invalidate_button.hpp"
 
-#include "common/throw.hpp"
+#include "mpk/mix/util/throw.hpp"
 
 #include <yaml-cpp/yaml.h>
 
@@ -68,7 +68,7 @@ auto parse_layout_item(GraphBroker* broker,
     {
         auto layout = qobject_cast<QBoxLayout*>(parent_item->layout());
         if (!layout)
-            common::throw_("Cannot insert a stretch into a widget");
+            mpk::mix::throw_("Cannot insert a stretch into a widget");
         int value = 0;
         if (auto value_node = item_node["value"])
             value = value_node.as<int>();
@@ -91,7 +91,7 @@ auto parse_layout_item(GraphBroker* broker,
         else if (type == "invalidate")
             widget = new InvalidateButton(broker, item_node);
         else
-            common::throw_("Unknown layout item type '", type, "'");
+            mpk::mix::throw_("Unknown layout item type '{}'", type);
 
         if (auto* parent_layout = parent_item->layout())
         {

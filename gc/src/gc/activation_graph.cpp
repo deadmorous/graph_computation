@@ -16,12 +16,12 @@
 #include "gc/simple_graph_util.hpp"
 #include "gc/strong_index.hpp"
 
-#include "common/detail/hash.hpp"
+#include "mpk/mix/util/detail/hash.hpp"
 #include "common/detail/ind.hpp"
-#include "common/format.hpp"
-#include "common/overloads.hpp"
-#include "common/strong_grouped.hpp"
-#include "common/throw.hpp"
+#include "mpk/mix/util/format_seq.hpp"
+#include "mpk/mix/util/overloads.hpp"
+#include "mpk/mix/strong/grouped.hpp"
+#include "mpk/mix/util/throw.hpp"
 
 #include <optional>
 #include <set>
@@ -34,7 +34,7 @@ namespace gc {
 
 namespace {
 
-using common::detail::Hash;
+using mpk::mix::detail::Hash;
 using common::detail::Ind;
 using common::detail::ScopedInd;
 
@@ -66,7 +66,7 @@ struct HeaderFileExtractor final
     auto operator()(alg::id::HeaderFile id)
         -> bool
     {
-        if (id == common::Zero)
+        if (id == mpk::mix::Zero)
             return true;
         const auto& spec = storage(id);
         (spec.system? system_headers: headers).insert(spec.name);
@@ -76,7 +76,7 @@ struct HeaderFileExtractor final
     auto operator()(alg::id::Lib id)
         -> bool
     {
-        if (id == common::Zero)
+        if (id == mpk::mix::Zero)
             return true;
         const auto& spec = storage(id);
         libs.insert(spec.name);
@@ -154,7 +154,7 @@ struct VarVisitor final
 // ---
 
 using GraphAlgos =
-    common::StrongVector<NodeActivationAlgorithms, NodeIndex>;
+    mpk::mix::StrongVector<NodeActivationAlgorithms, NodeIndex>;
 
 auto graph_algos(const ActivationGraph& g, alg::AlgorithmStorage& storage)
     -> GraphAlgos
@@ -205,7 +205,7 @@ auto upstream_activations(const ActivationGraph& g,
     auto result = UpstreamActivationMap{};
 
     using NodeOutputActivations =
-        common::StrongGrouped<alg::id::OutputActivation, NodeIndex, Index>;
+        mpk::mix::StrongGrouped<alg::id::OutputActivation, NodeIndex, Index>;
     auto out_activations = NodeOutputActivations{};
 
     for (auto node_index : g.nodes.index_range())
@@ -213,7 +213,7 @@ auto upstream_activations(const ActivationGraph& g,
         const auto& node = g.nodes[node_index];
         auto visitor = OutputActivationExtractor{ alg_storage };
         auto inspector = alg::AlgorithmInspector{ visitor, true, alg_storage };
-        for (auto port : common::index_range<InputPort>(node->input_count()))
+        for (auto port : mpk::mix::index_range<InputPort>(node->input_count()))
         {
             const auto& alg = algos.at(node_index).algorithms.at(port);
             inspector(alg.activate);
@@ -305,14 +305,14 @@ auto check_source_inputs(const ActivationGraph& g,
     s << "Source input check failed:";
     if (!extra_source_inputs.empty())
         s << "\n- there are extra inputs: "
-          << common::format_seq(extra_source_inputs);
+          << mpk::mix::format_seq(extra_source_inputs);
     if (!bound_source_inputs.empty())
         s << "\n- there are missing inputs: "
-          << common::format_seq(bound_source_inputs);
+          << mpk::mix::format_seq(bound_source_inputs);
     if (!invalid_ignored_sources.empty())
         s << "\n- some sources are not eligible to be ignored: "
-          << common::format_seq(invalid_ignored_sources);
-    common::throw_<std::invalid_argument>(s.str());
+          << mpk::mix::format_seq(invalid_ignored_sources);
+    mpk::mix::throw_<std::invalid_argument>("{}", s.str());
 }
 
 // ---
@@ -320,11 +320,11 @@ auto check_source_inputs(const ActivationGraph& g,
 [[maybe_unused]]
 auto template_param_name(size_t index)
     -> std::string
-{ return common::format('T', index); }
+{ return std::format("T{}", index); }
 
 auto activation_func_name(const EdgeInputEnd& input)
     -> std::string
-{ return common::format("activate_node_", input.node, "_", input.port); }
+{ return std::format("activate_node_{}_{}", input.node, input.port); }
 
 auto render_includes(std::ostream& s,
                      const ActivationGraph&,
@@ -399,40 +399,36 @@ public:
         used_ = true;
 
         visit(
-            common::Overloads{
+            mpk::mix::Overloads{
                 [&](const alg::id::FuncInvocation&)
                 {
-                    if (source_type_ != common::Zero)
-                        common::throw_(
-                            "Input ",
-                            to_,
-                            " has a source type specified, but its eligibility"
-                            " cannot be checked. Specify Zero here.");
+                    if (source_type_ != mpk::mix::Zero)
+                        mpk::mix::throw_(
+                            "Input {} has a source type specified, but its"
+                            " eligibility cannot be checked. Specify Zero here.",
+                            to_);
                 },
                 [&](const alg::id::Type& original_type)
                 {
-                    if (source_type_ == common::Zero)
+                    if (source_type_ == mpk::mix::Zero)
                         return;
                     if (source_type_ != original_type)
-                        common::throw_(
-                            "Input ",
-                            to_,
-                            " has a source type specified conflicting with"
-                            " node-defined type. Specify Zero here.");
+                        mpk::mix::throw_(
+                            "Input {} has a source type specified conflicting"
+                            " with node-defined type. Specify Zero here.",
+                            to_);
                 },
                 [&](const alg::id::TypeFromBinding&)
                 {
-                    if (source_type_ == common::Zero)
-                        common::throw_(
-                            "Input ",
-                            to_,
-                            " has no source type specified,"
-                            " but a type is required.");
+                    if (source_type_ == mpk::mix::Zero)
+                        mpk::mix::throw_(
+                            "Input {} has no source type specified,"
+                            " but a type is required.",
+                            to_);
                     if (var_source_types_.contains(input_binding.var))
-                        common::throw_(
-                            "Input ",
-                            to_,
-                            " has source type specified more than once");
+                        mpk::mix::throw_(
+                            "Input {} has source type specified more than once",
+                            to_);
                     var_source_types_.emplace(input_binding.var, source_type_);
                 },
             },
@@ -487,7 +483,7 @@ auto resolve_variable_types(const ActivationGraph& g,
 
     // Resolve `TypeFromBinding` from source types
     auto var_source_types = VarTypes{};
-    for (auto index : common::index_range(source_types.types.size()))
+    for (auto index : mpk::mix::index_range(source_types.types.size()))
     {
         auto source_type = source_types.types[index];
         for (const auto& to : group(source_types.destinations, index))
@@ -498,8 +494,9 @@ auto resolve_variable_types(const ActivationGraph& g,
             };
             visit_input_bindings_for(to, resolve_type_from_binding);
             if (!used)
-                common::throw_(
-                    "Destination ", to, " for source type was not used");
+                mpk::mix::throw_(
+                    "Destination {} for source type was not used",
+                    to);
         }
     }
 
@@ -533,8 +530,8 @@ auto resolve_variable_types(const ActivationGraph& g,
             std::swap(current_v, next_v);
         }
         if (i_up_var == n_up_vars)
-            common::throw_(
-                "Circular loop in upstream acivations, starting at var ", k);
+            mpk::mix::throw_(
+                "Circular loop in upstream acivations, starting at var {}", k);
 
         auto spec = std::optional<alg::Var>{};
         for (auto v_ : current_v)
@@ -545,18 +542,16 @@ auto resolve_variable_types(const ActivationGraph& g,
                 // Type must be in `var_source_types`
                 auto it = var_source_types.find(v_);
                 if (it == var_source_types.end())
-                    common::throw_(
-                        "Variable ", v_,
-                        " of type `TypeFromBinding` is unbound");
+                    mpk::mix::throw_(
+                        "Variable {} of type `TypeFromBinding` is unbound", v_);
                 v_spec = it->second;
             }
             if (!spec.has_value())
                 spec = v_spec;
             else
-                common::throw_(
-                    "Variable ", k, " has ancestors (",
-                    common::format_seq(current_v),
-                    ") some of which have different types");
+                mpk::mix::throw_(
+                    "Variable {} has ancestors ({}) some of which have different types",
+                    k, mpk::mix::format_seq(current_v));
         }
         assert(spec.has_value());
         result.emplace(k, *spec);
@@ -576,8 +571,7 @@ auto resolve_variable_types(const ActivationGraph& g,
             result.emplace(id, it->second);
             return false;
         }
-        common::throw_(
-            "Variable ", id, " of type `TypeFromBinding` is unbound");
+        mpk::mix::throw_("Variable {} of type `TypeFromBinding` is unbound", id);
     };
     visit_all_vars(complete_binding, algos, alg_storage);
 
@@ -617,7 +611,7 @@ public:
         const auto& a_spec = alg_storage_(i_spec.args);
         s_ << "std::decay_t<decltype("
            << f_spec.name << "("
-           << common::format_seq(
+           << mpk::mix::format_seq(
                   a_spec,
                   ", ",
                   [](std::ostream& s, alg::id::Var id)
@@ -707,7 +701,7 @@ auto render_context_type(std::ostream& s,
 
         for (const auto& input_binding : node_alg.input_bindings)
             render_decl(alg_storage(input_binding).var);
-        if (node_alg.context != common::Zero)
+        if (node_alg.context != mpk::mix::Zero)
             for (auto id : alg_storage(node_alg.context))
                 render_decl(id);
         if (algos.index_range().contains(node_index + NodeCount{1}))
@@ -772,7 +766,7 @@ private:
             {
                 for (; it != filtered_edges.end() &&
                        it->from.port == output_port; ++it)
-                    common::add_to_last_group(activations_, it->to);
+                    mpk::mix::add_to_last_group(activations_, it->to);
                 next_group(activations_);
             }
         }
@@ -788,7 +782,7 @@ private:
         auto operator()(alg::id::Assign id)
             -> bool
         {
-            auto sc = OptionalScope{ *this, ind_ == common::Zero };
+            auto sc = OptionalScope{ *this, ind_ == mpk::mix::Zero };
             const auto& spec = storage_(id);
             print(fmt_(spec.dst), " = ", fmt_(spec.src), ';');
             return false;
@@ -809,7 +803,7 @@ private:
         auto decl_vars(alg::id::Vars id)
             -> void
         {
-            if (id == common::Zero)
+            if (id == mpk::mix::Zero)
                 return;
             for (auto var_id : storage_(id))
             {
@@ -823,7 +817,7 @@ private:
         {
             const auto& spec = storage_(id);
             auto sc = OptionalScope{ *this, ind_.v < 1 ||
-                                     spec.vars != common::Zero  ||
+                                     spec.vars != mpk::mix::Zero  ||
                                      !is_relaxed() };
             decl_vars(spec.vars);
             print("do");
@@ -842,7 +836,7 @@ private:
         {
             const auto& spec = storage_(id);
             auto sc = OptionalScope{ *this, ind_.v < 1 ||
-                                     spec.vars != common::Zero
+                                     spec.vars != mpk::mix::Zero
                                      || !is_relaxed() };
             decl_vars(spec.vars);
             print("for (",
@@ -861,7 +855,7 @@ private:
         auto operator()(alg::id::FuncInvocation id)
             -> bool
         {
-            auto sc = OptionalScope{ *this, ind_ == common::Zero };
+            auto sc = OptionalScope{ *this, ind_ == mpk::mix::Zero };
             print(fmt_(id), ';');
             return false;
         }
@@ -880,7 +874,7 @@ private:
             const auto& spec = storage_(id);
             auto sc =
                 OptionalScope{ *this, ind_.v < 1
-                               || spec.vars != common::Zero
+                               || spec.vars != mpk::mix::Zero
                                || !is_relaxed() };
             decl_vars(spec.vars);
             auto relax = Relax{ relaxed_, false };
@@ -891,7 +885,7 @@ private:
                     scoped_ind.emplace(ind_);
                 (*this)(spec.then_clause);
             }
-            if (spec.else_clause != common::Zero)
+            if (spec.else_clause != mpk::mix::Zero)
             {
                 print("else");
                 std::optional<ScopedInd> scoped_ind;
@@ -923,7 +917,7 @@ private:
             -> bool
         {
             auto sc =
-                OptionalScope{ *this, ind_ == common::Zero || !is_relaxed() };
+                OptionalScope{ *this, ind_ == mpk::mix::Zero || !is_relaxed() };
 
             const auto& spec = storage_(id);
 
@@ -1004,7 +998,7 @@ private:
             const auto& spec = storage_(id);
             auto sc =
                 OptionalScope{ *this, ind_.v < 1 ||
-                               spec.vars != common::Zero ||
+                               spec.vars != mpk::mix::Zero ||
                                !is_relaxed() };
             decl_vars(spec.vars);
             print("while (", fmt_(spec.condition), ")");
@@ -1020,9 +1014,9 @@ private:
         auto print(Ts&&... args) const
             -> void
         {
-            s_ << ind_
-              << common::format(std::forward<Ts>(args)...)
-              << '\n';
+            std::ostringstream s;
+            (s << ... << std::forward<Ts>(args));
+            s_ << ind_ << s.str() << '\n';
         }
 
         auto is_block(alg::id::Statement id) const
@@ -1061,10 +1055,10 @@ private:
                 -> std::string
             {
                 if (visitor_.context_vars_.contains(id))
-                    return common::format("ctx.var_", id);
+                    return std::format("ctx.var_{}", id);
 
                 // TODO: Make sure var is found in `scopes_`
-                return common::format("var_", id);
+                return std::format("var_{}", id);
             }
 
             auto operator()(const alg::AssignRhs& rhs) const
@@ -1078,8 +1072,8 @@ private:
                 const auto& f_spec = visitor_.storage_(spec.func);
                 const auto& a_spec = visitor_.storage_(spec.args);
                 return
-                    common::format(f_spec.name, "(") +
-                    common::format_seq(
+                    std::format("{}(", f_spec.name) +
+                    mpk::mix::format_seq(
                         a_spec,
                         ", ",
                         [&](std::ostream& s, alg::id::Var id)
@@ -1091,7 +1085,7 @@ private:
                 -> std::string
             {
                 const auto& spec = visitor_.storage_(id);
-                return common::format(spec.name, "{}"); // TODO: Is this always what we need?
+                return spec.name + std::string{"{}"}; // TODO: Is this always what we need?
             }
 
             auto operator()(alg::id::TypeFromBinding) const
@@ -1135,7 +1129,7 @@ private:
 
         Formatter fmt_;
 
-        common::StrongGrouped<EdgeInputEnd, OutputPort, Index> activations_;
+        mpk::mix::StrongGrouped<EdgeInputEnd, OutputPort, Index> activations_;
 
 
         struct Relax final
@@ -1282,11 +1276,11 @@ auto for_each_state_var(
     const alg::AlgorithmStorage& alg_storage,
     Cb&& cb) -> void
 {
-    if (node_alg.context == common::Zero)
+    if (node_alg.context == mpk::mix::Zero)
         return;
 
     const auto& context = alg_storage(node_alg.context);
-    for (auto var_index : common::index_range<size_t>(context.size()))
+    for (auto var_index : mpk::mix::index_range<size_t>(context.size()))
     {
         auto var = context[var_index];
         cb(node_index, var_index, var);
@@ -1338,26 +1332,26 @@ auto delete_context(agc_rt::ContextHandle* h) -> void
 
     auto input_func_name = [](const EdgeInputEnd& input)
     {
-        return common::format(
-            "context_input_var_", input.node.v, '_', int{input.port.v});
+        return std::format(
+            "context_input_var_{}_{}", input.node.v, int{input.port.v});
     };
 
     auto compressed_edge_expr = [](const EdgeInputEnd& input)
     {
-        return common::format(
-            "combined_u32_and_u8(", input.node.v, ", ", int{input.port.v}, ')');
+        return std::format(
+            "combined_u32_and_u8({}, {})", input.node.v, int{input.port.v});
     };
 
     auto compressed_var_expr = [](NodeIndex node_index, size_t var_index)
     {
-        return common::format(
-            "combined_u32_and_u8(", node_index.v, ", ", var_index, ')');
+        return std::format(
+            "combined_u32_and_u8({}, {})", node_index.v, var_index);
     };
 
     auto state_func_name = [](NodeIndex node_index, size_t state_index)
     {
-        return common::format(
-            "context_state_var_", node_index.v, '_', state_index);
+        return std::format(
+            "context_state_var_{}_{}", node_index.v, state_index);
     };
 
     for_each_node(
@@ -1651,8 +1645,8 @@ private:
             -> void
         {
             const auto& spec = s_(id);
-            assert(spec.then_clause != common::Zero);
-            if (spec.else_clause == common::Zero)
+            assert(spec.then_clause != mpk::mix::Zero);
+            if (spec.else_clause == mpk::mix::Zero)
                 (*this)(spec.then_clause);
             else
             {
@@ -1788,7 +1782,7 @@ auto generate_entry_point(std::ostream& s,
             }
         }
         if (!progress)
-            common::throw_("Failed to order graph inputs"); // TODO: More details
+            mpk::mix::throw_("Failed to order graph inputs"); // TODO: More details
     }
 
     s << R"(
@@ -1857,8 +1851,8 @@ auto generate_source(std::ostream& s,
         const auto* node = g.nodes[inode].get();
         std::cout << "---- Node " << inode
                   << " - " << node->meta().type_name
-                  << " [" << common::format_seq(node->input_names()) << " / "
-                  << common::format_seq(node->output_names()) << ']'
+                  << " [" << mpk::mix::format_seq(node->input_names()) << " / "
+                  << mpk::mix::format_seq(node->output_names()) << ']'
                   << " ---- \n";
         std::cout
             << PrintableNodeActivationAlgorithms{algos.at(inode), alg_storage}

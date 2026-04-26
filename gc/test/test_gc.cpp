@@ -12,9 +12,11 @@
 #include "gc/computation_node.hpp"
 #include "gc/node_port_names.hpp"
 
-#include "common/format.hpp"
+#include "mpk/mix/util/format_streamable.hpp"
 
 #include <gtest/gtest.h>
+
+#include <format>
 
 #include <initializer_list>
 #include <numeric>
@@ -23,6 +25,8 @@
 
 using namespace std::literals;
 using namespace gc::literals;
+
+MPKMIX_DECL_OSTREAM_FORMATTER(gc::ComputationInstructions);
 
 namespace {
 
@@ -61,7 +65,7 @@ public:
 
         auto out_count = output_count();
 
-        if (out_count == common::Zero)
+        if (out_count == mpk::mix::Zero)
             return true;
 
         auto output_index = 0_gc_o;
@@ -116,7 +120,7 @@ auto check_comple_graph(const gc::ComputationGraph& g,
 
     // std::cout << "Compiled instructions: " << *instructions << std::endl;
 
-    EXPECT_EQ(common::format(*instructions), expected_formatted_instructions);
+    EXPECT_EQ(std::format("{}", *instructions), expected_formatted_instructions);
     EXPECT_EQ(source_inputs, expected_source_inputs);
 }
 
@@ -162,7 +166,7 @@ struct SourceInput final
 {
     gc::NodeIndex node;
     gc::InputPort port;
-    gc::Value value;
+    mpk::mix::value::Value value;
 };
 
 auto make_source_inputs(std::initializer_list<SourceInput> inputs)
@@ -372,9 +376,9 @@ TEST(Gc, compute_2)
             auto gr = group(res.outputs, inode);
             auto seq = std::ranges::transform_view(
                 gr,
-                [](const gc::Value& v)
+                [](const mpk::mix::value::Value& v)
                 { return v.as<int>(); });
-            s << inode << ": (" << common::format_seq(seq) << ')' << std::endl;
+            s << inode << ": (" << mpk::mix::format_seq(seq) << ')' << std::endl;
         }
         return s.str();
     };
@@ -443,11 +447,11 @@ TEST(Gc, compute_partially)
             auto gr = group(res.outputs, inode);
             auto seq = std::ranges::transform_view(
                 gr,
-                [](const gc::Value& v)
+                [](const mpk::mix::value::Value& v)
                 { return v.as<int>(); });
             const auto* node =
                 static_cast<const TestNode*>(g.nodes.at(inode).get());
-            s << inode << ": (" << common::format_seq(seq)
+            s << inode << ": (" << mpk::mix::format_seq(seq)
               << ") - ts: " << res.node_ts.at(inode)
               << ", computed: " << node->computation_count()
               << std::endl;

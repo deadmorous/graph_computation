@@ -12,7 +12,7 @@
 
 #include "gc_types/uint.hpp"
 
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
 
 namespace gc_types {
@@ -20,18 +20,18 @@ namespace gc_types {
 using UintVec = std::vector<Uint>;
 
 inline auto uint_vec_val(const UintVec& value)
-    -> gc::Value
+    -> mpk::mix::value::Value
 { return value; }
 
 inline auto uint_vec_val(UintVec&& value)
-    -> gc::Value
+    -> mpk::mix::value::Value
 { return std::move(value); }
 
-inline auto uint_vec_val(gc::Value& value)
+inline auto uint_vec_val(mpk::mix::value::Value& value)
     -> const UintVec&
 { return value.as<UintVec>(); }
 
-inline auto uint_vec_val(const gc::Value& value)
+inline auto uint_vec_val(const mpk::mix::value::Value& value)
     -> const UintVec&
 { return value.as<UintVec>(); }
 

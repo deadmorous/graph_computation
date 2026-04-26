@@ -25,7 +25,7 @@
 #include "gc/activation_graph.hpp"
 #include "gc/activation_node.hpp"
 #include "gc/algorithm.hpp"
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
 #include <gtest/gtest.h>
 
@@ -183,7 +183,7 @@ TEST(AgcApp_Node, Printer)
     auto node = make_printer({}, {});
     EXPECT_EQ(node->input_count(), 1_gc_ic);
     EXPECT_EQ(node->input_names()[0_gc_i], "value"sv);
-    EXPECT_EQ(node->output_count(), common::Zero);
+    EXPECT_EQ(node->output_count(), mpk::mix::Zero);
 
     print_node_algos(node.get());
     print_node_source_code(node, "int"sv);
@@ -217,7 +217,7 @@ TEST(AgcApp_Node, Scale)
 
 TEST(AgcApp_Node, Split)
 {
-    auto split_args = std::vector<gc::Value>{3};
+    auto split_args = std::vector<mpk::mix::value::Value>{3};
     auto node = make_split(split_args, {});
     EXPECT_EQ(node->input_count(), 1_gc_ic);
     EXPECT_EQ(node->input_names()[0_gc_i], "in"sv);

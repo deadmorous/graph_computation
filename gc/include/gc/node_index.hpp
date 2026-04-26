@@ -12,7 +12,7 @@
 
 #include "gc/weak_node_index.hpp"
 
-#include "common/strong.hpp"
+#include "mpk/mix/strong/strong.hpp"
 
 #include <cassert>
 #include <cstdint>
@@ -21,14 +21,14 @@
 
 namespace gc {
 
-GCLIB_STRONG_TYPE(NodeCount, WeakNodeIndex, common::StrongCountFeatures);
+MPKMIX_STRONG_TYPE(NodeCount, WeakNodeIndex, mpk::mix::StrongCountFeatures);
 
-GCLIB_STRONG_TYPE(
-    NodeIndex, WeakNodeIndex, common::StrongIndexFeatures<NodeCount>);
+MPKMIX_STRONG_TYPE(
+    NodeIndex, WeakNodeIndex, mpk::mix::StrongIndexFeatures<NodeCount>);
 
 namespace literals {
-GCLIB_STRONG_LITERAL_SUFFIX(NodeCount, _gc_nc);
-GCLIB_STRONG_LITERAL_SUFFIX(NodeIndex, _gc_n);
+MPKMIX_STRONG_LITERAL_SUFFIX(NodeCount, _gc_nc);
+MPKMIX_STRONG_LITERAL_SUFFIX(NodeIndex, _gc_n);
 } // namespace literals
 
 } // namespace gc

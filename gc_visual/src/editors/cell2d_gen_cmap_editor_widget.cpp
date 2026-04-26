@@ -18,10 +18,10 @@
 #include "gc_types/palette.hpp"
 
 #include "gc/computation_context.hpp"
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
-#include "common/func_ref.hpp"
-#include "common/scoped_inc.hpp"
+#include "mpk/mix/func_ref/func_ref.hpp"
+#include "mpk/mix/util/scoped_inc.hpp"
 
 #include <yaml-cpp/yaml.h>
 
@@ -55,8 +55,8 @@ namespace {
 
 auto generate_cmap(Cell2dGenCmapEditorWidget::Storage& s) -> void
 {
-    gc::ValueVec inputs{ s.gen_cmap };
-    gc::ValueVec outputs(1);
+    mpk::mix::value::ValueVec inputs{ s.gen_cmap };
+    mpk::mix::value::ValueVec outputs(1);
     try {
         s.cmap_generator->compute_outputs(outputs, inputs, {}, {});
         s.cmap = outputs[0].as<gc_types::IndexedColorMap>();
@@ -218,14 +218,14 @@ Cell2dGenCmapEditorWidget::Cell2dGenCmapEditorWidget(const YAML::Node&,
     QObject::connect(
         s.overlays,
         &VectorEditorWidget::value_changed,
-        [this](const gc::Value& v, gc::ValuePathView path)
+        [this](const mpk::mix::value::Value& v, mpk::mix::value::ValuePathView path)
         {
             auto& s = *storage_;
             if (s.in_set_value > 0)
                 return;
             using Overlay = gc_app::Cell2dGenCmap_Overlay;
             using OverlayVec = std::vector<Overlay>;
-            auto dst = gc::Value{s.gen_cmap.overlays};
+            auto dst = mpk::mix::value::Value{s.gen_cmap.overlays};
             dst.set(path, v);
             s.gen_cmap.overlays = dst.as<OverlayVec>();
             emit value_changed(s.gen_cmap);
@@ -238,27 +238,27 @@ Cell2dGenCmapEditorWidget::Cell2dGenCmapEditorWidget(const YAML::Node&,
 Cell2dGenCmapEditorWidget::~Cell2dGenCmapEditorWidget() = default;
 
 auto Cell2dGenCmapEditorWidget::value() const
-    -> gc::Value
+    -> mpk::mix::value::Value
 { return storage_->gen_cmap; }
 
-auto Cell2dGenCmapEditorWidget::check_type(const gc::Type* type)
+auto Cell2dGenCmapEditorWidget::check_type(const mpk::mix::value::Type* type)
     -> TypeCheckResult
 {
-    static auto expected_type = gc::type_of<gc_app::Cell2dGenCmap>();
+    static auto expected_type = mpk::mix::value::type_of<gc_app::Cell2dGenCmap>();
 
     if (type == expected_type)
         return { .ok = true };
 
     return {
         .ok = false,
-        .expected_type_description = common::format(expected_type)
+        .expected_type_description = std::format("{}", expected_type)
     };
 }
 
-void Cell2dGenCmapEditorWidget::set_value(const gc::Value& v)
+void Cell2dGenCmapEditorWidget::set_value(const mpk::mix::value::Value& v)
 {
     auto& s = *storage_;
-    auto inc_in_set_value = common::ScopedInc{s.in_set_value};
+    auto inc_in_set_value = mpk::mix::ScopedInc{s.in_set_value};
 
     auto gen_cmap = v.as<gc_app::Cell2dGenCmap>();
     if (s.gen_cmap == gen_cmap)

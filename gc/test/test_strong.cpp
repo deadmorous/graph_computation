@@ -8,32 +8,33 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "common/strong.hpp"
-#include "common/index_range.hpp"
-#include "common/strong_grouped.hpp"
-#include "common/strong_span.hpp"
-#include "common/strong_vector.hpp"
+#include "mpk/mix/util/detail/hash.hpp"
+#include "mpk/mix/strong/strong.hpp"
+#include "mpk/mix/util/index_range.hpp"
+#include "mpk/mix/strong/grouped.hpp"
+#include "mpk/mix/strong/span.hpp"
+#include "mpk/mix/strong/vector.hpp"
 
 #include <gtest/gtest.h>
-#include <unordered_set>
 
-#include "common/detail/hash.hpp"
+#include <format>
+#include <unordered_set>
 
 
 using namespace std::literals;
 
 namespace {
 
-GCLIB_STRONG_TYPE_WITH_DEFAULT(IntCountDefaultedTo33,
+MPKMIX_STRONG_TYPE_WITH_DEFAULT(IntCountDefaultedTo33,
                                int,
                                33,
-                               common::StrongCountFeatures);
+                               mpk::mix::StrongCountFeatures);
 
-GCLIB_STRONG_TYPE(Count, ptrdiff_t, common::StrongCountFeatures);
-GCLIB_STRONG_TYPE(Index, ptrdiff_t, common::StrongIndexFeatures<Count>);
+MPKMIX_STRONG_TYPE(Count, ptrdiff_t, mpk::mix::StrongCountFeatures);
+MPKMIX_STRONG_TYPE(Index, ptrdiff_t, mpk::mix::StrongIndexFeatures<Count>);
 
-GCLIB_STRONG_TYPE(Count2, ptrdiff_t, common::StrongCountFeatures);
-GCLIB_STRONG_TYPE(Index2, ptrdiff_t, common::StrongIndexFeatures<Count2>);
+MPKMIX_STRONG_TYPE(Count2, ptrdiff_t, mpk::mix::StrongCountFeatures);
+MPKMIX_STRONG_TYPE(Index2, ptrdiff_t, mpk::mix::StrongIndexFeatures<Count2>);
 
 template <typename Lhs, typename Rhs>
 concept CanAdd = requires(Lhs lhs, Rhs rhs)
@@ -43,9 +44,9 @@ template <typename Lhs, typename Rhs>
 concept CanSub = requires(Lhs lhs, Rhs rhs)
 { lhs - rhs; };
 
-// GCLIB_STRONG_TYPE(StrV, std::string_view);
-// GCLIB_STRONG_TYPE(Str, std::string, common::StrongStringFeatures<StrV>);
-GCLIB_STRONG_STRING(Str);
+// MPKMIX_STRONG_TYPE(StrV, std::string_view);
+// MPKMIX_STRONG_TYPE(Str, std::string, mpk::mix::StrongStringFeatures<StrV>);
+MPKMIX_STRONG_STRING(Str);
 
 } // anonymous namespace
 
@@ -58,7 +59,7 @@ TEST(Common_Strong, Basic)
     static_assert(X::is_count);
     static_assert(!X::is_index);
 
-    X x1 = common::Zero;
+    X x1 = mpk::mix::Zero;
     EXPECT_EQ(x1.v, 0);
 
     X x2{1};
@@ -156,7 +157,7 @@ TEST(Common_Strong, Ranges)
 
     auto test_range =
         []<typename R, typename I>(
-            R range, common::Type_Tag<I>, size_t /* begin */, size_t size)
+            R range, mpk::mix::Type_Tag<I>, size_t /* begin */, size_t size)
     {
         auto has_first = false;
         auto iter_count = size_t{};
@@ -176,23 +177,23 @@ TEST(Common_Strong, Ranges)
         EXPECT_EQ(iter_count, size);
     };
 
-    constexpr auto index_tag = common::Type<Index>;
-    constexpr auto int_tag = common::Type<int>;
-    test_range(common::index_range(i1, i2), index_tag, i1.v, (i2-i1).v);
-    test_range(common::index_range(i1, c), index_tag, i1.v, c.v);
-    test_range(common::sized_index_range(i1, c), index_tag, i1.v, c.v);
-    test_range(common::index_range<Index>(c), index_tag, 0, c.v);
-    test_range(common::index_range(5, 10), int_tag, 5, 10-5);
-    test_range(common::sized_index_range(5, 10), int_tag, 5, 10);
-    test_range(common::index_range(10), int_tag, 0, 10);
+    constexpr auto index_tag = mpk::mix::Type<Index>;
+    constexpr auto int_tag = mpk::mix::Type<int>;
+    test_range(mpk::mix::index_range(i1, i2), index_tag, i1.v, (i2-i1).v);
+    test_range(mpk::mix::index_range(i1, c), index_tag, i1.v, c.v);
+    test_range(mpk::mix::sized_index_range(i1, c), index_tag, i1.v, c.v);
+    test_range(mpk::mix::index_range<Index>(c), index_tag, 0, c.v);
+    test_range(mpk::mix::index_range(5, 10), int_tag, 5, 10-5);
+    test_range(mpk::mix::sized_index_range(5, 10), int_tag, 5, 10);
+    test_range(mpk::mix::index_range(10), int_tag, 0, 10);
 }
 
 TEST(Common_Strong, Vector)
 {
-    using V = common::StrongVector<std::string, Index>;
+    using V = mpk::mix::StrongVector<std::string, Index>;
 
     V v(Count(3));
-    v[common::Zero] = "one";
+    v[mpk::mix::Zero] = "one";
     v.at(Index{1}) = "two";
     v.at(Index{2}) = "three";
     v.reserve(Count{11});
@@ -248,12 +249,12 @@ TEST(Common_Strong, Span)
 {
     auto check_span =
         []<typename V, typename I, std::size_t E>(
-            common::StrongSpan<V, I, E> span,
+            mpk::mix::StrongSpan<V, I, E> span,
             std::initializer_list<V> contents)
     {
         using C = typename I::StrongDiff;
         EXPECT_EQ(span.size(), C(contents.size()));
-        EXPECT_EQ(span.empty(), span.size() == common::Zero);
+        EXPECT_EQ(span.empty(), span.size() == mpk::mix::Zero);
         auto it = contents.begin();
         for (I i : span.index_range())
         {
@@ -267,10 +268,10 @@ TEST(Common_Strong, Span)
         };
 
     {
-        using V = common::StrongVector<std::string, Index>;
+        using V = mpk::mix::StrongVector<std::string, Index>;
         using W = V::Weak;
         auto v = V{ W{ "one", "two", "three", "four" } };
-        using S = common::StrongSpan<std::string, Index>;
+        using S = mpk::mix::StrongSpan<std::string, Index>;
 
         auto s = S{v};
         check_span(s, { "one"s, "two"s, "three"s, "four"s });
@@ -283,8 +284,8 @@ TEST(Common_Strong, Span)
 
     {
         int n3[] = {123, 45, 67};
-        using S3 = common::StrongSpan<int, Index, 3>;
-        using S = common::StrongSpan<int, Index>;
+        using S3 = mpk::mix::StrongSpan<int, Index, 3>;
+        using S = mpk::mix::StrongSpan<int, Index>;
 
         auto s3 = S3{n3};
         auto s = S{n3};
@@ -299,7 +300,7 @@ TEST(Common_Strong, Span)
 
 TEST(Common_Strong, Grouped)
 {
-    using G = common::StrongGrouped<int, Index, Index2>;
+    using G = mpk::mix::StrongGrouped<int, Index, Index2>;
 
     auto g = G{};
     add_to_last_group(g, 1);
@@ -318,12 +319,12 @@ TEST(Common_Strong, Grouped)
     add_to_last_group(g, 10'000);
     next_group(g);
 
-    EXPECT_EQ(common::format(g),
+    EXPECT_EQ(std::format("{}", g),
               "[(1,2,3), (10,20), (100,200,300,400), (), (10000)]");
     EXPECT_EQ(group_count(g), Count{5});
 
-    EXPECT_EQ(group_indices(g), common::index_range<Index>(Count{5}));
-    EXPECT_EQ(group_indices(g.v), common::index_range(uint32_t{5}));
+    EXPECT_EQ(group_indices(g), mpk::mix::index_range<Index>(Count{5}));
+    EXPECT_EQ(group_indices(g.v), mpk::mix::index_range(uint32_t{5}));
 
     auto g0 = group(g, Index{0});
     EXPECT_EQ(g0.size(), Count2{3});
@@ -351,11 +352,11 @@ TEST(Common_Strong, String)
     static_assert(std::same_as<StrView, Str::View>);
 
     auto strv = StrView{"asd"};
-    EXPECT_EQ(strv.v, common::format(strv));
+    EXPECT_EQ(strv.v, std::format("{}", strv));
     auto s1 = std::string{strv.v};
 
     auto str = Str{"qwe"};
-    EXPECT_EQ(str.v, common::format(str));
+    EXPECT_EQ(str.v, std::format("{}", str));
     auto s2 = std::string{str.v};
 
     auto str_from_v = Str{ strv };
@@ -377,7 +378,7 @@ TEST(Common_Strong, String)
     EXPECT_FALSE(str == v_from_str);
     EXPECT_TRUE(v_from_str == strv);
 
-    using S = std::unordered_set<StrView, common::detail::Hash>;
+    using S = std::unordered_set<StrView, mpk::mix::detail::Hash>;
     S s;
     s.emplace(strv);
     s.emplace(StrView{"wow"});

@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "common/struct_type_macro.hpp"
+#include "mpk/mix/struct_type_macro.hpp"
 
 
 namespace gc_app {
@@ -34,7 +34,7 @@ struct Cell2dIndexRange final
     }
 };
 
-GCLIB_STRUCT_TYPE(
+MPKMIX_STRUCT_TYPE(
     Cell2dIndexRange, min, max, step);
 
 } // namespace gc_app

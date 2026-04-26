@@ -10,7 +10,7 @@
 
 #include "gc/node_port_names.hpp"
 
-#include "common/format.hpp"
+#include <format>
 
 
 namespace gc {
@@ -30,7 +30,7 @@ auto DynamicNames::resize(WeakPort count)
 
     else
         for (WeakPort i=names_.size(); i<count; ++i)
-            names_.push_back(common::format(prefix_, int(i)));
+            names_.push_back(std::format("{}{}", prefix_, int(i)));
 
     name_views_.clear();
     for (const auto& name : names_)
@@ -38,7 +38,7 @@ auto DynamicNames::resize(WeakPort count)
 }
 
 auto DynamicNames::operator()() const
-    -> common::ConstNameSpan
+    -> mpk::mix::ConstNameSpan
 {
     return name_views_;
 }

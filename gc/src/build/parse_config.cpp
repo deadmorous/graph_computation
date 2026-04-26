@@ -13,8 +13,8 @@
 #include "build/config.hpp"
 #include "build/lib_config.hpp"
 
-#include "gc/value.hpp"
-#include "gc/yaml/parse_value.hpp"
+#include "mpk/mix/value/value.hpp"
+#include "mpk/mix/serial/yaml/parse_value.hpp"
 
 
 namespace build {
@@ -25,8 +25,8 @@ template <typename T>
 auto parse(const YAML::Node& node)
     -> T
 {
-    const auto* type = gc::Type::of<T>();
-    auto value = gc::yaml::parse_value(node, type, {});
+    const auto* type = mpk::mix::value::Type::of<T>();
+    auto value = mpk::mix::serial::yaml::parse_value(node, type, {});
     return value.template as<T>();
 }
 

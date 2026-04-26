@@ -22,10 +22,10 @@ using namespace gc_types;
 auto populate_type_registry(gc::TypeRegistry& result)
     -> void
 {
-    result.register_value("Cell2dRules", gc::type_of<Cell2dRules>());
-    result.register_value("Color", gc::type_of<Color>());
-    result.register_value("IndexedPalette", gc::type_of<IndexedPalette>());
-    result.register_value("UintSize", gc::type_of<UintSize>());
+    result.register_value("Cell2dRules", mpk::mix::value::type_of<Cell2dRules>());
+    result.register_value("Color", mpk::mix::value::type_of<Color>());
+    result.register_value("IndexedPalette", mpk::mix::value::type_of<IndexedPalette>());
+    result.register_value("UintSize", mpk::mix::value::type_of<UintSize>());
 }
 
 } // namespace gc_app

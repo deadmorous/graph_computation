@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "common/strong.hpp"
+#include "mpk/mix/strong/strong.hpp"
 
 #include <cstddef>
 #include <cstdint>
@@ -21,7 +21,7 @@ namespace common::detail {
 
 // --- Indentation
 
-GCLIB_STRONG_TYPE(Ind, uint16_t, common::StrongCountFeatures);
+MPKMIX_STRONG_TYPE(Ind, uint16_t, mpk::mix::StrongCountFeatures);
 
 constexpr inline size_t tab_size = 2;
 

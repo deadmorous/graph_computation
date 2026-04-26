@@ -22,14 +22,14 @@ class ListEditorWidget final :
 public:
     explicit ListEditorWidget(const YAML::Node&, QWidget* parent = nullptr);
 
-    auto value() const -> gc::Value override;
+    auto value() const -> mpk::mix::value::Value override;
 
-    static auto check_type(const gc::Type*) -> TypeCheckResult;
+    static auto check_type(const mpk::mix::value::Type*) -> TypeCheckResult;
 
 public slots:
-    void set_value(const gc::Value& value) override;
+    void set_value(const mpk::mix::value::Value& value) override;
 
 private:
-    const gc::Type* type_{};
+    const mpk::mix::value::Type* type_{};
     int in_set_value_{};
 };

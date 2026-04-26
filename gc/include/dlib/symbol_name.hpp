@@ -10,11 +10,11 @@
 
 #pragma once
 
-#include "common/strong.hpp"
+#include "mpk/mix/strong/strong.hpp"
 
 
 namespace dlib {
 
-GCLIB_STRONG_STRING(SymbolName);
+MPKMIX_STRONG_STRING(SymbolName);
 
 } // namespace dlib

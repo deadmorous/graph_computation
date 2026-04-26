@@ -40,7 +40,7 @@
 #include "gc/computation_node.hpp"
 #include "gc/computation_node_registry.hpp"
 
-#include "common/func_ref.hpp"
+#include "mpk/mix/func_ref/func_ref.hpp"
 
 #include <gtest/gtest.h>
 
@@ -140,15 +140,15 @@ TEST(GcApp_Node, Cell2d)
     ASSERT_EQ(node->output_names().size(), 1_gc_oc);
     ASSERT_EQ(node->output_names()[0_gc_o], "output_state");
 
-    gc::ValueVec inputs(2);
-    gc::ValueVec outputs(1);
+    mpk::mix::value::ValueVec inputs(2);
+    mpk::mix::value::ValueVec outputs(1);
 
     node->default_inputs(inputs);
-    ASSERT_EQ(inputs[0].type(), gc::type_of<Cell2dRules>());
-    ASSERT_EQ(inputs[1].type(), gc::type_of<I8Image>());
+    ASSERT_EQ(inputs[0].type(), mpk::mix::value::type_of<Cell2dRules>());
+    ASSERT_EQ(inputs[1].type(), mpk::mix::value::type_of<I8Image>());
 
     node->compute_outputs(outputs, inputs, {}, {});
-    ASSERT_EQ(outputs[0].type(), gc::type_of<I8Image>());
+    ASSERT_EQ(outputs[0].type(), mpk::mix::value::type_of<I8Image>());
 }
 
 TEST(GcApp_Node, GenCmapReader)
@@ -164,15 +164,15 @@ TEST(GcApp_Node, GenCmapReader)
     ASSERT_EQ(node->output_names().size(), 1_gc_oc);
     ASSERT_EQ(node->output_names()[0_gc_o], "gen_cmap");
 
-    gc::ValueVec inputs(1);
-    gc::ValueVec outputs(1);
+    mpk::mix::value::ValueVec inputs(1);
+    mpk::mix::value::ValueVec outputs(1);
 
     node->default_inputs(inputs);
-    ASSERT_EQ(inputs[0].type(), gc::type_of<std::string>());
+    ASSERT_EQ(inputs[0].type(), mpk::mix::value::type_of<std::string>());
 
     inputs[0] = "data/program.cf"s;
     node->compute_outputs(outputs, inputs, {}, {});
-    ASSERT_EQ(outputs[0].type(), gc::type_of<Cell2dGenCmap>());
+    ASSERT_EQ(outputs[0].type(), mpk::mix::value::type_of<Cell2dGenCmap>());
 
     const auto& actual_gen_cmap = outputs[0].as<Cell2dGenCmap>();
     auto expected_gen_cmap = Cell2dGenCmap{
@@ -250,17 +250,17 @@ TEST(GcApp_Node, GenRuleReader)
     ASSERT_EQ(node->output_names().size(), 1_gc_oc);
     ASSERT_EQ(node->output_names()[0_gc_o], "gen_rules");
 
-    gc::ValueVec inputs(1);
-    gc::ValueVec outputs(1);
+    mpk::mix::value::ValueVec inputs(1);
+    mpk::mix::value::ValueVec outputs(1);
 
     node->default_inputs(inputs);
-    ASSERT_EQ(inputs[0].type(), gc::type_of<std::string>());
+    ASSERT_EQ(inputs[0].type(), mpk::mix::value::type_of<std::string>());
 
     // Case 1 - read gen_rules
     {
         inputs[0] = "data/hunt.gen"s;
         node->compute_outputs(outputs, inputs, {}, {});
-        ASSERT_EQ(outputs[0].type(), gc::type_of<Cell2dGenRules>());
+        ASSERT_EQ(outputs[0].type(), mpk::mix::value::type_of<Cell2dGenRules>());
 
         const auto& actual_gen_rules = outputs[0].as<Cell2dGenRules>();
         auto expected_gen_rules = Cell2dGenRules{
@@ -317,11 +317,11 @@ TEST(GcApp_Node, GenerateRules)
     ASSERT_EQ(node->output_names().size(), 1_gc_oc);
     ASSERT_EQ(node->output_names()[0_gc_o], "rules");
 
-    gc::ValueVec inputs(1);
-    gc::ValueVec outputs(1);
+    mpk::mix::value::ValueVec inputs(1);
+    mpk::mix::value::ValueVec outputs(1);
 
     node->default_inputs(inputs);
-    ASSERT_EQ(inputs[0].type(), gc::type_of<Cell2dGenRules>());
+    ASSERT_EQ(inputs[0].type(), mpk::mix::value::type_of<Cell2dGenRules>());
 
     inputs[0] = Cell2dGenRules{
         .state_count = 128,
@@ -339,7 +339,7 @@ TEST(GcApp_Node, GenerateRules)
         }
     };
     node->compute_outputs(outputs, inputs, {}, {});
-    ASSERT_EQ(outputs[0].type(), gc::type_of<Cell2dRules>());
+    ASSERT_EQ(outputs[0].type(), mpk::mix::value::type_of<Cell2dRules>());
 }
 
 TEST(GcApp_Node, GenerateCmap)
@@ -355,11 +355,11 @@ TEST(GcApp_Node, GenerateCmap)
     ASSERT_EQ(node->output_names().size(), 1_gc_oc);
     ASSERT_EQ(node->output_names()[0_gc_o], "cmap");
 
-    gc::ValueVec inputs(1);
-    gc::ValueVec outputs(1);
+    mpk::mix::value::ValueVec inputs(1);
+    mpk::mix::value::ValueVec outputs(1);
 
     node->default_inputs(inputs);
-    ASSERT_EQ(inputs[0].type(), gc::type_of<Cell2dGenCmap>());
+    ASSERT_EQ(inputs[0].type(), mpk::mix::value::type_of<Cell2dGenCmap>());
 
     inputs[0] = Cell2dGenCmap{
         .state_count = 256,
@@ -384,12 +384,12 @@ TEST(GcApp_Node, GenerateCmap)
         }
     };
     node->compute_outputs(outputs, inputs, {}, {});
-    ASSERT_EQ(outputs[0].type(), gc::type_of<IndexedColorMap>());
+    ASSERT_EQ(outputs[0].type(), mpk::mix::value::type_of<IndexedColorMap>());
 
     const auto& cmap = outputs[0].as<IndexedColorMap>();
     ASSERT_EQ(cmap.size(), 256);
     using C = ColorComponent;
-    for (size_t n : common::index_range<size_t>(256))
+    for (size_t n : mpk::mix::index_range<size_t>(256))
     {
         auto [r, g, b, a] = r_g_b_a(cmap[n]);
         EXPECT_EQ(a, C{0xff});
@@ -421,14 +421,14 @@ TEST(GcApp_Node, Life)
     ASSERT_EQ(node->output_names().size(), 1_gc_oc);
     ASSERT_EQ(node->output_names()[0_gc_o], "output");
 
-    gc::ValueVec inputs(1);
-    gc::ValueVec outputs(1);
+    mpk::mix::value::ValueVec inputs(1);
+    mpk::mix::value::ValueVec outputs(1);
 
     node->default_inputs(inputs);
-    ASSERT_EQ(inputs[0].type(), gc::type_of<I8Image>());
+    ASSERT_EQ(inputs[0].type(), mpk::mix::value::type_of<I8Image>());
 
     node->compute_outputs(outputs, inputs, {}, {});
-    ASSERT_EQ(outputs[0].type(), gc::type_of<I8Image>());
+    ASSERT_EQ(outputs[0].type(), mpk::mix::value::type_of<I8Image>());
 }
 
 TEST(GcApp_Node, OffsetImage)
@@ -446,12 +446,12 @@ TEST(GcApp_Node, OffsetImage)
     ASSERT_EQ(node->output_names().size(), 1_gc_oc);
     ASSERT_EQ(node->output_names()[0_gc_o], "output_image");
 
-    gc::ValueVec inputs(2);
-    gc::ValueVec outputs(1);
+    mpk::mix::value::ValueVec inputs(2);
+    mpk::mix::value::ValueVec outputs(1);
 
     node->default_inputs(inputs);
-    ASSERT_EQ(inputs[0].type(), gc::type_of<I8Image>());
-    ASSERT_EQ(inputs[1].type(), gc::type_of<int8_t>());
+    ASSERT_EQ(inputs[0].type(), mpk::mix::value::type_of<I8Image>());
+    ASSERT_EQ(inputs[1].type(), mpk::mix::value::type_of<int8_t>());
 
     auto& input_image = inputs[0].as<I8Image>();
     [[maybe_unused]]
@@ -489,17 +489,17 @@ TEST(GcApp_Node, RandomImage)
     ASSERT_EQ(node->output_names().size(), 1_gc_oc);
     ASSERT_EQ(node->output_names()[0_gc_o], "image");
 
-    gc::ValueVec inputs(7);
-    gc::ValueVec outputs(1);
+    mpk::mix::value::ValueVec inputs(7);
+    mpk::mix::value::ValueVec outputs(1);
 
     node->default_inputs(inputs);
-    ASSERT_EQ(inputs[0].type(), gc::type_of<UintSize>());
-    ASSERT_EQ(inputs[1].type(), gc::type_of<int8_t>());
-    ASSERT_EQ(inputs[2].type(), gc::type_of<int8_t>());
-    ASSERT_EQ(inputs[3].type(), gc::type_of<std::vector<int8_t>>());
-    ASSERT_EQ(inputs[4].type(), gc::type_of<int>());
-    ASSERT_EQ(inputs[5].type(), gc::type_of<std::string>());
-    ASSERT_EQ(inputs[6].type(), gc::type_of<int8_t>());
+    ASSERT_EQ(inputs[0].type(), mpk::mix::value::type_of<UintSize>());
+    ASSERT_EQ(inputs[1].type(), mpk::mix::value::type_of<int8_t>());
+    ASSERT_EQ(inputs[2].type(), mpk::mix::value::type_of<int8_t>());
+    ASSERT_EQ(inputs[3].type(), mpk::mix::value::type_of<std::vector<int8_t>>());
+    ASSERT_EQ(inputs[4].type(), mpk::mix::value::type_of<int>());
+    ASSERT_EQ(inputs[5].type(), mpk::mix::value::type_of<std::string>());
+    ASSERT_EQ(inputs[6].type(), mpk::mix::value::type_of<int8_t>());
 
     ASSERT_EQ(inputs[0].as<UintSize>(), UintSize(100, 100));
     ASSERT_EQ(inputs[1].as<int8_t>(), int8_t{0});
@@ -510,7 +510,7 @@ TEST(GcApp_Node, RandomImage)
     ASSERT_EQ(inputs[6].as<int8_t>(), int8_t{0});
 
     node->compute_outputs(outputs, inputs, {}, {});
-    ASSERT_EQ(outputs[0].type(), gc::type_of<I8Image>());
+    ASSERT_EQ(outputs[0].type(), mpk::mix::value::type_of<I8Image>());
 
     const auto& img = outputs[0].as<I8Image>();
     EXPECT_EQ(img.size, UintSize(100, 100));
@@ -559,8 +559,8 @@ TEST(GcApp_Node, ImageColorizer)
     ASSERT_EQ(node->output_names().size(), 1_gc_oc);
     ASSERT_EQ(node->output_names()[0_gc_o], "output_image");
 
-    gc::ValueVec inputs(3);
-    gc::ValueVec outputs(1);
+    mpk::mix::value::ValueVec inputs(3);
+    mpk::mix::value::ValueVec outputs(1);
 
     using C = ColorComponent;
     constexpr auto black = rgba(C{0x00}, C{0x00}, C{0x00});
@@ -579,7 +579,7 @@ TEST(GcApp_Node, ImageColorizer)
     inputs[2] = int8_t{0};
 
     node->compute_outputs(outputs, inputs, {}, {});
-    ASSERT_EQ(outputs[0].type(), gc::type_of<ColorImage>());
+    ASSERT_EQ(outputs[0].type(), mpk::mix::value::type_of<ColorImage>());
 
     const auto& image = outputs[0].as<ColorImage>();
     EXPECT_EQ(image.size, UintSize(3, 2));
@@ -604,8 +604,8 @@ TEST(GcApp_Node, ImageLoader)
     ASSERT_EQ(node->output_names()[0_gc_o], "image");
     ASSERT_EQ(node->output_names()[1_gc_o], "color_map");
 
-    gc::ValueVec inputs(2);
-    gc::ValueVec outputs(2);
+    mpk::mix::value::ValueVec inputs(2);
+    mpk::mix::value::ValueVec outputs(2);
 
     node->default_inputs(inputs);
     ASSERT_EQ(inputs[0], "image.png"s);
@@ -613,8 +613,8 @@ TEST(GcApp_Node, ImageLoader)
 
     inputs[0] = "data/acorn.png"s;
     node->compute_outputs(outputs, inputs, {}, {});
-    ASSERT_EQ(outputs[0].type(), gc::type_of<I8Image>());
-    ASSERT_EQ(outputs[1].type(), gc::type_of<IndexedColorMap>());
+    ASSERT_EQ(outputs[0].type(), mpk::mix::value::type_of<I8Image>());
+    ASSERT_EQ(outputs[1].type(), mpk::mix::value::type_of<IndexedColorMap>());
 
     const auto& image = outputs[0].as<I8Image>();
     const auto& color_map = outputs[1].as<IndexedColorMap>();
@@ -670,11 +670,11 @@ TEST(GcApp_Node, EratosthenesSieve)
     ASSERT_EQ(node->output_names().size(), 1_gc_oc);
     ASSERT_EQ(node->output_names()[0_gc_o], "sequence");
 
-    gc::ValueVec inputs(1);
-    gc::ValueVec outputs(1);
+    mpk::mix::value::ValueVec inputs(1);
+    mpk::mix::value::ValueVec outputs(1);
 
     node->default_inputs(inputs);
-    ASSERT_EQ(inputs[0].type(), gc::type_of<Uint>());
+    ASSERT_EQ(inputs[0].type(), mpk::mix::value::type_of<Uint>());
 
     auto count = uint_val(inputs[0]);
     ASSERT_GT(count, 1);
@@ -682,7 +682,7 @@ TEST(GcApp_Node, EratosthenesSieve)
 
     inputs[0] = uint_val(10);
     node->compute_outputs(outputs, inputs, {}, {});
-    ASSERT_EQ(outputs[0].type(), gc::type_of<UintVec>());
+    ASSERT_EQ(outputs[0].type(), mpk::mix::value::type_of<UintVec>());
 
     const auto& actual_output = uint_vec_val(outputs[0]);
     const auto expected_output =
@@ -705,12 +705,12 @@ TEST(GcApp_Node, FilterSeq)
     ASSERT_EQ(node->output_names().size(), 1_gc_oc);
     ASSERT_EQ(node->output_names()[0_gc_o], "indices");
 
-    gc::ValueVec inputs(2);
-    gc::ValueVec outputs(1);
+    mpk::mix::value::ValueVec inputs(2);
+    mpk::mix::value::ValueVec outputs(1);
 
     node->default_inputs(inputs);
-    ASSERT_EQ(inputs[0].type(), gc::type_of<UintVec>());
-    ASSERT_EQ(inputs[1].type(), gc::type_of<Uint>());
+    ASSERT_EQ(inputs[0].type(), mpk::mix::value::type_of<UintVec>());
+    ASSERT_EQ(inputs[1].type(), mpk::mix::value::type_of<Uint>());
 
     auto input_seq = uint_vec_val(inputs[0]);
     ASSERT_GT(input_seq.size(), 1);
@@ -724,7 +724,7 @@ TEST(GcApp_Node, FilterSeq)
     {
         inputs[1] = uint_val(value);
             node->compute_outputs(outputs, inputs, {}, {});
-        ASSERT_EQ(outputs[0].type(), gc::type_of<UintVec>());
+        ASSERT_EQ(outputs[0].type(), mpk::mix::value::type_of<UintVec>());
 
         const auto& actual_output = uint_vec_val(outputs[0]);
         ASSERT_EQ(actual_output, expected_output);
@@ -753,11 +753,11 @@ TEST(GcApp_Node, TestSequence)
     ASSERT_EQ(node->output_names().size(), 1_gc_oc);
     ASSERT_EQ(node->output_names()[0_gc_o], "sequence");
 
-    gc::ValueVec inputs(1);
-    gc::ValueVec outputs(1);
+    mpk::mix::value::ValueVec inputs(1);
+    mpk::mix::value::ValueVec outputs(1);
 
     node->default_inputs(inputs);
-    ASSERT_EQ(inputs[0].type(), gc::type_of<Uint>());
+    ASSERT_EQ(inputs[0].type(), mpk::mix::value::type_of<Uint>());
 
     auto count = uint_val(inputs[0]);
     ASSERT_GT(count, 1);
@@ -765,7 +765,7 @@ TEST(GcApp_Node, TestSequence)
 
     inputs[0] = uint_val(10);
     node->compute_outputs(outputs, inputs, {}, {});
-    ASSERT_EQ(outputs[0].type(), gc::type_of<UintVec>());
+    ASSERT_EQ(outputs[0].type(), mpk::mix::value::type_of<UintVec>());
 
     const auto& actual_output = uint_vec_val(outputs[0]);
     const auto expected_output =
@@ -791,8 +791,8 @@ TEST(GcApp_Node, Multiply)
     auto check =
         [&]<typename T>(T a, T b)
     {
-        gc::ValueVec inputs{ a, b };
-        gc::ValueVec outputs(1);
+        mpk::mix::value::ValueVec inputs{ a, b };
+        mpk::mix::value::ValueVec outputs(1);
 
         node->compute_outputs(outputs, inputs, {}, {});
         ASSERT_EQ(outputs[0].as<T>(), a*b);
@@ -806,9 +806,9 @@ TEST(GcApp_Node, Merge)
 {
     auto context = make_computation_context();
     context.type_registry.register_value(
-        "Vector[I32]", gc::type_of<std::vector<int32_t>>());
+        "Vector[I32]", mpk::mix::value::type_of<std::vector<int32_t>>());
 
-    auto input_count = gc::Value{common::Type<size_t>, 2u};
+    auto input_count = mpk::mix::value::Value{mpk::mix::Type<size_t>, 2u};
     auto node = context.node_registry.at("merge")({&input_count, 1}, context);
 
     ASSERT_EQ(node->input_count(), 5_gc_ic);
@@ -825,16 +825,16 @@ TEST(GcApp_Node, Merge)
     ASSERT_EQ(node->output_names()[0_gc_o], "output");
 
     auto output_type = "IndexedPalette"s;
-    auto path_0 = gc::ValuePath{} / "color_map"sv;
+    auto path_0 = mpk::mix::value::ValuePath{} / "color_map"sv;
     using C = ColorComponent;
     auto value_0 = IndexedColorMap{
         rgba(C{0x00}, C{0x00}, C{0x00}),
         rgba(C{0xff}, C{0xff}, C{0xff}),
     };
-    auto path_1 = gc::ValuePath{} / "overflow_color"sv;
+    auto path_1 = mpk::mix::value::ValuePath{} / "overflow_color"sv;
     auto value_1 = rgba(C{0xcc}, C{0x00}, C{0x00});
-    auto inputs = gc::ValueVec{ output_type, path_0, value_0, path_1, value_1 };
-    gc::ValueVec outputs(1);
+    auto inputs = mpk::mix::value::ValueVec{ output_type, path_0, value_0, path_1, value_1 };
+    mpk::mix::value::ValueVec outputs(1);
 
     node->compute_outputs(outputs, inputs, {}, {});
 
@@ -858,17 +858,17 @@ TEST(GcApp_Node, Project)
     ASSERT_EQ(node->output_names()[0_gc_o], "projection");
 
     auto check =
-        [&]<typename T, typename P>(T value, gc::ValuePath path, P projection)
+        [&]<typename T, typename P>(T value, mpk::mix::value::ValuePath path, P projection)
     {
-        gc::ValueVec inputs{ value, path };
-        gc::ValueVec outputs(1);
+        mpk::mix::value::ValueVec inputs{ value, path };
+        mpk::mix::value::ValueVec outputs(1);
 
         node->compute_outputs(outputs, inputs, {}, {});
         ASSERT_EQ(outputs[0].as<P>(), projection);
     };
 
-    check(std::vector<int>{123, 45}, gc::ValuePath{}/0u, 123);
-    check(std::vector<int>{123, 45}, gc::ValuePath{}/1u, 45);
+    check(std::vector<int>{123, 45}, mpk::mix::value::ValuePath{}/0u, 123);
+    check(std::vector<int>{123, 45}, mpk::mix::value::ValuePath{}/1u, 45);
 }
 
 TEST(GcApp_Node, UintSizeNode)
@@ -885,11 +885,11 @@ TEST(GcApp_Node, UintSizeNode)
     ASSERT_EQ(node->output_names().size(), 1_gc_oc);
     ASSERT_EQ(node->output_names()[0_gc_o], "size");
 
-    gc::ValueVec inputs(2);
-    gc::ValueVec outputs(1);
+    mpk::mix::value::ValueVec inputs(2);
+    mpk::mix::value::ValueVec outputs(1);
     node->default_inputs(inputs);
-    ASSERT_EQ(inputs[0].type(), gc::type_of<Uint>());
-    ASSERT_EQ(inputs[1].type(), gc::type_of<Uint>());
+    ASSERT_EQ(inputs[0].type(), mpk::mix::value::type_of<Uint>());
+    ASSERT_EQ(inputs[1].type(), mpk::mix::value::type_of<Uint>());
 
     auto expected_size = gc_types::UintSize{ 800, 600 };
     inputs[0] = expected_size.width;
@@ -918,8 +918,8 @@ TEST(GcApp_Node, Waring)
                     Uint s, Uint k,
                     std::vector<std::pair<Uint, UintVec>> expected)
     {
-        gc::ValueVec inputs{ count, s, k };
-        gc::ValueVec outputs(1);
+        mpk::mix::value::ValueVec inputs{ count, s, k };
+        mpk::mix::value::ValueVec outputs(1);
 
         node->compute_outputs(outputs, inputs, {}, {});
         const auto& seq = outputs[0].as<UintVec>();
@@ -969,8 +969,8 @@ TEST(GcApp_Progress, EratosthenesSieve)
 {
     auto node = num::make_eratosthenes_sieve({}, {});
 
-    gc::ValueVec inputs(1);
-    gc::ValueVec outputs(1);
+    mpk::mix::value::ValueVec inputs(1);
+    mpk::mix::value::ValueVec outputs(1);
 
     auto progress_checker = ProgressChecker{};
 
@@ -984,8 +984,8 @@ TEST(GcApp_Progress, Waring)
 {
     auto node = num::make_waring({}, {});
 
-    gc::ValueVec inputs(3);
-    gc::ValueVec outputs(1);
+    mpk::mix::value::ValueVec inputs(3);
+    mpk::mix::value::ValueVec outputs(1);
 
     auto progress_checker = ProgressChecker{};
 

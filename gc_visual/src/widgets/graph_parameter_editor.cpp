@@ -24,8 +24,8 @@
 
 #include "plot_visual/qstr.hpp"
 
-#include "common/func_ref.hpp"
-#include "common/throw.hpp"
+#include "mpk/mix/func_ref/func_ref.hpp"
+#include "mpk/mix/util/throw.hpp"
 
 #include <yaml-cpp/yaml.h>
 
@@ -63,12 +63,13 @@ public:
         if (auto type_check_result = EditorWidget::check_type(value.type());
             !type_check_result.ok)
         {
-            common::throw_(
-                "Invalid binding: '", editor_type,
-                "' can only bind to ",
+            mpk::mix::throw_(
+                "Invalid binding: '{}' can only bind to {},"
+                " whereas the parameter {} is of type {}",
+                editor_type,
                 type_check_result.expected_type_description,
-                ", whereas the parameter ", common::format(binding),
-                " is of type ", value.type());
+                binding,
+                value.type());
         }
 
         auto param_spec = binding.param_spec;
@@ -80,7 +81,7 @@ public:
             widget_,
             &EditorWidget::value_changed,
             broker,
-            [=](const gc::Value& v, gc::ValuePathView path)
+            [=](const mpk::mix::value::Value& v, mpk::mix::value::ValuePathView path)
             {
                 auto subspec = param_spec;
                 subspec.path /= path;
@@ -113,7 +114,7 @@ private:
 };
 
 using EditorFactoryFunc =
-    common::FuncRef<std::shared_ptr<QWidget>(
+    mpk::mix::FuncRef<std::shared_ptr<QWidget>(
         const std::string&,
         const ParamBinding&,
         GraphBroker*,

@@ -18,10 +18,10 @@
 #include "gc/expect_n_node_args.hpp"
 #include "gc/computation_node.hpp"
 #include "gc/node_port_names.hpp"
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
 #include "common/expr_calculator.hpp"
-#include "common/func_ref.hpp"
+#include "mpk/mix/func_ref/func_ref.hpp"
 
 #include <cassert>
 #include <cstring>
@@ -71,7 +71,7 @@ auto generate_cmap(const Cell2dGenCmap& gen_cmap) -> IndexedColorMap
             }
         }
         catch(std::exception& e) {
-            common::throw_("generate_cmap: ", context, ": ", e.what());
+            mpk::mix::throw_("generate_cmap: {}: {}", context, e.what());
         }
     };
 
@@ -103,11 +103,11 @@ auto generate_cmap(const Cell2dGenCmap& gen_cmap) -> IndexedColorMap
         fill_rgb_maps(
             rgb_maps,
             overlay,
-            common::format("overlay ", overlay_index++));
+            std::format("overlay {}", overlay_index++));
 
     auto result = IndexedColorMap(gen_cmap.state_count);
     using C = ColorComponent;
-    for (auto i : common::index_range<size_t>(gen_cmap.state_count))
+    for (auto i : mpk::mix::index_range<size_t>(gen_cmap.state_count))
         result[i] = rgba(C{rgb_maps.r[i]}, C{rgb_maps.g[i]}, C{rgb_maps.b[i]});
 
     return result;
@@ -155,7 +155,7 @@ public:
     }
 };
 
-auto make_generate_cmap(gc::ConstValueSpan args, const gc::ComputationContext&)
+auto make_generate_cmap(mpk::mix::value::ConstValueSpan args, const gc::ComputationContext&)
     -> std::shared_ptr<gc::ComputationNode>
 {
     gc::expect_no_node_args("GenerateCmap", args);

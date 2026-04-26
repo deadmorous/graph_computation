@@ -8,20 +8,20 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "common/holder.hpp"
+#include "mpk/mix/util/holder.hpp"
 
 #include <gtest/gtest.h>
 
 
 namespace {
 
-template <common::HolderType H>
+template <mpk::mix::HolderType H>
 auto held_value(H& h) -> typename H::value_type&
 {
     return h.value();
 }
 
-template <common::HolderType H>
+template <mpk::mix::HolderType H>
 auto const_held_value(const H& h) -> const typename H::value_type&
 {
     return h.value();
@@ -32,8 +32,8 @@ auto const_held_value(const H& h) -> const typename H::value_type&
 
 TEST(HolderTest, ValueHolder)
 {
-    using H = common::ValueHolder<int>;
-    static_assert(common::HolderType<H>);
+    using H = mpk::mix::ValueHolder<int>;
+    static_assert(mpk::mix::HolderType<H>);
     static_assert(std::same_as<H::value_type, int>);
 
     // Test construction
@@ -64,8 +64,8 @@ TEST(HolderTest, ValueHolder)
 
 TEST(HolderTest, ReferenceHolder)
 {
-    using H = common::ReferenceHolder<int>;
-    static_assert(common::HolderType<H>);
+    using H = mpk::mix::ReferenceHolder<int>;
+    static_assert(mpk::mix::HolderType<H>);
     static_assert(std::same_as<H::value_type, int>);
 
     auto i1 = int{};
@@ -98,12 +98,12 @@ TEST(HolderTest, ReferenceHolder)
 
 TEST(HolderTest, BaseOf)
 {
-    struct X : common::BaseOf<X>
+    struct X : mpk::mix::BaseOf<X>
     {
         int v{};
     };
-    using H = common::BaseOf<X>;
-    static_assert(common::HolderType<H>);
+    using H = mpk::mix::BaseOf<X>;
+    static_assert(mpk::mix::HolderType<H>);
     static_assert(std::same_as<H::value_type, X>);
 
     // Test construction

@@ -16,9 +16,9 @@
 
 #include "sieve/types/image_metrics.hpp"
 
-#include "gc/yaml/parse_value.hpp"
+#include "mpk/mix/serial/yaml/parse_value.hpp"
 
-#include "common/throw.hpp"
+#include "mpk/mix/util/throw.hpp"
 
 #include <yaml-cpp/yaml.h>
 
@@ -58,7 +58,7 @@ ImageMetricsVisualizer::ImageMetricsVisualizer(GraphBroker* broker,
             auto value = entry.second.as<std::string>();
             auto metric = magic_enum::enum_cast<sieve::ImageMetric>(key);
             if (!metric)
-                common::throw_("Unknown image metric '", key, "'");
+                mpk::mix::throw_("Unknown image metric '{}'", key);
             switch (*metric)
             {
             case sieve::ImageMetric::StateHistogram:
@@ -66,8 +66,7 @@ ImageMetricsVisualizer::ImageMetricsVisualizer(GraphBroker* broker,
                 auto r = magic_enum::enum_cast<
                     plot::TimeSeriesHistogramRenderer>(value);
                 if (!r)
-                    common::throw_(
-                        "Unknown histogram renderer '", value, "'");
+                    mpk::mix::throw_("Unknown histogram renderer '{}'", value);
                 renderers.state_histogram = *r;
                 break;
             }
@@ -76,8 +75,7 @@ ImageMetricsVisualizer::ImageMetricsVisualizer(GraphBroker* broker,
                 auto r = magic_enum::enum_cast<
                     plot::TimeSeriesHistogramRenderer>(value);
                 if (!r)
-                    common::throw_(
-                        "Unknown histogram renderer '", value, "'");
+                    mpk::mix::throw_("Unknown histogram renderer '{}'", value);
                 renderers.edge_histogram = *r;
                 break;
             }
@@ -86,8 +84,7 @@ ImageMetricsVisualizer::ImageMetricsVisualizer(GraphBroker* broker,
                 auto r = magic_enum::enum_cast<
                     plot::TimeSeriesRenderer>(value);
                 if (!r)
-                    common::throw_(
-                        "Unknown time series renderer '", value, "'");
+                    mpk::mix::throw_("Unknown time series renderer '{}'", value);
                 renderers.plateau_avg_size = *r;
                 break;
             }
@@ -131,15 +128,15 @@ ImageMetricsVisualizer::ImageMetricsVisualizer(GraphBroker* broker,
 
     QObject::connect(
         type_list, &ListEditorWidget::value_changed,
-        view, qOverload<const gc::Value&>(&ImageMetricsView::set_type));
+        view, qOverload<const mpk::mix::value::Value&>(&ImageMetricsView::set_type));
 
-    auto metric_type = [&]() -> gc::Value {
+    auto metric_type = [&]() -> mpk::mix::value::Value {
         auto type_node = item_node["metric"];
         if (!type_node.IsDefined())
             return sieve::ImageMetric::StateHistogram;
 
-        return gc::yaml::parse_value(
-            type_node, gc::type_of<sieve::ImageMetric>(), {});
+        return mpk::mix::serial::yaml::parse_value(
+            type_node, mpk::mix::value::type_of<sieve::ImageMetric>(), {});
     }();
     type_list->set_value(metric_type);
     view->set_type(metric_type);
@@ -147,20 +144,20 @@ ImageMetricsVisualizer::ImageMetricsVisualizer(GraphBroker* broker,
 
 ImageMetricsVisualizer::~ImageMetricsVisualizer() = default;
 
-auto ImageMetricsVisualizer::check_type(const gc::Type* type) -> TypeCheckResult
+auto ImageMetricsVisualizer::check_type(const mpk::mix::value::Type* type) -> TypeCheckResult
 {
-    static auto expected_type = gc::type_of<sieve::ImageMetrics>();
+    static auto expected_type = mpk::mix::value::type_of<sieve::ImageMetrics>();
 
     if (type == expected_type)
         return { .ok = true };
 
     return {
         .ok = false,
-        .expected_type_description = common::format(expected_type)
+        .expected_type_description = std::format("{}", expected_type)
     };
 }
 
-void ImageMetricsVisualizer::set_value(const gc::Value& v)
+void ImageMetricsVisualizer::set_value(const mpk::mix::value::Value& v)
 {
     storage_->view->add_image_metrics(v.as<const sieve::ImageMetrics&>());
 }

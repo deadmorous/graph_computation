@@ -17,7 +17,7 @@
 #include "gc/computation_node.hpp"
 #include "gc/node_port_names.hpp"
 #include "gc/type_registry.hpp"
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
 
 using namespace std::literals;
@@ -31,17 +31,17 @@ class Merge final :
     public gc::ComputationNode
 {
 public:
-    explicit Merge(const gc::Value& input_count_value,
+    explicit Merge(const mpk::mix::value::Value& input_count_value,
                    const gc::ComputationContext& context) :
         type_registry_{context.type_registry}
     {
         auto input_count = input_count_value.convert_to<size_t>();
         input_names_.reserve(1 + 2*input_count);
         input_names_.push_back("output_type");
-        for (auto index : common::index_range<size_t>(input_count))
+        for (auto index : mpk::mix::index_range<size_t>(input_count))
         {
-            input_names_.push_back(common::format("path_", index));
-            input_names_.push_back(common::format("value_", index));
+            input_names_.push_back(std::format("path_{}", index));
+            input_names_.push_back(std::format("value_{}", index));
         }
 
         input_name_views_.reserve(input_names_.size());
@@ -65,9 +65,9 @@ public:
         result[0_gc_i] = "Vector[I32]"s;
         iterate_inputs(
             result,
-            [](size_t index, gc::Value& path, gc::Value& value)
+            [](size_t index, mpk::mix::value::Value& path, mpk::mix::value::Value& value)
             {
-                path = gc::ValuePath{} / index;
+                path = mpk::mix::value::ValuePath{} / index;
                 value = index;
             });
     }
@@ -84,14 +84,14 @@ public:
         assert(result.size() == 1_gc_oc);
         auto output_type_name = inputs[0_gc_i].convert_to<std::string_view>();
         auto output_type = type_registry_.at(output_type_name);
-        auto result_value = gc::Value::make(output_type);
+        auto result_value = mpk::mix::value::Value::make(output_type);
         iterate_inputs(
             inputs,
             [&](size_t /* index */,
-                const gc::Value& path,
-                const gc::Value& value)
+                const mpk::mix::value::Value& path,
+                const mpk::mix::value::Value& value)
             {
-                result_value.set(path.as<gc::ValuePath>(), value);
+                result_value.set(path.as<mpk::mix::value::ValuePath>(), value);
             });
         result[0_gc_o] = std::move(result_value);
         return true;
@@ -103,7 +103,7 @@ private:
     {
         assert(inputs.size().v & 1u);
         auto input_count = inputs.size().v / 2;
-        for (auto index : common::index_range<int32_t>(input_count))
+        for (auto index : mpk::mix::index_range<int32_t>(input_count))
         {
             auto& path = inputs[gc::InputPort(1u + 2u*index)];
             auto& value = inputs[gc::InputPort(1u + 2u*index + 1u)];
@@ -116,7 +116,7 @@ private:
     std::vector<std::string_view> input_name_views_;
 };
 
-auto make_merge(gc::ConstValueSpan args, const gc::ComputationContext& context)
+auto make_merge(mpk::mix::value::ConstValueSpan args, const gc::ComputationContext& context)
     -> std::shared_ptr<gc::ComputationNode>
 {
     gc::expect_n_node_args("Merge", args, 1);

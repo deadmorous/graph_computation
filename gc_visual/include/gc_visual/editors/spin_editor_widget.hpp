@@ -25,22 +25,22 @@ public:
     explicit SpinEditorWidget(const YAML::Node& config,
                               QWidget* parent = nullptr);
 
-    auto value() const -> gc::Value override;
+    auto value() const -> mpk::mix::value::Value override;
 
-    static auto check_type(const gc::Type*) -> TypeCheckResult;
+    static auto check_type(const mpk::mix::value::Type*) -> TypeCheckResult;
 
 public slots:
-    void set_value(const gc::Value& value) override;
+    void set_value(const mpk::mix::value::Value& value) override;
 
 private:
     struct ValueProxy
     {
         virtual ~ValueProxy() = default;
-        virtual auto set(const gc::Value&) -> void = 0;
-        virtual auto get() -> gc::Value = 0;
+        virtual auto set(const mpk::mix::value::Value&) -> void = 0;
+        virtual auto get() -> mpk::mix::value::Value = 0;
     };
 
-    auto maybe_construct(const gc::Value& value) -> void;
+    auto maybe_construct(const mpk::mix::value::Value& value) -> void;
 
     YAML::Node config_;
     std::unique_ptr<ValueProxy> value_proxy_;

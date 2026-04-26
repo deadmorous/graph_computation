@@ -12,7 +12,7 @@
 #include "agc_perf/mandelbrot_param.hpp"
 #include "agc_perf/canvas.hpp"
 
-#include <common/func_ref.hpp>
+#include <mpk/mix/func_ref/func_ref.hpp>
 
 #include <cassert>
 #include <complex>

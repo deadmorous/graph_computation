@@ -27,7 +27,7 @@ auto operator<<(std::ostream& s, const SourceInputs& source_inputs)
         auto destinations = group(source_inputs.destinations, i);
         s << delim
           << source_inputs.values[i] << " -> ["
-          << common::format_seq(destinations)
+          << mpk::mix::format_seq(destinations)
           << "]";
     }
     s << '}';

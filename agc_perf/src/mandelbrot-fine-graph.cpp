@@ -12,7 +12,7 @@
 #include "agc_perf/mandelbrot_param.hpp"
 #include "agc_perf/canvas.hpp"
 
-#include <common/func_ref.hpp>
+#include <mpk/mix/func_ref/func_ref.hpp>
 
 #include <cassert>
 #include <complex>
@@ -25,7 +25,7 @@ namespace {
 using Complex = std::complex<double>;
 
 template <typename Arg>
-using Activate = common::FuncRef<void(const Arg*)>;
+using Activate = mpk::mix::FuncRef<void(const Arg*)>;
 
 template <typename Context, typename Arg>
 auto bind(Activate<Arg>& a, Context* ctx, void(*fn)(Context*, const Arg*))
@@ -33,12 +33,12 @@ auto bind(Activate<Arg>& a, Context* ctx, void(*fn)(Context*, const Arg*))
 { a = Activate<Arg>{ fn, ctx }; }
 
 template <typename Context, typename Arg, void(*fn)(Context*, const Arg*)>
-auto bind(Activate<Arg>& a, Context* ctx, common::Const_Tag<fn>)
+auto bind(Activate<Arg>& a, Context* ctx, mpk::mix::Const_Tag<fn>)
     -> void
 { a = Activate<Arg>{ fn, ctx }; }
 
 template <typename Context, typename Arg, void(*fn)(Context*)>
-auto bind(Activate<Arg>& a, Context* ctx, common::Const_Tag<fn>)
+auto bind(Activate<Arg>& a, Context* ctx, mpk::mix::Const_Tag<fn>)
     -> void
 {
     constexpr auto* adaptor =
@@ -338,17 +338,17 @@ auto state(const MandelbrotParam& mp)
 
     bind(result->split_grid.out[0],
          &result->iter_count,
-         common::Const<activate_Counter_reset>);
+         mpk::mix::Const<activate_Counter_reset>);
 
     bind(result->split_grid.out[1],
          &result->repl_z0,
-         common::Const<activate_Replicate_trigger<Complex>>);
+         mpk::mix::Const<activate_Replicate_trigger<Complex>>);
 
     bind(result->split_grid.out[2], &result->f, activate_F_p);
 
     bind(result->split_grid.out[3],
          &result->f_iter,
-         common::Const<activate_Iterator_next>);
+         mpk::mix::Const<activate_Iterator_next>);
 
     bind(result->iter_count.out, &result->split_iter_count,
          activate_Split_trigger);
@@ -367,13 +367,13 @@ auto state(const MandelbrotParam& mp)
 
     bind(result->split_iter_val.out[1],
          &result->iter_count,
-         common::Const<activate_Counter_next>);
+         mpk::mix::Const<activate_Counter_next>);
 
     bind(result->repl_iter_val.out, &result->iter_val_mag2, activate_Mag2);
 
     bind(result->threshold_iter_count.check_passed,
          &result->repl_iter_val,
-         common::Const<activate_Replicate_trigger<Complex>>);
+         mpk::mix::Const<activate_Replicate_trigger<Complex>>);
 
     bind(result->threshold_iter_count.check_failed,
          &result->result_scale,
@@ -385,11 +385,11 @@ auto state(const MandelbrotParam& mp)
 
     bind(result->threshold_iter_val_mag2.check_passed,
          &result->f_iter,
-         common::Const<activate_Iterator_next>);
+         mpk::mix::Const<activate_Iterator_next>);
 
     bind(result->threshold_iter_val_mag2.check_failed,
          &result->repl_iter_count,
-         common::Const<activate_Replicate_trigger<uint64_t>>);
+         mpk::mix::Const<activate_Replicate_trigger<uint64_t>>);
 
     bind(result->split_iter_count.out[0],
          &result->repl_iter_count,
@@ -429,10 +429,10 @@ auto mandelbrot_set(const MandelbrotParam& param)
 
 /** This overload provides a fine-graph single-threaded implementation
  *  computing Mandelbrot's set.
- *  Each node activates its output ports using `common::FuncRef` instances
+ *  Each node activates its output ports using `mpk::mix::FuncRef` instances
  *  representing activation functions. It looks like the use of these objects
  *  creates an obstacle for code optimizations by compiler, perhaps due to
- *  the fact that `common::FuncRef` implements a kind of type erasure.
+ *  the fact that `mpk::mix::FuncRef` implements a kind of type erasure.
  *
  *  Benchmarks show 6.14x slowdown with resp. to the reference implementation.
  */

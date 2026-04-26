@@ -12,8 +12,8 @@
 
 #include "gc_types/color.hpp"
 
-#include "common/struct_type_macro.hpp"
-#include "common/type.hpp"
+#include "mpk/mix/struct_type_macro.hpp"
+#include "mpk/mix/meta/type.hpp"
 
 #include <array>
 #include <cstdint>
@@ -32,7 +32,7 @@ struct IndexedPalette
     Color overflow_color;
 };
 
-GCLIB_STRUCT_TYPE(IndexedPalette, color_map, overflow_color);
+MPKMIX_STRUCT_TYPE(IndexedPalette, color_map, overflow_color);
 
 
 auto map_color(const IndexedPalette& palette, uint32_t value)

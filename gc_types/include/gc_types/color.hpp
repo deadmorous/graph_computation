@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "common/strong.hpp"
+#include "mpk/mix/strong/strong.hpp"
 
 #include <array>
 #include <cstdint>
@@ -18,9 +18,9 @@
 
 namespace gc_types {
 
-GCLIB_STRONG_TYPE(ColorComponent, uint8_t);
+MPKMIX_STRONG_TYPE(ColorComponent, uint8_t);
 
-GCLIB_STRONG_TYPE_WITH_DEFAULT(Color, uint32_t, 0xff000000);
+MPKMIX_STRONG_TYPE_WITH_DEFAULT(Color, uint32_t, 0xff000000);
 
 inline constexpr auto rgba(ColorComponent r,
                            ColorComponent g,

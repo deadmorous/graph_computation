@@ -15,14 +15,15 @@
 #include "build/lib_config.hpp"
 #include "build/scratch_dir.hpp"
 
-#include "common/format.hpp"
-#include "common/throw.hpp"
+#include "mpk/mix/util/format_seq.hpp"
+#include "mpk/mix/util/throw.hpp"
 
 #include "sys/wait.h"
 
 #include <cassert>
 #include <cstdlib>
 #include <iostream>
+#include <sstream>
 
 #define GCLIB_LOG_BUILD_COMMANDS
 
@@ -44,23 +45,24 @@ auto checked_system(const std::string& cmdln)
         auto exit_status = WEXITSTATUS(status);
         if (exit_status == 0)
             return;
-        common::throw_(
-            "The following command exited with status ", exit_status, ":\n",
-            cmdln);
+        mpk::mix::throw_(
+            "The following command exited with status {}:\n{}",
+            exit_status, cmdln);
     }
 
     if (WIFSIGNALED(status))
-        common::throw_(
-            "The following command was killed with signal ", WTERMSIG(status),
-            ":\n", cmdln);
+        mpk::mix::throw_(
+            "The following command was killed with signal {}:\n{}",
+            WTERMSIG(status), cmdln);
 
     if (WIFSIGNALED(status))
-        common::throw_(
-            "The following command was stopped with signal ", WSTOPSIG(status),
-            ":\n", cmdln);
+        mpk::mix::throw_(
+            "The following command was stopped with signal {}:\n{}",
+            WSTOPSIG(status), cmdln);
 
-    common::throw_(
-        "Unexpected status ", status, " for the following command:\n", cmdln);
+    mpk::mix::throw_(
+        "Unexpected status {} for the following command:\n{}",
+        status, cmdln);
 }
 
 } // anonymous namespace
@@ -115,10 +117,13 @@ auto build(const Config& config,
         const auto& output =
             obj_outputs.emplace_back(
                 scratch / (input.filename().string() + ".o"));
-        auto compile_cmdln = common::format(
-            config.paths.cxx_compiler_executable,
-            ' ', compile_flags,
-            " -c -o ", output, ' ', input);
+        auto compile_cmdln = [&]{
+            std::ostringstream s;
+            s << config.paths.cxx_compiler_executable
+              << ' ' << compile_flags
+              << " -c -o " << output << ' ' << input;
+            return s.str();
+        }();
         checked_system(compile_cmdln);
     }
 
@@ -140,12 +145,15 @@ auto build(const Config& config,
             append_link_flag(link_flags, "--no-whole-archive");
     }
 
-    auto link_cmdln = common::format(
-        config.paths.cxx_compiler_executable,
-        ' ', config.compile_flags.shared,
-        ' ', link_flags,
-        " -o ", output,
-        ' ', common::format_seq(obj_outputs, " "));
+    auto link_cmdln = [&]{
+        std::ostringstream s;
+        s << config.paths.cxx_compiler_executable
+          << ' ' << config.compile_flags.shared
+          << ' ' << link_flags
+          << " -o " << output
+          << ' ' << mpk::mix::format_seq(obj_outputs, " ");
+        return s.str();
+    }();
     checked_system(link_cmdln);
 }
 

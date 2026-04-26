@@ -12,7 +12,7 @@
 #include "agc_perf/mandelbrot_param.hpp"
 #include "agc_perf/canvas.hpp"
 
-#include <common/func_ref.hpp>
+#include <mpk/mix/func_ref/func_ref.hpp>
 
 #include <cassert>
 #include <complex>
@@ -339,11 +339,11 @@ auto mandelbrot_set(const MandelbrotParam& param)
 
 /** This overload implements an evolution of what's implemented for the
  *  first argument of type `MandelbrotFineGraphImpl_Tag`. The major change
- *  done here is getting rid of `common::FuncRef`. Each activation function
+ *  done here is getting rid of `mpk::mix::FuncRef`. Each activation function
  *  calls output activations directly.
  *
  *  Benchmarks show 2.36x slowdown with resp. to the reference implementation,
- *  which is much faster than the implementation with `common::FuncRef`.
+ *  which is much faster than the implementation with `mpk::mix::FuncRef`.
  */
 auto mandelbrot_set(MandelbrotFineGraphImpl2_Tag, const MandelbrotParam& param)
     -> Canvas

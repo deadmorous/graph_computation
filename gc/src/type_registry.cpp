@@ -10,37 +10,39 @@
 
 #include "gc/type_registry.hpp"
 
-#include "gc/type.hpp"
-#include "gc/value_path.hpp"
+#include "mpk/mix/value/type.hpp"
+#include "mpk/mix/value/value_path.hpp"
 
 #include <iostream>
 
 namespace gc {
 
+using namespace mpk::mix::value;
+
 auto populate_gc_type_registry(gc::TypeRegistry& result)
     -> void
 {
     auto register_type =
-        [&]<typename T, typename AggT>(common::Type_Tag<T> tag,
-                                       common::Type_Tag<AggT>)
+        [&]<typename T, typename AggT>(mpk::mix::Type_Tag<T> tag,
+                                       mpk::mix::Type_Tag<AggT>)
     {
         const auto* type = type_of(tag);
         auto name = AggT{type}.name();
         result.register_value(name, type);
     };
-    register_type( common::Type<bool       >, common::Type<ScalarT> );
-    register_type( common::Type<std::byte  >, common::Type<ScalarT> );
-    register_type( common::Type<float      >, common::Type<ScalarT> );
-    register_type( common::Type<double     >, common::Type<ScalarT> );
-    register_type( common::Type<int8_t     >, common::Type<ScalarT> );
-    register_type( common::Type<int16_t    >, common::Type<ScalarT> );
-    register_type( common::Type<int32_t    >, common::Type<ScalarT> );
-    register_type( common::Type<int64_t    >, common::Type<ScalarT> );
-    register_type( common::Type<uint8_t    >, common::Type<ScalarT> );
-    register_type( common::Type<uint16_t   >, common::Type<ScalarT> );
-    register_type( common::Type<uint32_t   >, common::Type<ScalarT> );
-    register_type( common::Type<uint64_t   >, common::Type<ScalarT> );
-    register_type( common::Type<std::string>, common::Type<StringT> );
+    register_type( mpk::mix::Type<bool       >, mpk::mix::Type<ScalarT> );
+    register_type( mpk::mix::Type<std::byte  >, mpk::mix::Type<ScalarT> );
+    register_type( mpk::mix::Type<float      >, mpk::mix::Type<ScalarT> );
+    register_type( mpk::mix::Type<double     >, mpk::mix::Type<ScalarT> );
+    register_type( mpk::mix::Type<int8_t     >, mpk::mix::Type<ScalarT> );
+    register_type( mpk::mix::Type<int16_t    >, mpk::mix::Type<ScalarT> );
+    register_type( mpk::mix::Type<int32_t    >, mpk::mix::Type<ScalarT> );
+    register_type( mpk::mix::Type<int64_t    >, mpk::mix::Type<ScalarT> );
+    register_type( mpk::mix::Type<uint8_t    >, mpk::mix::Type<ScalarT> );
+    register_type( mpk::mix::Type<uint16_t   >, mpk::mix::Type<ScalarT> );
+    register_type( mpk::mix::Type<uint32_t   >, mpk::mix::Type<ScalarT> );
+    register_type( mpk::mix::Type<uint64_t   >, mpk::mix::Type<ScalarT> );
+    register_type( mpk::mix::Type<std::string>, mpk::mix::Type<StringT> );
 
     result.register_value("ValuePath", type_of<ValuePath>());
 }

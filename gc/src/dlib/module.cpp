@@ -12,7 +12,7 @@
 
 #include "dlib/symbol.hpp"
 
-#include "common/throw.hpp"
+#include "mpk/mix/util/throw.hpp"
 
 #include <dlfcn.h>
 
@@ -28,7 +28,7 @@ struct Module::Impl
         handle{ dlopen(path_.c_str(), flags_) }
     {
         if (!handle)
-            common::throw_("Failed to load module ", path_, ": ", dlerror());
+            mpk::mix::throw_("Failed to load module {}: {}", path_.string(), dlerror());
     }
 
     Impl(const Impl&) = delete;
@@ -47,10 +47,10 @@ struct Module::Impl
         auto name_str = std::string{name.v};
         auto address = dlsym(handle, name_str.c_str());
         if (!address)
-            common::throw_(
-                "Failed to find symbol '", name, "' in module ", path_, ": ",
-                dlerror());
-        return { common::Impl, address };
+            mpk::mix::throw_(
+                "Failed to find symbol '{}' in module {}: {}",
+                name, path_.string(), dlerror());
+        return { mpk::mix::Impl, address };
     }
 
     std::filesystem::path path_;

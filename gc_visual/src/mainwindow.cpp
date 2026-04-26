@@ -303,7 +303,7 @@ auto MainWindow::load(const gc_visual::ConfigSpecification& spec)
             [config, node_map, input_names, spec, this]{
                 try {
                     if (!computation_thread_.ok())
-                        common::throw_("Graph computation has been terminated");
+                        mpk::mix::throw_("Graph computation has been terminated");
 
                     // Create visual layout
                     auto layout = config["layout"];

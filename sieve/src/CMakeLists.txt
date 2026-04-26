@@ -34,7 +34,7 @@ target_include_directories(sieve-lib
         "${CMAKE_CURRENT_LIST_DIR}/../include"
         "${GRAPH_COMPUTATION_CXX_ROOT_DIR}/3p/magic_enum/include")
 
-if ("${GRAPH_COMPUTATION_LOG_ENGINE}" STREQUAL "GC_LOG_QUILL")
+if ("${MPKMIX_LOG_ENGINE}" STREQUAL "MPKMIX_LOG_QUILL")
     target_link_libraries(sieve-lib
         PUBLIC
             quill::quill)

@@ -13,7 +13,7 @@
 #include "gc_types/color.hpp"
 #include "gc_types/uint.hpp"
 
-#include "common/struct_type_macro.hpp"
+#include "mpk/mix/struct_type_macro.hpp"
 
 
 namespace gc_types {
@@ -29,7 +29,7 @@ struct Size final
 
 using UintSize = Size<Uint>;
 
-GCLIB_STRUCT_TYPE(UintSize, width, height);
+MPKMIX_STRUCT_TYPE(UintSize, width, height);
 
 
 using ColorVec =
@@ -52,10 +52,10 @@ using U32Image = Image<uint32_t>;
 
 } // namespace gc_types
 
-GCLIB_REGISTER_CUSTOM_TYPE(gc_types::ColorImage, 1);
-GCLIB_REGISTER_CUSTOM_TYPE(gc_types::I8Image, 2);
-GCLIB_REGISTER_CUSTOM_TYPE(gc_types::U8Image, 3);
-GCLIB_REGISTER_CUSTOM_TYPE(gc_types::I16Image, 4);
-GCLIB_REGISTER_CUSTOM_TYPE(gc_types::U16Image, 5);
-GCLIB_REGISTER_CUSTOM_TYPE(gc_types::I32Image, 6);
-GCLIB_REGISTER_CUSTOM_TYPE(gc_types::U32Image, 7);
+MPKMIX_VALUE_REGISTER_CUSTOM_TYPE(gc_types::ColorImage, 1);
+MPKMIX_VALUE_REGISTER_CUSTOM_TYPE(gc_types::I8Image, 2);
+MPKMIX_VALUE_REGISTER_CUSTOM_TYPE(gc_types::U8Image, 3);
+MPKMIX_VALUE_REGISTER_CUSTOM_TYPE(gc_types::I16Image, 4);
+MPKMIX_VALUE_REGISTER_CUSTOM_TYPE(gc_types::U16Image, 5);
+MPKMIX_VALUE_REGISTER_CUSTOM_TYPE(gc_types::I32Image, 6);
+MPKMIX_VALUE_REGISTER_CUSTOM_TYPE(gc_types::U32Image, 7);

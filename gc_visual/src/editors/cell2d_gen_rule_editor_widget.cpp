@@ -17,10 +17,10 @@
 #include "gc_app/types/cell2d_rules.hpp"
 
 #include "gc/computation_context.hpp"
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
-#include "common/func_ref.hpp"
-#include "common/scoped_inc.hpp"
+#include "mpk/mix/func_ref/func_ref.hpp"
+#include "mpk/mix/util/scoped_inc.hpp"
 
 #include <yaml-cpp/yaml.h>
 
@@ -68,8 +68,8 @@ namespace {
 
 auto generate_rules(Cell2dGenRuleEditorWidget::Storage& s) -> void
 {
-    gc::ValueVec inputs{ s.gen_rules };
-    gc::ValueVec outputs(1);
+    mpk::mix::value::ValueVec inputs{ s.gen_rules };
+    mpk::mix::value::ValueVec outputs(1);
     try {
         s.rule_generator->compute_outputs(outputs, inputs, {}, {});
         s.rules = outputs[0].as<gc_app::Cell2dRules>();
@@ -296,14 +296,14 @@ Cell2dGenRuleEditorWidget::Cell2dGenRuleEditorWidget(const YAML::Node&,
         QObject::connect(
             widgets.overlays,
             &VectorEditorWidget::value_changed,
-            [this, &map](const gc::Value& v, gc::ValuePathView path)
+            [this, &map](const mpk::mix::value::Value& v, mpk::mix::value::ValuePathView path)
             {
                 auto& s = *storage_;
                 if (s.in_set_value > 0)
                     return;
                 using Overlay = gc_app::Cell2dGenRules_Overlay;
                 using OverlayVec = std::vector<Overlay>;
-                auto dst = gc::Value{map.overlays};
+                auto dst = mpk::mix::value::Value{map.overlays};
                 dst.set(path, v);
                 map.overlays = dst.as<OverlayVec>();
                 emit value_changed(s.gen_rules);
@@ -321,27 +321,27 @@ Cell2dGenRuleEditorWidget::Cell2dGenRuleEditorWidget(const YAML::Node&,
 Cell2dGenRuleEditorWidget::~Cell2dGenRuleEditorWidget() = default;
 
 auto Cell2dGenRuleEditorWidget::value() const
-    -> gc::Value
+    -> mpk::mix::value::Value
 { return storage_->gen_rules; }
 
-auto Cell2dGenRuleEditorWidget::check_type(const gc::Type* type)
+auto Cell2dGenRuleEditorWidget::check_type(const mpk::mix::value::Type* type)
     -> TypeCheckResult
 {
-    static auto expected_type = gc::type_of<gc_app::Cell2dGenRules>();
+    static auto expected_type = mpk::mix::value::type_of<gc_app::Cell2dGenRules>();
 
     if (type == expected_type)
         return { .ok = true };
 
     return {
         .ok = false,
-        .expected_type_description = common::format(expected_type)
+        .expected_type_description = std::format("{}", expected_type)
     };
 }
 
-void Cell2dGenRuleEditorWidget::set_value(const gc::Value& v)
+void Cell2dGenRuleEditorWidget::set_value(const mpk::mix::value::Value& v)
 {
     auto& s = *storage_;
-    auto inc_in_set_value = common::ScopedInc{s.in_set_value};
+    auto inc_in_set_value = mpk::mix::ScopedInc{s.in_set_value};
 
     auto gen_rules = v.as<gc_app::Cell2dGenRules>();
     if (s.gen_rules == gen_rules)

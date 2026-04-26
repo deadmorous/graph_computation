@@ -10,14 +10,14 @@
 
 #pragma once
 
-#include "common/strong.hpp"
+#include "mpk/mix/strong/strong.hpp"
 
 #include <cstdint>
 
 
 namespace gc {
 
-GCLIB_STRONG_TYPE(Count, uint32_t, common::StrongCountFeatures);
-GCLIB_STRONG_TYPE(Index, uint32_t, common::StrongIndexFeatures<Count>);
+MPKMIX_STRONG_TYPE(Count, uint32_t, mpk::mix::StrongCountFeatures);
+MPKMIX_STRONG_TYPE(Index, uint32_t, mpk::mix::StrongIndexFeatures<Count>);
 
 } // namespace gc

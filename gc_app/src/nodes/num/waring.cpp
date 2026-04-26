@@ -17,9 +17,9 @@
 #include "gc/computation_node.hpp"
 #include "gc/node_port_names.hpp"
 
-#include "common/binomial.hpp"
-#include "common/func_ref.hpp"
-#include "common/pow2.hpp"
+#include "mpk/mix/util/binomial.hpp"
+#include "mpk/mix/func_ref/func_ref.hpp"
+#include "mpk/mix/util/pow2.hpp"
 
 #include <cmath>
 #include <numeric>
@@ -58,11 +58,11 @@ auto waring(Uint limit,
 
     auto index = std::vector<Uint>(s, 0);
 
-    auto iter_count = binomial(common::Type<uint64_t>, tlim+s-1, s);
+    auto iter_count = mpk::mix::binomial(mpk::mix::Type<uint64_t>, tlim+s-1, s);
     auto progress_factor = 1. / iter_count;
     auto iter = uint64_t{0};
     auto iter_granularity =
-        std::max(2ul, common::ceil2(iter_count / 100)) - 1;
+        std::max(2ul, mpk::mix::ceil2(iter_count / 100)) - 1;
 
     do
     {
@@ -131,7 +131,7 @@ public:
     }
 };
 
-auto make_waring(gc::ConstValueSpan args, const gc::ComputationContext&)
+auto make_waring(mpk::mix::value::ConstValueSpan args, const gc::ComputationContext&)
     -> std::shared_ptr<gc::ComputationNode>
 {
     gc::expect_no_node_args("Waring", args);

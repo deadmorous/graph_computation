@@ -10,10 +10,10 @@
 
 #pragma once
 
-#include "common/strong.hpp"
+#include "mpk/mix/strong/strong.hpp"
 
 namespace gc::alg {
 
-GCLIB_STRONG_STRING_VIEW(TypeLiteral);
+MPKMIX_STRONG_STRING_VIEW(TypeLiteral);
 
 } // namespace gc::alg

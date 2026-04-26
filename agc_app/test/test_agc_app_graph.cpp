@@ -25,7 +25,7 @@
 #include "gc/algorithm.hpp"
 #include "gc/alg_known_types.hpp"
 #include "gc/generate_dot.hpp"
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 #include "gc/yaml/parse_graph.hpp"
 
 #include "build/build.hpp"
@@ -108,7 +108,7 @@ inputs:
 
     // TODO gc_app::populate_type_registry(type_registry);
     a_context.type_registry.register_value(
-        "LinSpaceSpec", gc::type_of<agc_app_rt::LinSpaceSpec>());
+        "LinSpaceSpec", mpk::mix::value::type_of<agc_app_rt::LinSpaceSpec>());
 
     // Parse YAML into a node object; parse graph from that node
     auto config = YAML::Load(example_graph_yaml);
@@ -120,7 +120,7 @@ inputs:
     auto source_types =
         gc::ActivationGraphSourceTypes{};
 
-    source_types.types.push_back(common::Zero);
+    source_types.types.push_back(mpk::mix::Zero);
     add_to_last_group(
         source_types.destinations,
         gc::EdgeInputEnd{ 0_gc_n, 0_gc_i });
@@ -178,10 +178,10 @@ inputs:
     auto* context = create_context();
 
     const auto& destinations = provided_inputs.destinations;
-    for (auto index : common::group_indices(destinations))
+    for (auto index : mpk::mix::group_indices(destinations))
     {
         const auto& value = provided_inputs.values.at(index);
-        for (const auto& to : common::group(destinations, index))
+        for (const auto& to : mpk::mix::group(destinations, index))
             set_input_var(context, to.compressed(), value.data());
     }
 
@@ -200,19 +200,19 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
     auto node_registry = agc_app::activation_node_registry();
 
     auto grid = node_registry.at("grid_2d")({}, {});
-    auto split_grid = node_registry.at("split")(std::vector<gc::Value>{4}, {});
+    auto split_grid = node_registry.at("split")(std::vector<mpk::mix::value::Value>{4}, {});
     auto iter_count = node_registry.at("counter")({}, {});
     auto repl_z0 = node_registry.at("replicate")({}, {});
     auto f = node_registry.at("mandelbrot_func")({}, {});
     auto f_iter = node_registry.at("func_iterator")({}, {});
     auto split_iter_val =
-        node_registry.at("split")(std::vector<gc::Value>{3}, {});
+        node_registry.at("split")(std::vector<mpk::mix::value::Value>{3}, {});
     auto repl_iter_val = node_registry.at("replicate")({}, {});
     auto threshold_iter_count = node_registry.at("threshold")({}, {});
     auto iter_val_mag2 = node_registry.at("mag2")({}, {});
     auto threshold_iter_val_mag2 = node_registry.at("threshold")({}, {});
     auto split_iter_count =
-        node_registry.at("split")(std::vector<gc::Value>{2}, {});
+        node_registry.at("split")(std::vector<mpk::mix::value::Value>{2}, {});
     auto repl_iter_count = node_registry.at("replicate")({}, {});
     auto result_scale = node_registry.at("scale")({}, {});
     auto canvas = node_registry.at("canvas")({}, {});
@@ -358,7 +358,7 @@ TEST(AgcApp_Graph, GenerateMandelbrot)
     auto source_types =
         gc::ActivationGraphSourceTypes{};
 
-    source_types.types.push_back(common::Zero);
+    source_types.types.push_back(mpk::mix::Zero);
     add_to_last_group(
         source_types.destinations,
         gc::EdgeInputEnd{ 0_gc_n, 0_gc_i });

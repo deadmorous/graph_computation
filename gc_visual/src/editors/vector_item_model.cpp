@@ -13,38 +13,38 @@
 #include "plot_visual/color.hpp"
 #include "plot_visual/qstr.hpp"
 
-#include "gc/parse_simple_value.hpp"
+#include "mpk/mix/value/parse_simple_value.hpp"
 
 #include <QMessageBox>
 
 
-VectorItemModel::VectorItemModel(gc::Value v, QObject* parent) :
+VectorItemModel::VectorItemModel(mpk::mix::value::Value v, QObject* parent) :
     QAbstractListModel{ parent }
 { on_set_value(std::move(v)); }
 
 auto VectorItemModel::path(const QModelIndex& index) const
-    -> gc::ValuePath
+    -> mpk::mix::value::ValuePath
 {
     const auto& field = element_fields_.at(index.column());
     auto row = index.row();
-    return gc::ValuePathItem{uint32_t(row)} / field.path;
+    return mpk::mix::value::ValuePathItem{uint32_t(row)} / field.path;
 }
 
 auto VectorItemModel::value() const noexcept
-    -> const gc::Value&
+    -> const mpk::mix::value::Value&
 { return v_; }
 
-auto VectorItemModel::setValue(gc::Value v) -> void
+auto VectorItemModel::setValue(mpk::mix::value::Value v) -> void
 { on_set_value(std::move(v)); }
 
-auto VectorItemModel::on_set_value(gc::Value v)
+auto VectorItemModel::on_set_value(mpk::mix::value::Value v)
     -> void
 {
     const auto* t = v.type();
-    if (t->aggregate_type() != gc::AggregateType::Vector)
-        common::throw_("VectorItemModel requires a vector type, got ", t);
+    if (t->aggregate_type() != mpk::mix::value::AggregateType::Vector)
+        mpk::mix::throw_("VectorItemModel requires a vector type, got {}", t);
 
-    auto vt = gc::VectorT{ t }.element_type();
+    auto vt = mpk::mix::value::VectorT{ t }.element_type();
     auto element_fields = gc_visual::flatten_type(vt);
 
     beginResetModel();
@@ -85,7 +85,7 @@ auto VectorItemModel::flags(const QModelIndex &index) const
     result |= Qt::ItemIsEditable;
 
     const auto& field = element_fields_.at(index.column());
-    if (field.type == gc::type_of<bool>())
+    if (field.type == mpk::mix::value::type_of<bool>())
         result |= Qt::ItemIsUserCheckable;
 
     return result;
@@ -100,7 +100,7 @@ auto VectorItemModel::data(const QModelIndex &index, int role) const
     const auto& field = element_fields_.at(index.column());
 
     auto row = index.row();
-    auto path = gc::ValuePathItem{uint32_t(row)} / field.path;
+    auto path = mpk::mix::value::ValuePathItem{uint32_t(row)} / field.path;
 
     switch (role)
     {
@@ -109,7 +109,7 @@ auto VectorItemModel::data(const QModelIndex &index, int role) const
         if (static_cast<size_t>(row) == v_.size())
             return tr("<new>");
 
-        if (field.type == gc::type_of<gc_types::Color>())
+        if (field.type == mpk::mix::value::type_of<gc_types::Color>())
             return "#" + QString::number(v_.get(path).as<gc_types::Color>().v, 16);
 
         return plot::format_qstr(v_.get(path));
@@ -119,7 +119,7 @@ auto VectorItemModel::data(const QModelIndex &index, int role) const
         if (static_cast<size_t>(row) == v_.size())
             return {};
 
-        if (field.type == gc::type_of<gc_types::Color>())
+        if (field.type == mpk::mix::value::type_of<gc_types::Color>())
             return "#" + QString::number(v_.get(path).as<gc_types::Color>().v, 16);
 
         return plot::format_qstr(v_.get(path));
@@ -129,7 +129,7 @@ auto VectorItemModel::data(const QModelIndex &index, int role) const
         if (static_cast<size_t>(row) == v_.size())
             return {};
 
-        if (field.type == gc::type_of<gc_types::Color>())
+        if (field.type == mpk::mix::value::type_of<gc_types::Color>())
             return plot::qcolor(v_.get(path).as<gc_types::Color>());
 
         return {};
@@ -153,7 +153,7 @@ auto VectorItemModel::setData(const QModelIndex &index,
     const auto& field = element_fields_.at(index.column());
 
     auto row = index.row();
-    auto path = gc::ValuePathItem{uint32_t(row)} / field.path;
+    auto path = mpk::mix::value::ValuePathItem{uint32_t(row)} / field.path;
 
     if (static_cast<size_t>(row) == v_.size())
         return false;
@@ -161,7 +161,7 @@ auto VectorItemModel::setData(const QModelIndex &index,
     try {
         auto text = value.toString().toStdString();
 
-        auto item_value = parse_simple_value(text, field.type);
+        auto item_value = mpk::mix::value::parse_simple_value(text, field.type);
         v_.set(path, item_value);
         emit dataChanged(index, index);
         return true;
@@ -214,8 +214,8 @@ auto VectorItemModel::insertRows(int row, int count, const QModelIndex &parent)
 
     for (int i=old_size-1; i>=row; --i)
     {
-        auto element = v_.get(gc::ValuePath{size_t(i)});
-        v_.set(gc::ValuePath{size_t(i+count)}, element);
+        auto element = v_.get(mpk::mix::value::ValuePath{size_t(i)});
+        v_.set(mpk::mix::value::ValuePath{size_t(i+count)}, element);
     }
 
     endInsertRows();
@@ -234,8 +234,8 @@ auto VectorItemModel::removeRows(int row, int count, const QModelIndex &parent)
 
     for (int i=row; i+count<old_size; ++i)
     {
-        auto element = v_.get(gc::ValuePath{size_t(i+count)});
-        v_.set(gc::ValuePath{size_t(i)}, element);
+        auto element = v_.get(mpk::mix::value::ValuePath{size_t(i+count)});
+        v_.set(mpk::mix::value::ValuePath{size_t(i)}, element);
     }
 
     v_.resize(old_size - count);

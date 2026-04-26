@@ -82,9 +82,10 @@ ImageVisualizer::ImageVisualizer(GraphBroker* broker,
             auto opt_blend_mode =
                 magic_enum::enum_cast<BitmapView::BlendMode>(mode_str);
             if (!opt_blend_mode)
-                common::throw_(
-                    "Invalid blend mode '", mode_str, "', expected one of ",
-                    common::format_seq(
+                mpk::mix::throw_(
+                    "Invalid blend mode '{}', expected one of {}",
+                    mode_str,
+                    mpk::mix::format_seq(
                         magic_enum::enum_names<BitmapView::BlendMode>(), ", "));
             blend_mode = *opt_blend_mode;
         }
@@ -246,20 +247,20 @@ ImageVisualizer::ImageVisualizer(GraphBroker* broker,
 
 ImageVisualizer::~ImageVisualizer() = default;
 
-auto ImageVisualizer::check_type(const gc::Type* type) -> TypeCheckResult
+auto ImageVisualizer::check_type(const mpk::mix::value::Type* type) -> TypeCheckResult
 {
-    static auto expected_type = gc::type_of<gc_types::ColorImage>();
+    static auto expected_type = mpk::mix::value::type_of<gc_types::ColorImage>();
 
     if (type == expected_type)
         return { .ok = true };
 
     return {
         .ok = false,
-        .expected_type_description = common::format(expected_type)
+        .expected_type_description = std::format("{}", expected_type)
     };
 }
 
-void ImageVisualizer::set_value(const gc::Value& v)
+void ImageVisualizer::set_value(const mpk::mix::value::Value& v)
 {
     storage_->bitmap_view->set_image(v);
 }

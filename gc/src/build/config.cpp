@@ -10,13 +10,13 @@
 
 #include "build/config.hpp"
 
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
 
 namespace build {
 
 auto operator<<(std::ostream& s, const Config& config)
     -> std::ostream&
-{ return s << gc::Value{ config }; }
+{ return s << mpk::mix::value::Value{ config }; }
 
 } // namespace build

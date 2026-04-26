@@ -25,12 +25,12 @@ public:
 
     ~Cell2dGenCmapEditorWidget();
 
-    auto value() const -> gc::Value override;
+    auto value() const -> mpk::mix::value::Value override;
 
-    static auto check_type(const gc::Type*) -> TypeCheckResult;
+    static auto check_type(const mpk::mix::value::Type*) -> TypeCheckResult;
 
 public slots:
-    void set_value(const gc::Value& v) override;
+    void set_value(const mpk::mix::value::Value& v) override;
 
 public:
     struct Storage;

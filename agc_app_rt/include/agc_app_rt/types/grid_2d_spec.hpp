@@ -23,6 +23,6 @@ struct Grid2dSpec final
     std::array<double, 2> resolution;
 };
 
-GCLIB_STRUCT_TYPE(Grid2dSpec, rect, resolution);
+MPKMIX_STRUCT_TYPE(Grid2dSpec, rect, resolution);
 
 } // namespace agc_app_rt

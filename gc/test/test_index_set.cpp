@@ -8,8 +8,8 @@
  * @author Stepan Orlov <majorsteve@mail.ru>
  */
 
-#include "common/index_set.hpp"
-#include "common/format.hpp"
+#include "mpk/mix/util/index_set.hpp"
+#include "mpk/mix/util/format_seq.hpp"
 
 #include <gtest/gtest.h>
 
@@ -17,17 +17,17 @@
 
 namespace {
 
-GCLIB_STRONG_TYPE(Count, uint8_t, common::StrongCountFeatures);
-GCLIB_STRONG_TYPE(Index, uint8_t, common::StrongIndexFeatures<Count>);
+MPKMIX_STRONG_TYPE(Count, uint8_t, mpk::mix::StrongCountFeatures);
+MPKMIX_STRONG_TYPE(Index, uint8_t, mpk::mix::StrongIndexFeatures<Count>);
 
-GCLIB_STRONG_LITERAL_SUFFIX(Index, _i);
+MPKMIX_STRONG_LITERAL_SUFFIX(Index, _i);
 
 } // anonymous namespace
 
 
 TEST(Common_IndexSet, Weak)
 {
-    using S = common::IndexSet<uint8_t, 10>;
+    using S = mpk::mix::IndexSet<uint8_t, 10>;
     using Vec = std::vector<uint8_t>;
 
     auto s = S::all();
@@ -87,12 +87,12 @@ TEST(Common_IndexSet, Weak)
 
 TEST(Common_IndexSet, Strong)
 {
-    using S = common::IndexSet<Index, 10>;
+    using S = mpk::mix::IndexSet<Index, 10>;
     using Vec = std::vector<Index>;
 
     auto s = S::all();
 
-    for (auto i : common::index_range<Index>(Count{100}))
+    for (auto i : mpk::mix::index_range<Index>(Count{100}))
         EXPECT_EQ(s.contains(i), i<Index{10});
 
     EXPECT_EQ(s.size(), 10);
@@ -143,7 +143,7 @@ TEST(Common_IndexSet, Strong)
     check_values(s1, {});
 
     auto str =
-        common::format_seq(
+        mpk::mix::format_seq(
             S{1_i, 5_i},
             ", ",
             [](std::ostream& s, Index i)

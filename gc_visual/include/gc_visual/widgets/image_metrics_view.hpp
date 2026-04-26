@@ -16,7 +16,7 @@
 
 #include "gc_types/palette.hpp"
 
-#include "gc/value_fwd.hpp"
+#include "mpk/mix/value/value_fwd.hpp"
 
 #include <QImage>
 #include <QWidget>
@@ -50,7 +50,7 @@ public slots:
     auto clear() -> void;
     auto set_palette(const gc_types::IndexedPalette&) -> void;
     auto set_type(sieve::ImageMetric) -> void;
-    auto set_type(const gc::Value& v) -> void;
+    auto set_type(const mpk::mix::value::Value& v) -> void;
 
 public:
     struct Storage;

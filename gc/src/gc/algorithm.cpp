@@ -10,7 +10,7 @@
 
 #include "gc/algorithm.hpp"
 
-#include "common/detail/hash.hpp"
+#include "mpk/mix/util/detail/hash.hpp"
 
 #include <unordered_map>
 
@@ -18,7 +18,7 @@ namespace gc::alg {
 
 namespace {
 
-using common::detail::Hash;
+using mpk::mix::detail::Hash;
 
 template <typename K, typename V>
 using SimpleMap = std::unordered_map<K, V, Hash>;

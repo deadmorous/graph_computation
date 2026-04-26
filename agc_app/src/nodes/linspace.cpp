@@ -17,7 +17,7 @@
 
 #include "gc/expect_n_node_args.hpp"
 #include "gc/node_port_names.hpp"
-#include "gc/value.hpp"
+#include "mpk/mix/value/value.hpp"
 
 #include <cassert>
 
@@ -163,7 +163,7 @@ public:
 } // anonymous namespace
 
 
-auto make_linspace(gc::ConstValueSpan args, const gc::ActivationContext&)
+auto make_linspace(mpk::mix::value::ConstValueSpan args, const gc::ActivationContext&)
     -> std::shared_ptr<gc::ActivationNode>
 {
     gc::expect_no_node_args(LinSpace::static_meta().type_name, args);

@@ -13,11 +13,11 @@
 #include "gc/activation_context_fwd.hpp"
 #include "gc/activation_node_fwd.hpp"
 
-#include "gc/value_fwd.hpp"
+#include "mpk/mix/value/value_fwd.hpp"
 
 namespace agc_app {
 
-auto make_split(gc::ConstValueSpan, const gc::ActivationContext&)
+auto make_split(mpk::mix::value::ConstValueSpan, const gc::ActivationContext&)
     -> std::shared_ptr<gc::ActivationNode>;
 
 } // namespace agc_app
