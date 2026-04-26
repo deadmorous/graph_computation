@@ -13,3 +13,6 @@
 [submodule "3p/benchmark"]
 	path = 3p/benchmark
 	url = https://github.com/google/benchmark.git
+[submodule "3p/mpk_mix"]
+	path = 3p/mpk_mix
+	url = https://github.com/mpksoft/mpk_mix.git
