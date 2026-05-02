@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-core:
+    name: Core (no Qt)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y libpng-dev gcc-14 g++-14
+
+      - name: Configure
+        run: |
+          cmake -S . -B build/release \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DCMAKE_C_COMPILER=gcc-14 \
+                -DCMAKE_CXX_COMPILER=g++-14
+
+      - name: Build
+        run: cmake --build build/release -j$(nproc)
+
+      - name: Test
+        run: ctest --test-dir build/release --output-on-failure
+
+  build-gui:
+    name: GUI (Qt 6)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libpng-dev \
+            libgl1-mesa-dev \
+            libavcodec-dev libavformat-dev libavutil-dev libswscale-dev \
+            gcc-14 g++-14
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.7.*'
+          cache: true
+
+      - name: Configure
+        run: |
+          cmake -S . -B build/release \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DCMAKE_C_COMPILER=gcc-14 \
+                -DCMAKE_CXX_COMPILER=g++-14 \
+                -DGRAPH_COMPUTATION_BUILD_VISUAL=ON \
+                -DCMAKE_PREFIX_PATH=$(qmake -query QT_INSTALL_PREFIX)
+
+      - name: Build
+        run: cmake --build build/release -j$(nproc)
+
+      - name: Test
+        run: ctest --test-dir build/release --output-on-failure
