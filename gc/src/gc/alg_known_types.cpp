@@ -38,7 +38,7 @@ auto index(TypeLiteral t)
     auto it = std::find(std::begin(literals), std::end(literals), t);
     if (it == std::end(literals))
         mpk::mix::throw_<std::invalid_argument>(
-            "Type literal '", t, "' is not well-known");
+            "Type literal '{}' is not well-known", t);
     return static_cast<TypeIndex>(it - std::begin(literals));
 }
 
