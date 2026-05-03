@@ -25,6 +25,7 @@
 #include "gc/activation_graph.hpp"
 #include "gc/activation_node.hpp"
 #include "gc/algorithm.hpp"
+
 #include "mpk/mix/value/value.hpp"
 
 #include <gtest/gtest.h>
@@ -36,6 +37,10 @@ using namespace std::string_view_literals;
 
 namespace {
 
+template <typename T>
+concept InputTypeArg =
+    mpk::mix::AnyOf<T, std::string_view, gc::alg::TypeLiteral>;
+
 auto print_node_algos(const gc::ActivationNode* node)
     -> void
 {
@@ -46,18 +51,34 @@ auto print_node_algos(const gc::ActivationNode* node)
         << "\n=====\n";
 }
 
-template <std::same_as<std::string_view>... Ts>
-auto make_source_types(gc::alg::AlgorithmStorage& alg_storage, Ts...types)
+auto resolve_type([[maybe_unused]] const gc::ActivationNode& node,
+                  gc::alg::AlgorithmStorage& alg_storage,
+                  std::string_view type) -> gc::alg::id::Type
+{
+    return alg_storage(gc::alg::Type{ .name = std::string(type) });
+}
+
+auto resolve_type(const gc::ActivationNode& node,
+                  gc::alg::AlgorithmStorage& alg_storage,
+                  gc::alg::TypeLiteral type) -> gc::alg::id::Type
+{
+    const auto xt = node.exported_types(alg_storage);
+    return xt.at(type);
+}
+
+template <InputTypeArg... Ts>
+auto make_source_types(const gc::ActivationNode& node,
+                       gc::alg::AlgorithmStorage& alg_storage,
+                       Ts...types)
     -> gc::ActivationGraphSourceTypes
 {
     auto result = gc::ActivationGraphSourceTypes{};
 
     // False positive "unused variable" by gcc 14
     [[maybe_unused]] auto port = gc::InputPort{0};
-    ([&](std::string_view type)
+    ([&](auto type)
     {
-        result.types.push_back(
-            alg_storage(gc::alg::Type{ .name = std::string(type) }));
+        result.types.push_back(resolve_type(node, alg_storage, type));
         add_to_last_group(result.destinations,
                           gc::EdgeInputEnd{ 0_gc_n, port });
         next_group(result.destinations);
@@ -67,12 +88,12 @@ auto make_source_types(gc::alg::AlgorithmStorage& alg_storage, Ts...types)
     return result;
 }
 
-template <std::same_as<std::string_view>... Ts>
+template <InputTypeArg... Ts>
 auto print_node_source_code(gc::ActivationNodePtr node, Ts...types)
     -> void
 {
     auto alg_storage = gc::alg::AlgorithmStorage{};
-    auto source_types = make_source_types(alg_storage, types...);
+    auto source_types = make_source_types(*node, alg_storage, types...);
 
     gc::generate_source(
         std::cout,
@@ -96,7 +117,8 @@ TEST(AgcApp_Node, Canvas)
     EXPECT_EQ(node->output_names()[0_gc_o], "canvas"sv);
 
     print_node_algos(node.get());
-    print_node_source_code(node);
+    print_node_source_code(
+        node, canvas_size_type, canvas_pixel_type, "double"sv);
 }
 
 TEST(AgcApp_Node, Counter)
@@ -138,7 +160,7 @@ TEST(AgcApp_Node, Grid2d)
     EXPECT_EQ(node->output_names()[2_gc_o], "end"sv);
 
     print_node_algos(node.get());
-    print_node_source_code(node);
+    print_node_source_code(node, grid_2d_spec_type);
 }
 
 TEST(AgcApp_Node, LinSpace)
@@ -150,7 +172,7 @@ TEST(AgcApp_Node, LinSpace)
     EXPECT_EQ(node->output_names()[0_gc_o], "sequence"sv);
 
     print_node_algos(node.get());
-    print_node_source_code(node);
+    print_node_source_code(node, linspace_spec_type);
 }
 
 TEST(AgcApp_Node, Mag2)
@@ -162,7 +184,7 @@ TEST(AgcApp_Node, Mag2)
     EXPECT_EQ(node->output_names()[0_gc_o], "mag2"sv);
 
     print_node_algos(node.get());
-    print_node_source_code(node);
+    print_node_source_code(node, mag2_input_type);
 }
 
 TEST(AgcApp_Node, MandelbrotFunc)
@@ -175,7 +197,7 @@ TEST(AgcApp_Node, MandelbrotFunc)
     EXPECT_EQ(node->output_names()[0_gc_o], "value"sv);
 
     print_node_algos(node.get());
-    print_node_source_code(node);
+    print_node_source_code(node, mandelbrot_point_type, mandelbrot_point_type);
 }
 
 TEST(AgcApp_Node, Printer)

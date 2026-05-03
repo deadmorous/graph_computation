@@ -269,7 +269,7 @@ auto check_source_inputs(const ActivationGraph& g,
         }
     }
 
-    // Cneck if any "extra" sources are specified; remove eligible specified
+    // Check if any "extra" sources are specified; remove eligible specified
     // sources from bound_source_inputs, so that it eventually only contains
     // missing inputs.
     auto extra_source_inputs = std::set<EdgeInputEnd>{};
@@ -1882,14 +1882,6 @@ auto generate_source(std::ostream& s,
 
     // Generate entry point
     generate_entry_point(s, g, source_types, algos, alg_storage);
-}
-
-auto generate_source(std::ostream& s,
-                     const ActivationGraph& g)
-    -> void
-{
-    auto alg_storage = alg::AlgorithmStorage{};
-    generate_source(s, g, alg_storage);
 }
 
 } // namespace gc

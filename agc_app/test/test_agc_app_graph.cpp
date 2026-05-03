@@ -75,7 +75,15 @@ TEST(AgcApp_Graph, GenerateSource)
                     .node = 1_gc_n,
                     .port = 0_gc_i } } } };
 
-    generate_source(std::cout, g);
+    auto alg_storage = gc::alg::AlgorithmStorage{};
+
+    auto source_types = gc::ActivationGraphSourceTypes{};
+    source_types.types.push_back(mpk::mix::Zero);
+    add_to_last_group(source_types.destinations,
+                      gc::EdgeInputEnd{ 0_gc_n, 0_gc_i });
+    next_group(source_types.destinations);
+
+    generate_source(std::cout, g, alg_storage, source_types);
 }
 
 TEST(AgcApp_Graph, RunFromYaml)

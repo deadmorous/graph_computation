@@ -48,8 +48,4 @@ auto generate_source(std::ostream& s,
                      EdgeInputEndSpan ignored_sources = {})
     -> void;
 
-auto generate_source(std::ostream& s,
-                     const ActivationGraph& g)
-    -> void;
-
 } // namespace gc

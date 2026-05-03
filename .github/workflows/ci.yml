@@ -28,8 +28,7 @@ jobs:
         run: cmake --build build/release -j$(nproc)
 
       - name: Test
-        # AgcApp_ tests require JIT compilation and are known to fail on CI
-        run: ctest --test-dir build/release --output-on-failure --exclude-regex "^AgcApp_"
+        run: ctest --test-dir build/release --output-on-failure
 
   build-gui:
     name: GUI (Qt 6)
@@ -67,5 +66,4 @@ jobs:
         run: cmake --build build/release -j$(nproc)
 
       - name: Test
-        # AgcApp_ tests require JIT compilation and are known to fail on CI
-        run: ctest --test-dir build/release --output-on-failure --exclude-regex "^AgcApp_"
+        run: ctest --test-dir build/release --output-on-failure
