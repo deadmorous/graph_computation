@@ -48,7 +48,7 @@ auto BindingResolver::io_spec(const std::string& io_name) const
 
         if (it == input_names_.end())
             mpk::mix::throw_<std::invalid_argument>(
-                "Input with name '", io_name, "' is not found");
+                "Input with name '{}' is not found", io_name);
 
         return gc::ExternalInputSpec{
             .input = size_t(it - input_names_.begin()) };
@@ -61,8 +61,7 @@ auto BindingResolver::io_spec(const std::string& io_name) const
 
         if (it_node == node_map_.end())
             mpk::mix::throw_<std::invalid_argument>(
-                "Output with name '", io_name,
-                "' is not found - no node '", node_name, "'");
+                "Output with name '{}' is not found - no node '{}'", io_name, node_name);
 
         const auto* node = it_node->second;
         auto output_names = node->output_names();
@@ -72,9 +71,8 @@ auto BindingResolver::io_spec(const std::string& io_name) const
 
         if (it_port == output_names.end())
             mpk::mix::throw_<std::invalid_argument>(
-                "Output with name '", io_name,
-                "' is not found - node '", node_name,
-                "' has no port '", port_name, "'");
+                "Output with name '{}' is not found - node '{}' has no port '{}'",
+                io_name, node_name, port_name);
 
         auto index = node_index(node);
         auto port = gc::OutputPort(it_port - output_names.begin());

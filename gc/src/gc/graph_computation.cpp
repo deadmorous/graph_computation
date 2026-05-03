@@ -265,7 +265,7 @@ auto compile(const ComputationGraph& g, const SourceInputs& provided_inputs)
                     { return !known.contains(inode); } );
 
             mpk::mix::throw_<std::invalid_argument>(
-                "Graph is not connected. Unreachable nodes are ",
+                "Graph is not connected. Unreachable nodes are {}",
                 mpk::mix::format_seq(unreachable));
         }
 
@@ -293,7 +293,7 @@ auto compile(const ComputationGraph& g, const SourceInputs& provided_inputs)
 
         mpk::mix::throw_<std::invalid_argument>(
             "The following edges are not processed because"
-            " the graph has a cycle: ",
+            " the graph has a cycle: {}",
             mpk::mix::format_seq(unprocessed_edges));
     }
 

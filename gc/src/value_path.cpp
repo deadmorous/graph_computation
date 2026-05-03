@@ -111,8 +111,7 @@ auto ValuePath::from_string(std::string_view s)
 {
     if (s.empty() || s[0] != '/')
         mpk::mix::throw_<std::invalid_argument>(
-            "Failed to parse ValuePath from string '", s,
-            "' - must start with '/'");
+            "Failed to parse ValuePath from string '{}' - must start with '/'", s);
 
     auto result = ValuePath{};
 

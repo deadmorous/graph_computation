@@ -127,7 +127,7 @@ private:
                 if (shape_str == "rectangle")
                     return Shape::rectangle;
                 mpk::mix::throw_<std::invalid_argument>(
-                    "Invalid shape '", shape_str, "'");
+                    "Invalid shape '{}'", shape_str);
             }();
 
             int width = size.width;

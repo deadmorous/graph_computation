@@ -41,7 +41,7 @@ auto I8Range::enforce_invariants() -> void
     auto end = min_state_ + state_count_;
     if (min_state_ < min || state_count_ < 0 || end > max+1)
         mpk::mix::throw_<std::range_error>(
-            "Range [", min_state_, ", ", end, ") is invalid");
+            "Range [{}, {}) is invalid", min_state_, end);
 }
 
 } // namespace sieve

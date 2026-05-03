@@ -345,8 +345,8 @@ public:
         }
 
         if (value_stack_pos != 1)
-            mpk::mix::throw_<std::runtime_error>("Expression leaves ", value_stack_pos,
-                                       " elements on the value stack");
+            mpk::mix::throw_<std::runtime_error>("Expression leaves {} elements on the value stack",
+                                       value_stack_pos);
 
     }
 
